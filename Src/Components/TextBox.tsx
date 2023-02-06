@@ -1,10 +1,10 @@
 import {StyleSheet, TextInput, View} from 'react-native';
 import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
-import CardView from './CardView';
-import {IconType} from '../Utilities/Icons';
-import {FONTS} from '../Utilities/GlobalFonts';
+
 import SVGIcon from './SVGIcon';
+import {IconType} from '../Utilities/Icons';
+import {FONTS} from '../Utilities/Fonts';
 
 interface TextBoxProps {
   placeHolder?: string;
@@ -15,17 +15,14 @@ interface TextBoxProps {
 
 const TextBox = ({
   placeHolder = '',
-  icon = 'user',
+  icon = 'visibility_on',
   iconHeight = 25,
   iconWidth = 25,
 }: TextBoxProps) => {
   const [value, setvalue] = useState<string>('');
 
   return (
-    <CardView style={styles.mainContainer}>
-      <View style={styles.iconContainer}>
-        <SVGIcon icon={icon} height={iconHeight} width={iconWidth} />
-      </View>
+    <View style={styles.mainContainer}>
       <TextInput
         value={value}
         onChangeText={setvalue}
@@ -33,7 +30,10 @@ const TextBox = ({
         placeholder={placeHolder}
         placeholderTextColor={COLORS.dimColor}
       />
-    </CardView>
+      <View style={styles.iconContainer}>
+        <SVGIcon icon={icon} height={iconHeight} width={iconWidth} />
+      </View>
+    </View>
   );
 };
 
@@ -47,17 +47,10 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginTop: 15,
     backgroundColor: COLORS.white,
-    shadowColor: COLORS.primary,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.39,
-    shadowRadius: 8.3,
-    elevation: 13,
     flexDirection: 'row',
     justifyContent: 'space-between',
-
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
     alignItems: 'center',
   },
   inputField: {
@@ -67,7 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     paddingHorizontal: 10,
     fontSize: 13,
-    fontFamily: FONTS.RobotoSlab.regular,
+    fontFamily: FONTS.Roboto.regular,
   },
   iconContainer: {
     height: '100%',
