@@ -7,7 +7,6 @@ import SubmitButton from '../SubmitButton';
 import SloganLogo from '../../Assets/Svg/slogan_logo.svg';
 import {FONTS} from '../../Utilities/Fonts';
 import AppLogo from '../../Assets/Svg/app_logo.svg';
-import BackIcon from '../../Assets/Svg/back.svg';
 import SVGIcon from '../SVGIcon';
 
 type AuthScreenHOCProps = {
@@ -16,14 +15,18 @@ type AuthScreenHOCProps = {
   subTitle: string;
   buttonBottomLeftText: string;
   buttonBottomRightText: string;
-  submitButtonText: string;
-  isEnableBackButton: boolean;
+  submitButtonText?: string;
+  isEnableBottomButtonText?: boolean;
+  isEnableCancelButton?: boolean;
+  isEnableBackButton?: boolean;
+  isEnableSubmitButton?: boolean;
   titleContainerAlignItems?: 'flex-start' | 'flex-end' | 'center';
   titleTextAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   buttonBottomTextAlignment?: 'flex-start' | 'flex-end' | 'center';
   onPressSubmitButton?: () => void;
   onPressButtonBottomText?: () => void;
   onPressBackButton?: () => void;
+  onPressCancelButton?: () => void;
 };
 
 const AuthScreenHOC = ({
@@ -37,9 +40,13 @@ const AuthScreenHOC = ({
   buttonBottomTextAlignment = 'center',
   submitButtonText = '',
   isEnableBackButton = false,
+  isEnableSubmitButton = true,
+  isEnableCancelButton = false,
+  isEnableBottomButtonText = true,
   onPressButtonBottomText,
   onPressSubmitButton,
   onPressBackButton,
+  onPressCancelButton,
 }: AuthScreenHOCProps) => {
   return (
     <HOCView isEnableKeyboardAware={true}>
@@ -88,25 +95,37 @@ const AuthScreenHOC = ({
         </View>
 
         {children}
-        <SubmitButton
-          buttonText={submitButtonText}
-          onPress={onPressSubmitButton}
-        />
-        <View
-          style={[
-            styles.signUpContainer,
-            {alignItems: 'center', justifyContent: buttonBottomTextAlignment},
-          ]}>
-          <StyledText style={styles.signUpText}>
-            {buttonBottomLeftText}
-          </StyledText>
-          <StyledText
-            isButton
-            onPress={onPressButtonBottomText}
-            style={{...styles.signUpText, color: COLORS.secondary}}>
-            {buttonBottomRightText}
-          </StyledText>
-        </View>
+        {isEnableSubmitButton && (
+          <SubmitButton
+            buttonText={submitButtonText}
+            onPress={onPressSubmitButton}
+          />
+        )}
+        {isEnableCancelButton && (
+          <SubmitButton
+            buttonText={'Cancel'}
+            onPress={onPressCancelButton}
+            bgColor={COLORS.white}
+            textColor={COLORS.secondary}
+          />
+        )}
+        {isEnableBottomButtonText && (
+          <View
+            style={[
+              styles.signUpContainer,
+              {alignItems: 'center', justifyContent: buttonBottomTextAlignment},
+            ]}>
+            <StyledText style={styles.signUpText}>
+              {buttonBottomLeftText}
+            </StyledText>
+            <StyledText
+              isButton
+              onPress={onPressButtonBottomText}
+              style={{...styles.signUpText, color: COLORS.secondary}}>
+              {buttonBottomRightText}
+            </StyledText>
+          </View>
+        )}
         <View style={styles.bottomContainer}>
           <AppLogo />
           <StyledText style={styles.footerText}>
@@ -183,6 +202,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     alignItems: 'center',
     paddingVertical: 15,
+    paddingTop: 40,
   },
   footerText: {
     fontFamily: FONTS.Roboto.regular,

@@ -8,6 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const Login = () => {
   const navigation = useNavigation();
+
   return (
     <AuthScreenHOC
       title="Welcome to Rawcaster"
@@ -15,7 +16,10 @@ const Login = () => {
     media performance."
       submitButtonText="Login"
       buttonBottomLeftText="Don’t have an account?  "
-      buttonBottomRightText="Sign up">
+      buttonBottomRightText="Sign up"
+      onPressButtonBottomText={() => {
+        navigation.navigate('Signup');
+      }}>
       <TextBox
         iconColor={COLORS.placeHolderColor}
         placeHolder="Phone number or Email address"

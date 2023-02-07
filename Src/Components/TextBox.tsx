@@ -1,4 +1,11 @@
-import {StyleSheet, TextInput, TouchableOpacity, View} from 'react-native';
+import {
+  KeyboardTypeOptions,
+  StyleSheet,
+  TextInput,
+  TextStyle,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 
@@ -17,6 +24,10 @@ interface TextBoxProps {
   iconWidth?: number;
   iconColor?: string;
   value?: string;
+  keyboardType?: KeyboardTypeOptions;
+  maxLength?: number;
+  isEnablePasswordConditionText?: boolean;
+  passwordConditionTextStyle?: TextStyle;
   onChangeText?: (text: string) => void;
 }
 
@@ -26,9 +37,13 @@ const TextBox = ({
   iconHeight = 25,
   iconWidth = 25,
   isSecure = false,
+  isEnablePasswordConditionText = false,
   iconColor = COLORS.white,
   value = '',
+  keyboardType,
+  maxLength,
   onChangeText,
+  passwordConditionTextStyle = {},
 }: TextBoxProps) => {
   const [isVisiblePassword, setisVisiblePassword] = useState(false);
 
@@ -42,6 +57,8 @@ const TextBox = ({
           secureTextEntry={isSecure ? !isVisiblePassword : false}
           style={[styles.inputField, {width: isSecure ? '87%' : '100%'}]}
           placeholder={placeHolder}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
           placeholderTextColor={COLORS.placeHolderColor}
         />
         {isSecure && (
@@ -61,6 +78,13 @@ const TextBox = ({
           </View>
         )}
       </View>
+      {isSecure && isEnablePasswordConditionText && (
+        <StyledText style={passwordConditionTextStyle}>
+          We recommend your password to be at least 8 characters long, contain
+          uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a
+          number (0-9).
+        </StyledText>
+      )}
     </View>
   );
 };
