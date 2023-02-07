@@ -4,18 +4,18 @@ import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 
 type Props = {
-  style: TextStyle;
+  style?: TextStyle;
   isButton?: boolean;
-  onPress?: () => {};
-  children: JSX.Element;
-  paddingVertical: number;
+  onPress?: () => void;
+  children: string;
+  paddingVertical?: number;
 };
 
 const StyledText = ({
   children,
   style = {},
   isButton = false,
-  paddingVertical = isButton ? 10 : 5,
+  paddingVertical = 5,
   onPress,
 }: Props) => {
   return (
