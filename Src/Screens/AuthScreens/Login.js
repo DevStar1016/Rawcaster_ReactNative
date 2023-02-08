@@ -5,9 +5,30 @@ import StyledText from '../../Components/StyledText';
 import TextBox from '../../Components/TextBox';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import {useNavigation} from '@react-navigation/native';
+import {useFormik} from 'formik';
+import * as Yup from 'yup';
+
+const loginSchema = Yup.object({
+  login_id: Yup.string().required('Phone number or email is required'),
+  password: Yup.string().required('Password is required'),
+});
 
 const Login = () => {
   const navigation = useNavigation();
+
+  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
+    useFormik({
+      initialValues: {
+        login_id: '',
+        password: '',
+      },
+      validationSchema: loginSchema,
+      onSubmit: values => {
+        console.log(values, '===values');
+      },
+    });
+
+  console.log(values, errors, '==formik');
 
   return (
     <AuthScreenHOC
@@ -19,16 +40,21 @@ const Login = () => {
       buttonBottomRightText="Sign up"
       onPressButtonBottomText={() => {
         navigation.navigate('Signup');
-      }}>
+      }}
+      onPressSubmitButton={handleSubmit}>
       <TextBox
         iconColor={COLORS.placeHolderColor}
         placeHolder="Phone number or Email address"
         title="Login ID"
+        onChangeText={handleChange('login_id')}
+        value={values.login_id}
       />
       <TextBox
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"
         title="Password"
+        onChangeText={handleChange('password')}
+        value={values.password}
         isSecure
       />
       <View style={styles.forgotPasswordContainer}>

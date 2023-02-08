@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '400',
     fontFamily: FONTS.DMSans.regular,
+    color: COLORS.black,
   },
   iconContainer: {
     height: '100%',
