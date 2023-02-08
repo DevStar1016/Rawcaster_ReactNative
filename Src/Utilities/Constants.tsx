@@ -1,4 +1,5 @@
 import {Dimensions, Platform} from 'react-native';
+import moment from 'moment';
 import LivetalkImage from '../Assets/Png/IntroImages/live_talk.png';
 import LiveChatImage from '../Assets/Png/IntroImages/live_chat.png';
 import EventImage from '../Assets/Png/IntroImages/event.png';
@@ -64,22 +65,10 @@ export const SOCIAL_SIGN_IN_LIST = [
 export const IS_IOS = Platform.OS === 'ios';
 export const WINDOW_HEIGHT = Dimensions.get('window').height;
 export const WINDOW_WIDTH = Dimensions.get('window').width;
+export const AGE_RESTRICTION = 13;
 
 export const DATES_MONTHS_YEARS_DATA = {
-  months: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ],
+  months: moment.months(),
   dates: [...Array(31)].map((_, index) => index + 1),
-  years: getyears(),
+  years: getyears({decreasedYears: AGE_RESTRICTION}),
 };

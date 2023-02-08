@@ -1,7 +1,11 @@
-export function getyears(startingYear = 1900) {
-  const offset = new Date().getFullYear() - startingYear;
+import {GetYearProps} from './Types';
 
-  let thisYear = new Date().getFullYear();
+export function getyears({
+  startingYear = 1900,
+  decreasedYears = 0,
+}: GetYearProps) {
+  let thisYear = new Date().getFullYear() - decreasedYears;
+  const offset = thisYear - startingYear;
   let allYears = [];
   for (let x = 0; x <= offset; x++) {
     allYears.push(thisYear - x);

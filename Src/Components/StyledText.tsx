@@ -7,7 +7,7 @@ type Props = {
   style?: TextStyle;
   isButton?: boolean;
   onPress?: () => void;
-  children: string;
+  children: string | number;
   paddingVertical?: number;
 };
 
