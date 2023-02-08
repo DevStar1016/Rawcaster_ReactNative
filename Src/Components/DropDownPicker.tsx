@@ -14,14 +14,14 @@ import ItemSelectionMiniList from './ItemSelectionMiniList';
 
 type Props = {
   title?: string;
-  value?: string;
+  value?: string | number | undefined | null;
   dropDownIconSize?: number;
   dataList?: number[] | string[];
   placeHolderText?: string;
+  isInsideList?: boolean;
   mainContainerWidth?: number | string;
-  textContainerWidth?: number | string;
-  iconContainerWidth?: number | string;
   onPress?: () => void;
+  onSelectItem?: (item: any) => void;
 };
 
 const DropDownPicker = ({
@@ -31,7 +31,9 @@ const DropDownPicker = ({
   mainContainerWidth = '100%',
   placeHolderText = 'Select Data',
   dataList = [],
+  isInsideList = true,
   onPress,
+  onSelectItem,
 }: Props) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
 
@@ -42,8 +44,13 @@ const DropDownPicker = ({
         style={styles.inputContainer}
         activeOpacity={0.7}
         onPress={() => {
-          setisOpenDataListModal(true);
-          // onPress()
+          if (isInsideList) {
+            setisOpenDataListModal(true);
+          } else {
+            if (onPress) {
+              onPress();
+            }
+          }
         }}>
         <View style={[styles.dropDownTextContainer]}>
           <StyledText
@@ -75,7 +82,13 @@ const DropDownPicker = ({
             onClose={() => {
               setisOpenDataListModal(false);
             }}
-            listData={[1, 2, 3, 4, 5, 6]}
+            listData={dataList}
+            onSelectItem={(item: any) => {
+              setisOpenDataListModal(false);
+              if (onSelectItem) {
+                onSelectItem(item);
+              }
+            }}
           />
         </SafeAreaView>
       </Modal>

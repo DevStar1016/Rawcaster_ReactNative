@@ -11,6 +11,7 @@ type Props = {
   fieldName?: string;
   containerWidth?: number | string;
   maxHeight?: number | string;
+  onSelectItem?: (item: any) => void;
   onClose: () => void;
 };
 
@@ -26,33 +27,24 @@ const ItemSelectionMiniList = ({
   containerWidth = '60%',
   onClose,
   maxHeight = '50%',
+  onSelectItem,
 }: Props) => {
-  const Divider = ({width = '100%', color = COLORS.borderColor}) => {
-    return (
-      <View style={[styles.divider, {width: width, backgroundColor: color}]} />
-    );
-  };
   const ItemSeperator = () => {
-    return (
-      <View
-        style={{
-          height: 2,
-          borderWidth: 1,
-          borderColor: '#F2718D',
-          marginTop: 5,
-        }}
-      />
-    );
+    return <View style={styles.divider} />;
   };
 
   const renderItem = ({item}: RenderItemProps) => {
     return (
       <View>
-        <TouchableOpacity style={styles.itemContainer}>
+        <TouchableOpacity
+          style={styles.itemContainer}
+          onPress={() => {
+            if (onSelectItem) {
+              onSelectItem(item);
+            }
+          }}>
           <StyledText>{fieldName ? item[fieldName] : item}</StyledText>
         </TouchableOpacity>
-
-        {/* <ItemSeperator /> */}
       </View>
     );
   };
@@ -88,11 +80,7 @@ const ItemSelectionMiniList = ({
           data={listData}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+          contentContainerStyle={styles.listContentContainer}
           ItemSeparatorComponent={() => {
             return <ItemSeperator />;
           }}
@@ -126,13 +114,19 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   divider: {
-    height: 1.5,
-    backgroundColor: COLORS.borderColor,
-    alignSelf: 'center',
+    height: 2,
+    borderWidth: 1,
+    borderColor: '#F2718D',
+    marginTop: 5,
   },
   itemContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContentContainer: {
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
   },
