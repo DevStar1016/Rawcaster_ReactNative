@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
@@ -9,6 +9,8 @@ type Props = {
   title?: string;
   listData?: any[];
   fieldName?: string;
+  containerWidth?: number | string;
+  maxHeight?: number | string;
   onClose: () => void;
 };
 
@@ -18,22 +20,40 @@ type RenderItemProps = {
 };
 
 const ItemSelectionMiniList = ({
-  title = 'Select Item',
+  title = '',
   listData = [],
   fieldName = '',
+  containerWidth = '60%',
   onClose,
+  maxHeight = '50%',
 }: Props) => {
   const Divider = ({width = '100%', color = COLORS.borderColor}) => {
     return (
       <View style={[styles.divider, {width: width, backgroundColor: color}]} />
     );
   };
+  const ItemSeperator = () => {
+    return (
+      <View
+        style={{
+          height: 2,
+          borderWidth: 1,
+          borderColor: '#F2718D',
+          marginTop: 5,
+        }}
+      />
+    );
+  };
 
   const renderItem = ({item}: RenderItemProps) => {
     return (
-      <TouchableOpacity style={styles.itemContainer}>
-        <StyledText>{fieldName ? item[fieldName] : item}</StyledText>
-      </TouchableOpacity>
+      <View>
+        <TouchableOpacity style={styles.itemContainer}>
+          <StyledText>{fieldName ? item[fieldName] : item}</StyledText>
+        </TouchableOpacity>
+
+        {/* <ItemSeperator /> */}
+      </View>
     );
   };
 
@@ -42,28 +62,39 @@ const ItemSelectionMiniList = ({
       style={styles.mainContainer}
       activeOpacity={1}
       onPress={onClose}>
-      <TouchableOpacity style={styles.subContainer} activeOpacity={1}>
-        <View style={styles.titleContainer}>
-          <View style={{width: '15%'}} />
-          <View style={{width: '50%', alignItems: 'center'}}>
-            <StyledText>{title}</StyledText>
-          </View>
-          <View style={{width: '15%', alignItems: 'flex-end'}}>
-            <TouchableOpacity
-              style={{padding: 5}}
-              activeOpacity={0.7}
-              onPress={onClose}>
-              <SVGIcon icon="close" color={COLORS.black} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Divider />
+      <TouchableOpacity
+        style={[styles.subContainer, {width: containerWidth, maxHeight}]}
+        activeOpacity={1}>
+        {title ? (
+          <>
+            <View style={styles.titleContainer}>
+              <View style={{width: '15%'}} />
+              <View style={{width: '50%', alignItems: 'center'}}>
+                <StyledText>{title}</StyledText>
+              </View>
+              <View style={{width: '15%', alignItems: 'flex-end'}}>
+                <TouchableOpacity
+                  style={{padding: 5}}
+                  activeOpacity={0.7}
+                  onPress={onClose}>
+                  <SVGIcon icon="close" color={COLORS.black} />
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/* <Divider /> */}
+          </>
+        ) : null}
         <FlatList
           data={listData}
           keyExtractor={(_, index) => index.toString()}
           renderItem={renderItem}
+          contentContainerStyle={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
           ItemSeparatorComponent={() => {
-            return <Divider width="70%" color={COLORS.secondary} />;
+            return <ItemSeperator />;
           }}
           showsVerticalScrollIndicator={false}
         />
@@ -85,8 +116,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 10,
     padding: 10,
-    width: '90%',
-    maxHeight: WINDOW_HEIGHT / 2 + 100,
+    width: '60%',
+    maxHeight: '60%',
   },
   titleContainer: {
     alignItems: 'center',
@@ -100,8 +131,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   itemContainer: {
-    alignItems: 'center',
-    padding: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     justifyContent: 'center',
+    alignItems: 'center',
   },
 });

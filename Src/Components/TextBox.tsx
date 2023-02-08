@@ -18,7 +18,7 @@ interface TextBoxProps {
   placeHolder?: string;
   title: string;
   isSecure: boolean;
-
+  errorText?: string;
   icon?: IconType;
   iconHeight?: number;
   iconWidth?: number;
@@ -40,6 +40,7 @@ const TextBox = ({
   isEnablePasswordConditionText = false,
   iconColor = COLORS.white,
   value = '',
+  errorText = '',
   keyboardType,
   maxLength,
   onChangeText,
@@ -50,7 +51,11 @@ const TextBox = ({
   return (
     <View style={styles.mainContainer}>
       {title && <StyledText>{title}</StyledText>}
-      <View style={styles.inputContainer}>
+      <View
+        style={[
+          styles.inputContainer,
+          {borderColor: errorText ? 'red' : COLORS.borderColor},
+        ]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -78,6 +83,11 @@ const TextBox = ({
           </View>
         )}
       </View>
+      {errorText ? (
+        <StyledText style={styles.errorText} paddingVertical={0}>
+          {errorText}
+        </StyledText>
+      ) : null}
       {isSecure && isEnablePasswordConditionText && (
         <StyledText style={passwordConditionTextStyle}>
           We recommend your password to be at least 8 characters long, contain
@@ -128,5 +138,9 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
   },
 });

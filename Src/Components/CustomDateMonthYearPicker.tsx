@@ -10,7 +10,7 @@ const DOBPicker = () => {
       <StyledText>Date of Birth</StyledText>
       <View style={styles.dateMonthYearContainer}>
         <DropDownPicker
-          placeHolderText="Month"
+          placeHolderText="September"
           mainContainerWidth={'36%'}
           dataList={DATES_MONTHS_YEARS_DATA.months}
         />

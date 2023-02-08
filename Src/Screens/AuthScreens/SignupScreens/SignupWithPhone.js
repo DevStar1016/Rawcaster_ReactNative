@@ -1,12 +1,10 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import {useNavigation} from '@react-navigation/native';
 import TextBox from '../../../Components/TextBox';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
-import {FONTS} from '../../../Utilities/Fonts';
-import DropDownPicker from '../../../Components/DropDownPicker';
 import DOBPicker from '../../../Components/CustomDateMonthYearPicker';
 
 const SignupWithPhone = () => {
