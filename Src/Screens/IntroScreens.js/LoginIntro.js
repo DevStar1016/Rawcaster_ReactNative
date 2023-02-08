@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import UsersImage from '../../Assets/Png/IntroImages/background.png';
-import Logo from '../../Assets/Png/app_logo.png';
+import Logo from '../../Assets/Svg/slogan_logo.svg';
 import {INTRO_DATA} from '../../Utilities/Constants';
 import {useDispatch} from 'react-redux';
 import {setStatusBarColor} from '../../Store/Slices/UtilitySlice';
@@ -72,11 +72,12 @@ const LoginIntro = ({onSkipIntro}) => {
       <View style={styles.imagebackground}>
         <ImageBackground source={UsersImage} style={styles.background} />
       </View>
-      <Image
+      <Logo style={[styles.logo, {width: windowWidth}]} alignSelf={'center'} />
+      {/* <Image
         source={Logo}
         style={[styles.logo, {width: windowWidth}]}
         resizeMode="contain"
-      />
+      /> */}
       <FlatList
         horizontal={true}
         style={styles.scrollViewStyle}

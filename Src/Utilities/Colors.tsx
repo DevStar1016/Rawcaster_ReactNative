@@ -3,6 +3,8 @@ export const COLORS = {
   secondary: '#F2718D',
   white: '#FFFFFF',
   black: '#000000',
-  dimColor: '#99A0B0',
+  dimColor: '#9BA0AA',
+  placeHolderColor: '#99A0B0',
   borderColor: '#E8EAEE',
+  transparentDimColor: 'rgba(0,0,0,0.5)',
 };

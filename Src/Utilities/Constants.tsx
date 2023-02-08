@@ -1,9 +1,10 @@
-import {Platform} from 'react-native';
+import {Dimensions, Platform} from 'react-native';
 import LivetalkImage from '../Assets/Png/IntroImages/live_talk.png';
 import LiveChatImage from '../Assets/Png/IntroImages/live_chat.png';
 import EventImage from '../Assets/Png/IntroImages/event.png';
 import NuggetImage from '../Assets/Png/IntroImages/nugget.png';
 import LiveImage from '../Assets/Png/IntroImages/live.png';
+import {getyears} from './Methods';
 export const INTRO_DATA = [
   {
     image: LivetalkImage,
@@ -37,4 +38,48 @@ export const INTRO_DATA = [
   },
 ];
 
+export const SOCIAL_SIGN_IN_LIST = [
+  {
+    id: 1,
+    platformName: 'Google',
+    iconName: 'google',
+  },
+  {
+    id: 2,
+    platformName: 'Facebook',
+    iconName: 'facebook',
+  },
+  {
+    id: 3,
+    platformName: 'Twitter',
+    iconName: 'twitter',
+  },
+  {
+    id: 4,
+    platformName: 'Apple',
+    iconName: 'apple',
+  },
+];
+
 export const IS_IOS = Platform.OS === 'ios';
+export const WINDOW_HEIGHT = Dimensions.get('window').height;
+export const WINDOW_WIDTH = Dimensions.get('window').width;
+
+export const DATES_MONTHS_YEARS_DATA = {
+  months: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ],
+  dates: [...Array(31)].map((_, index) => index + 1),
+  years: getyears(),
+};

@@ -1,45 +1,59 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React from 'react';
-import KeyboardAvoidingHOC from '../../Components/KeyboardAvoidingHOC';
 import {COLORS} from '../../Utilities/Colors';
-import Logo from '../../Assets/Svg/slogan_logo.svg';
-import {FONTS} from '../../Utilities/Fonts';
 import StyledText from '../../Components/StyledText';
+import TextBox from '../../Components/TextBox';
+import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
+import {useNavigation} from '@react-navigation/native';
 
 const Login = () => {
+  const navigation = useNavigation();
+
   return (
-    <KeyboardAvoidingHOC>
-      <View style={styles.headerContainer}>
-        <Logo />
-      </View>
-      <View style={styles.contentContainer}>
-        <StyledText style={styles.title}>Welcome to Rawcaster</StyledText>
-        <StyledText style={{textAlign: 'center'}}>
-          Log in now to access the latest insights, experience for your social
-          media performance.
+    <AuthScreenHOC
+      title="Welcome to Rawcaster"
+      subTitle="Log in now to access the latest insights, experience for your social
+    media performance."
+      submitButtonText="Login"
+      buttonBottomLeftText="Don’t have an account?  "
+      buttonBottomRightText="Sign up"
+      onPressButtonBottomText={() => {
+        navigation.navigate('Signup');
+      }}>
+      <TextBox
+        iconColor={COLORS.placeHolderColor}
+        placeHolder="Phone number or Email address"
+        title="Login ID"
+      />
+      <TextBox
+        iconColor={COLORS.placeHolderColor}
+        placeHolder="Enter your password"
+        title="Password"
+        isSecure
+      />
+      <View style={styles.forgotPasswordContainer}>
+        <StyledText
+          isButton={true}
+          paddingVertical={0}
+          onPress={() => {
+            navigation.navigate('ForgotPassword');
+          }}
+          style={styles.forgotPasswordText}>
+          Forgot Password?
         </StyledText>
       </View>
-    </KeyboardAvoidingHOC>
+    </AuthScreenHOC>
   );
 };
 
 export default Login;
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
   },
-  contentContainer: {
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingTop: 20,
-    paddingHorizontal: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: FONTS.Gilroy.bold,
+  forgotPasswordText: {
+    color: COLORS.secondary,
+    fontWeight: 500,
   },
 });
