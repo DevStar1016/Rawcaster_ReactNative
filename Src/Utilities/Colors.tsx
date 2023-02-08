@@ -1,6 +1,7 @@
 export const COLORS = {
   primary: '#563662',
   secondary: '#F2718D',
+  red: '#FF626B',
   white: '#FFFFFF',
   black: '#000000',
   dimColor: '#9BA0AA',
