@@ -16,19 +16,20 @@ const loginSchema = Yup.object({
 const Login = () => {
   const navigation = useNavigation();
 
-  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
-    useFormik({
-      initialValues: {
-        login_id: '',
-        password: '',
-      },
-      validationSchema: loginSchema,
-      onSubmit: values => {
-        console.log(values, '===values');
-      },
-    });
+  const {handleSubmit, handleChange, values, errors} = useFormik({
+    initialValues: {
+      login_id: '',
+      password: '',
+    },
+    validationSchema: loginSchema,
+    onSubmit: values => {
+      handleLogin(values);
+    },
+  });
 
-  console.log(values, errors, '==formik');
+  const handleLogin = data => {
+    console.log(data, 'Login data');
+  };
 
   return (
     <AuthScreenHOC
@@ -47,6 +48,7 @@ const Login = () => {
         placeHolder="Phone number or Email address"
         title="Login ID"
         onChangeText={handleChange('login_id')}
+        errorText={errors.login_id ? errors.login_id : ''}
         value={values.login_id}
       />
       <TextBox
@@ -54,6 +56,7 @@ const Login = () => {
         placeHolder="Enter your password"
         title="Password"
         onChangeText={handleChange('password')}
+        errorText={errors.password ? errors.password : ''}
         value={values.password}
         isSecure
       />

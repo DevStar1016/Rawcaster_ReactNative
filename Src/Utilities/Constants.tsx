@@ -83,3 +83,11 @@ export const DATES_MONTHS_YEARS_DATA = {
   dates: [...Array(31)].map((_, index) => index + 1),
   years: getyears(),
 };
+
+// Regex
+
+export const PASSWORD_REGEX = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/;
+export const NAME_REGEX = /^[A-Za-z_ ]+$/;
+export const NUMBER_REGEX = /^[0-9]*$/;
+export const EMAIL_REGEX =
+  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
