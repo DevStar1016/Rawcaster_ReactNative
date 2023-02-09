@@ -32,3 +32,7 @@ export const signupService = formData => {
 export const forgotPasswordService = data => {
   return axios.post('forgotpassword', data);
 };
+
+export const verifyOtpAndResetPassword = data => {
+  return axios.post('verifyotpandresetpassword', data);
+};

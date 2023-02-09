@@ -7,6 +7,8 @@ import OTPInput from '../../Components/OTPInput';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {PASSWORD_REGEX} from '../../Utilities/Constants';
+import {SALT_KEY} from '../../Services/ServiceConstants';
+import {verifyOtpAndResetPassword} from '../../Services/ApiService';
 
 const resetPasswordSchema = Yup.object({
   otp: Yup.string().required('Otp is required'),
@@ -26,6 +28,8 @@ const resetPasswordSchema = Yup.object({
     .required('Confirm password is required'),
 });
 
+const sha1 = require('sha1');
+
 const ResetPasswordOTP = () => {
   const navigation = useNavigation();
 
@@ -43,6 +47,24 @@ const ResetPasswordOTP = () => {
 
   const handleResetOtp = data => {
     console.log(data, 'reset otp data');
+    let formData = new FormData();
+    formData.append('otp_ref_id', '');
+    formData.append('otp_code', data.otp);
+    formData.append('new_password', data.password);
+    formData.append('confirm_password', data.confirm_password);
+    formData.append('auth_code', sha1(SALT_KEY + ''));
+    formData.append('device_id', 'abcd');
+    verifyOtpAndResetPassword(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          console.log(res.data, 'response');
+        } else {
+          console.log(res.data.msg);
+        }
+      })
+      .catch(err => {
+        console.log(err, '===error');
+      });
   };
 
   return (

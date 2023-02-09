@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import {useNavigation} from '@react-navigation/native';
@@ -15,6 +15,9 @@ import {
 } from '../../../Utilities/Constants';
 import {useDispatch} from 'react-redux';
 import {signupService} from '../../../Services/ApiService';
+import {SALT_KEY} from '../../../Services/ServiceConstants';
+
+const sha1 = require('sha1');
 
 const SignupWithPhone = () => {
   const navigation = useNavigation();
@@ -55,7 +58,6 @@ const SignupWithPhone = () => {
     });
 
   const handleSignupWithPhone = data => {
-    console.log(data, 'signup with phone');
     let formData = new FormData();
     formData.append('first_name', data.name);
     formData.append('display_name', data.name);
@@ -63,13 +65,18 @@ const SignupWithPhone = () => {
     formData.append('password', data.password);
     formData.append('confirm_password', data.password);
     formData.append('dob', data.dob);
+    formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
+    formData.append('device_id', 'abcd');
+    formData.append('auth_code', sha1(SALT_KEY + data.login_id));
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {
           console.log(res.data, 'response');
           navigation.navigate('OTPVerification');
-        } else {
-          console.log(res.data.msg);
+        } else if (res.data.status === 0) {
+          navigation.reset({
+            routes: [{name: 'Login'}],
+          });
         }
       })
       .catch(err => {
@@ -104,6 +111,7 @@ const SignupWithPhone = () => {
           placeHolder="Enter your phone number"
           title="Phone Number"
           keyboardType="number-pad"
+          maxLength={13}
           onChangeText={handleChange('phone_or_email')}
           errorText={
             errors.phone_or_email && touched.phone_or_email
@@ -143,13 +151,16 @@ const SignupWithPhone = () => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"
         title="Password"
-        onChangeText={handleChange('phone_or_email')}
+        onChangeText={handleChange('password')}
         errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
         isSecure
         isEnablePasswordConditionText
       />
-      <DOBPicker onSelect={handleChange('dob')} />
+      <DOBPicker
+        onSelect={handleChange('dob')}
+        errorText={errors.dob && touched.dob ? errors.dob : ''}
+      />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>
         <StyledText style={{fontSize: 17}} paddingVertical={0}>
           {"By Signing up you agree with Rawcaster's "}

@@ -43,10 +43,11 @@ const Login = () => {
     formData.append('device_id', 'abcd');
     loginService(formData)
       .then(res => {
+        dispatch(StoreToken(true));
         if (res.data.status === 1) {
           dispatch(StoreToken(true));
-        } else {
-          console.log(res.data.msg);
+        } else if (res.data.status === 0) {
+          navigation.navigate('Signup');
         }
       })
       .catch(err => {

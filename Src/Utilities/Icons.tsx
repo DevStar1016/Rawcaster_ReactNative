@@ -12,6 +12,10 @@ import SearchIcon from '../Assets/Svg/search.svg';
 import LiveIcon from '../Assets/Svg/live.svg';
 import UserIcon from '../Assets/Svg/user.svg';
 import UserPlusIcon from '../Assets/Svg/user_plus.svg';
+import ProfileImage from '../Assets/Svg/sample_profile.svg';
+import Medal from '../Assets/Svg/silver_medal.svg';
+import ActiveCheckMark from '../Assets/Svg/active_checkmark.svg';
+import DisableCheckMark from '../Assets/Svg/disable_checkmark.svg';
 
 export type IconType =
   | 'visibility_on'
@@ -27,7 +31,11 @@ export type IconType =
   | 'live'
   | 'search'
   | 'user'
-  | 'user_plus';
+  | 'user_plus'
+  | 'influencer'
+  | 'medal'
+  | 'active_checkmark'
+  | 'disable_checkmark';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -43,4 +51,8 @@ export const ICONS = {
   live: LiveIcon,
   user: UserIcon,
   user_plus: UserPlusIcon,
+  influencer: ProfileImage,
+  medal: Medal,
+  active_checkmark: ActiveCheckMark,
+  disable_checkmark: DisableCheckMark,
 };

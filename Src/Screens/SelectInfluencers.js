@@ -4,6 +4,9 @@ import CustomHeader from '../Components/CustomHeader';
 import StyledText from '../Components/StyledText';
 import SearchInput from '../Components/SearchInput';
 import HOCView from '../Components/HOCView';
+import LinearGradientButton from '../Components/LinearGradientButton';
+import RightArrowImage from '../Assets/Svg/right_arrow.svg';
+import InfluencersItem from '../Components/InfluencersItem';
 
 const SelectInfluencers = () => {
   return (
@@ -13,6 +16,8 @@ const SelectInfluencers = () => {
         <StyledText>Welcome Danii - Select your influencers</StyledText>
       </View>
       <SearchInput />
+
+      <InfluencersItem />
     </HOCView>
   );
 };

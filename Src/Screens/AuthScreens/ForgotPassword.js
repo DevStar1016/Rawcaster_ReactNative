@@ -6,6 +6,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {SALT_KEY} from '../../Services/ServiceConstants';
+import {forgotPasswordService} from '../../Services/ApiService';
 
 const forgotPasswordSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -26,10 +27,22 @@ const ForgotPassword = () => {
   });
 
   const handleForgotPassword = data => {
-    console.log(data, 'forgot password data');
     let formData = new FormData();
-    formData.append('', data.login_id);
-    formData.append('', sha1(SALT_KEY + data.login_id));
+    formData.append('username', data.login_id);
+    formData.append('auth_code', sha1(SALT_KEY + data.login_id));
+    forgotPasswordService(formData)
+      .then(res => {
+        navigation.navigate('ResetPasswordOTP');
+        if (res.data.status === 1) {
+          console.log(res.data, 'response');
+          navigation.navigate('ResetPasswordOTP');
+        } else {
+          console.log(res.data.msg);
+        }
+      })
+      .catch(err => {
+        console.log(err, '===error');
+      });
   };
 
   return (
@@ -41,10 +54,7 @@ const ForgotPassword = () => {
       buttonBottomLeftText="Already Registered? "
       buttonBottomRightText="Login"
       isEnableBackButton={true}
-      onPressSubmitButton={() => {
-        navigation.navigate('ResetPasswordOTP');
-        // handleSubmit();
-      }}
+      onPressSubmitButton={handleSubmit}
       onPressBackButton={() => {
         navigation.goBack();
       }}
