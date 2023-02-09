@@ -1,8 +1,9 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DropDownPicker from './DropDownPicker';
 import StyledText from './StyledText';
 import {AGE_RESTRICTION, DATES_MONTHS_YEARS_DATA} from '../Utilities/Constants';
+import moment from 'moment';
 
 type DateMonthYearType = {
   date?: string | number | null;
@@ -11,15 +12,35 @@ type DateMonthYearType = {
 };
 
 type Props = {
-  onSelect: (value: DateMonthYearType) => void;
+  onSelect: (value: string) => void;
+  format?: string;
 };
 
-const CustomDateMonthYearPicker = ({onSelect}: Props) => {
+const CustomDateMonthYearPicker = ({
+  onSelect,
+  format = 'YYYY-MM-DD',
+}: Props) => {
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
     date: null,
     month: null,
     year: null,
   });
+
+  useEffect(() => {
+    if (dateMonthYear.date && dateMonthYear.month && dateMonthYear.year) {
+      dateMonthYear.year, dateMonthYear.month, dateMonthYear.date;
+      onSelect(
+        moment(
+          dateMonthYear.year +
+            ' ' +
+            dateMonthYear.month +
+            ' ' +
+            dateMonthYear.date,
+          'YYYY MMMM DD',
+        ).format(format),
+      );
+    }
+  }, [dateMonthYear]);
 
   const getSlicedList = (
     fieldName: 'dates' | 'months' | 'years',
@@ -86,7 +107,6 @@ const CustomDateMonthYearPicker = ({onSelect}: Props) => {
       }
     }
     setdateMonthYear(tempDateMonthYear);
-    onSelect(tempDateMonthYear);
   };
 
   const onSelectYear = (year: number) => {
@@ -111,7 +131,6 @@ const CustomDateMonthYearPicker = ({onSelect}: Props) => {
       }
     }
     setdateMonthYear(tempDateMonthYear);
-    onSelect(tempDateMonthYear);
   };
 
   return (
@@ -134,7 +153,6 @@ const CustomDateMonthYearPicker = ({onSelect}: Props) => {
           value={dateMonthYear.date}
           onSelectItem={(date: string) => {
             setdateMonthYear(pre => {
-              onSelect({...pre, date});
               return {
                 ...pre,
                 date,

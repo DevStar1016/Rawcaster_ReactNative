@@ -1,11 +1,26 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
+import TextBox from './TextBox';
+import {TextInput} from 'react-native-gesture-handler';
 
-const SearchInput = () => {
+const SearchInput = ({}) => {
+  const [searchValue, setsearchValue] = useState('');
   return (
     <View style={styles.mainContainer}>
+      <View style={styles.inputContainer}>
+        {/* <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          secureTextEntry={isSecure ? !isVisiblePassword : false}
+          style={[styles.inputField, {width: isSecure ? '87%' : '100%'}]}
+          placeholder={placeHolder}
+          keyboardType={keyboardType}
+          maxLength={maxLength}
+          placeholderTextColor={COLORS.placeHolderColor}
+        /> */}
+      </View>
       <TouchableOpacity style={styles.searchButton} activeOpacity={0.7}>
         <SVGIcon icon="search" color={COLORS.primary} />
       </TouchableOpacity>
@@ -21,6 +36,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: COLORS.searchBarBg,
     flexDirection: 'row',
+  },
+  inputContainer: {
+    flex: 1,
+    paddingHorizontal: 5,
   },
   searchButton: {
     backgroundColor: COLORS.primary,
