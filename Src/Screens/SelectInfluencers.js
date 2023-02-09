@@ -2,16 +2,18 @@ import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import CustomHeader from '../Components/CustomHeader';
 import StyledText from '../Components/StyledText';
+import SearchInput from '../Components/SearchInput';
+import HOCView from '../Components/HOCView';
 
 const SelectInfluencers = () => {
   return (
-    <View style={styles.mainContainer}>
-      <CustomHeader />
+    <HOCView isEnableScroll={true}>
       <View style={styles.contentContainer}></View>
       <View style={styles.titleContainer}>
         <StyledText>Welcome Danii - Select your influencers</StyledText>
       </View>
-    </View>
+      <SearchInput />
+    </HOCView>
   );
 };
 
@@ -20,6 +22,10 @@ export default SelectInfluencers;
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+  },
+  contentContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
   titleContainer: {
     alignItems: 'center',

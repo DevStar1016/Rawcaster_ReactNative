@@ -10,7 +10,11 @@ type DateMonthYearType = {
   year?: number | null;
 };
 
-const CustomDateMonthYearPicker = () => {
+type Props = {
+  onSelect: (value: DateMonthYearType) => void;
+};
+
+const CustomDateMonthYearPicker = ({onSelect}: Props) => {
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
     date: null,
     month: null,
@@ -82,6 +86,7 @@ const CustomDateMonthYearPicker = () => {
       }
     }
     setdateMonthYear(tempDateMonthYear);
+    onSelect(tempDateMonthYear);
   };
 
   const onSelectYear = (year: number) => {
@@ -106,6 +111,7 @@ const CustomDateMonthYearPicker = () => {
       }
     }
     setdateMonthYear(tempDateMonthYear);
+    onSelect(tempDateMonthYear);
   };
 
   return (
@@ -128,6 +134,7 @@ const CustomDateMonthYearPicker = () => {
           value={dateMonthYear.date}
           onSelectItem={(date: string) => {
             setdateMonthYear(pre => {
+              onSelect({...pre, date});
               return {
                 ...pre,
                 date,

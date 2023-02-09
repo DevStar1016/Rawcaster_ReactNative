@@ -49,7 +49,7 @@ const AuthScreenHOC = ({
   onPressCancelButton,
 }: AuthScreenHOCProps) => {
   return (
-    <HOCView isEnableKeyboardAware={true}>
+    <HOCView isEnableKeyboardAware={true} isEnableHeader={false}>
       <View
         style={[
           styles.headerContainer,

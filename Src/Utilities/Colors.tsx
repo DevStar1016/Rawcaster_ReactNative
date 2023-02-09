@@ -8,4 +8,5 @@ export const COLORS = {
   placeHolderColor: '#99A0B0',
   borderColor: '#E8EAEE',
   transparentDimColor: 'rgba(0,0,0,0.5)',
+  searchBarBg: '#F1F2F5',
 };

@@ -6,15 +6,16 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import {IS_IOS} from '../Utilities/Constants';
 import {COLORS} from '../Utilities/Colors';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import CustomHeader from './CustomHeader';
 
 type Props = {
   children: JSX.Element | JSX.Element[];
   isEnableKeyboardAware?: boolean;
   isEnableScroll?: boolean;
   backgroundColor?: string;
+  isEnableHeader?: boolean;
 };
 
 const HOCView = ({
@@ -22,9 +23,11 @@ const HOCView = ({
   isEnableKeyboardAware = false,
   isEnableScroll = false,
   backgroundColor = COLORS.white,
+  isEnableHeader = true,
 }: Props) => {
   return (
     <View style={{flex: 1, backgroundColor: backgroundColor}}>
+      {isEnableHeader && <CustomHeader />}
       {isEnableKeyboardAware ? (
         <KeyboardAwareScrollView
           extraScrollHeight={55}
