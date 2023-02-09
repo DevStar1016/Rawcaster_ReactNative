@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../../Utilities/Colors';
 import StyledText from '../../Components/StyledText';
@@ -9,11 +9,15 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch} from 'react-redux';
 import {StoreToken} from '../../Store/Slices/AuthSlice';
+import {SALT_KEY} from '../../Services/ServiceConstants';
+import {loginService} from '../../Services/ApiService';
 
 const loginSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
   password: Yup.string().required('Password is required'),
 });
+
+const sha1 = require('sha1');
 
 const Login = () => {
   const navigation = useNavigation();
@@ -31,8 +35,19 @@ const Login = () => {
   });
 
   const handleLogin = data => {
-    dispatch(StoreToken(true));
-    console.log(data, 'Login data');
+    let formData = new FormData();
+    formData.append('username', data.login_id);
+    formData.append('auth_code', sha1(SALT_KEY + data.login_id));
+    formData.append('password', data.password);
+    formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
+    loginService(formData)
+      .then(res => {
+        dispatch(StoreToken(true));
+        console.log(res.data, '===response');
+      })
+      .catch(err => {
+        console.log(err, '===error');
+      });
   };
 
   return (
@@ -47,7 +62,7 @@ const Login = () => {
         navigation.navigate('Signup');
       }}
       onPressSubmitButton={() => {
-        dispatch(StoreToken(true));
+        handleSubmit();
       }}>
       <TextBox
         iconColor={COLORS.placeHolderColor}
