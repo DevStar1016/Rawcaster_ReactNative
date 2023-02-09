@@ -9,6 +9,7 @@ interface SVGIconProps {
   icon?: IconType;
   color?: string;
   marginLeft?: number;
+  isButton?: boolean;
   onPress?: () => void;
 }
 
@@ -18,12 +19,14 @@ const SVGIcon = ({
   icon = 'visibility_on',
   color = COLORS.white,
   marginLeft = 0,
+  isButton = false,
   onPress,
 }: SVGIconProps) => {
   const Icon = ICONS[icon];
   return (
     <TouchableOpacity
       style={{marginLeft}}
+      disabled={!isButton}
       activeOpacity={0.7}
       onPress={onPress}>
       <Icon height={height} width={width} fill={color} />
