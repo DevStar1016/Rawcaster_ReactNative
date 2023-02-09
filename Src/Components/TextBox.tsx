@@ -16,8 +16,8 @@ import StyledText from './StyledText';
 
 interface TextBoxProps {
   placeHolder?: string;
-  title: string;
-  isSecure: boolean;
+  title?: string;
+  isSecure?: boolean;
   errorText?: string;
   icon?: IconType;
   iconHeight?: number;
