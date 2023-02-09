@@ -36,25 +36,35 @@ const SignupWithPhone = () => {
       : Yup.string()
           .matches(EMAIL_REGEX, 'Enter valid email')
           .required('Email is required'),
+    dob: Yup.string().required('Date of birth is required'),
   });
 
-  const {handleSubmit, handleChange, values, errors, setFieldValue} = useFormik(
-    {
+  const {handleSubmit, handleChange, values, errors, setFieldValue, touched} =
+    useFormik({
       initialValues: {
         name: '',
         phone_or_email: '',
         password: '',
+        dob: '',
       },
       validationSchema: signupWithPhoneSchema,
       onSubmit: values => {
         handleSignupWithPhone(values);
       },
-    },
-  );
+    });
 
   const handleSignupWithPhone = data => {
     console.log(data, 'signup with phone');
+    let formData = new FormData();
+    formData.append('first_name', data.name);
+    formData.append('display_name', data.name);
+    formData.append('email_id', data.phone_or_email);
+    formData.append('password', data.password);
+    formData.append('confirm_password', data.password);
+    formData.append('dob');
   };
+
+  console.log(values, '===values');
 
   return (
     <AuthScreenHOC
@@ -77,7 +87,7 @@ const SignupWithPhone = () => {
         placeHolder="Enter your name"
         title="Name"
         onChangeText={handleChange('name')}
-        errorText={errors.name ? errors.name : ''}
+        errorText={errors.name && touched.name ? errors.name : ''}
         value={values.name}
       />
       {isEnablePhoneNumber ? (
@@ -87,7 +97,11 @@ const SignupWithPhone = () => {
           title="Phone Number"
           keyboardType="number-pad"
           onChangeText={handleChange('phone_or_email')}
-          errorText={errors.phone_or_email ? errors.phone_or_email : ''}
+          errorText={
+            errors.phone_or_email && touched.phone_or_email
+              ? errors.phone_or_email
+              : ''
+          }
           value={values.phone_or_email}
         />
       ) : (
@@ -97,7 +111,11 @@ const SignupWithPhone = () => {
           title="Email Address"
           keyboardType="email-address"
           onChangeText={handleChange('phone_or_email')}
-          errorText={errors.phone_or_email ? errors.phone_or_email : ''}
+          errorText={
+            errors.phone_or_email && touched.phone_or_email
+              ? errors.phone_or_email
+              : ''
+          }
           value={values.phone_or_email}
         />
       )}
@@ -118,12 +136,16 @@ const SignupWithPhone = () => {
         placeHolder="Enter your password"
         title="Password"
         onChangeText={handleChange('phone_or_email')}
-        errorText={errors.password ? errors.password : ''}
+        errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
         isSecure
         isEnablePasswordConditionText
       />
-      <DOBPicker />
+      <DOBPicker
+        onSelect={e => {
+          console.log(e, '===dob');
+        }}
+      />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>
         <StyledText style={{fontSize: 17}} paddingVertical={0}>
           {"By Signing up you agree with Rawcaster's "}

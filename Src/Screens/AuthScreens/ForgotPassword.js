@@ -5,10 +5,13 @@ import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHO
 import {useNavigation} from '@react-navigation/native';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
+import {SALT_KEY} from '../../Services/ServiceConstants';
 
 const forgotPasswordSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
 });
+
+const sha1 = require('sha1');
 
 const ForgotPassword = () => {
   const navigation = useNavigation();
@@ -24,6 +27,9 @@ const ForgotPassword = () => {
 
   const handleForgotPassword = data => {
     console.log(data, 'forgot password data');
+    let formData = new FormData();
+    formData.append('', data.login_id);
+    formData.append('', sha1(SALT_KEY + data.login_id));
   };
 
   return (

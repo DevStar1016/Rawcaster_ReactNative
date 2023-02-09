@@ -41,7 +41,6 @@ const Login = () => {
     formData.append('password', data.password);
     formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
     formData.append('device_id', 'abcd');
-    console.log(formData);
     loginService(formData)
       .then(res => {
         if (res.data.status === 1) {

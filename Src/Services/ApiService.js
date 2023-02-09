@@ -28,3 +28,7 @@ export const loginService = formData => {
 export const signupService = formData => {
   return axios.post('signup', formData);
 };
+
+export const forgotPasswordService = data => {
+  return axios.post('forgotpassword', data);
+};
