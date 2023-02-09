@@ -14,6 +14,7 @@ import {
   PASSWORD_REGEX,
 } from '../../../Utilities/Constants';
 import {useDispatch} from 'react-redux';
+import {signupService} from '../../../Services/ApiService';
 
 const SignupWithPhone = () => {
   const navigation = useNavigation();
@@ -61,10 +62,20 @@ const SignupWithPhone = () => {
     formData.append('email_id', data.phone_or_email);
     formData.append('password', data.password);
     formData.append('confirm_password', data.password);
-    formData.append('dob');
+    formData.append('dob', data.dob);
+    signupService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          console.log(res.data, 'response');
+          navigation.navigate('OTPVerification');
+        } else {
+          console.log(res.data.msg);
+        }
+      })
+      .catch(err => {
+        console.log(err, '===error');
+      });
   };
-
-  console.log(values, '===values');
 
   return (
     <AuthScreenHOC
@@ -73,10 +84,7 @@ const SignupWithPhone = () => {
       buttonBottomLeftText="Already Registered? "
       buttonBottomRightText="Login"
       submitButtonText="Join Rawcaster Family"
-      onPressSubmitButton={() => {
-        navigation.navigate('OTPVerification');
-        // handleSubmit();
-      }}
+      onPressSubmitButton={handleSubmit}
       onPressButtonBottomText={() => {
         navigation.reset({
           routes: [{name: 'Login'}],
@@ -141,11 +149,7 @@ const SignupWithPhone = () => {
         isSecure
         isEnablePasswordConditionText
       />
-      <DOBPicker
-        onSelect={e => {
-          console.log(e, '===dob');
-        }}
-      />
+      <DOBPicker onSelect={handleChange('dob')} />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>
         <StyledText style={{fontSize: 17}} paddingVertical={0}>
           {"By Signing up you agree with Rawcaster's "}
