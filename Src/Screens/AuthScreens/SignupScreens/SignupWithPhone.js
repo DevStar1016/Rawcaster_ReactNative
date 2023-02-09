@@ -13,9 +13,11 @@ import {
   NAME_REGEX,
   PASSWORD_REGEX,
 } from '../../../Utilities/Constants';
+import {useDispatch} from 'react-redux';
 
 const SignupWithPhone = () => {
   const navigation = useNavigation();
+
   const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(true);
 
   const signupWithPhoneSchema = Yup.object({

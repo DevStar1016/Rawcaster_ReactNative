@@ -1,11 +1,15 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import SelectInfluencers from '../Screens/SelectInfluencers';
+
+const Stack = createStackNavigator();
 
 const MainStack = () => {
   return (
-    <View>
-      <Text>MainStack</Text>
-    </View>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="SelectInfluencers" component={SelectInfluencers} />
+    </Stack.Navigator>
   );
 };
 

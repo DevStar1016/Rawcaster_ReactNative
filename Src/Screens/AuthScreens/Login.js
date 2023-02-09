@@ -7,6 +7,8 @@ import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHO
 import {useNavigation} from '@react-navigation/native';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
+import {useDispatch} from 'react-redux';
+import {StoreToken} from '../../Store/Slices/AuthSlice';
 
 const loginSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -15,6 +17,7 @@ const loginSchema = Yup.object({
 
 const Login = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const {handleSubmit, handleChange, values, errors} = useFormik({
     initialValues: {
@@ -28,6 +31,7 @@ const Login = () => {
   });
 
   const handleLogin = data => {
+    dispatch(StoreToken(true));
     console.log(data, 'Login data');
   };
 
@@ -42,7 +46,9 @@ const Login = () => {
       onPressButtonBottomText={() => {
         navigation.navigate('Signup');
       }}
-      onPressSubmitButton={handleSubmit}>
+      onPressSubmitButton={() => {
+        dispatch(StoreToken(true));
+      }}>
       <TextBox
         iconColor={COLORS.placeHolderColor}
         placeHolder="Phone number or Email address"

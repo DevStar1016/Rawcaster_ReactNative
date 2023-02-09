@@ -7,17 +7,27 @@ import FaceBookIcon from '../Assets/Svg/facebook.svg';
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
 import CloseIcon from '../Assets/Svg/close.svg';
+import AppLogoIcon from '../Assets/Svg/app_logo_white.svg';
+import SearchIcon from '../Assets/Svg/search.svg';
+import LiveIcon from '../Assets/Svg/live.svg';
+import UserIcon from '../Assets/Svg/user.svg';
+import UserPlusIcon from '../Assets/Svg/user_plus.svg';
 
 export type IconType =
   | 'visibility_on'
   | 'visibility_off'
   | 'back'
+  | 'app_logo_white'
   | 'down_arrow'
   | 'google'
   | 'facebook'
   | 'twitter'
   | 'apple'
-  | 'close';
+  | 'close'
+  | 'live'
+  | 'search'
+  | 'user'
+  | 'user_plus';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -28,4 +38,9 @@ export const ICONS = {
   apple: AppleIcon,
   down_arrow: DownArrowIcon,
   close: CloseIcon,
+  app_logo_white: AppLogoIcon,
+  search: SearchIcon,
+  live: LiveIcon,
+  user: UserIcon,
+  user_plus: UserPlusIcon,
 };
