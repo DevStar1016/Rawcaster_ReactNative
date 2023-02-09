@@ -14,11 +14,13 @@ type DateMonthYearType = {
 type Props = {
   onSelect: (value: string) => void;
   format?: string;
+  errorText?: string;
 };
 
 const CustomDateMonthYearPicker = ({
   onSelect,
   format = 'YYYY-MM-DD',
+  errorText = '',
 }: Props) => {
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
     date: null,
@@ -170,6 +172,11 @@ const CustomDateMonthYearPicker = ({
           }}
         />
       </View>
+      {errorText ? (
+        <StyledText style={styles.errorText} paddingVertical={0}>
+          {errorText}
+        </StyledText>
+      ) : null}
     </View>
   );
 };
@@ -184,5 +191,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
   },
 });

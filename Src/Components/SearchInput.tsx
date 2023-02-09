@@ -5,15 +5,19 @@ import SVGIcon from './SVGIcon';
 import TextBox from './TextBox';
 import {TextInput} from 'react-native-gesture-handler';
 
-const SearchInput = ({}) => {
+type Props = {
+  placeHolderText?: string;
+};
+
+const SearchInput = ({placeHolderText = 'Search'}: Props) => {
   const [searchValue, setsearchValue] = useState('');
   return (
     <View style={styles.mainContainer}>
       <View style={styles.inputContainer}>
         {/* <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          secureTextEntry={isSecure ? !isVisiblePassword : false}
+          value={searchValue}
+          onChangeText={setsearchValue}
+         
           style={[styles.inputField, {width: isSecure ? '87%' : '100%'}]}
           placeholder={placeHolder}
           keyboardType={keyboardType}
