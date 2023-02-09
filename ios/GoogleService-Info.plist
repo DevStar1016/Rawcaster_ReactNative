@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>165212392194-3qtotpujkoa4k6m0703vg8fbm5om2prd.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.165212392194-3qtotpujkoa4k6m0703vg8fbm5om2prd</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDG6ckvZCUri90urf4hwH-yWAJiKkLwCtc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>165212392194</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.rawcaster.app</string>
+	<key>PROJECT_ID</key>
+	<string>rawcaster-56622</string>
+	<key>STORAGE_BUCKET</key>
+	<string>rawcaster-56622.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:165212392194:ios:dd9cc0f64d4a6fea09d01b</string>
+</dict>
+</plist>

@@ -16,6 +16,7 @@ type Props = {
   isEnableScroll?: boolean;
   backgroundColor?: string;
   isEnableHeader?: boolean;
+  paddingHorizontal?: number;
 };
 
 const HOCView = ({
@@ -24,6 +25,7 @@ const HOCView = ({
   isEnableScroll = false,
   backgroundColor = COLORS.white,
   isEnableHeader = true,
+  paddingHorizontal = 15,
 }: Props) => {
   return (
     <View style={{flex: 1, backgroundColor: backgroundColor}}>
@@ -31,6 +33,7 @@ const HOCView = ({
       {isEnableKeyboardAware ? (
         <KeyboardAwareScrollView
           extraScrollHeight={55}
+          style={{paddingHorizontal}}
           enableOnAndroid={true}
           bounces={false}
           showsVerticalScrollIndicator={false}
@@ -42,7 +45,10 @@ const HOCView = ({
       ) : (
         <View style={{flex: 1}}>
           {isEnableScroll ? (
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              style={{paddingHorizontal}}
+              keyboardShouldPersistTaps="handled">
               {children}
             </ScrollView>
           ) : (

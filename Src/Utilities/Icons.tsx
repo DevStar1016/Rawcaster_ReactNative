@@ -12,6 +12,7 @@ import SearchIcon from '../Assets/Svg/search.svg';
 import LiveIcon from '../Assets/Svg/live.svg';
 import UserIcon from '../Assets/Svg/user.svg';
 import UserPlusIcon from '../Assets/Svg/user_plus.svg';
+import RightArrowIcon from '../Assets/Svg/right_arrow.svg';
 
 export type IconType =
   | 'visibility_on'
@@ -27,7 +28,8 @@ export type IconType =
   | 'live'
   | 'search'
   | 'user'
-  | 'user_plus';
+  | 'user_plus'
+  | 'right_arrow';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -43,4 +45,5 @@ export const ICONS = {
   live: LiveIcon,
   user: UserIcon,
   user_plus: UserPlusIcon,
+  right_arrow: RightArrowIcon,
 };
