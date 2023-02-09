@@ -9,7 +9,7 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch} from 'react-redux';
 import {StoreToken} from '../../Store/Slices/AuthSlice';
-import {SALT_KEY} from '../../Services/ServiceConstants';
+import {DEVICE_ID, SALT_KEY} from '../../Services/ServiceConstants';
 import {loginService} from '../../Services/ApiService';
 
 const loginSchema = Yup.object({
@@ -23,7 +23,7 @@ const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const {handleSubmit, handleChange, values, errors} = useFormik({
+  const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
       login_id: '',
       password: '',
@@ -40,10 +40,15 @@ const Login = () => {
     formData.append('auth_code', sha1(SALT_KEY + data.login_id));
     formData.append('password', data.password);
     formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
+    formData.append('device_id', 'abcd');
+    console.log(formData);
     loginService(formData)
       .then(res => {
-        dispatch(StoreToken(true));
-        console.log(res.data, '===response');
+        if (res.data.status === 1) {
+          dispatch(StoreToken(true));
+        } else {
+          console.log(res.data.msg);
+        }
       })
       .catch(err => {
         console.log(err, '===error');
@@ -69,7 +74,7 @@ const Login = () => {
         placeHolder="Phone number or Email address"
         title="Login ID"
         onChangeText={handleChange('login_id')}
-        errorText={errors.login_id ? errors.login_id : ''}
+        errorText={errors.login_id && touched.login_id ? errors.login_id : ''}
         value={values.login_id}
       />
       <TextBox
@@ -77,7 +82,7 @@ const Login = () => {
         placeHolder="Enter your password"
         title="Password"
         onChangeText={handleChange('password')}
-        errorText={errors.password ? errors.password : ''}
+        errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
         isSecure
       />
