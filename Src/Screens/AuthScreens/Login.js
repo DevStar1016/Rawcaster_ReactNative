@@ -48,6 +48,8 @@ const Login = () => {
           dispatch(StoreToken(true));
         } else if (res.data.status === 0) {
           navigation.navigate('Signup');
+        } else if (res.data.status === 2) {
+          navigation.navigate('Signup');
         }
       })
       .catch(err => {

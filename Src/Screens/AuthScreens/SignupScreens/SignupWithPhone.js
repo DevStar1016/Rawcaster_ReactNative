@@ -68,12 +68,20 @@ const SignupWithPhone = () => {
     formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
     formData.append('device_id', 'abcd');
     formData.append('auth_code', sha1(SALT_KEY + data.login_id));
+    formData.append('signup_type', isEnablePhoneNumber ? 2 : 1);
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data, 'response');
-          navigation.navigate('OTPVerification');
+          navigation.navigate('OTPVerification', {
+            state: {
+              otp_ref_id: res.data.otp_ref_id,
+            },
+          });
         } else if (res.data.status === 0) {
+          navigation.reset({
+            routes: [{name: 'Login'}],
+          });
+        } else if (res.data.status === 2) {
           navigation.reset({
             routes: [{name: 'Login'}],
           });
