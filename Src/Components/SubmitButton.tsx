@@ -19,6 +19,7 @@ type ButtonProps = {
   buttonTextStyle?: TextStyle;
   onPress?: () => void;
   icon?: IconType;
+  rightIcon?: IconType;
 };
 
 const SubmitButton = ({
@@ -29,6 +30,7 @@ const SubmitButton = ({
   textColor = COLORS.white,
   buttonTextStyle = {},
   icon,
+  rightIcon,
 }: ButtonProps) => {
   return (
     <TouchableOpacity
@@ -43,11 +45,13 @@ const SubmitButton = ({
         style={{
           ...styles.buttonText,
           marginLeft: icon ? 15 : 0,
+          marginRight: rightIcon ? 15 : 0,
           color: textColor,
           ...buttonTextStyle,
         }}>
         {buttonText}
       </StyledText>
+      {rightIcon ? <SVGIcon icon={rightIcon} /> : null}
     </TouchableOpacity>
   );
 };

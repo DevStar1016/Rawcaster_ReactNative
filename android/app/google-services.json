@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "165212392194",
+    "project_id": "rawcaster-56622",
+    "storage_bucket": "rawcaster-56622.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:165212392194:android:00153d39ed399c4309d01b",
+        "android_client_info": {
+          "package_name": "com.rawcaster"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "165212392194-48bdvglq550ov9suvhfdr7eslubdcdtb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rawcaster",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDA1K7O6vROtfSbDABVaUWsSORRv4FYrRI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

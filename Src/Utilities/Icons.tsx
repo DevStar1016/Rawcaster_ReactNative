@@ -16,6 +16,7 @@ import ProfileImage from '../Assets/Svg/sample_profile.svg';
 import Medal from '../Assets/Svg/silver_medal.svg';
 import ActiveCheckMark from '../Assets/Svg/active_checkmark.svg';
 import DisableCheckMark from '../Assets/Svg/disable_checkmark.svg';
+import RightArrowIcon from '../Assets/Svg/right_arrow.svg';
 
 export type IconType =
   | 'visibility_on'
@@ -35,7 +36,8 @@ export type IconType =
   | 'influencer'
   | 'medal'
   | 'active_checkmark'
-  | 'disable_checkmark';
+  | 'disable_checkmark'
+  | 'right_arrow';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -55,4 +57,5 @@ export const ICONS = {
   medal: Medal,
   active_checkmark: ActiveCheckMark,
   disable_checkmark: DisableCheckMark,
+  right_arrow: RightArrowIcon,
 };
