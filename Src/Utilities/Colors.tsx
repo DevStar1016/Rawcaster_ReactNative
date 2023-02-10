@@ -2,6 +2,7 @@ export const COLORS = {
   primary: '#563662',
   secondary: '#F2718D',
   red: '#FF626B',
+  green: '#0DBD0D',
   white: '#FFFFFF',
   black: '#000000',
   dimColor: '#9BA0AA',

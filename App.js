@@ -4,18 +4,20 @@ import {NavigationContainer} from '@react-navigation/native';
 import RNBootSplash from 'react-native-bootsplash';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {useDispatch} from 'react-redux';
+import Toast from 'react-native-toast-message';
 import LoginIntro from './Src/Screens/IntroScreens.js/LoginIntro';
 import {
   INTRO_SCREEN_SEEN,
   ISLOGIN,
 } from './Src/Utilities/EncryptedStoreConstants';
-import {StoreToken} from './Src/Store/Slices/AuthSlice';
+import {SetToken} from './Src/Store/Slices/AuthSlice';
 import {useStatusBarColor, useToken} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
 import RootStack from './Src/Stacks/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import CustomStatusBar from './Src/Components/CustomStatusBar';
 import {COLORS} from './Src/Utilities/Colors';
+import ToastConfig from './Src/Utilities/ToastConfig';
 
 const App = () => {
   const [isIntroSeen, setisIntroSeen] = useState(false);
@@ -32,7 +34,7 @@ const App = () => {
         }
         const token = await EncryptedStorage.getItem(ISLOGIN);
         if (token) {
-          dispatch(StoreToken(token));
+          dispatch(SetToken(token));
         }
       } catch (e) {}
       RNBootSplash.hide({fade: true, duration: 100});
@@ -60,6 +62,12 @@ const App = () => {
       ) : (
         <LoginIntro onSkipIntro={onSkipIntro} />
       )}
+      <Toast
+        visibilityTime={3000}
+        autoHide={false}
+        config={ToastConfig}
+        topOffset={40}
+      />
     </SafeAreaProvider>
   );
 };

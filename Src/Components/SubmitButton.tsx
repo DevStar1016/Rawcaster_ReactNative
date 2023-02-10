@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextStyle,
@@ -19,6 +20,9 @@ type ButtonProps = {
   buttonTextStyle?: TextStyle;
   onPress?: () => void;
   icon?: IconType;
+  loaderColor?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
   rightIcon?: IconType;
 };
 
@@ -30,7 +34,10 @@ const SubmitButton = ({
   textColor = COLORS.white,
   buttonTextStyle = {},
   icon,
+  isDisabled = false,
   rightIcon,
+  loaderColor = COLORS.white,
+  isLoading = false,
 }: ButtonProps) => {
   return (
     <TouchableOpacity
@@ -38,20 +45,31 @@ const SubmitButton = ({
         styles.mainContainer,
         {backgroundColor: bgColor, borderColor, flexDirection: 'row'},
       ]}
+      disabled={isLoading || isDisabled}
       activeOpacity={0.7}
       onPress={onPress}>
-      {icon ? <SVGIcon icon={icon} /> : null}
-      <StyledText
-        style={{
-          ...styles.buttonText,
-          marginLeft: icon ? 15 : 0,
-          marginRight: rightIcon ? 15 : 0,
-          color: textColor,
-          ...buttonTextStyle,
-        }}>
-        {buttonText}
-      </StyledText>
-      {rightIcon ? <SVGIcon icon={rightIcon} /> : null}
+      {isLoading ? (
+        <ActivityIndicator
+          size="large"
+          color={loaderColor}
+          style={{marginHorizontal: 10}}
+        />
+      ) : (
+        <>
+          {icon ? <SVGIcon icon={icon} /> : null}
+          <StyledText
+            style={{
+              ...styles.buttonText,
+              marginLeft: icon ? 15 : 0,
+              marginRight: rightIcon ? 15 : 0,
+              color: textColor,
+              ...buttonTextStyle,
+            }}>
+            {buttonText}
+          </StyledText>
+          {rightIcon ? <SVGIcon icon={rightIcon} /> : null}
+        </>
+      )}
     </TouchableOpacity>
   );
 };

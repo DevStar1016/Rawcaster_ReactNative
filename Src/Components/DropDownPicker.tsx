@@ -19,6 +19,7 @@ type Props = {
   dataList?: number[] | string[];
   placeHolderText?: string;
   isInsideList?: boolean;
+  isDisabled?: boolean;
   mainContainerWidth?: number | string;
   onPress?: () => void;
   onSelectItem?: (item: any) => void;
@@ -33,6 +34,7 @@ const DropDownPicker = ({
   dataList = [],
   isInsideList = true,
   onPress,
+  isDisabled = false,
   onSelectItem,
 }: Props) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
@@ -42,6 +44,7 @@ const DropDownPicker = ({
       {title && <StyledText>{title}</StyledText>}
       <TouchableOpacity
         style={styles.inputContainer}
+        disabled={isDisabled}
         activeOpacity={0.7}
         onPress={() => {
           if (isInsideList) {

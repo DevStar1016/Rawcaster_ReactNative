@@ -1,5 +1,5 @@
 import {Platform, StyleSheet, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import {useNavigation} from '@react-navigation/native';
 import TextBox from '../../../Components/TextBox';
@@ -10,24 +10,25 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {
   EMAIL_REGEX,
+  IS_IOS,
   NAME_REGEX,
   PASSWORD_REGEX,
+  SHA1,
 } from '../../../Utilities/Constants';
-import {useDispatch} from 'react-redux';
 import {signupService} from '../../../Services/ApiService';
-import {SALT_KEY} from '../../../Services/ServiceConstants';
+import {DEVICE_ID, SALT_KEY} from '../../../Services/ServiceConstants';
 
-const sha1 = require('sha1');
-
-const SignupWithPhone = () => {
+let isMount = true;
+const SignupWithPhone = ({route}) => {
   const navigation = useNavigation();
+  const {loginId, signUpType /* 1 - Email, 2 - Phone*/} = route.params ?? {};
+  const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
+    signUpType === 2 ? true : false,
+  );
+  const [isLoading, setisLoading] = useState(false);
 
-  const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(true);
-
-  const signupWithPhoneSchema = Yup.object({
-    name: Yup.string()
-      .matches(NAME_REGEX, 'Enter valid name')
-      .required('Name is required'),
+  const validationSchema = Yup.object({
+    name: Yup.string().required('Name is required'),
     password: Yup.string()
       .min(8, 'Password to be at least 8 characters long')
       .matches(
@@ -37,43 +38,58 @@ const SignupWithPhone = () => {
       .required('Password is required'),
     phone_or_email: isEnablePhoneNumber
       ? Yup.string().required('Phone number is required')
-      : Yup.string()
-          .matches(EMAIL_REGEX, 'Enter valid email')
-          .required('Email is required'),
+      : Yup.string().email('Enter valid email').required('Email is required'),
     dob: Yup.string().required('Date of birth is required'),
   });
 
-  const {handleSubmit, handleChange, values, errors, setFieldValue, touched} =
-    useFormik({
-      initialValues: {
-        name: '',
-        phone_or_email: '',
-        password: '',
-        dob: '',
-      },
-      validationSchema: signupWithPhoneSchema,
-      onSubmit: values => {
-        handleSignupWithPhone(values);
-      },
-    });
+  const {handleSubmit, handleChange, values, errors, touched} = useFormik({
+    initialValues: {
+      name: '',
+      phone_or_email: loginId ?? '',
+      password: '',
+      dob: '',
+    },
+    validationSchema: validationSchema,
+    onSubmit: values => {
+      if (isMount) {
+        setisLoading(true);
+      }
+      handleSignupWithPhone(values);
+    },
+  });
 
-  const handleSignupWithPhone = data => {
+  useEffect(() => {
+    isMount = true;
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  const handleSignupWithPhone = values => {
     let formData = new FormData();
-    formData.append('first_name', data.name);
-    formData.append('display_name', data.name);
-    formData.append('email_id', data.phone_or_email);
-    formData.append('password', data.password);
-    formData.append('confirm_password', data.password);
-    formData.append('dob', data.dob);
-    formData.append('app_type', Platform.OS === 'ios' ? 2 : 1);
-    formData.append('device_id', 'abcd');
-    formData.append('auth_code', sha1(SALT_KEY + data.login_id));
+    formData.append('auth_code', SHA1(SALT_KEY + values.login_id));
+    formData.append('signup_type', isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
+    formData.append('first_name', values.name);
+    formData.append('display_name', values.name);
+    formData.append('dob', values.dob);
+    formData.append('email_id', values.phone_or_email);
+    formData.append('password', values.password);
+    formData.append('confirm_password', values.password);
+    // formData.append('geo_location', "");
+    postData.append('ref_id', '');
+    formData.append('device_id', DEVICE_ID);
+    // postData.append("push_id", "");
+    // postData.append("voip_token", IS_IOS ? "" : null);
+    formData.append('app_type', IS_IOS ? 2 : 1);
+
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {
           console.log(res.data, 'response');
           navigation.navigate('OTPVerification');
         } else if (res.data.status === 0) {
+        } else if (res.data.status === 2) {
           navigation.reset({
             routes: [{name: 'Login'}],
           });
@@ -81,6 +97,11 @@ const SignupWithPhone = () => {
       })
       .catch(err => {
         console.log(err, '===error');
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
       });
   };
 
@@ -91,6 +112,7 @@ const SignupWithPhone = () => {
       buttonBottomLeftText="Already Registered? "
       buttonBottomRightText="Login"
       submitButtonText="Join Rawcaster Family"
+      isLoading={isLoading}
       onPressSubmitButton={handleSubmit}
       onPressButtonBottomText={() => {
         navigation.reset({
@@ -101,6 +123,7 @@ const SignupWithPhone = () => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your name"
         title="Name"
+        isEditable={!isLoading}
         onChangeText={handleChange('name')}
         errorText={errors.name && touched.name ? errors.name : ''}
         value={values.name}
@@ -112,6 +135,7 @@ const SignupWithPhone = () => {
           title="Phone Number"
           keyboardType="number-pad"
           maxLength={13}
+          isEditable={!isLoading}
           onChangeText={handleChange('phone_or_email')}
           errorText={
             errors.phone_or_email && touched.phone_or_email
@@ -126,6 +150,7 @@ const SignupWithPhone = () => {
           placeHolder="Enter your email address"
           title="Email Address"
           keyboardType="email-address"
+          isEditable={!isLoading}
           onChangeText={handleChange('phone_or_email')}
           errorText={
             errors.phone_or_email && touched.phone_or_email
@@ -138,7 +163,7 @@ const SignupWithPhone = () => {
 
       <View style={{alignItems: 'flex-end'}}>
         <StyledText
-          isButton
+          isButton={!isLoading}
           paddingVertical={0}
           style={styles.emailFieldToggleButtonText}
           onPress={() => {
@@ -151,6 +176,7 @@ const SignupWithPhone = () => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"
         title="Password"
+        isEditable={!isLoading}
         onChangeText={handleChange('password')}
         errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
@@ -159,6 +185,7 @@ const SignupWithPhone = () => {
       />
       <DOBPicker
         onSelect={handleChange('dob')}
+        isDisabled={isLoading}
         errorText={errors.dob && touched.dob ? errors.dob : ''}
       />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>
@@ -167,7 +194,7 @@ const SignupWithPhone = () => {
         </StyledText>
         <StyledText
           style={{color: COLORS.secondary, fontSize: 17}}
-          isButton
+          isButton={!isLoading}
           paddingVertical={0}
           onPress={() => {}}>
           terms and conditions

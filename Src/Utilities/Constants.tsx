@@ -6,6 +6,8 @@ import EventImage from '../Assets/Png/IntroImages/event.png';
 import NuggetImage from '../Assets/Png/IntroImages/nugget.png';
 import LiveImage from '../Assets/Png/IntroImages/live.png';
 import {getyears} from './Methods';
+export const SHA1 = require('sha1');
+
 export const INTRO_DATA = [
   {
     image: LivetalkImage,
@@ -74,7 +76,6 @@ export const DATES_MONTHS_YEARS_DATA = {
 };
 
 // Regex
-
 export const PASSWORD_REGEX = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/;
 export const NAME_REGEX = /^[A-Za-z_ ]+$/;
 export const NUMBER_REGEX = /^[0-9]*$/;

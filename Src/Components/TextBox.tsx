@@ -26,6 +26,7 @@ interface TextBoxProps {
   value?: string;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
+  isEditable?: boolean;
   isEnablePasswordConditionText?: boolean;
   passwordConditionTextStyle?: TextStyle;
   onChangeText?: (text: string) => void;
@@ -41,6 +42,7 @@ const TextBox = ({
   iconColor = COLORS.white,
   value = '',
   errorText = '',
+  isEditable = true,
   keyboardType,
   maxLength,
   onChangeText,
@@ -59,6 +61,7 @@ const TextBox = ({
         <TextInput
           value={value}
           onChangeText={onChangeText}
+          editable={isEditable}
           secureTextEntry={isSecure ? !isVisiblePassword : false}
           style={[styles.inputField, {width: isSecure ? '87%' : '100%'}]}
           placeholder={placeHolder}
@@ -70,6 +73,7 @@ const TextBox = ({
           <View style={styles.iconContainer}>
             <TouchableOpacity
               style={styles.button}
+              disabled={!isEditable}
               onPress={() => {
                 setisVisiblePassword(pre => !pre);
               }}>

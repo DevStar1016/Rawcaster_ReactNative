@@ -15,12 +15,14 @@ type Props = {
   onSelect: (value: string) => void;
   format?: string;
   errorText?: string;
+  isDisabled?: boolean;
 };
 
 const CustomDateMonthYearPicker = ({
   onSelect,
   format = 'YYYY-MM-DD',
   errorText = '',
+  isDisabled = false,
 }: Props) => {
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
     date: null,
@@ -141,6 +143,7 @@ const CustomDateMonthYearPicker = ({
       <View style={styles.dateMonthYearContainer}>
         <DropDownPicker
           placeHolderText="Month"
+          isDisabled={isDisabled}
           mainContainerWidth={'36%'}
           dataList={getMonthsList()}
           value={dateMonthYear.month}
@@ -151,6 +154,7 @@ const CustomDateMonthYearPicker = ({
         <DropDownPicker
           placeHolderText="Day"
           mainContainerWidth={'28%'}
+          isDisabled={isDisabled}
           dataList={getDatesList()}
           value={dateMonthYear.date}
           onSelectItem={(date: string) => {
@@ -165,6 +169,7 @@ const CustomDateMonthYearPicker = ({
         <DropDownPicker
           placeHolderText="Year"
           mainContainerWidth={'30%'}
+          isDisabled={isDisabled}
           dataList={DATES_MONTHS_YEARS_DATA.years}
           value={dateMonthYear.year}
           onSelectItem={(year: number) => {

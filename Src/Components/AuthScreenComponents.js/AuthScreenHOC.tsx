@@ -20,6 +20,7 @@ type AuthScreenHOCProps = {
   isEnableCancelButton?: boolean;
   isEnableBackButton?: boolean;
   isEnableSubmitButton?: boolean;
+  isLoading?: boolean;
   titleContainerAlignItems?: 'flex-start' | 'flex-end' | 'center';
   titleTextAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
   buttonBottomTextAlignment?: 'flex-start' | 'flex-end' | 'center';
@@ -36,6 +37,7 @@ const AuthScreenHOC = ({
   titleContainerAlignItems = 'center',
   titleTextAlign = 'center',
   buttonBottomLeftText = '',
+  isLoading = false,
   buttonBottomRightText = '',
   buttonBottomTextAlignment = 'center',
   submitButtonText = '',
@@ -62,6 +64,7 @@ const AuthScreenHOC = ({
           <View style={styles.backButtonContainer}>
             <TouchableOpacity
               style={styles.backButton}
+              disabled={isLoading}
               activeOpacity={0.7}
               onPress={onPressBackButton}>
               <SVGIcon
@@ -101,6 +104,7 @@ const AuthScreenHOC = ({
         {isEnableSubmitButton && (
           <SubmitButton
             buttonText={submitButtonText}
+            isLoading={isLoading}
             onPress={onPressSubmitButton}
           />
         )}
@@ -109,6 +113,7 @@ const AuthScreenHOC = ({
             buttonText={'Cancel'}
             onPress={onPressCancelButton}
             bgColor={COLORS.white}
+            isDisabled={isLoading}
             textColor={COLORS.secondary}
           />
         )}
@@ -122,7 +127,7 @@ const AuthScreenHOC = ({
               {buttonBottomLeftText}
             </StyledText>
             <StyledText
-              isButton
+              isButton={!isLoading}
               onPress={onPressButtonBottomText}
               style={{...styles.signUpText, color: COLORS.secondary}}>
               {buttonBottomRightText}
