@@ -86,9 +86,16 @@ const SignupWithPhone = ({route}) => {
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data, 'response');
-          navigation.navigate('OTPVerification');
+          navigation.navigate('OTPVerification', {
+            state: {
+              otp_ref_id: res.data.otp_ref_id,
+            },
+          });
         } else if (res.data.status === 0) {
+        } else if (res.data.status === 2) {
+          navigation.reset({
+            routes: [{name: 'Login'}],
+          });
         } else if (res.data.status === 2) {
           navigation.reset({
             routes: [{name: 'Login'}],

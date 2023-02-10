@@ -58,7 +58,7 @@ const ResetPasswordOTP = () => {
       .then(res => {
         if (res.data.status === 1) {
           console.log(res.data, 'response');
-        } else {
+        } else if (res.data.status === 0) {
           console.log(res.data.msg);
         }
       })
