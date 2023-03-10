@@ -11,6 +11,7 @@ import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {IconType} from '../Utilities/Icons';
 import SVGIcon from './SVGIcon';
+import {FONTS} from '../Utilities/Fonts';
 
 type ButtonProps = {
   buttonText: string;
@@ -20,10 +21,23 @@ type ButtonProps = {
   buttonTextStyle?: TextStyle;
   onPress?: () => void;
   icon?: IconType;
+  marginTop?: number;
+  disabledColor?: string;
   loaderColor?: string;
   isLoading?: boolean;
   isDisabled?: boolean;
   rightIcon?: IconType;
+  rightIconSize?: number;
+  iconSize?: number;
+  padding?: number;
+  textPaddingVertical?: number;
+  paddingVertical?: number;
+  paddingHorizontal?: number;
+  marginHorizontal?: number;
+  marginBottom?: number;
+  textMarginLeftWhenIcon?: number;
+  textMarginRightWhenIcon?: number;
+  borderRadius?: number;
 };
 
 const SubmitButton = ({
@@ -34,16 +48,42 @@ const SubmitButton = ({
   textColor = COLORS.white,
   buttonTextStyle = {},
   icon,
+  iconSize = 25,
   isDisabled = false,
   rightIcon,
+  rightIconSize = 15,
   loaderColor = COLORS.white,
+  disabledColor,
   isLoading = false,
+  marginTop = 20,
+  marginBottom,
+  textMarginLeftWhenIcon = 10,
+  textMarginRightWhenIcon = 10,
+  padding = 10,
+  paddingVertical,
+  textPaddingVertical = 2,
+  paddingHorizontal,
+  marginHorizontal,
+  borderRadius = 6,
 }: ButtonProps) => {
   return (
     <TouchableOpacity
       style={[
         styles.mainContainer,
-        {backgroundColor: bgColor, borderColor, flexDirection: 'row'},
+        {
+          backgroundColor:
+            isDisabled && disabledColor ? disabledColor : bgColor,
+          borderColor:
+            isDisabled && disabledColor ? disabledColor : borderColor,
+          flexDirection: 'row',
+          marginTop,
+          padding,
+          paddingVertical,
+          paddingHorizontal,
+          marginHorizontal,
+          marginBottom,
+          borderRadius,
+        },
       ]}
       disabled={isLoading || isDisabled}
       activeOpacity={0.7}
@@ -56,18 +96,28 @@ const SubmitButton = ({
         />
       ) : (
         <>
-          {icon ? <SVGIcon icon={icon} /> : null}
+          {icon ? (
+            <SVGIcon icon={icon} height={iconSize} width={iconSize} />
+          ) : null}
           <StyledText
+            // paddingVertical={0}
             style={{
               ...styles.buttonText,
-              marginLeft: icon ? 15 : 0,
-              marginRight: rightIcon ? 15 : 0,
+              marginLeft: icon ? textMarginLeftWhenIcon : 0,
+              marginRight: rightIcon ? textMarginRightWhenIcon : 0,
               color: textColor,
+              paddingVertical: textPaddingVertical,
               ...buttonTextStyle,
             }}>
             {buttonText}
           </StyledText>
-          {rightIcon ? <SVGIcon icon={rightIcon} /> : null}
+          {rightIcon ? (
+            <SVGIcon
+              icon={rightIcon}
+              height={rightIconSize}
+              width={rightIconSize}
+            />
+          ) : null}
         </>
       )}
     </TouchableOpacity>
@@ -81,15 +131,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: COLORS.secondary,
     borderWidth: 2,
     borderColor: COLORS.secondary,
     marginTop: 20,
   },
   buttonText: {
-    fontWeight: '500',
+    fontFamily: FONTS.DMSans.medium,
     color: COLORS.white,
-    fontSize: 19,
+    fontSize: 16,
   },
 });

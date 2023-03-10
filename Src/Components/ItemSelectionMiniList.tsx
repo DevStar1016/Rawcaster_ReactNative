@@ -2,7 +2,6 @@ import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
-import {WINDOW_HEIGHT} from '../Utilities/Constants';
 import SVGIcon from './SVGIcon';
 
 type Props = {
@@ -13,6 +12,7 @@ type Props = {
   maxHeight?: number | string;
   onSelectItem?: (item: any) => void;
   onClose: () => void;
+  isEnableCloseIcon?: boolean;
 };
 
 type RenderItemProps = {
@@ -28,6 +28,7 @@ const ItemSelectionMiniList = ({
   onClose,
   maxHeight = '50%',
   onSelectItem,
+  isEnableCloseIcon = false,
 }: Props) => {
   const ItemSeperator = () => {
     return <View style={styles.divider} />;
@@ -43,7 +44,9 @@ const ItemSelectionMiniList = ({
               onSelectItem(item);
             }
           }}>
-          <StyledText>{fieldName ? item[fieldName] : item}</StyledText>
+          <StyledText style={{paddingVertical: 5}}>
+            {fieldName ? item[fieldName] : item}
+          </StyledText>
         </TouchableOpacity>
       </View>
     );
@@ -62,19 +65,24 @@ const ItemSelectionMiniList = ({
             <View style={styles.titleContainer}>
               <View style={{width: '15%'}} />
               <View style={{width: '50%', alignItems: 'center'}}>
-                <StyledText>{title}</StyledText>
+                <StyledText style={{paddingVertical: 5}}>{title}</StyledText>
               </View>
               <View style={{width: '15%', alignItems: 'flex-end'}}>
-                <TouchableOpacity
-                  style={{padding: 5}}
-                  activeOpacity={0.7}
-                  onPress={onClose}>
-                  <SVGIcon icon="close" color={COLORS.black} />
-                </TouchableOpacity>
+                {isEnableCloseIcon && (
+                  <TouchableOpacity
+                    style={{padding: 5}}
+                    activeOpacity={0.7}
+                    onPress={onClose}>
+                    <SVGIcon icon="close_rounded" />
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
             {/* <Divider /> */}
           </>
+        ) : null}
+        {title ? (
+          <View style={{height: 1, backgroundColor: COLORS.borderColor}} />
         ) : null}
         <FlatList
           data={listData}
@@ -114,14 +122,17 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   divider: {
-    height: 2,
-    borderWidth: 1,
-    borderColor: '#F2718D',
+    height: 1,
+    // width: '100%',
+    // borderWidth: 0,
+    opacity: 0.2,
+    backgroundColor: COLORS.transparentDimColor,
+    // borderColor: COLORS.grey,
     marginTop: 5,
   },
   itemContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },

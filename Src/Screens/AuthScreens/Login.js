@@ -1,17 +1,24 @@
-import {StyleSheet, View} from 'react-native';
+import {Keyboard, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../Utilities/Colors';
 import StyledText from '../../Components/StyledText';
 import TextBox from '../../Components/TextBox';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import {useNavigation} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch} from 'react-redux';
-import {DEVICE_ID, SALT_KEY} from '../../Services/ServiceConstants';
+import {DEVICE_ID} from '../../Services/ServiceConstants';
 import {loginService} from '../../Services/ApiService';
-import {storeToken, toastService} from '../../Utilities/Methods';
-import {IS_IOS, SHA1} from '../../Utilities/Constants';
+import {
+  getAuthCode,
+  setIsGlobalLoading,
+  storeToken,
+} from '../../Utilities/Methods';
+import {IS_IOS} from '../../Utilities/Constants';
+import Toast from '../../Components/Toast';
+import {FONTS} from '../../Utilities/Fonts';
 
 let isMount = true;
 
@@ -23,7 +30,7 @@ const validationSchema = Yup.object({
 const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const [isLoading, setisLoading] = useState(false);
+  const [pushId, setpushId] = useState(null);
 
   const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
@@ -32,9 +39,8 @@ const Login = () => {
     },
     validationSchema: validationSchema,
     onSubmit: values => {
-      if (isMount) {
-        setisLoading(true);
-      }
+      setIsGlobalLoading(true, dispatch);
+
       handleLogin(values);
     },
   });
@@ -44,16 +50,26 @@ const Login = () => {
 
     return () => {
       isMount = false;
+      Keyboard.dismiss();
     };
+  }, []);
+
+  useEffect(() => {
+    messaging()
+      .getToken()
+      .then(token => {
+        setpushId(token);
+      })
+      .catch(e => {});
   }, []);
 
   const handleLogin = data => {
     let formData = new FormData();
-    formData.append('auth_code', SHA1(SALT_KEY + data.login_id));
-    formData.append('username', data.login_id);
+    formData.append('auth_code', getAuthCode(data.login_id));
+    formData.append('username', data.login_id?.trim());
     formData.append('password', data.password);
     formData.append('device_id', DEVICE_ID);
-    // formData.append('push_id', "");
+    formData.append('push_id', pushId);
     formData.append('device_type', IS_IOS ? 2 : 1);
     // formData.append('voip_token', "");
     formData.append('app_type', IS_IOS ? 2 : 1);
@@ -68,8 +84,9 @@ const Login = () => {
           };
           storeToken(res.data.token, userData, dispatch);
         } else if (res.data.status === 0) {
-          toastService(res.data.msg);
+          Toast.fail(res.data.msg);
         } else if (res.data.status === 2) {
+          Toast.fail(res.data.msg);
           navigation.navigate('SignupWithPhone', {
             loginId: data.login_id,
             signUpType: res.data.type, // 1 - Email, 2 - Phone
@@ -77,12 +94,10 @@ const Login = () => {
         }
       })
       .catch(err => {
-        console.log(err, '===error');
+        Toast.fail(err.message);
       })
       .finally(() => {
-        if (isMount) {
-          setisLoading(false);
-        }
+        setIsGlobalLoading(false, dispatch);
       });
   };
 
@@ -95,9 +110,8 @@ const Login = () => {
       buttonBottomLeftText="Don’t have an account?  "
       buttonBottomRightText="Sign up"
       onPressButtonBottomText={() => {
-        navigation.navigate('Signup');
+        navigation.navigate('Signup', {pushId: pushId});
       }}
-      isLoading={isLoading}
       onPressSubmitButton={() => {
         handleSubmit();
       }}>
@@ -105,7 +119,6 @@ const Login = () => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Phone number or Email address"
         title="Login ID"
-        isEditable={!isLoading}
         onChangeText={handleChange('login_id')}
         errorText={errors.login_id && touched.login_id ? errors.login_id : ''}
         value={values.login_id}
@@ -114,7 +127,6 @@ const Login = () => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"
         title="Password"
-        isEditable={!isLoading}
         onChangeText={handleChange('password')}
         errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
@@ -122,8 +134,6 @@ const Login = () => {
       />
       <View style={styles.forgotPasswordContainer}>
         <StyledText
-          isButton={!isLoading}
-          paddingVertical={0}
           onPress={() => {
             navigation.navigate('ForgotPassword');
           }}
@@ -143,6 +153,6 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     color: COLORS.secondary,
-    fontWeight: 500,
+    fontFamily: FONTS.DMSans.medium,
   },
 });

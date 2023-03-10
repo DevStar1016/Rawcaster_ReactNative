@@ -1,31 +1,46 @@
-import {Platform, StyleSheet, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {Keyboard, Modal, SafeAreaView, StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useFormik} from 'formik';
+import * as Yup from 'yup';
+import {useDispatch} from 'react-redux';
+
 import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
-import {useNavigation} from '@react-navigation/native';
 import TextBox from '../../../Components/TextBox';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
-import DOBPicker from '../../../Components/CustomDateMonthYearPicker';
-import {useFormik} from 'formik';
-import * as Yup from 'yup';
-import {
-  EMAIL_REGEX,
-  IS_IOS,
-  NAME_REGEX,
-  PASSWORD_REGEX,
-  SHA1,
-} from '../../../Utilities/Constants';
+import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPicker';
+import {IS_IOS, PASSWORD_REGEX} from '../../../Utilities/Constants';
 import {signupService} from '../../../Services/ApiService';
-import {DEVICE_ID, SALT_KEY} from '../../../Services/ServiceConstants';
+import {
+  DEVICE_ID,
+  TERMS_CONDTION_URL,
+} from '../../../Services/ServiceConstants';
+import Toast from '../../../Components/Toast';
+import {
+  getAuthCode,
+  setIsGlobalLoading,
+  storeToken,
+} from '../../../Utilities/Methods';
+import {FONTS} from '../../../Utilities/Fonts';
+import {useLocationDetails} from '../../../Utilities/StoreData';
+import {setIsVisibleInfluencers} from '../../../Store/Slices/UtilitySlice';
+import WebUrlLoaderModal from '../../../Modals/WebUrlLoaderModal';
 
 let isMount = true;
 const SignupWithPhone = ({route}) => {
   const navigation = useNavigation();
-  const {loginId, signUpType /* 1 - Email, 2 - Phone*/} = route.params ?? {};
+  const locationDetails = useLocationDetails();
+  const dispatch = useDispatch();
+  const {loginId, signUpType, pushId /* 1 - Email, 2 - Phone*/} =
+    route.params ?? {};
+
   const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
     signUpType === 2 ? true : false,
   );
-  const [isLoading, setisLoading] = useState(false);
+
+  const [isOpenTermsAndConditionsModal, setisOpenTermsAndConditionsModal] =
+    useState(false);
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
@@ -36,7 +51,7 @@ const SignupWithPhone = ({route}) => {
         'Password contain uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a number (0-9)',
       )
       .required('Password is required'),
-    phone_or_email: isEnablePhoneNumber
+    login_id: isEnablePhoneNumber
       ? Yup.string().required('Phone number is required')
       : Yup.string().email('Enter valid email').required('Email is required'),
     dob: Yup.string().required('Date of birth is required'),
@@ -45,70 +60,69 @@ const SignupWithPhone = ({route}) => {
   const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
       name: '',
-      phone_or_email: loginId ?? '',
+      login_id: loginId ?? '',
       password: '',
       dob: '',
     },
     validationSchema: validationSchema,
     onSubmit: values => {
-      if (isMount) {
-        setisLoading(true);
-      }
+      dispatch(setIsVisibleInfluencers(true));
+      setIsGlobalLoading(true, dispatch);
       handleSignupWithPhone(values);
     },
   });
 
   useEffect(() => {
     isMount = true;
-
     return () => {
       isMount = false;
+      Keyboard.dismiss();
     };
   }, []);
 
   const handleSignupWithPhone = values => {
-    let formData = new FormData();
-    formData.append('auth_code', SHA1(SALT_KEY + values.login_id));
+    const formData = new FormData();
+    formData.append('auth_code', getAuthCode(values.login_id));
     formData.append('signup_type', isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
     formData.append('dob', values.dob);
-    formData.append('email_id', values.phone_or_email);
+    formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
-    // formData.append('geo_location', "");
-    postData.append('ref_id', '');
+    if (locationDetails && locationDetails.geoLocation) {
+      formData.append('geo_location', locationDetails.geoLocation);
+    }
+    formData.append('ref_id', '');
     formData.append('device_id', DEVICE_ID);
-    // postData.append("push_id", "");
-    // postData.append("voip_token", IS_IOS ? "" : null);
+    formData.append('push_id', pushId);
+    // formData.append("voip_token", IS_IOS ? "" : null);
     formData.append('app_type', IS_IOS ? 2 : 1);
 
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          navigation.navigate('OTPVerification', {
-            state: {
-              otp_ref_id: res.data.otp_ref_id,
-            },
-          });
+          const userData = {
+            name: res.data.name,
+            user_id: res.data.user_id,
+            profile_image: res.data.profile_image,
+            acc_verify_status: res.data.acc_verify_status,
+          };
+          storeToken(res.data.token, userData, dispatch);
         } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
         } else if (res.data.status === 2) {
-          navigation.reset({
-            routes: [{name: 'Login'}],
-          });
-        } else if (res.data.status === 2) {
+          Toast.fail(res.data.msg);
           navigation.reset({
             routes: [{name: 'Login'}],
           });
         }
       })
       .catch(err => {
-        console.log(err, '===error');
+        Toast.fail(err.message);
       })
       .finally(() => {
-        if (isMount) {
-          setisLoading(false);
-        }
+        setIsGlobalLoading(false, dispatch);
       });
   };
 
@@ -119,7 +133,6 @@ const SignupWithPhone = ({route}) => {
       buttonBottomLeftText="Already Registered? "
       buttonBottomRightText="Login"
       submitButtonText="Join Rawcaster Family"
-      isLoading={isLoading}
       onPressSubmitButton={handleSubmit}
       onPressButtonBottomText={() => {
         navigation.reset({
@@ -130,7 +143,6 @@ const SignupWithPhone = ({route}) => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your name"
         title="Name"
-        isEditable={!isLoading}
         onChangeText={handleChange('name')}
         errorText={errors.name && touched.name ? errors.name : ''}
         value={values.name}
@@ -142,14 +154,9 @@ const SignupWithPhone = ({route}) => {
           title="Phone Number"
           keyboardType="number-pad"
           maxLength={13}
-          isEditable={!isLoading}
-          onChangeText={handleChange('phone_or_email')}
-          errorText={
-            errors.phone_or_email && touched.phone_or_email
-              ? errors.phone_or_email
-              : ''
-          }
-          value={values.phone_or_email}
+          onChangeText={handleChange('login_id')}
+          errorText={errors.login_id && touched.login_id ? errors.login_id : ''}
+          value={values.login_id}
         />
       ) : (
         <TextBox
@@ -157,24 +164,19 @@ const SignupWithPhone = ({route}) => {
           placeHolder="Enter your email address"
           title="Email Address"
           keyboardType="email-address"
-          isEditable={!isLoading}
-          onChangeText={handleChange('phone_or_email')}
-          errorText={
-            errors.phone_or_email && touched.phone_or_email
-              ? errors.phone_or_email
-              : ''
-          }
-          value={values.phone_or_email}
+          onChangeText={handleChange('login_id')}
+          errorText={errors.login_id && touched.login_id ? errors.login_id : ''}
+          value={values.login_id}
         />
       )}
 
       <View style={{alignItems: 'flex-end'}}>
         <StyledText
-          isButton={!isLoading}
-          paddingVertical={0}
           style={styles.emailFieldToggleButtonText}
           onPress={() => {
-            setisEnablePhoneNumber(pre => !pre);
+            if (isMount) {
+              setisEnablePhoneNumber(pre => !pre);
+            }
           }}>
           {`Use ${isEnablePhoneNumber ? 'Email' : 'Phone Number'} instead`}
         </StyledText>
@@ -183,30 +185,44 @@ const SignupWithPhone = ({route}) => {
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"
         title="Password"
-        isEditable={!isLoading}
+        isEditable
         onChangeText={handleChange('password')}
         errorText={errors.password && touched.password ? errors.password : ''}
         value={values.password}
         isSecure
         isEnablePasswordConditionText
       />
-      <DOBPicker
+      <CustomDateMonthYearPicker
         onSelect={handleChange('dob')}
-        isDisabled={isLoading}
         errorText={errors.dob && touched.dob ? errors.dob : ''}
       />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>
-        <StyledText style={{fontSize: 17}} paddingVertical={0}>
+        <StyledText style={{fontSize: 17}}>
           {"By Signing up you agree with Rawcaster's "}
         </StyledText>
         <StyledText
           style={{color: COLORS.secondary, fontSize: 17}}
-          isButton={!isLoading}
-          paddingVertical={0}
-          onPress={() => {}}>
+          onPress={() => {
+            setisOpenTermsAndConditionsModal(true);
+          }}>
           terms and conditions
         </StyledText>
       </View>
+      <Modal
+        visible={isOpenTermsAndConditionsModal}
+        transparent
+        // statusBarTranslucent
+        animationType="slide"
+        onRequestClose={() => {
+          setisOpenTermsAndConditionsModal(false);
+        }}>
+        <SafeAreaView style={{flex: 1}}>
+          <WebUrlLoaderModal
+            url={TERMS_CONDTION_URL}
+            setModal={setisOpenTermsAndConditionsModal}
+          />
+        </SafeAreaView>
+      </Modal>
     </AuthScreenHOC>
   );
 };
@@ -216,6 +232,6 @@ export default SignupWithPhone;
 const styles = StyleSheet.create({
   emailFieldToggleButtonText: {
     color: COLORS.secondary,
-    fontWeight: '500',
+    fontFamily: FONTS.DMSans.medium,
   },
 });

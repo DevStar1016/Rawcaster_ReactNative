@@ -1,41 +1,132 @@
-import {StyleSheet, Text, TextStyle, TouchableOpacity} from 'react-native';
-import React from 'react';
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useCallback, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
+import Hyperlink from 'react-native-hyperlink';
+import {IS_IOS} from '../Utilities/Constants';
 
 type Props = {
+  children?: JSX.Element | JSX.Element[] | string;
+  textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
+  numberOfLines?: number;
   style?: TextStyle;
-  isButton?: boolean;
+  readMoreButtonTextStyle?: TextStyle;
   onPress?: () => void;
-  children: string | number;
-  paddingVertical?: number;
 };
 
-const StyledText = ({
+const CustomStyledText = ({
   children,
-  style = {},
-  isButton = false,
-  paddingVertical = 5,
+  textMode = 'normal',
+  numberOfLines = 0,
   onPress,
+  readMoreButtonTextStyle = {},
+  style,
 }: Props) => {
-  return (
-    <TouchableOpacity
-      style={{paddingVertical: paddingVertical}}
-      disabled={!isButton}
-      onPress={onPress}
-      activeOpacity={0.7}>
-      <Text style={[styles.text, {...style}]}>{children}</Text>
-    </TouchableOpacity>
-  );
+  const [lengthMore, setLengthMore] = useState(false);
+  const [isEnableFullText, setisEnableFullText] = useState(false);
+
+  const onTextLayout = useCallback((e: any) => {
+    setLengthMore(e.nativeEvent.lines.length > numberOfLines);
+  }, []);
+
+  const getStyle = () => {
+    if (style) {
+      if (Array.isArray(style)) {
+        return [styles.text, ...style];
+      }
+      return [styles.text, {...style}];
+    }
+    return styles.text;
+  };
+
+  const renderText = () => {
+    return (
+      <Text style={getStyle()} onPress={onPress}>
+        {children}
+      </Text>
+    );
+  };
+
+  const renderReadMoreText = () => {
+    return (
+      <View>
+        {lengthMore ? (
+          <Text
+            numberOfLines={isEnableFullText ? undefined : numberOfLines}
+            style={[styles.text, {...style}]}
+            onPress={onPress}>
+            {children}
+          </Text>
+        ) : (
+          <Text
+            onTextLayout={onTextLayout}
+            style={[styles.text, {...style}]}
+            onPress={onPress}>
+            {children}
+          </Text>
+        )}
+
+        {lengthMore ? (
+          <Text
+            style={[
+              styles.text,
+              {color: COLORS.secondary, ...readMoreButtonTextStyle},
+            ]}
+            onPress={() => setisEnableFullText(pre => !pre)}>
+            {isEnableFullText ? 'Read less' : 'Read more'}
+          </Text>
+        ) : null}
+      </View>
+    );
+  };
+
+  const hyperLinkText = (isEnableReadMore = false) => {
+    return (
+      <Hyperlink
+        linkDefault={false}
+        linkStyle={{color: '#2980b9'}}
+        onPress={(url, text) => {
+          if (url) {
+            Linking.openURL(url)
+              .then(res => {})
+              .catch(e => {});
+          }
+          // handleExternalLink(url);
+        }}>
+        {isEnableReadMore ? renderReadMoreText() : renderText()}
+      </Hyperlink>
+    );
+  };
+
+  const TextComponent = () => {
+    switch (textMode) {
+      case 'read_more':
+        return renderReadMoreText();
+      case 'hyper_link':
+        return hyperLinkText();
+      case 'read_more_hyper_link':
+        return hyperLinkText(true);
+      default:
+        return renderText();
+    }
+  };
+
+  return <TextComponent />;
 };
 
-export default StyledText;
+export default CustomStyledText;
 
 const styles = StyleSheet.create({
   text: {
-    fontFamily: FONTS.DMSans.regular,
     color: COLORS.black,
-    fontSize: 16,
-    fontWeight: '400',
+    fontFamily: FONTS.DMSans.regular,
+    fontSize: 14,
   },
 });

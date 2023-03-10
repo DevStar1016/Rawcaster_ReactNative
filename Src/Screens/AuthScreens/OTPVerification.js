@@ -1,26 +1,35 @@
-import {StyleSheet, Text} from 'react-native';
-import React from 'react';
+import {StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import OTPInput from '../../Components/OTPInput';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import {useRoute} from '@react-navigation/native';
-import {signupVerifyService} from '../../Services/ApiService';
-import {SALT_KEY} from '../../Services/ServiceConstants';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {resendOTPService, signupVerifyService} from '../../Services/ApiService';
+import {getAuthCode, setIsGlobalLoading} from '../../Utilities/Methods';
+import {useMyProfile, useToken} from '../../Utilities/StoreData';
+import Toast from '../../Components/Toast';
+import {useDispatch} from 'react-redux';
+import {setMyProfile} from '../../Store/Slices/AuthSlice';
 
 const otpVerificationSchema = Yup.object({
-  otp: Yup.string().required('Otp is required'),
+  otp: Yup.string()
+    .required('Otp is required')
+    .min(6, 'Enter valid OTP')
+    .max(6, 'Enter valid OTP'),
 });
 
-const sha1 = require('sha1');
+const OTPVerification = ({route}) => {
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const token = useToken();
+  const [otpRefId, setotpRefId] = useState(null);
+  const [timer, settimer] = useState(0);
+  const myProfile = useMyProfile();
 
-const OTPVerification = () => {
-  let {params} = useRoute();
-  console.log(params, '===params');
-  const {handleSubmit, handleChange, values, errors} = useFormik({
+  const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
       otp: '',
-      otp_ref_id: params?.state?.otp_ref_id || '',
     },
     validationSchema: otpVerificationSchema,
     onSubmit: values => {
@@ -28,40 +37,104 @@ const OTPVerification = () => {
     },
   });
 
-  const handleOtpVerification = data => {
-    console.log(data, 'otp verification data');
+  useEffect(() => {
+    resendOTPAPICall();
+  }, []);
+
+  const resendOTPAPICall = () => {
+    setIsGlobalLoading(true, dispatch);
+    const formData = new FormData();
+    formData.append('auth_code', getAuthCode('Rawcaster'));
+    formData.append('token', token);
+    if (route.params && route.params.otpType) {
+      formData.append('otp_flag', route.params.otpType);
+    }
+    resendOTPService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg, 4000);
+          setotpRefId(res.data.otp_ref_id);
+          settimer(parseInt(res.data.remaining_seconds));
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setIsGlobalLoading(false, dispatch);
+      });
+  };
+
+  const handleOtpVerification = values => {
+    setIsGlobalLoading(true, dispatch);
     let formData = new FormData();
-    formData.append('otp_ref_id', data.otp_ref_id);
-    formData.append('otp', data.otp);
-    formData.append('auth_code', sha1(SALT_KEY + data.otp_ref_id));
+    formData.append('auth_code', getAuthCode(otpRefId));
+    formData.append('otp_ref_id', otpRefId);
+    formData.append('otp', values.otp);
+    if (route.params && route.params.otpType) {
+      formData.append('otp_flag', route.params.otpType);
+    }
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data, 'response');
+          if (route.params && route.params.otpType) {
+            if (route.params.otpType === 'sms') {
+              dispatch(setMyProfile({...myProfile, is_mobile_no_verified: 1}));
+            } else {
+              dispatch(setMyProfile({...myProfile, is_email_id_verified: 1}));
+            }
+          } else {
+            dispatch(setMyProfile({...myProfile, is_email_id_verified: 1}));
+          }
+          Toast.success(res.data.msg);
           navigation.reset({
-            routes: [{name: 'Login'}],
+            routes: [{name: 'HomeStack'}],
           });
         } else if (res.data.status === 0) {
-          console.log(res.data);
+          Toast.fail(res.data.msg);
         }
       })
-      .catch(err => {
-        console.log(err, '===error');
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setIsGlobalLoading(false, dispatch);
       });
+  };
+
+  const getOtpSendedCommunication = () => {
+    if (
+      route.params &&
+      route.params.otpType &&
+      route.params.otpType === 'sms'
+    ) {
+      return myProfile.mobile;
+    }
+    return myProfile.email_id;
   };
 
   return (
     <AuthScreenHOC
       title="Validate your email"
-      subTitle="Please enter the One Time Password (OTP) sent to godfrey@gmail.com"
+      subTitle={`Please enter the One Time Password (OTP) sent to ${getOtpSendedCommunication()}`}
       submitButtonText="Validate"
       isEnableCancelButton
+      onPressCancelButton={() => {
+        navigation.goBack();
+      }}
       titleContainerAlignItems="flex-start"
       titleTextAlign="left"
       onPressSubmitButton={handleSubmit}
       isEnableBottomButtonText={false}>
       <OTPInput
         onCodeChanged={handleChange('otp')}
+        seconds={timer}
+        onResendOtp={() => {
+          resendOTPAPICall();
+        }}
+        errorText={errors.otp && touched.otp ? errors.otp : ''}
         paddingVertical={20}
         paddingBottom={40}
       />

@@ -1,0 +1,52 @@
+import {Modal, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import HOCView from '../../../Components/HOCView';
+import SearchInput from '../../../Components/SearchInput';
+import {GlobalSearchContext} from '../../../Utilities/Contexts';
+import GlobalSearchTopTabNavigation from '../../../Navigation/TopTabNavigationSearch/GlobalSearchTopTabNavigation';
+import Loader from '../../../Components/Loader';
+import {COLORS} from '../../../Utilities/Colors';
+
+const GlobalSearchHome = () => {
+  const [searchText, setsearchText] = useState(null);
+  const [focusedTab, setfocusedTab] = useState('Profile');
+  const [isActionLoading, setisActionLoading] = useState(false);
+  const [topLayerHeight, settopLayerHeight] = useState(0);
+
+  const searchContextValue = {
+    searchText: searchText,
+    setFocusedTab: setfocusedTab,
+    setisActionLoading: setisActionLoading,
+    topLayerHeight: topLayerHeight + 50,
+  };
+
+  return (
+    <GlobalSearchContext.Provider value={searchContextValue}>
+      <HOCView
+        headerType="header_with_back"
+        onLayoutHeight={height => {
+          settopLayerHeight(pre => pre + height);
+        }}
+        paddingHorizontal={0}
+        backHeaderProps={{title: 'Search Rawcaster'}}>
+        <SearchInput
+          marginVertical={10}
+          marginHorizontal={15}
+          onLayoutHeight={height => {
+            settopLayerHeight(pre => pre + height + 20);
+          }}
+          onPressSearch={setsearchText}
+          placeHolderText={'Search ' + focusedTab}
+        />
+        <GlobalSearchTopTabNavigation />
+      </HOCView>
+      <Modal visible={isActionLoading} onRequestClose={() => {}} transparent>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
+    </GlobalSearchContext.Provider>
+  );
+};
+
+export default GlobalSearchHome;
+
+const styles = StyleSheet.create({});

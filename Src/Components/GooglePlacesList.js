@@ -1,0 +1,145 @@
+import {SafeAreaView, StyleSheet, View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {
+  GOOGLE_SERACH_ANDROID,
+  GOOGLE_SERACH_IOS,
+} from '../Services/ServiceConstants';
+import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
+import {COLORS} from '../Utilities/Colors';
+import {FONTS} from '../Utilities/Fonts';
+import HeaderWithBack from './HeaderWithBack';
+
+const GooglePlacesList = ({setOpenModal, onSelect}) => {
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#fff',
+        }}>
+        {/* <View
+        style={{
+          height: 40,
+          backgroundColor: COLORS.primary,
+          justifyContent: "space-between",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingLeft: 10,
+          paddingRight: 10,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            setislocationsearch(false);
+          }}
+        >
+          <Image
+            source={require("../../assets/icon/close.png")}
+            style={{ width: 20, height: 20, tintColor: "#fff" }}
+          />
+        </TouchableOpacity>
+        <View>
+          <Text style={[styles.textInputFont, { color: "#fff" }]}>
+            Location Search
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            setislocationsearch(false);
+          }}
+        >
+          <Image
+            source={require("../../assets/icon/tick-sign.png")}
+            style={{ width: 20, height: 20, tintColor: "#fff" }}
+          />
+        </TouchableOpacity>
+      </View> */}
+
+        <HeaderWithBack
+          title="Location Search"
+          isTitleCenter={true}
+          isModal
+          setModal={setOpenModal}
+        />
+
+        <GooglePlacesAutocomplete
+          autoFocus={true}
+          placeholder="Search "
+          enablePoweredByContainer={false}
+          onPress={(data, details = null) => {
+            setOpenModal(false);
+            onSelect(data.description);
+            //   formRef.current.setFieldValue("location", data.description);
+            // setdetectedAddress(data.description);
+          }}
+          query={{
+            key:
+              Platform.OS === 'android'
+                ? GOOGLE_SERACH_ANDROID
+                : GOOGLE_SERACH_IOS,
+            language: 'en',
+          }}
+          styles={{
+            container: styles.listContainer,
+            predefinedPlacesDescription: styles.predefinedPlacesDescription,
+            textInputContainer: styles.inputContainer,
+            textInput: styles.textInputField,
+            row: styles.itemContainer,
+            description: styles.description,
+          }}
+        />
+      </View>
+    </SafeAreaView>
+  );
+};
+
+export default GooglePlacesList;
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    height: TEXT_INPUT_HEIGHT,
+    width: '100%',
+    borderRadius: 8,
+    marginVertical: 5,
+    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+    alignItems: 'center',
+  },
+  textInputField: {
+    height: '100%',
+    width: '100%',
+    borderRadius: 11,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 15,
+    fontSize: 14,
+    fontFamily: FONTS.DMSans.regular,
+    color: COLORS.black,
+  },
+  itemContainer: {
+    backgroundColor: COLORS.white,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    height: 45,
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
+  predefinedPlacesDescription: {
+    color: 'red',
+  },
+  listContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  description: {
+    color: COLORS.black,
+    fontFamily: FONTS.DMSans.regular,
+    fontSize: 14,
+  },
+});

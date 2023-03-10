@@ -5,45 +5,44 @@ import {useDispatch} from 'react-redux';
 import {setInsets} from '../Store/Slices/UtilitySlice';
 import {COLORS} from '../Utilities/Colors';
 import {IS_IOS} from '../Utilities/Constants';
+import {useInsets} from '../Utilities/StoreData';
 
-const CustomStatusBar = ({
-  barBackgroundColor = COLORS.primary,
-  isContentLight = false,
-}) => {
+const CustomStatusBar = () => {
   const dispatch = useDispatch();
+  const insets = useInsets();
   const {top, bottom, left, right} = useSafeAreaInsets();
 
   useEffect(() => {
     dispatch(
       setInsets({
-        top,
-        bottom,
-        right,
-        left,
+        ...insets,
+        top: top,
+        bottom: bottom,
+        right: right,
+        left: left,
       }),
     );
 
     return () => {};
   }, []);
 
-  return (
+  return IS_IOS ? (
     <View
-      style={[
-        IS_IOS
-          ? {
-              height: top > 0 ? top : 20,
-              backgroundColor: barBackgroundColor,
-            }
-          : {
-              height: StatusBar.currentHeight,
-            },
-      ]}>
-      <StatusBar
-        translucent
-        backgroundColor={barBackgroundColor}
-        barStyle={isContentLight ? 'light-content' : 'dark-content'}
-      />
+      style={{
+        height: top > 0 ? top : 20,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+      }}>
+      <StatusBar translucent barStyle={'light-content'} />
     </View>
+  ) : (
+    <StatusBar
+      backgroundColor={COLORS.transparent}
+      translucent={true}
+      barStyle="light-content"
+    />
   );
 };
 export default CustomStatusBar;

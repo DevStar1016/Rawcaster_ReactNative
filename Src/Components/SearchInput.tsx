@@ -1,20 +1,42 @@
-import {Keyboard, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Keyboard,
+  LayoutChangeEvent,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
-import TextBox from './TextBox';
 import {TextInput} from 'react-native-gesture-handler';
 import {FONTS} from '../Utilities/Fonts';
+import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 
 type Props = {
   placeHolderText?: string;
   onPressSearch: (value: string) => void;
+  marginVertical?: number;
+  marginHorizontal?: number;
+  onLayoutHeight?: (height: number) => void;
 };
 
-const SearchInput = ({placeHolderText = 'Search', onPressSearch}: Props) => {
+const SearchInput = ({
+  placeHolderText = 'Search',
+  onPressSearch,
+  marginVertical = 0,
+  marginHorizontal,
+  onLayoutHeight,
+}: Props) => {
   const [searchValue, setsearchValue] = useState('');
   return (
-    <View style={styles.mainContainer}>
+    <View
+      style={[styles.mainContainer, {marginVertical, marginHorizontal}]}
+      onLayout={event => {
+        if (onLayoutHeight) {
+          onLayoutHeight(event.nativeEvent.layout.height);
+        }
+      }}>
       <View style={styles.inputContainer}>
         <TextInput
           value={searchValue}
@@ -31,7 +53,7 @@ const SearchInput = ({placeHolderText = 'Search', onPressSearch}: Props) => {
           Keyboard.dismiss();
           onPressSearch(searchValue);
         }}>
-        <SVGIcon icon="search" color={COLORS.primary} />
+        <SVGIcon icon="search" />
       </TouchableOpacity>
     </View>
   );
@@ -41,9 +63,9 @@ export default SearchInput;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    height: 45,
-    borderRadius: 45 / 2,
-    backgroundColor: COLORS.searchBarBg,
+    height: TEXT_INPUT_HEIGHT,
+    borderRadius: TEXT_INPUT_HEIGHT / 2,
+    backgroundColor: COLORS.lightGrey,
     flexDirection: 'row',
   },
   inputContainer: {
@@ -53,18 +75,17 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
-    backgroundColor: COLORS.searchBarBg,
+    backgroundColor: COLORS.lightGrey,
     fontSize: 16,
-    fontWeight: '400',
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.black,
     borderRadius: 25,
   },
   searchButton: {
     backgroundColor: COLORS.primary,
-    height: 45,
-    width: 45,
-    borderRadius: 45 / 2,
+    height: TEXT_INPUT_HEIGHT,
+    width: TEXT_INPUT_HEIGHT,
+    borderRadius: TEXT_INPUT_HEIGHT / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

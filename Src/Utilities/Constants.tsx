@@ -6,7 +6,11 @@ import EventImage from '../Assets/Png/IntroImages/event.png';
 import NuggetImage from '../Assets/Png/IntroImages/nugget.png';
 import LiveImage from '../Assets/Png/IntroImages/live.png';
 import {getyears} from './Methods';
-export const SHA1 = require('sha1');
+
+export const DIMENSIONS = {
+  window: Dimensions.get('window'),
+  screen: Dimensions.get('screen'),
+};
 
 export const INTRO_DATA = [
   {
@@ -41,33 +45,70 @@ export const INTRO_DATA = [
   },
 ];
 
+export const SIGNUP_TYPE = {
+  email_phone: 1,
+  apple: 2,
+  twitter: 3,
+  instagram: 4,
+  google: 5,
+};
+
 export const SOCIAL_SIGN_IN_LIST = [
   {
-    id: 1,
+    id: SIGNUP_TYPE.google,
     platformName: 'Google',
     iconName: 'google',
+    deviceType: ['android'],
   },
   {
-    id: 2,
-    platformName: 'Facebook',
-    iconName: 'facebook',
-  },
-  {
-    id: 3,
-    platformName: 'Twitter',
-    iconName: 'twitter',
-  },
-  {
-    id: 4,
+    id: SIGNUP_TYPE.apple,
     platformName: 'Apple',
     iconName: 'apple',
+    deviceType: ['ios'],
+  },
+  {
+    id: SIGNUP_TYPE.instagram,
+    platformName: 'Instagram',
+    iconName: 'facebook',
+    deviceType: ['ios', 'android'],
+  },
+  {
+    id: SIGNUP_TYPE.twitter,
+    platformName: 'Twitter',
+    iconName: 'twitter',
+    deviceType: ['ios', 'android'],
   },
 ];
 
+export const GENDER_LIST = [
+  {
+    id: 0,
+    name: 'Transgender',
+  },
+  {
+    id: 1,
+    name: 'Male',
+  },
+  {
+    id: 2,
+    name: 'Female',
+  },
+];
+
+export const NUGGET_SHARE_TYPE = [
+  {id: 1, name: 'Public'},
+  {id: 2, name: 'Only me'},
+  {id: 6, name: 'Connections'},
+  {id: 3, name: 'Group'},
+  {id: 4, name: 'Specific Connection'},
+  {id: 7, name: 'My Fans'},
+];
+
+export const DEVICE_TYPE = Platform.OS;
 export const IS_IOS = Platform.OS === 'ios';
-export const WINDOW_HEIGHT = Dimensions.get('window').height;
-export const WINDOW_WIDTH = Dimensions.get('window').width;
 export const AGE_RESTRICTION = 13;
+export const TEXT_INPUT_HEIGHT = 45;
+export const SCREEN_PADDING_HORIZONTAL = 10;
 
 export const DATES_MONTHS_YEARS_DATA = {
   months: moment.months(),
@@ -81,3 +122,4 @@ export const NAME_REGEX = /^[A-Za-z_ ]+$/;
 export const NUMBER_REGEX = /^[0-9]*$/;
 export const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const PHONE_REGEX = /^[0-9]{4,15}$/;

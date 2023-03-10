@@ -20,7 +20,7 @@ type Props = {
 
 const SmallButton = ({
   buttonText = '',
-  buttonTextStyle,
+  buttonTextStyle = {},
   containerStyle = {},
   isEnableIcon = false,
   onPress,
@@ -30,7 +30,9 @@ const SmallButton = ({
       style={[styles.mainContainer, {...containerStyle}]}
       activeOpacity={0.7}
       onPress={onPress}>
-      <StyledText style={buttonTextStyle}>{buttonText}</StyledText>
+      <StyledText style={{paddingVertical: 5, ...buttonTextStyle}}>
+        {buttonText}
+      </StyledText>
       {isEnableIcon && (
         <SVGIcon icon="right_arrow" height={15} width={13} marginLeft={5} />
       )}
@@ -42,10 +44,9 @@ export default SmallButton;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 12,
     backgroundColor: COLORS.white,
     borderWidth: 1,
-
     alignItems: 'center',
     justifyContent: 'center',
     borderColor: COLORS.borderColor,

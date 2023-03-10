@@ -1,9 +1,17 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TextStyle, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import DropDownPicker from './DropDownPicker';
 import StyledText from './StyledText';
 import {AGE_RESTRICTION, DATES_MONTHS_YEARS_DATA} from '../Utilities/Constants';
 import moment from 'moment';
+import {COLORS} from '../Utilities/Colors';
+import {IconType} from '../Utilities/Icons';
+
+type PlaceHolder = {
+  first?: string;
+  second?: string;
+  third?: string;
+};
 
 type DateMonthYearType = {
   date?: string | number | null;
@@ -11,28 +19,110 @@ type DateMonthYearType = {
   year?: number | null;
 };
 
+type OtherDataType = {
+  days: number;
+  hours: number;
+  minutes: number;
+};
+
+type ContainerWidth = {
+  first?: string | number;
+  second?: string | number;
+  third?: string | number;
+};
+
+type ValueAdditionalData = {
+  first?: string;
+  second?: string;
+  third?: string;
+};
+
 type Props = {
-  onSelect: (value: string) => void;
+  onSelect: (value: string | any) => void;
   format?: string;
+  pickerMode?: 'month_date_year' | 'duration_days_hrs_mins';
   errorText?: string;
   isDisabled?: boolean;
+  titlePaddingVertical?: number;
+  inputContainerMarginVertical?: number;
+  mainContainerMarginVertical?: number;
+  parentContainerPaddingVertical?: number;
+  value?: string;
+  titleStyle?: TextStyle;
+  dropDownIcon?: IconType;
+  title?: string;
+  dropDownBorderColor?: string;
+  dropDownBackgroundColor?: string;
+  dropDownValueColor?: string;
+  placeHolder?: PlaceHolder;
+  dropDownContainerWidth?: ContainerWidth;
+  valueShowAdditionalData?: ValueAdditionalData;
 };
 
 const CustomDateMonthYearPicker = ({
   onSelect,
   format = 'YYYY-MM-DD',
   errorText = '',
+  valueShowAdditionalData = {
+    first: '',
+    second: '',
+    third: '',
+  },
   isDisabled = false,
+  titlePaddingVertical = 5,
+  value,
+  titleStyle = {},
+  inputContainerMarginVertical = 5,
+  mainContainerMarginVertical = 5,
+  parentContainerPaddingVertical = 5,
+  dropDownBorderColor = COLORS.borderColor,
+  dropDownBackgroundColor = COLORS.white,
+  dropDownValueColor = COLORS.black,
+  title = 'Date of Birth',
+  pickerMode = 'month_date_year',
+  placeHolder = {
+    first: 'Month',
+    second: 'Day',
+    third: 'Year',
+  },
+  dropDownIcon = 'down_arrow',
+  dropDownContainerWidth = {
+    first: '39%',
+    second: '27%',
+    third: '29%',
+  },
 }: Props) => {
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
-    date: null,
-    month: null,
-    year: null,
+    date: value ? moment(value, format).date() : null,
+    month: value
+      ? DATES_MONTHS_YEARS_DATA.months[moment(value, format).month() + 1]
+      : null,
+    year: value ? moment(value, format).year() : null,
+  });
+  const [durationData, setdurationData] = useState<OtherDataType>({
+    days: 7,
+    hours: 0,
+    minutes: 0,
   });
 
   useEffect(() => {
-    if (dateMonthYear.date && dateMonthYear.month && dateMonthYear.year) {
-      dateMonthYear.year, dateMonthYear.month, dateMonthYear.date;
+    if (
+      durationData.days.toString() &&
+      durationData.hours.toString() &&
+      durationData.minutes.toString() &&
+      pickerMode === 'duration_days_hrs_mins'
+    ) {
+      onSelect(durationData);
+    }
+  }, [durationData]);
+
+  useEffect(() => {
+    if (
+      dateMonthYear.date &&
+      dateMonthYear.month &&
+      dateMonthYear.year &&
+      pickerMode === 'month_date_year'
+    ) {
       onSelect(
         moment(
           dateMonthYear.year +
@@ -137,50 +227,167 @@ const CustomDateMonthYearPicker = ({
     setdateMonthYear(tempDateMonthYear);
   };
 
+  const getFirstDropDownList = () => {
+    if (pickerMode === 'month_date_year') {
+      return getMonthsList();
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return [...Array(8)].map((_, index) => index);
+    }
+    return [];
+  };
+
+  const getSecondDropDownList = () => {
+    if (pickerMode === 'month_date_year') {
+      return getDatesList();
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return [...Array(24)].map((_, index) => index);
+    }
+    return [];
+  };
+
+  const getThirdDropDownList = () => {
+    if (pickerMode === 'month_date_year') {
+      return DATES_MONTHS_YEARS_DATA.years;
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return [...Array(60)].map((_, index) => index);
+    }
+    return [];
+  };
+
+  const onSelectFirstItem = (selectedValue: any) => {
+    if (pickerMode === 'month_date_year') {
+      onSelectMonth(selectedValue);
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      setdurationData(preData => {
+        return {
+          ...preData,
+          days: selectedValue,
+          hours: selectedValue === 7 ? 0 : preData.hours,
+          minutes: selectedValue === 7 ? 0 : preData.minutes,
+        };
+      });
+    }
+  };
+
+  const onSelectSecondItem = (selectedValue: any) => {
+    if (pickerMode === 'month_date_year') {
+      setdateMonthYear(pre => {
+        return {
+          ...pre,
+          date: selectedValue,
+        };
+      });
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      setdurationData(preData => {
+        return {
+          ...preData,
+          hours: preData.days === 7 ? 0 : selectedValue,
+        };
+      });
+    }
+  };
+
+  const onSelectThirdItem = (selectedValue: any) => {
+    if (pickerMode === 'month_date_year') {
+      onSelectYear(selectedValue);
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      setdurationData(preData => {
+        return {
+          ...preData,
+          minutes: preData.days === 7 ? 0 : selectedValue,
+        };
+      });
+    }
+  };
+
+  const getFirstDropDownValue = () => {
+    if (pickerMode === 'month_date_year') {
+      return dateMonthYear.month;
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return durationData.days.toString();
+    }
+  };
+
+  const getSecondDropDownValue = () => {
+    if (pickerMode === 'month_date_year') {
+      return dateMonthYear.date;
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return durationData.hours.toString();
+    }
+  };
+
+  const getThirdDropDownValue = () => {
+    if (pickerMode === 'month_date_year') {
+      return dateMonthYear.year;
+    } else if (pickerMode === 'duration_days_hrs_mins') {
+      return durationData.minutes.toString();
+    }
+  };
+
   return (
-    <View style={styles.mainContainer}>
-      <StyledText>Date of Birth</StyledText>
+    <View
+      style={[
+        styles.mainContainer,
+        {paddingVertical: parentContainerPaddingVertical},
+      ]}>
+      {title ? (
+        <StyledText
+          style={{paddingVertical: titlePaddingVertical, ...titleStyle}}>
+          {title}
+        </StyledText>
+      ) : null}
       <View style={styles.dateMonthYearContainer}>
         <DropDownPicker
-          placeHolderText="Month"
+          borderColor={dropDownBorderColor}
+          backgroundColor={dropDownBackgroundColor}
+          valueTextColor={dropDownValueColor}
+          placeHolderText={placeHolder.first}
           isDisabled={isDisabled}
-          mainContainerWidth={'36%'}
-          dataList={getMonthsList()}
-          value={dateMonthYear.month}
-          onSelectItem={(month: string) => {
-            onSelectMonth(month);
-          }}
+          dropDownIcon={dropDownIcon}
+          mainContainerWidth={dropDownContainerWidth.first}
+          fontSize={13}
+          inputContainerMarginVertical={inputContainerMarginVertical}
+          mainContainerMarginVertical={mainContainerMarginVertical}
+          dataList={getFirstDropDownList()}
+          value={getFirstDropDownValue()}
+          additionalDisplayText={' ' + valueShowAdditionalData.first}
+          onSelectItem={onSelectFirstItem}
         />
         <DropDownPicker
-          placeHolderText="Day"
-          mainContainerWidth={'28%'}
+          borderColor={dropDownBorderColor}
+          backgroundColor={dropDownBackgroundColor}
+          valueTextColor={dropDownValueColor}
+          placeHolderText={placeHolder.second}
+          dropDownIcon={dropDownIcon}
+          mainContainerWidth={dropDownContainerWidth.second}
+          inputContainerMarginVertical={inputContainerMarginVertical}
+          mainContainerMarginVertical={mainContainerMarginVertical}
           isDisabled={isDisabled}
-          dataList={getDatesList()}
-          value={dateMonthYear.date}
-          onSelectItem={(date: string) => {
-            setdateMonthYear(pre => {
-              return {
-                ...pre,
-                date,
-              };
-            });
-          }}
+          dataList={getSecondDropDownList()}
+          fontSize={13}
+          value={getSecondDropDownValue()}
+          additionalDisplayText={' ' + valueShowAdditionalData.second}
+          onSelectItem={onSelectSecondItem}
         />
         <DropDownPicker
-          placeHolderText="Year"
-          mainContainerWidth={'30%'}
+          borderColor={dropDownBorderColor}
+          backgroundColor={dropDownBackgroundColor}
+          valueTextColor={dropDownValueColor}
+          placeHolderText={placeHolder.third}
+          dropDownIcon={dropDownIcon}
+          mainContainerWidth={dropDownContainerWidth.third}
+          inputContainerMarginVertical={inputContainerMarginVertical}
+          mainContainerMarginVertical={mainContainerMarginVertical}
           isDisabled={isDisabled}
-          dataList={DATES_MONTHS_YEARS_DATA.years}
-          value={dateMonthYear.year}
-          onSelectItem={(year: number) => {
-            onSelectYear(year);
-          }}
+          fontSize={13}
+          dataList={getThirdDropDownList()}
+          value={getThirdDropDownValue()}
+          additionalDisplayText={' ' + valueShowAdditionalData.third}
+          onSelectItem={onSelectThirdItem}
         />
       </View>
       {errorText ? (
-        <StyledText style={styles.errorText} paddingVertical={0}>
-          {errorText}
-        </StyledText>
+        <StyledText style={styles.errorText}>{errorText}</StyledText>
       ) : null}
     </View>
   );

@@ -6,8 +6,8 @@ import StyledText from '../StyledText';
 import SubmitButton from '../SubmitButton';
 import SloganLogo from '../../Assets/Svg/slogan_logo.svg';
 import {FONTS} from '../../Utilities/Fonts';
-import AppLogo from '../../Assets/Svg/app_logo.svg';
 import SVGIcon from '../SVGIcon';
+import PoliciesFooter from '../PoliciesFooter';
 
 type AuthScreenHOCProps = {
   children: JSX.Element | JSX.Element[];
@@ -54,6 +54,7 @@ const AuthScreenHOC = ({
     <HOCView
       isEnableKeyboardAware={true}
       isEnableHeader={false}
+      isEnablePrimaryColorStatusBar={true}
       paddingHorizontal={0}>
       <View
         style={[
@@ -67,12 +68,7 @@ const AuthScreenHOC = ({
               disabled={isLoading}
               activeOpacity={0.7}
               onPress={onPressBackButton}>
-              <SVGIcon
-                icon="back"
-                width="100%"
-                height="100%"
-                color={COLORS.primary}
-              />
+              <SVGIcon icon="back" width="100%" height="100%" />
             </TouchableOpacity>
           </View>
         )}
@@ -95,7 +91,7 @@ const AuthScreenHOC = ({
           <StyledText style={{...styles.title, textAlign: titleTextAlign}}>
             {title}
           </StyledText>
-          <StyledText style={{textAlign: titleTextAlign}}>
+          <StyledText style={{paddingVertical: 5, textAlign: titleTextAlign}}>
             {subTitle}
           </StyledText>
         </View>
@@ -127,25 +123,17 @@ const AuthScreenHOC = ({
               {buttonBottomLeftText}
             </StyledText>
             <StyledText
-              isButton={!isLoading}
-              onPress={onPressButtonBottomText}
+              onPress={() => {
+                if (!isLoading && onPressButtonBottomText) {
+                  onPressButtonBottomText();
+                }
+              }}
               style={{...styles.signUpText, color: COLORS.secondary}}>
               {buttonBottomRightText}
             </StyledText>
           </View>
         )}
-        <View style={styles.bottomContainer}>
-          <AppLogo />
-          <StyledText style={styles.footerText}>
-            © Copyright Rawcaster 2021
-          </StyledText>
-          <StyledText style={styles.footerText} paddingVertical={0} isButton>
-            Terms and Conditions | Privacy Policy
-          </StyledText>
-          <StyledText style={styles.footerText} paddingVertical={0}>
-            Cookies Policy
-          </StyledText>
-        </View>
+        <PoliciesFooter />
       </View>
     </HOCView>
   );
@@ -159,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 40,
+    paddingVertical: 30,
   },
   backButtonContainer: {
     alignItems: 'center',
@@ -188,13 +176,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontFamily: FONTS.Gilroy.bold,
+    paddingVertical: 5,
   },
   forgotPasswordContainer: {
     alignItems: 'flex-end',
   },
   forgotPasswordText: {
     color: COLORS.secondary,
-    fontWeight: '500',
+    fontFamily: FONTS.DMSans.medium,
   },
   signUpContainer: {
     alignItems: 'center',
@@ -204,17 +193,8 @@ const styles = StyleSheet.create({
   },
   signUpText: {
     color: COLORS.dimColor,
-    fontWeight: '500',
+    fontFamily: FONTS.DMSans.medium,
     fontSize: 17,
-  },
-  bottomContainer: {
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingTop: 40,
-  },
-  footerText: {
-    fontFamily: FONTS.Roboto.regular,
-    fontWeight: '400',
-    color: COLORS.dimColor,
+    paddingVertical: 5,
   },
 });

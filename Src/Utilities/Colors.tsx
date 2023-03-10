@@ -1,6 +1,8 @@
 export const COLORS = {
   primary: '#563662',
+  primaryLight: '#AE567A',
   secondary: '#F2718D',
+  orange: '#F58A70',
   red: '#FF626B',
   green: '#0DBD0D',
   white: '#FFFFFF',
@@ -9,5 +11,9 @@ export const COLORS = {
   placeHolderColor: '#99A0B0',
   borderColor: '#E8EAEE',
   transparentDimColor: 'rgba(0,0,0,0.5)',
-  searchBarBg: '#F1F2F5',
+  lightGrey: '#F1F2F5',
+  grey: '#616060',
+  transparent: 'transparent',
+  gradientColorsPrimary: ['#D86886', '#844670'],
+  gradientColorsSecondary: ['#F99F46', '#F3738B'],
 };

@@ -3,16 +3,6 @@ import {BASE_URL} from './ServiceConstants';
 
 axios.defaults.baseURL = BASE_URL;
 
-axios.interceptors.response.use(
-  async response => {
-    if (response.data.status === -1) {
-      // clear token
-    }
-    return response;
-  },
-  error => Promise.reject(error),
-);
-
 axios.interceptors.request.use(
   async request => {
     request.headers['Content-Type'] = 'multipart/form-data';
@@ -31,6 +21,10 @@ export const signupService = formData => {
   return axios.post('signup', formData);
 };
 
+export const socialMediaLoginService = formData => {
+  return axios.post('socialmedialogin', formData);
+};
+
 export const forgotPasswordService = data => {
   return axios.post('forgotpassword', data);
 };
@@ -41,6 +35,10 @@ export const verifyOtpAndResetPassword = data => {
 
 export const signupVerifyService = data => {
   return axios.post('signupverify', data);
+};
+
+export const resendOTPService = formData => {
+  return axios.post('resendotp', formData);
 };
 
 export const logoutService = data => {
@@ -59,11 +57,11 @@ export const contactusService = data => {
   return axios.post('contactus', data);
 };
 
-export const getProfileService = data => {
+export const getMyProfileService = data => {
   return axios.post('getmyprofile', data);
 };
 
-export const updateProfileService = data => {
+export const updateMyProfileService = data => {
   return axios.post('updatemyprofile', data);
 };
 
@@ -199,137 +197,149 @@ export const editEventService = data => {
 };
 
 export const listChatMessagesService = data => {
-  return axios.post('listchatmessages ', data);
+  return axios.post('listchatmessages', data);
 };
 
 export const uploadChatAttachmentService = data => {
-  return axios.post('uploadchatattachment ', data);
+  return axios.post('uploadchatattachment', data);
 };
 
 // Notification services
 
 export const listNotificationsService = data => {
-  return axios.post('listnotifications ', data);
+  return axios.post('listnotifications', data);
 };
 
 export const deleteNotificationService = data => {
-  return axios.post('deletenotification ', data);
+  return axios.post('deletenotification', data);
 };
 
 export const readNotificationService = data => {
-  return axios.post('readnotification ', data);
+  return axios.post('readnotification', data);
 };
 
 export const unfriendService = data => {
-  return axios.post('unfriend ', data);
+  return axios.post('unfriend', data);
 };
 
 export const getOthersProfileService = data => {
-  return axios.post('getothersprofile ', data);
+  return axios.post('getothersprofile', data);
 };
 
 // Users services
 
 export const listAllBlockedUsersService = data => {
-  return axios.post('listallblockedusers ', data);
+  return axios.post('listallblockedusers', data);
 };
 
 export const blockUnblockUserService = data => {
-  return axios.post('blockunblockuser ', data);
+  return axios.post('blockunblockuser', data);
 };
 
 export const getUserSettingsService = data => {
-  return axios.post('getusersettings ', data);
+  return axios.post('getusersettings', data);
 };
 
 export const updateUserSettingsService = data => {
-  return axios.post('updateusersettings ', data);
+  return axios.post('updateusersettings', data);
 };
 
 export const getEventMelodyService = data => {
-  return axios.post('geteventmelody ', data);
+  return axios.post('geteventmelody', data);
 };
 
 export const blockMultipleUserService = data => {
-  return axios.post('blockmultipleuser ', data);
+  return axios.post('blockmultipleuser', data);
 };
 
 export const globalSearchEventsService = data => {
-  return axios.post('globalsearchevents ', data);
+  return axios.post('globalsearchevents', data);
 };
 
 export const globalSearchNuggetsService = data => {
-  return axios.post('globalsearchnuggets ', data);
+  return axios.post('globalsearchnuggets', data);
 };
 
 export const nuggetAbuseReportService = data => {
-  return axios.post('nuggetabusereport ', data);
+  return axios.post('nuggetabusereport', data);
 };
 
 export const messageReadService = data => {
-  return axios.post('messageread ', data);
+  return axios.post('messageread', data);
 };
 
 export const eventJoinValidationService = data => {
-  return axios.post('eventjoinvalidation ', data);
+  return axios.post('eventjoinvalidation', data);
 };
 
 export const getEventDetailsService = data => {
-  return axios.post('geteventdetails ', data);
+  return axios.post('geteventdetails', data);
 };
 
 export const getTimeZoneService = data => {
-  return axios.post('gettimezone ', data);
+  return axios.post('gettimezone', data);
 };
 
 export const getLanguageListService = data => {
-  return axios.post('getlanguagelist ', data);
+  return axios.post('getlanguagelist', data);
 };
 
 export const groupListUpdateService = data => {
-  return axios.post('grouplistupdate ', data);
+  return axios.post('grouplistupdate', data);
 };
 
 export const getSettingsService = data => {
-  return axios.post('getsettings ', data);
+  return axios.post('getsettings', data);
 };
 
 export const getFaqService = data => {
-  return axios.post('getfaq ', data);
+  return axios.post('getfaq', data);
 };
 
 export const getOpenNuggetDetailService = data => {
-  return axios.post('getopennuggetdetail ', data);
+  return axios.post('getopennuggetdetail', data);
 };
 
 export const followAndUnfollowService = data => {
-  return axios.post('followandunfollow ', data);
+  return axios.post('followandunfollow', data);
 };
 
 export const getFollowListService = data => {
-  return axios.post('getfollowlist ', data);
+  return axios.post('getfollowlist', data);
 };
 
 export const addNuggetViewService = data => {
-  return axios.post('addnuggetview ', data);
+  return axios.post('addnuggetview', data);
 };
 
 export const getReferralListService = data => {
-  return axios.post('getreferrallist ', data);
+  return axios.post('getreferrallist', data);
 };
 
 export const addLiveEventService = data => {
-  return axios.post('addliveevent ', data);
+  return axios.post('addliveevent', data);
 };
 
 export const editLiveEventService = data => {
-  return axios.post('editliveevent ', data);
+  return axios.post('editliveevent', data);
 };
 
 export const addGoLiveEventService = data => {
-  return axios.post('addgoliveevent ', data);
+  return axios.post('addgoliveevent', data);
 };
 
 export const enableGoLiveEventService = data => {
-  return axios.post('enablegoliveevent ', data);
+  return axios.post('enablegoliveevent', data);
+};
+
+export const getInfluencerCategoryService = data => {
+  return axios.post('getinfluencercategory', data);
+};
+
+export const influencerListService = data => {
+  return axios.post('influencerlist', data);
+};
+
+export const influencerFollowService = data => {
+  return axios.post('influencerfollow', data);
 };

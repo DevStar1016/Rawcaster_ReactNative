@@ -1,15 +1,14 @@
-import {TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity} from 'react-native';
 import React from 'react';
-import {COLORS} from '../Utilities/Colors';
 import {ICONS, IconType} from '../Utilities/Icons';
 
-interface SVGIconProps {
+export interface SVGIconProps {
   height?: number | string;
   width?: number | string;
   icon?: IconType;
-  color?: string;
   marginLeft?: number;
   isButton?: boolean;
+  marginRight?: number;
   onPress?: () => void;
 }
 
@@ -17,20 +16,26 @@ const SVGIcon = ({
   height = 25,
   width = 25,
   icon = 'visibility_on',
-  color = COLORS.white,
   marginLeft = 0,
+  marginRight = 0,
   isButton = false,
   onPress,
 }: SVGIconProps) => {
   const Icon = ICONS[icon];
-  return (
+  return isButton ? (
     <TouchableOpacity
-      style={{marginLeft}}
-      disabled={!isButton}
+      style={{
+        marginLeft,
+        marginRight,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
       activeOpacity={0.7}
       onPress={onPress}>
-      <Icon height={height} width={width} fill={color} />
+      <Icon height={height} width={width} />
     </TouchableOpacity>
+  ) : (
+    <Icon height={height} width={width} style={{marginLeft, marginRight}} />
   );
 };
 

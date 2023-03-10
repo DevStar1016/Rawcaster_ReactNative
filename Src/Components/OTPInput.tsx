@@ -1,22 +1,52 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
+import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
 
 type Props = {
   onCodeChanged: (code: string) => void;
   paddingTop?: number;
   paddingBottom?: number;
   paddingVertical?: number;
+  seconds?: number;
+  errorText?: string;
+  onResendOtp?: () => void;
 };
-
+let interval: any;
 const OTPInput = ({
   onCodeChanged,
   paddingTop,
   paddingBottom,
   paddingVertical = 10,
+  seconds = 0,
+  onResendOtp,
+  errorText,
 }: Props) => {
+  const [timer, settimer] = useState(seconds);
+
+  useEffect(() => {
+    settimer(seconds);
+  }, [seconds]);
+
+  useEffect(() => {
+    interval = setInterval(() => {
+      settimer(pre => {
+        if (pre === 0) {
+          clearInterval(interval);
+          return 0;
+        } else {
+          return pre - 1;
+        }
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [seconds]);
+
   return (
     <View
       style={[
@@ -34,11 +64,25 @@ const OTPInput = ({
           onCodeChanged={onCodeChanged}
         />
       </View>
+      {errorText ? (
+        <StyledText style={styles.errorText}>{errorText}</StyledText>
+      ) : null}
       <View style={styles.timerResendContainer}>
-        <StyledText style={styles.timerResendText} isButton onPress={() => {}}>
+        <StyledText
+          style={{
+            ...styles.timerResendText,
+            color: timer === 0 ? COLORS.secondary : COLORS.dimColor,
+          }}
+          onPress={() => {
+            if (timer === 0 && onResendOtp) {
+              onResendOtp();
+            }
+          }}>
           Resend code
         </StyledText>
-        <StyledText style={styles.timerResendText}>59:00</StyledText>
+        <StyledText style={styles.timerResendText}>
+          {secondsToMinutesAndSeconds(timer)}
+        </StyledText>
       </View>
     </View>
   );
@@ -70,6 +114,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     color: COLORS.black,
+    paddingVertical: 5,
   },
   timerResendContainer: {
     flexDirection: 'row',
@@ -79,5 +124,11 @@ const styles = StyleSheet.create({
   timerResendText: {
     color: COLORS.dimColor,
     fontSize: 18,
+    paddingVertical: 5,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    paddingVertical: 5,
   },
 });

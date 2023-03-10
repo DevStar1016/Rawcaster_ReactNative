@@ -1,42 +1,100 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React, {useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import appleAuth from '@invertase/react-native-apple-authentication';
+// import {TwitterLogin} from 'react-native-login-twitter';
+import {useDispatch} from 'react-redux';
 import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import SubmitButton from '../../../Components/SubmitButton';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
-import {SOCIAL_SIGN_IN_LIST} from '../../../Utilities/Constants';
+import {
+  DEVICE_TYPE,
+  IS_IOS,
+  SIGNUP_TYPE,
+  SOCIAL_SIGN_IN_LIST,
+} from '../../../Utilities/Constants';
+import {FONTS} from '../../../Utilities/Fonts';
+import {DEVICE_ID} from '../../../Services/ServiceConstants';
+import {
+  getAuthCode,
+  getLocationAddress,
+  setIsGlobalLoading,
+  storeToken,
+} from '../../../Utilities/Methods';
+import {useLocationDetails} from '../../../Utilities/StoreData';
+import {setLocationDetails} from '../../../Store/Slices/UtilitySlice';
+import {socialMediaLoginService} from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
+import jwt_decode from 'jwt-decode';
 
-const Signup = () => {
+const Signup = ({route}) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {pushId} = route.params;
+  const locationDetails = useLocationDetails();
 
   useEffect(() => {
-    GoogleSignin.configure({
-      scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
-      webClientId:
-        '749429188201-u1e40oco3dejrfcnr7algubh0k0sf01e.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
-      androidClientId:
-        '165212392194-48bdvglq550ov9suvhfdr7eslubdcdtb.apps.googleusercontent.com',
-      offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
-      hostedDomain: '', // specifies a hosted domain restriction
-      forceCodeForRefreshToken: true, // [Android] related to `serverAuthCode`, read the docs link below *.
-      accountName: '', // [Android] specifies an account name on the device that should be used
-      iosClientId: '<FROM DEVELOPER CONSOLE>', // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
-      googleServicePlistPath: '', // [iOS] if you renamed your GoogleService-Info file, new name here, e.g. GoogleService-Info-Staging
-      openIdRealm: '', // [iOS] The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.
-      profileImageSize: 120, // [iOS] The desired height (and width) of the profile image. Defaults to 120px
-    });
+    getLocationAddress()
+      .then(res => {
+        dispatch(setLocationDetails(res));
+      })
+      .catch(e => {});
   }, []);
+
+  const handleSocialSignupAPICall = (values, signin_type) => {
+    setIsGlobalLoading(true, dispatch);
+    const formData = new FormData();
+    formData.append('auth_code', getAuthCode(values.login_id));
+    formData.append('signin_type', signin_type); // 1 - Email, 2 - Phone
+    formData.append('first_name', values.name);
+    formData.append('display_name', values.name);
+    formData.append('email_id', values.login_id?.trim());
+    if (locationDetails && locationDetails.geoLocation) {
+      formData.append('geo_location', locationDetails.geoLocation);
+    }
+    formData.append('device_id', DEVICE_ID);
+    formData.append('push_id', pushId);
+    // formData.append("voip_token", IS_IOS ? "" : null);
+    formData.append('app_type', IS_IOS ? 2 : 1);
+    socialMediaLoginService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          const userData = {
+            name: res.data.name,
+            user_id: res.data.user_id,
+            profile_image: res.data.profile_image,
+            acc_verify_status: res.data.acc_verify_status,
+          };
+          storeToken(res.data.token, userData, dispatch);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        } else if (res.data.status === 2) {
+          Toast.fail(res.data.msg);
+          navigation.reset({
+            routes: [{name: 'Login'}],
+          });
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        setIsGlobalLoading(false, dispatch);
+      });
+  };
 
   const googleSignUp = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo, 'LOGIN');
+      const values = {
+        login_id: userInfo.user.email,
+        name: userInfo.user.name,
+      };
+      handleSocialSignupAPICall(values, SIGNUP_TYPE.google);
     } catch (error) {
       const typedError = error;
       console.log(error, 'KLKLKLK');
@@ -44,41 +102,70 @@ const Signup = () => {
       switch (typedError.code) {
         case statusCodes.SIGN_IN_CANCELLED:
           // sign in was cancelled
-          alert('cancelled');
           break;
         case statusCodes.IN_PROGRESS:
           // operation (eg. sign in) already in progress
-          alert('in progress');
+          Toast.fail('In Progress');
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           // android only
-          alert('play services not available or outdated');
+          Toast.fail('Play Services not available or outdated');
           break;
         default:
-          alert('Something went wrong', typedError.toString());
+          Toast.fail('Something went wrong');
+          console.log('Something went wrong', typedError.toString());
       }
     }
   };
 
-  const facebookSignUp = async () => {};
+  const instagramSignUp = async () => {};
 
-  const twitterSignUp = async () => {};
+  const twitterSignUp = async () => {
+    // TwitterLogin.init(
+    //   'qWPj1TXbreMX1SsDvdiQTaF7Y',
+    //   '4t0cRfGWXZvySIa5sS0M38AnT8a8B8hwcX2lZiaStSWStD4B4Z',
+    // );
+    // TwitterLogin.logIn()
+    //   .then(res => {
+    //     console.log(res, 'RESPONSE');
+    //   })
+    //   .catch(e => {
+    //     console.log(e, 'ERRORRRR');
+    //   });
+  };
 
-  const appleSignUp = async () => {};
+  const appleSignUp = async () => {
+    try {
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+      const values = {
+        login_id: appleAuthRequestResponse.email,
+        name: appleAuthRequestResponse.fullName.givenName,
+        id: appleAuthRequestResponse.user,
+      };
+      handleSocialSignupAPICall(values, SIGNUP_TYPE.apple);
+      let tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
+      console.log(tempToken, 'REPONSE');
+    } catch (err) {
+      console.log(err, 'error');
+    }
+  };
 
   const onPressSocialSignup = id => {
     switch (id) {
-      case 1:
+      case SIGNUP_TYPE.google:
         googleSignUp();
         return;
-      case 2:
-        facebookSignUp();
-        return;
-      case 3:
-        twitterSignUp();
-        return;
-      case 4:
+      case SIGNUP_TYPE.apple:
         appleSignUp();
+        return;
+      case SIGNUP_TYPE.instagram:
+        instagramSignUp();
+        return;
+      case SIGNUP_TYPE.twitter:
+        twitterSignUp();
         return;
     }
   };
@@ -93,9 +180,10 @@ const Signup = () => {
         buttonText={buttonText}
         bgColor={COLORS.white}
         onPress={onPress}
-        buttonTextStyle={{fontWeight: '400', fontSize: 18}}
+        buttonTextStyle={{fontFamily: FONTS.DMSans.regular, fontSize: 17}}
         textColor={COLORS.black}
         icon={icon}
+        iconSize={23}
         borderColor={COLORS.borderColor}
       />
     );
@@ -113,19 +201,21 @@ const Signup = () => {
       }}>
       <SubmitButton
         buttonText="Signup with phone number or email"
-        buttonTextStyle={{fontSize: 18}}
+        buttonTextStyle={{fontSize: 17}}
         onPress={() => {
-          navigation.navigate('SignupWithPhone');
+          navigation.navigate('SignupWithPhone', {pushId: pushId});
         }}
       />
       <View style={styles.dividerContainer}>
         <Divider />
         <View style={styles.orTextContainer}>
-          <StyledText style={{fontSize: 17}}>OR</StyledText>
+          <StyledText style={{fontSize: 17, paddingVertical: 5}}>OR</StyledText>
         </View>
         <Divider />
       </View>
-      {SOCIAL_SIGN_IN_LIST.map(item => {
+      {SOCIAL_SIGN_IN_LIST.filter(item =>
+        item.deviceType.includes(DEVICE_TYPE),
+      ).map(item => {
         return (
           <SignupTypeButton
             key={item.id.toString()}

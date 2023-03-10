@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import TextBox from '../../Components/TextBox';
@@ -7,11 +7,20 @@ import OTPInput from '../../Components/OTPInput';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {PASSWORD_REGEX} from '../../Utilities/Constants';
-import {SALT_KEY} from '../../Services/ServiceConstants';
-import {verifyOtpAndResetPassword} from '../../Services/ApiService';
+import {DEVICE_ID} from '../../Services/ServiceConstants';
+import {
+  resendOTPService,
+  verifyOtpAndResetPassword,
+} from '../../Services/ApiService';
+import {getAuthCode, setIsGlobalLoading} from '../../Utilities/Methods';
+import {useDispatch} from 'react-redux';
+import Toast from '../../Components/Toast';
 
 const resetPasswordSchema = Yup.object({
-  otp: Yup.string().required('Otp is required'),
+  otp: Yup.string()
+    .required('Otp is required')
+    .min(6, 'Enter valid OTP')
+    .max(6, 'Enter valid OTP'),
   password: Yup.string()
     .min(8, 'Password to be at least 8 characters long')
     .matches(
@@ -28,12 +37,13 @@ const resetPasswordSchema = Yup.object({
     .required('Confirm password is required'),
 });
 
-const sha1 = require('sha1');
-
-const ResetPasswordOTP = () => {
+const ResetPasswordOTP = ({route}) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {otp_ref_id, remaining_seconds} = route.params;
+  const [timer, settimer] = useState(remaining_seconds);
 
-  const {handleSubmit, handleChange, values, errors} = useFormik({
+  const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
       otp: '',
       password: '',
@@ -41,29 +51,61 @@ const ResetPasswordOTP = () => {
     },
     validationSchema: resetPasswordSchema,
     onSubmit: values => {
-      handleResetOtp(values);
+      setIsGlobalLoading(true, dispatch);
+      handleVerifyOtpResetPassword(values);
     },
   });
 
-  const handleResetOtp = data => {
-    console.log(data, 'reset otp data');
+  const onResendOtp = () => {
+    setIsGlobalLoading(true, dispatch);
+    handleResendOTP();
+  };
+
+  const handleResendOTP = () => {
+    const formData = new FormData();
+    formData.append('otp_ref_id', otp_ref_id);
+    formData.append('auth_code', getAuthCode(otp_ref_id));
+    resendOTPService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          settimer(parseInt(res.data.remaining_seconds));
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setIsGlobalLoading(false, dispatch);
+      });
+  };
+
+  const handleVerifyOtpResetPassword = values => {
     let formData = new FormData();
-    formData.append('otp_ref_id', '');
-    formData.append('otp_code', data.otp);
-    formData.append('new_password', data.password);
-    formData.append('confirm_password', data.confirm_password);
-    formData.append('auth_code', sha1(SALT_KEY + ''));
-    formData.append('device_id', 'abcd');
+    formData.append('otp_ref_id', otp_ref_id);
+    formData.append('otp', values.otp);
+    formData.append('new_password', values.password);
+    formData.append('confirm_password', values.confirm_password);
+    formData.append('auth_code', getAuthCode(otp_ref_id));
+    formData.append('device_id', DEVICE_ID);
     verifyOtpAndResetPassword(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data, 'response');
+          Toast.success(res.data.msg);
+          navigation.reset({
+            routes: [{name: 'Login'}],
+          });
         } else if (res.data.status === 0) {
-          console.log(res.data.msg);
+          Toast.fail(res.data.msg);
         }
       })
-      .catch(err => {
-        console.log(err, '===error');
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setIsGlobalLoading(false, dispatch);
       });
   };
 
@@ -80,7 +122,12 @@ const ResetPasswordOTP = () => {
           routes: [{name: 'Login'}],
         });
       }}>
-      <OTPInput onCodeChanged={handleChange('otp')} />
+      <OTPInput
+        onCodeChanged={handleChange('otp')}
+        seconds={timer}
+        onResendOtp={onResendOtp}
+        errorText={errors.otp && touched.otp ? errors.otp : ''}
+      />
       <TextBox
         iconColor={COLORS.placeHolderColor}
         placeHolder="Enter your password"

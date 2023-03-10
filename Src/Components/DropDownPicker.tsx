@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -11,10 +12,12 @@ import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import ItemSelectionMiniList from './ItemSelectionMiniList';
+import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
+import {IconType} from '../Utilities/Icons';
 
 type Props = {
   title?: string;
-  value?: string | number | undefined | null;
+  value?: any;
   dropDownIconSize?: number;
   dataList?: number[] | string[];
   placeHolderText?: string;
@@ -23,11 +26,27 @@ type Props = {
   mainContainerWidth?: number | string;
   onPress?: () => void;
   onSelectItem?: (item: any) => void;
+  mainContainerMarginVertical?: number;
+  titlePaddingVertical?: number;
+  inputContainerMarginVertical?: number;
+  fieldName?: string;
+  listTitle?: string;
+  errorText?: string;
+  dropDownIcon?: IconType;
+  isDropDownIconAsButton?: boolean;
+  onPressIcon?: () => void;
+  isLoadingIcon?: boolean;
+  fontSize?: number;
+  backgroundColor?: string;
+  borderColor?: string;
+  valueTextColor?: string;
+  additionalDisplayText?: string;
 };
 
 const DropDownPicker = ({
   title,
-  value = '',
+  value,
+  errorText = '',
   dropDownIconSize = 13,
   mainContainerWidth = '100%',
   placeHolderText = 'Select Data',
@@ -36,14 +55,56 @@ const DropDownPicker = ({
   onPress,
   isDisabled = false,
   onSelectItem,
+  fieldName,
+  mainContainerMarginVertical = 5,
+  titlePaddingVertical = 5,
+  inputContainerMarginVertical = 5,
+  listTitle = title,
+  isDropDownIconAsButton = false,
+  dropDownIcon = 'down_arrow',
+  onPressIcon,
+  isLoadingIcon,
+  fontSize = 14,
+  valueTextColor = COLORS.black,
+  backgroundColor = COLORS.white,
+  borderColor = COLORS.borderColor,
+  additionalDisplayText = '',
 }: Props) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
 
+  const getValueText = () => {
+    if (value) {
+      if (fieldName) {
+        return value[fieldName] + additionalDisplayText;
+      }
+      return value + additionalDisplayText;
+    }
+    return placeHolderText;
+  };
+
   return (
-    <View style={[styles.mainContainer, {width: mainContainerWidth}]}>
-      {title && <StyledText>{title}</StyledText>}
+    <View
+      style={[
+        styles.mainContainer,
+        {
+          width: mainContainerWidth,
+          marginVertical: mainContainerMarginVertical,
+        },
+      ]}>
+      {title && (
+        <StyledText style={{paddingVertical: titlePaddingVertical}}>
+          {title}
+        </StyledText>
+      )}
       <TouchableOpacity
-        style={styles.inputContainer}
+        style={[
+          styles.inputContainer,
+          {
+            marginVertical: inputContainerMarginVertical,
+            backgroundColor,
+            borderColor,
+          },
+        ]}
         disabled={isDisabled}
         activeOpacity={0.7}
         onPress={() => {
@@ -58,20 +119,32 @@ const DropDownPicker = ({
         <View style={[styles.dropDownTextContainer]}>
           <StyledText
             style={{
-              color: value ? COLORS.black : COLORS.dimColor,
-              fontSize: 14,
+              color: value ? valueTextColor : COLORS.placeHolderColor,
+              fontSize: fontSize,
+              paddingVertical: 5,
             }}>
-            {value ? value : placeHolderText}
+            {getValueText()}
           </StyledText>
         </View>
-        <View style={styles.iconContainer}>
-          <SVGIcon
-            icon={'down_arrow'}
-            height={dropDownIconSize}
-            width={dropDownIconSize}
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          activeOpacity={0.7}
+          disabled={!isDropDownIconAsButton || isLoadingIcon}
+          onPress={onPressIcon}>
+          {isLoadingIcon ? (
+            <ActivityIndicator size={'small'} color={COLORS.primary} />
+          ) : (
+            <SVGIcon
+              icon={dropDownIcon}
+              height={dropDownIconSize}
+              width={dropDownIconSize}
+            />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
+      {errorText ? (
+        <StyledText style={styles.errorText}>{errorText}</StyledText>
+      ) : null}
       <Modal
         visible={isOpenDataListModal}
         onRequestClose={() => {
@@ -85,6 +158,8 @@ const DropDownPicker = ({
             onClose={() => {
               setisOpenDataListModal(false);
             }}
+            fieldName={fieldName}
+            title={listTitle}
             listData={dataList}
             onSelectItem={(item: any) => {
               setisOpenDataListModal(false);
@@ -106,7 +181,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   inputContainer: {
-    height: 55,
+    height: TEXT_INPUT_HEIGHT,
     width: '100%',
     borderRadius: 8,
     marginVertical: 5,
@@ -126,9 +201,14 @@ const styles = StyleSheet.create({
   iconContainer: {
     height: '100%',
     // flex: 1,
-    paddingRight: 10,
+    paddingRight: 5,
     paddingLeft: 5,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    paddingVertical: 5,
   },
 });

@@ -15,25 +15,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import UsersImage from '../../Assets/Png/IntroImages/background.png';
 import Logo from '../../Assets/Svg/slogan_logo.svg';
 import {INTRO_DATA} from '../../Utilities/Constants';
-import {useDispatch} from 'react-redux';
-import {setStatusBarColor} from '../../Store/Slices/UtilitySlice';
-import {COLORS} from '../../Utilities/Colors';
-
-// import {DMSANS, GILROY} from '../shared/GlobalFonts';
 
 const LoginIntro = ({onSkipIntro}) => {
   const {width: windowWidth} = useWindowDimensions();
   const [isDone, setisDone] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(setStatusBarColor(COLORS.secondary));
-
-    return () => {
-      dispatch(setStatusBarColor(COLORS.primary));
-    };
-  }, []);
 
   const renderItem = ({item, index}) => {
     return (
@@ -64,20 +50,10 @@ const LoginIntro = ({onSkipIntro}) => {
       start={{x: 1.45, y: 0.35}}
       end={{x: 0.95, y: 0.75}}
       style={styles.linearGradient}>
-      {/* <StatusBar
-        animated={true}
-        translucent
-        backgroundColor="rgba(206, 102, 131, 0)"
-      /> */}
       <View style={styles.imagebackground}>
         <ImageBackground source={UsersImage} style={styles.background} />
       </View>
       <Logo style={[styles.logo, {width: windowWidth}]} alignSelf={'center'} />
-      {/* <Image
-        source={Logo}
-        style={[styles.logo, {width: windowWidth}]}
-        resizeMode="contain"
-      /> */}
       <FlatList
         horizontal={true}
         style={styles.scrollViewStyle}

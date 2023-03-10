@@ -41,3 +41,39 @@ let tasks = [
 //     pendingTasks:[{taskId:6, name: "API Integration"}]
 //     completedTasks:[{taskId:3, name:"Design"}]
 // }]
+
+let obj = {
+  name: 'abc',
+  age: 18,
+  department: 'CSE',
+  phoneNumber: '9988776655',
+  address: 'abc',
+};
+
+// const a ={
+//   keys:["name","age","department","phoneNumber","address"],
+//   values:["abc",18,"CSE","9988776655","abc"]
+// }
+
+// [
+//   {
+//     key:"name",
+//     value:"abc"
+//   },
+//   {
+//     key:"age",
+//     value:18
+//   },
+//   {
+//     key:"department",
+//     value:"CSE"
+//   },
+//   {
+//     key:"phoneNumber",
+//     value:"9988776655"
+//   },
+//   {
+//     key:"address",
+//     value:"abc"
+//   }
+// ]
