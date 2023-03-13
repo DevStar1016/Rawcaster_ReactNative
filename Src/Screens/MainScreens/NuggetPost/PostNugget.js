@@ -67,6 +67,19 @@ const PostNugget = () => {
   const [isLoading, setisLoading] = useState(false);
   const [typedText, settypedText] = useState('');
 
+  const [question, setquestion] = useState('');
+  const [pollLength, setpollLength] = useState(null);
+  const [choiceList, setchoiceList] = useState([
+    {
+      isOptional: false,
+      value: '',
+    },
+    {
+      isOptional: false,
+      value: '',
+    },
+  ]);
+
   useEffect(() => {
     return () => {
       Keyboard.dismiss();
@@ -79,15 +92,30 @@ const PostNugget = () => {
     }
     const formData = new FormData();
     formData.append('token', token);
-    if (typedText.trim()) {
-      formData.append('content', typedText.trim());
-    }
     formData.append('share_type', selectedShareType.id);
-    if (selectedMediaList.length > 0) {
-      selectedMediaList.map(item => {
-        formData.append('nuggets_media[]', item);
-      });
+    if (typedText.trim() || (isPollClicked && question.trim())) {
+      formData.append(
+        'content',
+        isPollClicked ? question.trim() : typedText.trim(),
+      );
     }
+    if (isPollClicked) {
+      formData.append(
+        'poll_option',
+        JSON.stringify([...choiceList].map(item => item.value)),
+      );
+      formData.append(
+        'poll_duration',
+        `${pollLength.days}:${pollLength.hours}:${pollLength.minutes}`,
+      );
+    } else {
+      if (selectedMediaList.length > 0) {
+        selectedMediaList.map(item => {
+          formData.append('nuggets_media[]', item);
+        });
+      }
+    }
+
     addNuggetsService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -253,6 +281,18 @@ const PostNugget = () => {
     ]);
   };
 
+  const isDisabledPostButton = () => {
+    if (isPollClicked) {
+      return question &&
+        choiceList &&
+        pollLength &&
+        choiceList.filter(item => item.value).length >= 2
+        ? false
+        : true;
+    }
+    return !typedText.trim() && selectedMediaList.length <= 0;
+  };
+
   const getMediaItem = item => {
     if (IS_IOS && item.type.includes('video')) {
       return (
@@ -415,9 +455,9 @@ const PostNugget = () => {
                   width={19}
                   isButton
                   onPress={() => {
-                    // if (isMount) {
-                    //   setisPollClicked(true);
-                    // }
+                    if (isMount) {
+                      setisPollClicked(true);
+                    }
                   }}
                 />
               )}
@@ -477,6 +517,11 @@ const PostNugget = () => {
           </View>
           {isPollClicked ? (
             <PollContainer
+              choiceList={choiceList}
+              setchoiceList={setchoiceList}
+              question={question}
+              setquestion={setquestion}
+              setpollLength={setpollLength}
               onPressRemovePoll={() => {
                 if (isMount) {
                   setisPollClicked(false);
@@ -529,10 +574,10 @@ const PostNugget = () => {
           <View>
             <SubmitButton
               buttonText={isPollClicked ? 'Post Poll' : 'Post Nugget'}
-              isDisabled={!typedText.trim() && selectedMediaList.length <= 0}
+              isDisabled={isDisabledPostButton()}
               disabledColor={COLORS.dimColor}
               onPress={() => {
-                if (typedText.trim() || selectedMediaList.length > 0) {
+                if (!isDisabledPostButton()) {
                   handlePostNuggets();
                 }
               }}

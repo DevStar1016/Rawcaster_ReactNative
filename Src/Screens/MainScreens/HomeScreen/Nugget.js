@@ -4,6 +4,7 @@ import NuggetItem from './NuggetItem';
 import TextOnlyNugget from './NuggetItemTypes/TextOnlyNugget';
 import {DIMENSIONS, IS_IOS} from '../../../Utilities/Constants';
 import {useInsets} from '../../../Utilities/StoreData';
+import PollNugget from './NuggetItemTypes/PollNugget';
 
 const Nugget = ({
   nugget,
@@ -97,6 +98,18 @@ const Nugget = ({
             viewabilityConfig={viewConfigRef.current}
           />
         </View>
+      ) : nuggetData.poll_option && nuggetData.poll_option.length > 0 ? (
+        <PollNugget
+          mediaHeight={mediaHeight}
+          isEnableTopInsetsPadding={isEnableTopInsetsPadding}
+          textNuggetNumberOfLines={textNuggetNumberOfLines}
+          headerContainerHeight={headerContainerHeight}
+          isEnableADDButton={isEnableADDButton}
+          isSaved={isSaved}
+          nuggetData={nuggetData}
+          onPressLike={onPressLike}
+          onPressSave={onPressSave}
+        />
       ) : (
         <TextOnlyNugget
           mediaHeight={mediaHeight}

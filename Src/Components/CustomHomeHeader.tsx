@@ -51,7 +51,7 @@ const CustomHomeHeader = ({
           isButton
           onPress={() => {
             if (isLogin()) {
-              // navigation.navigate('GlobalSearchStack');
+              navigation.navigate('GlobalSearchStack');
             }
           }}
         />

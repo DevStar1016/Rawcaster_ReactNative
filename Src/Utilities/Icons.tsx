@@ -66,6 +66,7 @@ import DownArrowWhiteIcon from '../Assets/Svg/down_arrow_white.svg';
 import CloseRoundedWhiteIcon from '../Assets/Svg/close_rounded_white.svg';
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
 import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
+import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -150,7 +151,8 @@ export type IconType =
   | 'down_arrow_white'
   | 'close_rounded_white'
   | 'mute_white'
-  | 'speaker_white';
+  | 'speaker_white'
+  | 'menu_horizontal';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -228,4 +230,5 @@ export const ICONS = {
   close_rounded_white: CloseRoundedWhiteIcon,
   mute_white: MuteWhiteIcon,
   speaker_white: SpeakerWhiteIcon,
+  menu_horizontal: MenuHorizontalIcon,
 };

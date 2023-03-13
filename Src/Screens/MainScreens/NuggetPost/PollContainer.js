@@ -15,19 +15,14 @@ import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPi
 import SVGIcon from '../../../Components/SVGIcon';
 import StyledText from '../../../Components/StyledText';
 
-const PollContainer = ({onPressRemovePoll}) => {
-  const [typedText, settypedText] = useState('');
-  const [choiceList, setchoiceList] = useState([
-    {
-      isOptional: false,
-      value: '',
-    },
-    {
-      isOptional: false,
-      value: '',
-    },
-  ]);
-
+const PollContainer = ({
+  onPressRemovePoll,
+  question,
+  setquestion,
+  choiceList,
+  setchoiceList,
+  setpollLength,
+}) => {
   const handleRemoveOption = index => {
     setchoiceList(preList => {
       if (preList.length > 2) {
@@ -81,8 +76,8 @@ const PollContainer = ({onPressRemovePoll}) => {
           placeholder={'Ask a question...'}
           style={styles.textInput}
           multiline
-          value={typedText}
-          onChangeText={settypedText}
+          value={question}
+          onChangeText={setquestion}
           numberOfLines={2}
           textAlignVertical={'top'}
           placeholderTextColor={COLORS.white}
@@ -131,7 +126,9 @@ const PollContainer = ({onPressRemovePoll}) => {
           placeHolder="Choice 2"
         /> */}
         <CustomDateMonthYearPicker
-          onSelect={() => {}}
+          onSelect={selectedDuration => {
+            setpollLength(selectedDuration);
+          }}
           valueShowAdditionalData={{
             first: 'Days',
             second: 'Hrs',
