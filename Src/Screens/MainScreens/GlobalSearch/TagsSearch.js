@@ -181,7 +181,7 @@ const TagsSearch = () => {
                 },
                 color: (opacity = 1) => COLORS.secondary,
               }}
-              // bezier
+              bezier
               withDots={false}
               withHorizontalLabels={false}
               withShadow={false}
