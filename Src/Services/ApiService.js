@@ -343,3 +343,15 @@ export const influencerListService = data => {
 export const influencerFollowService = data => {
   return axios.post('influencerfollow', data);
 };
+
+export const pollVoteService = data => {
+  return axios.post('pollvote', data);
+};
+
+export const tagListService = data => {
+  return axios.post('tagslist', data);
+};
+
+export const saveAndUnsaveNuggetService = data => {
+  return axios.post('saveandunsavenugget', data);
+};

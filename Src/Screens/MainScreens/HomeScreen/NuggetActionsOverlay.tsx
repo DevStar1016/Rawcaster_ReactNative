@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import Badges from '../../../Utilities/Badges';
@@ -38,6 +38,12 @@ import {
   setIsOpenVerifyPopup,
 } from '../../../Store/Slices/UtilitySlice';
 import Hyperlink from 'react-native-hyperlink';
+import {
+  likeAndUnlikeNuggetService,
+  saveAndUnsaveNuggetService,
+} from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
+import lodash from 'lodash';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -115,6 +121,54 @@ const NuggetActionsOverlay = ({
   //     setexternalLinkWarning((prev) => !prev);
   //   }
 
+  const likeAndUnlikeNuggetApiCall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    formData.append('like', isLiked ? 2 : 1);
+    likeAndUnlikeNuggetService(formData)
+      .then(res => {
+        if (res.data.status === 1 && onPressLike) {
+          onPressLike();
+        }
+        // else if (res.data.status === 0) {
+        //   Toast.fail(res.data.msg);
+        // }
+      })
+      .catch(e => {
+        console.log(e, 'ERROR LIKE AND UNLIKE NUGGET API');
+      });
+  };
+
+  const saveAndUnsaveNuggetApiCall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    formData.append('save', isSaved ? 2 : 1);
+    saveAndUnsaveNuggetService(formData)
+      .then(res => {
+        if (res.data.status === 1 && onPressSave) {
+          onPressSave();
+        }
+        // else if (res.data.status === 0) {
+        //   Toast.fail(res.data.msg);
+        // }
+      })
+      .catch(e => {
+        console.log(e, 'ERROR SAVE AND UNSAVE NUGGET API');
+      });
+  };
+
+  const debounceOnLike = useCallback(
+    lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
+    [isLiked],
+  );
+
+  const debounceOnSave = useCallback(
+    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
+    [isSaved],
+  );
+
   const ActionIconContainer = ({
     icon,
     text = '',
@@ -130,6 +184,9 @@ const NuggetActionsOverlay = ({
             if (isMustLogin) {
               if (!token) {
                 dispatch(setIsOpenLoginAlert(true));
+                return;
+              } else if (token && user && user?.acc_verify_status === 0) {
+                dispatch(setIsOpenVerifyPopup(true));
                 return;
               }
             }
@@ -316,7 +373,7 @@ const NuggetActionsOverlay = ({
           <ActionIconContainer
             icon={isLiked ? 'heart_pink' : 'heart_white'}
             text={bigNumberFormater(nugget.total_likes)}
-            onPress={onPressLike}
+            onPress={debounceOnLike}
           />
           <ActionIconContainer
             icon="comment"
@@ -325,8 +382,7 @@ const NuggetActionsOverlay = ({
           <ActionIconContainer icon="share" text="726" isMustLogin={false} />
           <ActionIconContainer
             icon={isSaved ? 'save_pink' : 'save_white'}
-            text="12"
-            onPress={onPressSave}
+            onPress={debounceOnSave}
           />
         </View>
       </View>
