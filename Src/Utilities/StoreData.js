@@ -47,3 +47,7 @@ export const useIsAppForeground = () => {
 export const useIsOpenLoginAlert = () => {
   return useSelector(state => state.utility.isOpenLoginAlert);
 };
+
+export const useIsOpenVerifyPopup = () => {
+  return useSelector(state => state.utility.isOpenVerifyPopup);
+};

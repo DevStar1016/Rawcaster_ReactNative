@@ -29,11 +29,14 @@ import {
 } from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
-import {useInsets, useToken} from '../../../Utilities/StoreData';
+import {useInsets, useToken, useUserData} from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useDispatch} from 'react-redux';
-import {setIsOpenLoginAlert} from '../../../Store/Slices/UtilitySlice';
+import {
+  setIsOpenLoginAlert,
+  setIsOpenVerifyPopup,
+} from '../../../Store/Slices/UtilitySlice';
 import Hyperlink from 'react-native-hyperlink';
 
 type Props = {
@@ -83,6 +86,7 @@ const NuggetActionsOverlay = ({
 }: Props) => {
   const navigation = useNavigation();
   const token = useToken();
+  const user = useUserData();
   const dispatch = useDispatch();
   const insets = useInsets();
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
@@ -299,7 +303,13 @@ const NuggetActionsOverlay = ({
         <View style={{alignItems: 'center'}}>
           {token && isEnableADDButton ? (
             <RoundedPlusButton
-              onPress={() => navigation.navigate('PostNugget')}
+              onPress={() => {
+                if (token && user && user?.acc_verify_status === 0) {
+                  dispatch(setIsOpenVerifyPopup(true));
+                } else {
+                  navigation.navigate('PostNugget');
+                }
+              }}
               style={{marginBottom: 20}}
             />
           ) : null}

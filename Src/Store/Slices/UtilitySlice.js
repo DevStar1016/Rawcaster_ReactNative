@@ -15,6 +15,7 @@ export const initialState = {
   isVisibleInfluencers: false,
   isAppForeground: true,
   isOpenLoginAlert: false,
+  isOpenVerifyPopup: false,
 };
 
 const UtilitySlice = createSlice({
@@ -45,6 +46,9 @@ const UtilitySlice = createSlice({
     setIsOpenLoginAlert: (state, action) => {
       state.isOpenLoginAlert = action.payload;
     },
+    setIsOpenVerifyPopup: (state, action) => {
+      state.isOpenVerifyPopup = action.payload;
+    },
   },
 });
 export const {
@@ -56,5 +60,6 @@ export const {
   setIsVisibleInfluencers,
   setIsAppForeground,
   setIsOpenLoginAlert,
+  setIsOpenVerifyPopup,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

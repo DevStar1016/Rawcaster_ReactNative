@@ -89,8 +89,11 @@ const OTPVerification = ({route}) => {
             dispatch(setMyProfile({...myProfile, is_email_id_verified: 1}));
           }
           Toast.success(res.data.msg);
+          // navigation.reset({
+          //   routes: [{name: 'HomeStack'}],
+          // });
           navigation.reset({
-            routes: [{name: 'HomeStack'}],
+            routes: [{name: 'BottomTabNavigationAfterLogin'}],
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);

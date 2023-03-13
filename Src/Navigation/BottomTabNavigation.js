@@ -10,18 +10,20 @@ import CustomBottomTabBar from './CustomBottomTabBar';
 import {
   useIsGlobalLoading,
   useIsOpenLoginAlert,
+  useIsOpenVerifyPopup,
   useMyProfile,
   useToken,
   useUserData,
 } from '../Utilities/StoreData';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import Toast from '../Components/Toast';
 import VerificationMethodChoose from '../Modals/VerificationMethodOptions';
 import {
   setIsBottomTabBarAbsolute,
   setIsOpenLoginAlert,
+  setIsOpenVerifyPopup,
 } from '../Store/Slices/UtilitySlice';
 
 const Tab = createBottomTabNavigator();
@@ -33,15 +35,21 @@ export default function BottomTabNavigation() {
   const myProfile = useMyProfile();
   const isLoading = useIsGlobalLoading();
   const isOpenLoginALert = useIsOpenLoginAlert();
-  const [isOpenVerifyPopup, setisOpenVerifyPopup] = useState(
-    token && isLoading === false && user && user?.acc_verify_status === 0,
-  );
+  const isOpenVerifyPopup = useIsOpenVerifyPopup();
 
   const [isOpenVerificationOptions, setisOpenVerificationOptions] =
     useState(false);
 
+  useEffect(() => {
+    dispatch(
+      setIsOpenVerifyPopup(
+        token && isLoading === false && user && user?.acc_verify_status === 0,
+      ),
+    );
+  }, []);
+
   const handleAccountVerification = () => {
-    setisOpenVerifyPopup(false);
+    dispatch(setIsOpenVerifyPopup(false));
     if (user.acc_verify_status === 0 && myProfile.is_profile_updated === 1) {
       if (
         myProfile.two_type_verification === 1 &&
@@ -95,7 +103,7 @@ export default function BottomTabNavigation() {
         <ConfirmationPopup
           isEnableClose={false}
           onPressNegativeButton={() => {
-            setisOpenVerifyPopup(false);
+            dispatch(setIsOpenVerifyPopup(false));
           }}
           onPressPositiveButton={handleAccountVerification}
           content={
@@ -119,7 +127,7 @@ export default function BottomTabNavigation() {
           }}
           onClose={() => {
             setisOpenVerificationOptions(false);
-            setisOpenVerifyPopup(true);
+            dispatch(setIsOpenVerifyPopup(true));
           }}
         />
       </Modal>
