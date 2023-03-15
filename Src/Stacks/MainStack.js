@@ -7,9 +7,12 @@ import {COLORS} from '../Utilities/Colors';
 import {useIsVisibleInfluencers, useToken} from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
-import {getMyProfileService} from '../Services/ApiService';
+import {
+  getMyProfileService,
+  getUserSettingsService,
+} from '../Services/ApiService';
 import {useDispatch} from 'react-redux';
-import {setMyProfile} from '../Store/Slices/AuthSlice';
+import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
 import OTPVerification from '../Screens/AuthScreens/OTPVerification';
 import PostNugget from '../Screens/MainScreens/NuggetPost/PostNugget';
 import MyProfile from '../Screens/MainScreens/MyProfile';
@@ -35,7 +38,10 @@ const MainStack = () => {
   };
 
   const initialAPICall = () => {
-    Promise.all([getMyProfileService(getCommonFormData())])
+    Promise.all([
+      getMyProfileService(getCommonFormData()),
+      getUserSettingsService(getCommonFormData()),
+    ])
       .then(res => {
         if (res[0].data.status === 1) {
           let profile = {...res[0].data.profile};
@@ -47,6 +53,12 @@ const MainStack = () => {
             bio_data: htmlDecodeText(profile.bio_data),
           };
           dispatch(setMyProfile(profile));
+        }
+        return res;
+      })
+      .then(res => {
+        if (res[1].data.status === 1) {
+          dispatch(setSettings(res[1].data.settings));
         }
         return res;
       })

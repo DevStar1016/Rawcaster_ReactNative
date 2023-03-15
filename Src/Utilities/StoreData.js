@@ -11,6 +11,9 @@ export const useUserData = () => {
 export const useMyProfile = () => {
   return useSelector(state => state.auth.myProfile);
 };
+export const useSettings = () => {
+  return useSelector(state => state.auth.settings);
+};
 
 export const useIsGlobalLoading = () => {
   return useSelector(state => state.utility.isGlobalLoading);

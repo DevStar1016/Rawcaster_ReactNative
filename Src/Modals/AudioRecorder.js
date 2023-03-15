@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import AudioRecorderPlayer, {
   AudioEncoderAndroidType,
@@ -17,6 +17,7 @@ import {
 } from '../Utilities/Methods';
 import {FONTS} from '../Utilities/Fonts';
 import BOX_SHADOW from '../Utilities/BoxShadow';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -41,6 +42,11 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
   }, [playingSeconds]);
 
   const handleAudioRecord = async () => {
+    const dirs = RNFetchBlob.fs.dirs;
+    const path = Platform.select({
+      ios: 'rawcaster_recorded_audio.m4a',
+      android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
+    });
     try {
       const audioSet = {
         AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
@@ -54,7 +60,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
       setisPaused(false);
       setisRecording(true);
       const result = await audioPlayer.startRecorder(
-        recordedAudio,
+        path,
         audioSet,
         meteringEnabled,
       );

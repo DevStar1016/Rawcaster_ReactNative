@@ -4,6 +4,7 @@ export const initialState = {
   token: null,
   userData: null,
   myProfile: null,
+  settings: null,
 };
 
 const AuthSlice = createSlice({
@@ -19,7 +20,11 @@ const AuthSlice = createSlice({
     setMyProfile: (state, action) => {
       state.myProfile = action.payload;
     },
+    setSettings: (state, action) => {
+      state.settings = action.payload;
+    },
   },
 });
-export const {setToken, setUserData, setMyProfile} = AuthSlice.actions;
+export const {setToken, setUserData, setMyProfile, setSettings} =
+  AuthSlice.actions;
 export default AuthSlice.reducer;

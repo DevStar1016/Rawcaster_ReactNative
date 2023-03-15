@@ -21,6 +21,7 @@ import {
   getDoubleDigit,
   getSlicedText,
   htmlDecodeText,
+  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {
   DIMENSIONS,
@@ -29,7 +30,12 @@ import {
 } from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
-import {useInsets, useToken, useUserData} from '../../../Utilities/StoreData';
+import {
+  useInsets,
+  useSettings,
+  useToken,
+  useUserData,
+} from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useDispatch} from 'react-redux';
@@ -41,9 +47,12 @@ import Hyperlink from 'react-native-hyperlink';
 import {
   likeAndUnlikeNuggetService,
   saveAndUnsaveNuggetService,
+  pollVoteService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import lodash from 'lodash';
+import AnimatedBgFillContainer from '../../../Components/AnimatedBgFillContainer';
+import moment from 'moment';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -73,6 +82,16 @@ type NuggetDetailsProps = {
   value: any;
 };
 
+type PollOptionsItemProp = {
+  option_id: number;
+  option_name: string;
+  option_percentage: string;
+};
+type PollVotedDataProp = {
+  isVoted: boolean;
+  votedOptionID: any;
+};
+
 const NuggetActionsOverlay = ({
   nugget,
   nuggetType,
@@ -93,10 +112,16 @@ const NuggetActionsOverlay = ({
   const navigation = useNavigation();
   const token = useToken();
   const user = useUserData();
+  const settings = useSettings();
   const dispatch = useDispatch();
   const insets = useInsets();
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
+
+  const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
+    isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
+    votedOptionID: null,
+  });
 
   const getNuggetType = () => {
     const nuggetType = NUGGET_SHARE_TYPE.find(
@@ -120,6 +145,26 @@ const NuggetActionsOverlay = ({
   //     }
   //     setexternalLinkWarning((prev) => !prev);
   //   }
+
+  const pollVotingAPICall = (optionId: number) => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    formData.append('poll_option_id', optionId);
+    pollVoteService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+        } else if (res.data.status === 0) {
+          setpollVotedData({isVoted: false, votedOptionID: null});
+
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        setpollVotedData({isVoted: false, votedOptionID: null});
+        Toast.fail(e.message);
+      });
+  };
 
   const likeAndUnlikeNuggetApiCall = () => {
     const formData = new FormData();
@@ -168,6 +213,75 @@ const NuggetActionsOverlay = ({
     lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
     [isSaved],
   );
+
+  const getRemainingTimeOfPoll = (duration: string) => {
+    const [days, hours, minutes] = duration.split(':').map(Number);
+    const createdAt = new Date(nugget.created_date);
+    const now: any = new Date();
+    const endDate: any = new Date(
+      createdAt.getTime() +
+        days * 24 * 60 * 60 * 1000 +
+        hours * 60 * 60 * 1000 +
+        minutes * 60 * 1000,
+    );
+    const remaining = endDate - now;
+    let remainingDays: any = Math.floor(remaining / (24 * 60 * 60 * 1000));
+    let remainingHours: any = Math.floor(
+      (remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000),
+    );
+    let remainingMinutes: any = Math.floor(
+      (remaining % (60 * 60 * 1000)) / (60 * 1000),
+    );
+
+    if (remainingDays <= 0) {
+      remainingDays = null;
+    }
+    if (remainingHours <= 0) {
+      remainingHours = null;
+    }
+    if (remainingMinutes <= 0) {
+      remainingMinutes = null;
+    }
+
+    let result = '';
+    if (remainingDays !== null) {
+      result += `${remainingDays} days`;
+    }
+    if (remainingHours !== null) {
+      result += ` ${remainingHours.toString()} hours`;
+    }
+    if (remainingMinutes !== null) {
+      result += ` ${remainingMinutes.toString()} min`;
+    }
+    if (result) {
+      result += ' left';
+    }
+    return result;
+  };
+
+  const getTotalVotes = () => {
+    return pollVotedData.votedOptionID
+      ? parseInt(nugget.total_vote) + 1
+      : nugget.total_vote;
+  };
+
+  const getPollOptions = () => {
+    let tempPollOptions = [...nugget.poll_option].map(item => {
+      let votes = item.votes;
+      if (pollVotedData.votedOptionID === item.option_id) {
+        votes = parseInt(item.votes) + 1;
+      }
+      return {
+        ...item,
+        votes,
+        option_percentage: parseFloat(
+          ((parseInt(votes) / parseInt(getTotalVotes())) * 100).toString(),
+        ).toFixed(2),
+      };
+    });
+
+    return [...tempPollOptions];
+  };
 
   const ActionIconContainer = ({
     icon,
@@ -218,6 +332,43 @@ const NuggetActionsOverlay = ({
 
   const UserNuggetDetail = ({value}: NuggetDetailsProps) => {
     return <StyledText style={styles.userDetailsText}>{value}</StyledText>;
+  };
+
+  const PollData = () => {
+    return (
+      <View style={{paddingRight: 20}}>
+        {getPollOptions().map((item: PollOptionsItemProp) => {
+          return pollVotedData.isVoted ? (
+            <AnimatedBgFillContainer
+              key={item.option_id.toString()}
+              percentage={item.option_percentage}
+              name={item.option_name}
+              mainContainerStyle={{marginTop: 10}}
+            />
+          ) : (
+            <SubmitButton
+              key={item.option_id.toString()}
+              buttonText={item.option_name}
+              marginTop={10}
+              isDisabled={pollVotedData.isVoted}
+              onPress={() => {
+                setpollVotedData({
+                  isVoted: true,
+                  votedOptionID: item.option_id,
+                });
+                pollVotingAPICall(item.option_id);
+              }}
+            />
+          );
+        })}
+
+        <StyledText style={{color: COLORS.white, paddingTop: 10}}>
+          {`${getTotalVotes()} votes . ${getRemainingTimeOfPoll(
+            nugget.poll_duration,
+          )}`}
+        </StyledText>
+      </View>
+    );
   };
 
   return (
@@ -356,6 +507,7 @@ const NuggetActionsOverlay = ({
               </ScrollView>
             </TouchableOpacity>
           ) : null}
+          {nugget.poll_option && nugget.poll_option.length > 0 && <PollData />}
         </View>
         <View style={{alignItems: 'center'}}>
           {token && isEnableADDButton ? (

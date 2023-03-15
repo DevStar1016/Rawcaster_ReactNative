@@ -82,6 +82,7 @@ const Nugget = ({
                 nuggetId={nuggetData.nugget_id}
                 viewableNuggetItem={viewableNuggetItem}
                 onFinishPlaying={index => {
+                  console.log(nuggetIndex, 'KLKLKLKLKLK');
                   if (index < nuggetData?.media_list?.length - 1) {
                     flatlistRef.current.scrollToIndex({
                       index: index + 1,
