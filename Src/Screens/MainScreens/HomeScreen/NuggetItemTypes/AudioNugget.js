@@ -4,9 +4,10 @@ import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
 import DefaultBackground from '../../../../Components/DefaultBackground';
 import {useInsets} from '../../../../Utilities/StoreData';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-const audioRecorderPlayer = new AudioRecorderPlayer();
-var eventListener = undefined;
+import Sound from 'react-native-sound';
+// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+// const audioRecorderPlayer = new AudioRecorderPlayer();
+// var eventListener = undefined;
 const AudioNugget = ({
   url,
   paused,
@@ -15,13 +16,22 @@ const AudioNugget = ({
   index,
   mediaHeight,
 }) => {
+  const sound = new Sound(url, Sound.MAIN_BUNDLE, error => {
+    if (error) {
+      console.log(error, 'ERRORRRR');
+      return;
+    }
+    // startPlayer();
+    console.log(sound.getDuration(), 'DURATION');
+  });
+
   const insets = useInsets();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
 
   useEffect(() => {
     if (paused) {
-      stopPlayer();
+      pausePlayer();
     } else {
       startPlayer();
     }
@@ -29,45 +39,62 @@ const AudioNugget = ({
 
   useEffect(() => {
     setPlayerVolume();
-  }, [isMuted, paused]);
+  }, [isMuted]);
 
   const setPlayerVolume = async () => {
-    if (!paused) {
-      try {
-        await audioRecorderPlayer.setVolume(isMuted ? 0.0 : 1.0);
-      } catch (e) {
-        console.log(e, 'ERROR SET VOLUME');
-      }
+    if (sound) {
+      sound.setVolume(isMuted ? 0.0 : 1.0);
+      // try {
+      //   await audioRecorderPlayer.setVolume(isMuted ? 0.0 : 1.0);
+      // } catch (e) {
+      //   console.log(e, 'ERROR SET VOLUME');
+      // }
     }
   };
 
-  const stopPlayer = async () => {
-    try {
-      await audioRecorderPlayer.stopPlayer();
-      audioRecorderPlayer.removePlayBackListener();
-    } catch (e) {
-      console.log(e, 'STOP ERROR');
-    }
-  };
-
-  const startPlayer = async () => {
-    audioRecorderPlayer
-      .startPlayer(url)
-      .then(res => {
-        setPlayerVolume();
-        audioRecorderPlayer.addPlayBackListener(e => {
-          console.log('playBackListener', e);
-          if (e.currentPosition === e.duration) {
-            stopPlayer();
-            onFinishPlaying(index);
-          }
-        });
-
-        console.log(res, 'AUDIO PLAY');
-      })
-      .catch(e => {
-        console.log('startPlayer error', err.message);
+  const pausePlayer = async () => {
+    if (sound) {
+      sound.pause(() => {
+        console.log('Paused');
       });
+    }
+    // try {
+    //   await audioRecorderPlayer.stopPlayer();
+    //   audioRecorderPlayer.removePlayBackListener();
+    // } catch (e) {
+    //   console.log(e, 'STOP ERROR');
+    // }
+  };
+
+  const startPlayer = () => {
+    setPlayerVolume();
+    sound.play(success => {
+      console.log(success, 'STATUS');
+      if (success) {
+        console.log('SUCCESS PLAY');
+        sound.stop();
+        onFinishPlaying(index);
+      } else {
+        console.log('ERROR PLAY');
+      }
+    });
+
+    // audioRecorderPlayer
+    //   .startPlayer(url)
+    //   .then(res => {
+    //     setPlayerVolume();
+    //     audioRecorderPlayer.addPlayBackListener(e => {
+    //       console.log('playBackListener', e);
+    //       if (e.currentPosition === e.duration) {
+    //         stopPlayer();
+    //         onFinishPlaying(index);
+    //       }
+    //     });
+    //     console.log(res, 'AUDIO PLAY');
+    //   })
+    //   .catch(e => {
+    //     console.log('startPlayer error', err.message);
+    //   });
   };
 
   return (
