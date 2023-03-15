@@ -1,5 +1,6 @@
 import {
   Linking,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -44,6 +45,7 @@ import {
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import lodash from 'lodash';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -97,6 +99,8 @@ const NuggetActionsOverlay = ({
   const insets = useInsets();
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
+  const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
+  const [url, seturl] = useState('');
 
   const getNuggetType = () => {
     const nuggetType = NUGGET_SHARE_TYPE.find(
@@ -218,6 +222,13 @@ const NuggetActionsOverlay = ({
 
   const UserNuggetDetail = ({value}: NuggetDetailsProps) => {
     return <StyledText style={styles.userDetailsText}>{value}</StyledText>;
+  };
+
+  const onPressUrl = (value: any) => {
+    if (value) {
+      setopenUrlConfirmation(true);
+      seturl(value);
+    }
   };
 
   return (
@@ -346,6 +357,7 @@ const NuggetActionsOverlay = ({
                       ? 5
                       : textNuggetNumberOfLines ?? 15
                   }
+                  onPress={onPressUrl}
                   style={{
                     color: COLORS.white,
                     fontSize: 15.5,
@@ -418,6 +430,30 @@ const NuggetActionsOverlay = ({
           />
         </TouchableOpacity>
       )}
+      <Modal visible={openUrlConfirmation} transparent>
+        <ConfirmationPopup
+          onClose={() => {
+            setopenUrlConfirmation(false);
+            seturl('');
+          }}
+          onPressPositiveButton={() => {
+            if (url) {
+              Linking.openURL(url)
+                .then(res => {})
+                .catch(e => {});
+            }
+          }}
+          onPressNegativeButton={() => {
+            setopenUrlConfirmation(false);
+            seturl('');
+          }}
+          positiveButtonText="Continue"
+          negativeButtonText="Cancel"
+          content={
+            'The site you have requested is not managed by Rawcaster.com, we cannot vouch for the contents of the site. We recommend, that you excercise precautions before you click unknown sites.'
+          }
+        />
+      </Modal>
     </TouchableOpacity>
   );
 };
