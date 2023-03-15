@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   FlatList,
+  processColor,
   RefreshControl,
   StyleSheet,
   View,
@@ -18,13 +19,16 @@ import {
 import {
   searchRawcasterUsersService,
   followAndUnfollowService,
+  tagListService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
 import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
+import {DIMENSIONS} from '../../../Utilities/Constants';
 import {LineChart} from 'react-native-chart-kit';
+// import {LineChart} from 'react-native-charts-wrapper';
 
 var isMount = true;
 var currentPage = 1;
@@ -50,7 +54,7 @@ const TagsSearch = () => {
       hours: 5,
     },
     {
-      total_nuggets: 5,
+      total_nuggets: 15,
       hours: 19,
     },
     {
@@ -77,36 +81,28 @@ const TagsSearch = () => {
   }, []);
 
   useEffect(() => {
-    if (searchText !== null) {
-      setisListLoading(true);
-      tagsSearchAPICall(1);
-    }
+    // if (searchText !== null) {
+    setisListLoading(true);
+    tagsSearchAPICall(1);
+    // }
   }, [searchText]);
 
   const tagsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('search_key', searchText);
+    formData.append('search_tag', searchText || '');
     formData.append('auth_code', getAuthCode(token));
     formData.append('page_number', pageNumber);
-    searchRawcasterUsersService(formData)
+    tagListService(formData)
       .then(res => {
         if (isMount) {
           if (res.data.status === 1) {
-            let decodedNuggetList = [...res.data.users_list].map(item => {
-              return {
-                ...item,
-                display_name: htmlDecodeText(item.display_name),
-                first_name: htmlDecodeText(item.first_name),
-                last_name: htmlDecodeText(item.last_name),
-              };
-            });
-
+            console.log(res.data, 'TAGGGG');
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              settagsList(decodedNuggetList);
+              settagsList([...res.data.tags]);
             } else {
-              settagsList(preList => [...preList, ...decodedNuggetList]);
+              settagsList(preList => [...preList, ...res.data.tags]);
             }
           } else if (res.data.status === 0) {
             settagsList([]);
@@ -146,32 +142,37 @@ const TagsSearch = () => {
     }
   };
 
-  const renderItem = () => {
+  const renderItem = ({item}) => {
     return (
       <View style={styles.itemContainer}>
         <View style={styles.itemRowContainer}>
           <View style={{maxWidth: '80%'}}>
-            <StyledText>Trending in Pakistan</StyledText>
+            <StyledText>Trending in {item?.country}</StyledText>
           </View>
           <SVGIcon icon="menu_horizontal" isButton height={20} width={20} />
         </View>
         <View style={styles.itemRowContainer}>
-          <View>
+          <View style={{width: (DIMENSIONS.window.width - 30) / 2}}>
             <StyledText style={{fontFamily: FONTS.DMSans.bold}}>
-              Neymar
+              {item?.tag}
             </StyledText>
             <StyledText style={{paddingVertical: 3, fontSize: 13}}>
-              11.2K Tweets
+              {item?.nugget_count} Nuggets
             </StyledText>
           </View>
           <View style={styles.trendingChartContainer}>
             <LineChart
-              width={200} // from react-native
+              width={(DIMENSIONS.window.width - 30) / 2}
               height={70}
-              style={{height: 70}}
+              style={{
+                paddingBottom: 0,
+                paddingLeft: 0,
+              }}
+              fromNumber={0}
               chartConfig={{
-                height: 40,
-                backgroundColor: COLORS.white,
+                height: 70,
+                paddingTop: 0,
+                backgroundColor: COLORS.green,
                 backgroundGradientFrom: COLORS.white,
                 backgroundGradientTo: COLORS.white,
                 linejoinType: 'round',
@@ -187,17 +188,142 @@ const TagsSearch = () => {
               withShadow={false}
               withVerticalLabels={false}
               withInnerLines={false}
+              segments={0}
+              // transparent
               // withHorizontalLines={false}
               // withVerticalLines={false}
 
               data={{
                 datasets: [
                   {
-                    data: testObj.map(item => item.hours),
+                    data: item?.trends?.map(item => item.total_nuggets),
                   },
                 ],
               }}
             />
+            {/* <LineChart
+              style={{height: 50, width: 200}}
+              data={{
+                dataSets: [
+                  {
+                    values: [
+                      {
+                        y: 35,
+                        x: 0,
+                        marker: '35 kg',
+                      },
+                      {
+                        y: 47,
+                        x: 1,
+                        marker: '47 kg',
+                      },
+                      {
+                        y: 46,
+                        x: 2,
+                        marker: '46 kg',
+                      },
+                      {
+                        y: 44,
+                        x: 3,
+                        marker: '44 kg',
+                      },
+                      {
+                        y: 46,
+                        x: 4,
+                        marker: '46 kg',
+                      },
+                      {
+                        y: 35,
+                        x: 5,
+                        marker: 'Today: 35 kg',
+                      },
+                    ],
+                    label: '',
+                    config: {
+                      mode: 'CUBIC_BEZIER',
+                      drawValues: false,
+                      lineWidth: 2,
+                      drawCircles: false,
+                      circleColor: processColor('red'),
+                      drawCircleHole: false,
+                      circleRadius: 5,
+                      highlightColor: processColor('transparent'),
+                      color: processColor(COLORS.secondary),
+                      drawFilled: false,
+                      fillGradient: {
+                        colors: [processColor('red'), processColor('yellow')],
+                        positions: [0, 0.5],
+                        angle: 90,
+                        orientation: 'TOP_BOTTOM',
+                      },
+                      fillAlpha: 1000,
+                      valueTextSize: 15,
+                    },
+                  },
+                ],
+              }}
+              chartDescription={{text: ''}}
+              legend={{
+                enabled: false,
+              }}
+              marker={{
+                enabled: false,
+                markerColor: processColor('white'),
+                textColor: processColor('black'),
+              }}
+              xAxis={{
+                enabled: true,
+                granularity: 0,
+                drawLabels: false,
+                position: 'BOTTOM',
+                drawAxisLine: true,
+                drawGridLines: false,
+                fontFamily: 'HelveticaNeue-Medium',
+                fontWeight: 'bold',
+                textSize: 12,
+                textColor: processColor('gray'),
+                valueFormatter: [],
+                axisDashedLine: {
+                  lineLength: 5,
+                  spaceLength: 5,
+                },
+              }}
+              yAxis={{
+                left: {
+                  enabled: true,
+                  textColor: processColor('red'),
+                  drawGridLines: false,
+                  gridLineWidth: 1,
+                  drawAxisLine: true,
+                  drawLabels: false,
+                  yOffset: -5,
+                  position: 'INSIDE_CHART',
+                  textSize: 10,
+                  gridColor: processColor('grey'),
+                },
+                right: {
+                  enabled: false,
+                },
+              }}
+              autoScaleMinMaxEnabled={true}
+              animation={{
+                durationX: 0,
+                durationY: 0,
+                easingY: 'EaseInOutQuart',
+              }}
+              drawGridBackground={false}
+              drawBorders={false}
+              touchEnabled={true}
+              dragEnabled={false}
+              scaleEnabled={false}
+              scaleXEnabled={false}
+              scaleYEnabled={false}
+              pinchZoom={false}
+              doubleTapToZoomEnabled={false}
+              dragDecelerationEnabled={true}
+              dragDecelerationFrictionCoef={0.99}
+              keepPositionOnRotation={false}
+            /> */}
           </View>
         </View>
       </View>
@@ -225,8 +351,8 @@ const TagsSearch = () => {
       ) : (
         <FlatList
           // data={getFilteredDuplicatesList(tagsList, 'user_ref_id')}
-          // data={tagsList}
-          data={testObj}
+          data={tagsList}
+          // data={testObj}
           // scrollEnabled={tagsList.length > 0 ? true : false}
           renderItem={renderItem}
           ListEmptyComponent={() => {
@@ -274,7 +400,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
   },
-  trendingChartContainer: {},
+  trendingChartContainer: {
+    // height: 70,
+    // backgroundColor: 'white',
+    width: (DIMENSIONS.window.width - 30) / 2,
+  },
   divider: {
     backgroundColor: COLORS.borderColor,
     height: 1,

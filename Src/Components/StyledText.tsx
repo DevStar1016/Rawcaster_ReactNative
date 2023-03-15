@@ -18,7 +18,7 @@ type Props = {
   numberOfLines?: number;
   style?: TextStyle;
   readMoreButtonTextStyle?: TextStyle;
-  onPress?: () => void;
+  onPress?: (value: any) => void;
 };
 
 const StyledText = ({
@@ -92,14 +92,7 @@ const StyledText = ({
       <Hyperlink
         linkDefault={false}
         linkStyle={{color: '#2980b9'}}
-        onPress={(url, text) => {
-          if (url) {
-            Linking.openURL(url)
-              .then(res => {})
-              .catch(e => {});
-          }
-          // handleExternalLink(url);
-        }}>
+        onPress={onPress}>
         {isEnableReadMore ? renderReadMoreText() : renderText()}
       </Hyperlink>
     );

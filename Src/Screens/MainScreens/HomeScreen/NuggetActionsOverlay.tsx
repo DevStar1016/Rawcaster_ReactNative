@@ -1,5 +1,6 @@
 import {
   Linking,
+  Modal,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -51,6 +52,7 @@ import {
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import lodash from 'lodash';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 import AnimatedBgFillContainer from '../../../Components/AnimatedBgFillContainer';
 import moment from 'moment';
 
@@ -117,6 +119,8 @@ const NuggetActionsOverlay = ({
   const insets = useInsets();
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
+  const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
+  const [url, seturl] = useState('');
 
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
     isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
@@ -334,6 +338,18 @@ const NuggetActionsOverlay = ({
     return <StyledText style={styles.userDetailsText}>{value}</StyledText>;
   };
 
+  const onPressUrl = (value: any) => {
+    if (value) {
+      if (value.includes('rawcaster')) {
+        Linking.openURL(value)
+          .then(res => {})
+          .catch(e => {});
+      } else {
+        setopenUrlConfirmation(true);
+        seturl(value);
+      }
+    }
+  };
   const PollData = () => {
     return (
       <View style={{paddingRight: 20}}>
@@ -497,6 +513,7 @@ const NuggetActionsOverlay = ({
                       ? 5
                       : textNuggetNumberOfLines ?? 15
                   }
+                  onPress={onPressUrl}
                   style={{
                     color: COLORS.white,
                     fontSize: 15.5,
@@ -570,6 +587,31 @@ const NuggetActionsOverlay = ({
           />
         </TouchableOpacity>
       )}
+      <Modal visible={openUrlConfirmation} transparent>
+        <ConfirmationPopup
+          onClose={() => {
+            setopenUrlConfirmation(false);
+            seturl('');
+          }}
+          onPressPositiveButton={() => {
+            if (url) {
+              setopenUrlConfirmation(false);
+              Linking.openURL(url)
+                .then(res => {})
+                .catch(e => {});
+            }
+          }}
+          onPressNegativeButton={() => {
+            setopenUrlConfirmation(false);
+            seturl('');
+          }}
+          positiveButtonText="Continue"
+          negativeButtonText="Cancel"
+          content={
+            'The site you have requested is not managed by Rawcaster.com, we cannot vouch for the contents of the site. We recommend, that you excercise precautions before you click unknown sites.'
+          }
+        />
+      </Modal>
     </TouchableOpacity>
   );
 };
