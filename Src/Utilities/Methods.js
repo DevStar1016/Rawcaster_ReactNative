@@ -8,6 +8,7 @@ import sha1 from 'sha1';
 import Compressor from 'react-native-compressor';
 import {SALT_KEY} from '../Services/ServiceConstants';
 import {setToken, setUserData} from '../Store/Slices/AuthSlice';
+import momentTZ from 'moment-timezone';
 import {
   setGlobalLoading,
   setLocationDetails,
@@ -303,4 +304,21 @@ export const getMinutesSecondsFormate = seconds => {
 
 export const htmlDecodeText = text => {
   return htmldecode(text);
+};
+
+export const getTimezoneName = str => {
+  let index;
+  try {
+    index = str.indexOf('(');
+  } catch (error) {}
+  if (index > -1) return str.substr(0, index - 1).trim();
+  else return str;
+};
+
+export const utcToUserTimezone = (time, zonename) => {
+  let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
+  let displayCutoff = momentTZ(utcCutoff)
+    .tz(getTimezoneName(zonename))
+    .format('YYYY-MM-DD HH:mm:ss');
+  return moment(displayCutoff);
 };

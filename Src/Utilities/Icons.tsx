@@ -4,6 +4,8 @@ import BackIcon from '../Assets/Svg/back.svg';
 import DownArrowIcon from '../Assets/Svg/down_arrow.svg';
 import GoogleIcon from '../Assets/Svg/google.svg';
 import FaceBookIcon from '../Assets/Svg/facebook.svg';
+import InstagramIcon from '../Assets/Svg/instagram.svg';
+
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
 import CloseRoundedIcon from '../Assets/Svg/close_rounded.svg';
@@ -86,6 +88,7 @@ export type IconType =
   | 'facebook'
   | 'twitter'
   | 'apple'
+  | 'instagram'
   | 'close_rounded'
   | 'live'
   | 'search'
@@ -160,6 +163,7 @@ export const ICONS = {
   back: BackIcon,
   google: GoogleIcon,
   facebook: FaceBookIcon,
+  instagram: InstagramIcon,
   twitter: TwitterIcon,
   apple: AppleIcon,
   down_arrow: DownArrowIcon,

@@ -118,6 +118,8 @@ const PostNugget = () => {
 
     addNuggetsService(formData)
       .then(res => {
+        console.log(res.data, 'POST NUGGET RESPONSE');
+        console.log(JSON.stringify(res.data), 'POST NUGGET STRING');
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({

@@ -21,7 +21,7 @@ type Props = {
   onPress?: (value: any) => void;
 };
 
-const CustomStyledText = ({
+const StyledText = ({
   children,
   textMode = 'normal',
   numberOfLines = 0,
@@ -114,7 +114,7 @@ const CustomStyledText = ({
   return <TextComponent />;
 };
 
-export default CustomStyledText;
+export default StyledText;
 
 const styles = StyleSheet.create({
   text: {

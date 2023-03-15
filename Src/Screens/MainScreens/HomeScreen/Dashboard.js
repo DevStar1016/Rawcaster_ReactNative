@@ -59,6 +59,12 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
+    if (flatlistRef.current && (nuggetType === 1 || nuggetType === 2)) {
+      flatlistRef.current.scrollToOffset({animated: false, offset: 0});
+    }
+  }, [nuggetType]);
+
+  useEffect(() => {
     dispatch(setNuggetsList([]));
     listNuggetsAPICall(1);
   }, [token]);
@@ -79,6 +85,7 @@ const Dashboard = () => {
               user_name: htmlDecodeText(item.user_name),
             };
           });
+          console.log(decodedNuggetList[0], 'NUGGET');
           if (pageNumber === 1) {
             totalPages = parseInt(res.data.total_pages);
             dispatch(setNuggetsList(decodedNuggetList));
@@ -176,6 +183,7 @@ const Dashboard = () => {
             offset: insets.mediaHeight * index,
             index,
           })}
+          onScrollToIndexFailed={() => {}}
           windowSize={20}
           renderItem={({item, index}) => (
             <Nugget
@@ -187,6 +195,7 @@ const Dashboard = () => {
               nuggetIndex={index}
               viewableNuggetItem={viewableItem}
               onFinishPlaying={index => {
+                console.log('GTTTTTTT', index + 1);
                 if (index < nuggetsList.length - 1) {
                   flatlistRef.current.scrollToIndex({
                     index: index + 1,

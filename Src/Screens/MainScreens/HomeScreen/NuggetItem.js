@@ -18,6 +18,7 @@ import {
   useUserData,
 } from '../../../Utilities/StoreData';
 import {useIsFocused} from '@react-navigation/native';
+import AudioNugget from './NuggetItemTypes/AudioNugget';
 
 function NuggetItem({
   index,
@@ -74,12 +75,20 @@ function NuggetItem({
   ]);
 
   const getNuggetItem = () => {
-    if (
-      mediaItem.media_type.includes('video') ||
-      mediaItem.media_type.includes('audio')
-    ) {
+    if (mediaItem.media_type.includes('video')) {
       return (
         <VideoNugget
+          mediaHeight={mediaHeight}
+          paused={paused}
+          isMuted={isMuted}
+          onFinishPlaying={onFinishPlaying}
+          url={mediaItem.path}
+          index={index}
+        />
+      );
+    } else if (mediaItem.media_type.includes('audio')) {
+      return (
+        <AudioNugget
           mediaHeight={mediaHeight}
           paused={paused}
           isMuted={isMuted}

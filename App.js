@@ -1,4 +1,4 @@
-import {AppState, Modal, StatusBar, StyleSheet, View} from 'react-native';
+import {AppState, Modal} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
@@ -25,7 +25,10 @@ import axios from 'axios';
 import {removeToken} from './Src/Utilities/Methods';
 import Toast from './Src/Components/Toast';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {GOOGLE_PLACES_API_KEY} from './Src/Services/ServiceConstants';
+import {
+  GOOGLE_PLACES_API_KEY,
+  GOOGLE_SIGNIN_IOS_CLIENT_ID,
+} from './Src/Services/ServiceConstants';
 import {createStackNavigator} from '@react-navigation/stack';
 import {setInsets, setIsAppForeground} from './Src/Store/Slices/UtilitySlice';
 import {IS_IOS} from './Src/Utilities/Constants';
@@ -64,7 +67,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    GoogleSignin.configure();
+    GoogleSignin.configure({
+      iosClientId: GOOGLE_SIGNIN_IOS_CLIENT_ID,
+    });
     Geocode.setApiKey(GOOGLE_PLACES_API_KEY);
     return () => tokenFetchingTimer && clearTimeout(tokenFetchingTimer);
   }, []);

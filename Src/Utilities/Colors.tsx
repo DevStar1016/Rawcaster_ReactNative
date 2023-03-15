@@ -16,4 +16,5 @@ export const COLORS = {
   transparent: 'transparent',
   gradientColorsPrimary: ['#D86886', '#844670'],
   gradientColorsSecondary: ['#F99F46', '#F3738B'],
+  pollGradientColors: ['#F5A663', '#F18497'],
 };

@@ -55,21 +55,21 @@ export const SIGNUP_TYPE = {
 
 export const SOCIAL_SIGN_IN_LIST = [
   {
-    id: SIGNUP_TYPE.google,
-    platformName: 'Google',
-    iconName: 'google',
-    deviceType: ['android'],
-  },
-  {
     id: SIGNUP_TYPE.apple,
     platformName: 'Apple',
     iconName: 'apple',
     deviceType: ['ios'],
   },
   {
+    id: SIGNUP_TYPE.google,
+    platformName: 'Google',
+    iconName: 'google',
+    deviceType: ['ios', 'android'],
+  },
+  {
     id: SIGNUP_TYPE.instagram,
     platformName: 'Instagram',
-    iconName: 'facebook',
+    iconName: 'instagram',
     deviceType: ['ios', 'android'],
   },
   {
