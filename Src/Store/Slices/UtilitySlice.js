@@ -2,7 +2,6 @@ import {createSlice} from '@reduxjs/toolkit';
 import {COLORS} from '../../Utilities/Colors';
 
 export const initialState = {
-  isGlobalLoading: false,
   insets: {
     bottom: 0,
     top: 0,
@@ -24,9 +23,6 @@ const UtilitySlice = createSlice({
   reducers: {
     setInsets: (state, action) => {
       state.insets = action.payload;
-    },
-    setGlobalLoading: (state, action) => {
-      state.isGlobalLoading = action.payload;
     },
     setLocationDetails: (state, action) => {
       state.locationDetails = action.payload;
@@ -53,7 +49,6 @@ const UtilitySlice = createSlice({
 });
 export const {
   setInsets,
-  setGlobalLoading,
   setLocationDetails,
   setIsBottomTabBarAbsolute,
   setNuggetType,

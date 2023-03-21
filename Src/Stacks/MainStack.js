@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import BottomTabNavigation from '../Navigation/BottomTabNavigation';
 import Loader from '../Components/Loader';
-import {COLORS} from '../Utilities/Colors';
 import {useIsVisibleInfluencers, useToken} from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
@@ -15,8 +14,7 @@ import {useDispatch} from 'react-redux';
 import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
 import OTPVerification from '../Screens/AuthScreens/OTPVerification';
 import PostNugget from '../Screens/MainScreens/NuggetPost/PostNugget';
-import MyProfile from '../Screens/MainScreens/MyProfile';
-import GlobalSearchStack from './GlobalSearchStack';
+import EditProfile from '../Screens/MainScreens/EditProfile';
 
 const Stack = createStackNavigator();
 
@@ -86,7 +84,7 @@ const MainStack = () => {
             component={BottomTabNavigation}
           />
           <Stack.Screen name="PostNugget" component={PostNugget} />
-          <Stack.Screen name="MyProfile" component={MyProfile} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
           <Stack.Screen name="OTPVerification" component={OTPVerification} />
           {/* <Stack.Screen
             name="GlobalSearchStack"

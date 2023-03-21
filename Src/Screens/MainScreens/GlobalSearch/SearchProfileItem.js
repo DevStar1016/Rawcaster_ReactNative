@@ -12,7 +12,7 @@ const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
     <View style={styles.mainContainer}>
       <View style={styles.leftContainer}>
         <ProfileWithBadge
-          // badge={Badges(myProfile.user_status_id)}
+          // badge={Badges(profile.user_status_id)}
           containerStyle={styles.profile}
           isEnableGradient={false}
           profileImage={item.profile_img}

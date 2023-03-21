@@ -1,22 +1,10 @@
-import {
-  Image,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {View} from 'react-native';
+import React, {useEffect, useState} from 'react';
 
-import {DIMENSIONS} from '../../../Utilities/Constants';
 import NuggetActionsOverlay from './NuggetActionsOverlay';
 import VideoNugget from './NuggetItemTypes/VideoNugget';
 import ImageNugget from './NuggetItemTypes/ImageNugget';
-import {
-  useIsAppForeground,
-  useIsGlobalLoading,
-  useUserData,
-} from '../../../Utilities/StoreData';
+import {useIsAppForeground} from '../../../Utilities/StoreData';
 import {useIsFocused} from '@react-navigation/native';
 import AudioNugget from './NuggetItemTypes/AudioNugget';
 
@@ -26,16 +14,19 @@ function NuggetItem({
   viewableNuggetItem,
   mediaItem,
   onFinishPlaying,
+  isOpenComments,
   isEnableTopInsetsPadding,
   nuggetId,
   headerContainerHeight,
   nugget,
   isLiked,
   onPressLike,
+  setTotalComments,
   isSaved,
   onPressSave,
   textNuggetNumberOfLines,
   isMuted,
+  setisOpenComments,
   setisMuted,
   mediaHeight,
   isEnableADDButton,
@@ -43,21 +34,15 @@ function NuggetItem({
   const [paused, setpaused] = useState(true);
   const isFocused = useIsFocused();
 
-  // const [isMuted, setisMuted] = useState(true);
-
   const isAppForeground = useIsAppForeground();
-
-  const isGlobalLoading = useIsGlobalLoading();
-  // const user = useUserData();
 
   useEffect(() => {
     if (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&
       nuggetId === viewableNuggetItem &&
-      !isGlobalLoading &&
-      isFocused
-      // &&((user && user.acc_verify_status === 1) || !user)
+      isFocused &&
+      !isOpenComments
     ) {
       setpaused(false);
     } else {
@@ -68,8 +53,6 @@ function NuggetItem({
     viewableNuggetItem,
     nuggetId,
     mediaItem,
-    // user,
-    isGlobalLoading,
     isAppForeground,
     isFocused,
   ]);
@@ -80,6 +63,7 @@ function NuggetItem({
         <VideoNugget
           mediaHeight={mediaHeight}
           paused={paused}
+          isOpenComments={isOpenComments}
           isMuted={isMuted}
           onFinishPlaying={onFinishPlaying}
           url={mediaItem.path}
@@ -91,6 +75,7 @@ function NuggetItem({
         <AudioNugget
           mediaHeight={mediaHeight}
           paused={paused}
+          isOpenComments={isOpenComments}
           isMuted={isMuted}
           onFinishPlaying={onFinishPlaying}
           url={mediaItem.path}
@@ -115,7 +100,9 @@ function NuggetItem({
         headerContainerHeight={headerContainerHeight}
         isEnableADDButton={isEnableADDButton}
         nuggetType={mediaItem.media_type}
+        setisOpenComments={setisOpenComments}
         isLiked={isLiked}
+        setTotalComments={setTotalComments}
         onPressLike={onPressLike}
         isSaved={isSaved}
         isPaused={paused}

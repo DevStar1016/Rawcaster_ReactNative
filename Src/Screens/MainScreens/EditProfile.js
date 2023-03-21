@@ -3,11 +3,9 @@ import {
   Keyboard,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
 import HOCView from '../../Components/HOCView';
@@ -15,7 +13,7 @@ import SVGIcon from '../../Components/SVGIcon';
 import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import {COLORS} from '../../Utilities/Colors';
-import {useMyProfile, useToken} from '../../Utilities/StoreData';
+import {useProfile, useToken} from '../../Utilities/StoreData';
 import ImagePicker from 'react-native-image-crop-picker';
 import TextBox from '../../Components/TextBox';
 import DropDownPicker from '../../Components/DropDownPicker';
@@ -30,19 +28,19 @@ import {
   getFileName,
   getLocationAddress,
   htmlDecodeText,
-  setIsGlobalLoading,
 } from '../../Utilities/Methods';
 import {useDispatch} from 'react-redux';
 import {updateMyProfileService} from '../../Services/ApiService';
 import {setMyProfile} from '../../Store/Slices/AuthSlice';
 import {useNavigation} from '@react-navigation/native';
 import VerificationMethodChoose from '../../Modals/VerificationMethodOptions';
+import Loader from '../../Components/Loader';
 
 var isMount = true;
-const MyProfile = ({route}) => {
+const EditProfile = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const myProfile = useMyProfile();
+  const profile = useProfile();
   const token = useToken();
   const [selectedProfileImage, setselectedProfileImage] = useState(null);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
@@ -51,6 +49,8 @@ const MyProfile = ({route}) => {
     useState(false);
   const {requiredField} = route.params || {};
 
+  const [isLoading, setisLoading] = useState(false);
+
   const isValidateEmail = useRef(false);
 
   const [isFetchingLocation, setisFetchingLocation] = useState(false);
@@ -58,6 +58,7 @@ const MyProfile = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
+      .matches(/^[^\p{Emoji}]*$/, 'First name is invalid')
       .min(2, 'Enter valid First name')
       .max(20, 'First name is too long')
       .required('Required'),
@@ -77,7 +78,7 @@ const MyProfile = ({route}) => {
       .string()
       .matches(PHONE_REGEX, 'Invalid phone number')
       .test('Required', 'Required', function (value) {
-        return myProfile.mobile
+        return profile.mobile
           ? value
             ? true
             : false
@@ -91,7 +92,7 @@ const MyProfile = ({route}) => {
       .string()
       .email('Enter valid Email')
       .test('Required', 'Required', function (value) {
-        return myProfile.email_id
+        return profile.email_id
           ? value
             ? true
             : false
@@ -107,30 +108,30 @@ const MyProfile = ({route}) => {
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
     useFormik({
       initialValues: {
-        firstName: myProfile.first_name ?? '',
-        lastName: myProfile.last_name ?? '',
-        displayName: myProfile.name ?? '',
-        gender: GENDER_LIST.find(item => item.id === myProfile.gender) ?? null,
-        dob: myProfile.dob ?? '',
-        mobileNumber: myProfile.mobile ?? '',
-        email: myProfile.email_id ?? '',
-        location: myProfile.geo_location ?? '',
+        firstName: profile.first_name ?? '',
+        lastName: profile.last_name ?? '',
+        displayName: profile.name ?? '',
+        gender: GENDER_LIST.find(item => item.id === profile.gender) ?? null,
+        dob: profile.dob ?? '',
+        mobileNumber: profile.mobile ?? '',
+        email: profile.email_id ?? '',
+        location: profile.geo_location ?? '',
       },
       validationSchema: validationSchema,
       onSubmit: values => {
-        setIsGlobalLoading(true, dispatch);
-        handleUpdateProfile(values);
+        if (isMount) {
+          setisLoading(true);
+          handleUpdateProfile(values);
+        }
       },
     });
-  useEffect(() => {
-    return () => {
-      Keyboard.dismiss();
-    };
-  }, []);
 
   useEffect(() => {
     isMount = true;
-    return () => (isMount = false);
+    return () => {
+      Keyboard.dismiss();
+      isMount = false;
+    };
   }, []);
 
   const handleUpdateProfile = () => {
@@ -203,11 +204,13 @@ const MyProfile = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        if (isMount) {
+          setisLoading(false);
+        }
       });
   };
 
-  const onSelectProfilePhoto = (type = 'profile') => {
+  const onSelectProfilePhoto = () => {
     ImagePicker.openPicker({
       width: 512,
       height: 512,
@@ -281,7 +284,7 @@ const MyProfile = ({route}) => {
           source={{
             uri: selectedProfileImage
               ? selectedProfileImage.path
-              : myProfile.profile_image,
+              : profile.profile_image,
           }}
           style={styles.profileImage}
         />
@@ -381,7 +384,7 @@ const MyProfile = ({route}) => {
           handleSubmit();
         }}
       />
-      {myProfile.acc_verify_status === 0 && (
+      {profile.acc_verify_status === 0 && (
         <SubmitButton
           buttonText="Next"
           marginTop={10}
@@ -422,11 +425,14 @@ const MyProfile = ({route}) => {
           }}
         />
       </Modal>
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </HOCView>
   );
 };
 
-export default MyProfile;
+export default EditProfile;
 
 const styles = StyleSheet.create({
   mainContainer: {

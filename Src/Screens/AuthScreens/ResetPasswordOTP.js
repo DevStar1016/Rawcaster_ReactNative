@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {Modal} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import TextBox from '../../Components/TextBox';
@@ -12,9 +13,10 @@ import {
   resendOTPService,
   verifyOtpAndResetPassword,
 } from '../../Services/ApiService';
-import {getAuthCode, setIsGlobalLoading} from '../../Utilities/Methods';
+import {getAuthCode} from '../../Utilities/Methods';
 import {useDispatch} from 'react-redux';
 import Toast from '../../Components/Toast';
+import Loader from '../../Components/Loader';
 
 const resetPasswordSchema = Yup.object({
   otp: Yup.string()
@@ -42,6 +44,7 @@ const ResetPasswordOTP = ({route}) => {
   const dispatch = useDispatch();
   const {otp_ref_id, remaining_seconds} = route.params;
   const [timer, settimer] = useState(remaining_seconds);
+  const [isLoading, setisLoading] = useState(false);
 
   const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
@@ -51,13 +54,14 @@ const ResetPasswordOTP = ({route}) => {
     },
     validationSchema: resetPasswordSchema,
     onSubmit: values => {
-      setIsGlobalLoading(true, dispatch);
+      setisLoading(true);
       handleVerifyOtpResetPassword(values);
     },
   });
 
   const onResendOtp = () => {
-    setIsGlobalLoading(true, dispatch);
+    settimer(0);
+    setisLoading(true);
     handleResendOTP();
   };
 
@@ -78,7 +82,7 @@ const ResetPasswordOTP = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
@@ -105,7 +109,7 @@ const ResetPasswordOTP = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
@@ -148,6 +152,9 @@ const ResetPasswordOTP = ({route}) => {
         isEnablePasswordConditionText
         passwordConditionTextStyle={{marginBottom: 40}}
       />
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </AuthScreenHOC>
   );
 };

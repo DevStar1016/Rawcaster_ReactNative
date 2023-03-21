@@ -17,4 +17,5 @@ export const COLORS = {
   gradientColorsPrimary: ['#D86886', '#844670'],
   gradientColorsSecondary: ['#F99F46', '#F3738B'],
   pollGradientColors: ['#F5A663', '#F18497'],
+  commentsBg: 'rgba(29, 28, 28, 0.8)',
 };

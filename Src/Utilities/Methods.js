@@ -9,10 +9,6 @@ import Compressor from 'react-native-compressor';
 import {SALT_KEY} from '../Services/ServiceConstants';
 import {setToken, setUserData} from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
-import {
-  setGlobalLoading,
-  setLocationDetails,
-} from '../Store/Slices/UtilitySlice';
 import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
 
@@ -67,10 +63,6 @@ export const secondsToMinutesAndSeconds = millis => {
   var minutes = Math.floor(millis / 60);
   var seconds = (millis % 60).toFixed(0);
   return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-};
-
-export const setIsGlobalLoading = (status = false, dispatch) => {
-  dispatch(setGlobalLoading(status));
 };
 
 export const getFileName = url => {

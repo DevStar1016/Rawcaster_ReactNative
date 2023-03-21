@@ -168,6 +168,9 @@ const styles = StyleSheet.create({
     elevation: 0,
     position: 'absolute',
     bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
     borderTopColor: 'rgba(0,0,0,0.1)',
   },
   relativeBarStyle: {

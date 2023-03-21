@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
+  Modal,
   RefreshControl,
   StyleSheet,
   TouchableOpacity,
@@ -20,16 +21,12 @@ import InfluencerItem from './InfluencerItem';
 import {SCREEN_PADDING_HORIZONTAL} from '../../Utilities/Constants';
 import {FONTS} from '../../Utilities/Fonts';
 import InfluencerCategoriesList from './InfluencerCategoriesList';
-import {useMyProfile, useToken} from '../../Utilities/StoreData';
+import {useProfile, useToken} from '../../Utilities/StoreData';
 import {
   influencerListService,
   influencerFollowService,
 } from '../../Services/ApiService';
-import {
-  getAuthCode,
-  getDoubleDigit,
-  setIsGlobalLoading,
-} from '../../Utilities/Methods';
+import {getAuthCode, getDoubleDigit} from '../../Utilities/Methods';
 import Loader from '../../Components/Loader';
 import Toast from '../../Components/Toast';
 import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
@@ -38,11 +35,10 @@ var totalPages = 1;
 var currentPage = 1;
 var isMount = true;
 const InfluencersList = () => {
-  const navigation = useNavigation();
   const token = useToken();
   const dispatch = useDispatch();
-  const myProfile = useMyProfile();
-  const [isLoading, setisLoading] = useState(false);
+  const profile = useProfile();
+  const [isLoading, setisLoading] = useState(true);
   const [searchText, setsearchText] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [errorText, seterrorText] = useState('No data found');
@@ -52,6 +48,7 @@ const InfluencersList = () => {
   const [selectedInfluencersRefIds, setselectedInfluencersRefIds] = useState(
     [],
   );
+  const [isActionLoading, setisActionLoading] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -144,8 +141,14 @@ const InfluencersList = () => {
     return [...selectedInfluencersRefIds].find(refId => refId === id);
   };
 
-  const handleInfluencerFollow = (ids = [...selectedInfluencersRefIds]) => {
-    setIsGlobalLoading(true, dispatch);
+  const handleInfluencerFollow = (
+    ids = [...selectedInfluencersRefIds],
+    isSkipScreen = false,
+  ) => {
+    if (isMount) {
+      setisActionLoading(true);
+    }
+
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
@@ -153,8 +156,12 @@ const InfluencersList = () => {
     influencerFollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          Toast.success(res.data.msg);
           handleFilterInfluencerList(ids);
+          if (isSkipScreen) {
+            dispatch(setIsVisibleInfluencers(false));
+          } else {
+            Toast.success(res.data.msg);
+          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -163,7 +170,9 @@ const InfluencersList = () => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        if (isMount) {
+          setisActionLoading(false);
+        }
       });
   };
 
@@ -234,7 +243,7 @@ const InfluencersList = () => {
               fontSize: 18,
               paddingVertical: 5,
             }}>
-            {`Welcome ${myProfile.name} - Select your influencers`}
+            {`Welcome ${profile.name} - Select your influencers`}
           </StyledText>
         </View>
         <View style={styles.searchContainer}>
@@ -275,7 +284,7 @@ const InfluencersList = () => {
               activeOpacity={0.7}
               disabled={selectedInfluencersRefIds.length <= 0}
               onPress={() => {
-                handleInfluencerFollow();
+                handleInfluencerFollow(selectedInfluencersRefIds, true);
               }}>
               <StyledText style={{paddingVertical: 5}}>Become a Fan</StyledText>
               <SVGIcon
@@ -291,7 +300,11 @@ const InfluencersList = () => {
 
         <View style={styles.influencersListContainer}>
           {isLoading ? (
-            <Loader loaderText="Fetching Influencers" />
+            <Loader
+              loaderText="Fetching Influencers"
+              indicatorColor={COLORS.primary}
+              loaderTextColor={COLORS.primary}
+            />
           ) : (
             <FlatList
               data={influencersList}
@@ -317,6 +330,9 @@ const InfluencersList = () => {
           )}
         </View>
       </View>
+      <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </HOCView>
   );
 };

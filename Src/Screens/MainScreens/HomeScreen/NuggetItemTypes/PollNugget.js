@@ -11,7 +11,9 @@ const PollNugget = ({
   headerContainerHeight,
   textNuggetNumberOfLines,
   onPressLike,
+  setTotalComments,
   onPressSave,
+  setisOpenComments,
   isEnableTopInsetsPadding,
   isEnableADDButton,
   mediaHeight,
@@ -32,6 +34,8 @@ const PollNugget = ({
         isEnableTopInsetsPadding={isEnableTopInsetsPadding}
         textNuggetNumberOfLines={textNuggetNumberOfLines}
         isEnableADDButton={isEnableADDButton}
+        setisOpenComments={setisOpenComments}
+        setTotalComments={setTotalComments}
         headerContainerHeight={headerContainerHeight}
         // nuggetType={mediaItem.media_type}
         isLiked={nuggetData.liked}

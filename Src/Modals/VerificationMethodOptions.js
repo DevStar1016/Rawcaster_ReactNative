@@ -1,16 +1,16 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
-import {useMyProfile} from '../Utilities/StoreData';
+import {useProfile} from '../Utilities/StoreData';
 import SVGIcon from '../Components/SVGIcon';
 import StyledText from '../Components/StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 
 const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
-  const myProfile = useMyProfile();
+  const profile = useProfile();
 
   const getPartialHiddenEmail = () => {
-    let emailSplitedList = myProfile.email_id.toString().split('@');
+    let emailSplitedList = profile.email_id.toString().split('@');
     let emailNameText = '';
     emailSplitedList[0]
       .toString()
@@ -27,7 +27,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
   };
 
   const getPartialHiddenMobileNumber = () => {
-    let splitedNumbersList = myProfile.mobile.toString().split('');
+    let splitedNumbersList = profile.mobile.toString().split('');
     let phoneNumber = '';
     splitedNumbersList.map((num, index) => {
       if (index < 2 || index > splitedNumbersList.length - 3) {
@@ -53,7 +53,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
           </StyledText>
         </View>
         <View>
-          {myProfile.email_id.toString() ? (
+          {profile.email_id.toString() ? (
             <>
               <TouchableOpacity
                 style={styles.choiceContainer}
@@ -75,7 +75,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
               <Divider />
             </>
           ) : null}
-          {myProfile.mobile.toString() ? (
+          {profile.mobile.toString() ? (
             <>
               <TouchableOpacity
                 style={styles.choiceContainer}

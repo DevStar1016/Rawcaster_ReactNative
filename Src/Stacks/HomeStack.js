@@ -8,6 +8,7 @@ import {
 } from '../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
 import GlobalSearchStack from './GlobalSearchStack';
+import ProfileStack from './ProfileStack';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +31,7 @@ const HomeStack = () => {
       }}>
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="GlobalSearchStack" component={GlobalSearchStack} />
+      <Stack.Screen name="ProfileStack" component={ProfileStack} />
     </Stack.Navigator>
   );
 };

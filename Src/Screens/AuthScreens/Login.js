@@ -1,4 +1,4 @@
-import {Keyboard, StyleSheet, View} from 'react-native';
+import {Keyboard, Modal, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../Utilities/Colors';
 import StyledText from '../../Components/StyledText';
@@ -11,16 +11,11 @@ import * as Yup from 'yup';
 import {useDispatch} from 'react-redux';
 import {DEVICE_ID} from '../../Services/ServiceConstants';
 import {loginService} from '../../Services/ApiService';
-import {
-  getAuthCode,
-  setIsGlobalLoading,
-  storeToken,
-} from '../../Utilities/Methods';
+import {getAuthCode, storeToken} from '../../Utilities/Methods';
 import {IS_IOS} from '../../Utilities/Constants';
 import Toast from '../../Components/Toast';
 import {FONTS} from '../../Utilities/Fonts';
-
-let isMount = true;
+import Loader from '../../Components/Loader';
 
 const validationSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -31,6 +26,7 @@ const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [pushId, setpushId] = useState(null);
+  const [isLoading, setisLoading] = useState(false);
 
   const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
@@ -39,7 +35,7 @@ const Login = () => {
     },
     validationSchema: validationSchema,
     onSubmit: values => {
-      setIsGlobalLoading(true, dispatch);
+      setisLoading(true);
 
       handleLogin(values);
     },
@@ -97,7 +93,7 @@ const Login = () => {
         Toast.fail(err.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
@@ -141,6 +137,9 @@ const Login = () => {
           Forgot Password?
         </StyledText>
       </View>
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </AuthScreenHOC>
   );
 };

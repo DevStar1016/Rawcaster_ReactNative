@@ -1,10 +1,15 @@
 import {FlatList, StatusBar, StyleSheet, View} from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
+import lodash from 'lodash';
 import NuggetItem from './NuggetItem';
 import TextOnlyNugget from './NuggetItemTypes/TextOnlyNugget';
 import {DIMENSIONS, IS_IOS} from '../../../Utilities/Constants';
-import {useInsets} from '../../../Utilities/StoreData';
+import {useInsets, useToken} from '../../../Utilities/StoreData';
 import PollNugget from './NuggetItemTypes/PollNugget';
+import {
+  likeAndUnlikeNuggetService,
+  saveAndUnsaveNuggetService,
+} from '../../../Services/ApiService';
 
 const Nugget = ({
   nugget,
@@ -21,30 +26,67 @@ const Nugget = ({
 }) => {
   const flatlistRef = useRef(null);
   const insets = useInsets();
+  const token = useToken();
   const [nuggetData, setnuggetData] = useState({...nugget});
+  const [isOpenComments, setisOpenComments] = useState(false);
   const [viewableItem, setviewableItem] = useState('');
   const viewConfigRef = useRef({viewAreaCoveragePercentThreshold: 70});
-
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0)
       setviewableItem(viewableItems.viewableItems[0].item.media_id || 0);
   });
-  const [isSaved, setisSaved] = useState(false);
+  const debounceOnLike = useCallback(
+    lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
+    [],
+  );
+  const debounceOnSave = useCallback(
+    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
+    [],
+  );
+  const setTotalComments = totalComments => {
+    setnuggetData(preData => ({
+      ...preData,
+      total_comments: totalComments,
+    }));
+  };
 
   const onPressLike = () => {
     setnuggetData(pre => {
-      let isLiked = pre.liked;
-      return {
-        ...pre,
-        liked: !isLiked,
-        total_likes: !isLiked ? pre.total_likes + 1 : pre.total_likes - 1,
-      };
+      let isLiked = !pre.liked;
+      let totalLikes = parseInt(pre.total_likes);
+      totalLikes = isLiked ? totalLikes + 1 : totalLikes - 1;
+      debounceOnLike(isLiked);
+      return {...pre, liked: isLiked, total_likes: totalLikes};
     });
   };
 
   const onPressSave = () => {
-    setisSaved(pre => !pre);
+    setnuggetData(pre => {
+      let isSaved = !pre.saved;
+      debounceOnSave(isSaved);
+      return {...pre, saved: isSaved};
+    });
   };
+
+  function likeAndUnlikeNuggetApiCall(status) {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nuggetData.nugget_id);
+    formData.append('like', status ? 1 : 2);
+    likeAndUnlikeNuggetService(formData)
+      .then(res => {})
+      .catch(e => {});
+  }
+
+  function saveAndUnsaveNuggetApiCall(status) {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nuggetData.nugget_id);
+    formData.append('save', status ? 1 : 2);
+    saveAndUnsaveNuggetService(formData)
+      .then(res => {})
+      .catch(e => {});
+  }
 
   return (
     <View style={styles.mainContainer}>
@@ -74,15 +116,17 @@ const Nugget = ({
                 mediaHeight={mediaHeight}
                 nugget={nuggetData}
                 index={index}
+                setTotalComments={setTotalComments}
+                isOpenComments={isOpenComments}
+                setisOpenComments={setisOpenComments}
                 isLiked={nuggetData.liked}
                 onPressLike={onPressLike}
-                isSaved={isSaved}
+                isSaved={nuggetData.saved}
                 onPressSave={onPressSave}
                 viewableItem={viewableItem}
                 nuggetId={nuggetData.nugget_id}
                 viewableNuggetItem={viewableNuggetItem}
                 onFinishPlaying={index => {
-                  console.log(nuggetIndex, 'KLKLKLKLKLK');
                   if (index < nuggetData?.media_list?.length - 1) {
                     flatlistRef.current.scrollToIndex({
                       index: index + 1,
@@ -106,7 +150,8 @@ const Nugget = ({
           textNuggetNumberOfLines={textNuggetNumberOfLines}
           headerContainerHeight={headerContainerHeight}
           isEnableADDButton={isEnableADDButton}
-          isSaved={isSaved}
+          isSaved={nuggetData.saved}
+          setisOpenComments={setisOpenComments}
           nuggetData={nuggetData}
           onPressLike={onPressLike}
           onPressSave={onPressSave}
@@ -118,7 +163,8 @@ const Nugget = ({
           textNuggetNumberOfLines={textNuggetNumberOfLines}
           headerContainerHeight={headerContainerHeight}
           isEnableADDButton={isEnableADDButton}
-          isSaved={isSaved}
+          isSaved={nuggetData.saved}
+          setisOpenComments={setisOpenComments}
           nuggetData={nuggetData}
           onPressLike={onPressLike}
           onPressSave={onPressSave}

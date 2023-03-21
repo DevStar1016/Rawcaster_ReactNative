@@ -146,7 +146,7 @@ const Dashboard = () => {
         }}>
         <CustomHomeHeader
           bgColor={COLORS.transparent}
-          isEnableAddUserButton={token ? true : false}
+          isEnableAddUserButton={false}
         />
 
         {!token && (
@@ -195,7 +195,6 @@ const Dashboard = () => {
               nuggetIndex={index}
               viewableNuggetItem={viewableItem}
               onFinishPlaying={index => {
-                console.log('GTTTTTTT', index + 1);
                 if (index < nuggetsList.length - 1) {
                   flatlistRef.current.scrollToIndex({
                     index: index + 1,

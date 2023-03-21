@@ -8,15 +8,11 @@ export const useUserData = () => {
   return useSelector(state => state.auth.userData);
 };
 
-export const useMyProfile = () => {
-  return useSelector(state => state.auth.myProfile);
+export const useProfile = () => {
+  return useSelector(state => state.auth.profile);
 };
 export const useSettings = () => {
   return useSelector(state => state.auth.settings);
-};
-
-export const useIsGlobalLoading = () => {
-  return useSelector(state => state.utility.isGlobalLoading);
 };
 
 export const useLocationDetails = () => {

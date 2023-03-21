@@ -1,16 +1,18 @@
-import {StyleSheet} from 'react-native';
+import {Modal, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
 import OTPInput from '../../Components/OTPInput';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {resendOTPService, signupVerifyService} from '../../Services/ApiService';
-import {getAuthCode, setIsGlobalLoading} from '../../Utilities/Methods';
-import {useMyProfile, useToken} from '../../Utilities/StoreData';
+import {getAuthCode} from '../../Utilities/Methods';
+import {useProfile, useToken} from '../../Utilities/StoreData';
 import Toast from '../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setMyProfile} from '../../Store/Slices/AuthSlice';
+import Loader from '../../Components/Loader';
+import {COLORS} from '../../Utilities/Colors';
 
 const otpVerificationSchema = Yup.object({
   otp: Yup.string()
@@ -25,7 +27,8 @@ const OTPVerification = ({route}) => {
   const token = useToken();
   const [otpRefId, setotpRefId] = useState(null);
   const [timer, settimer] = useState(0);
-  const myProfile = useMyProfile();
+  const profile = useProfile();
+  const [isLoading, setisLoading] = useState(false);
 
   const {handleSubmit, handleChange, values, errors, touched} = useFormik({
     initialValues: {
@@ -42,7 +45,7 @@ const OTPVerification = ({route}) => {
   }, []);
 
   const resendOTPAPICall = () => {
-    setIsGlobalLoading(true, dispatch);
+    setisLoading(true);
     const formData = new FormData();
     formData.append('auth_code', getAuthCode('Rawcaster'));
     formData.append('token', token);
@@ -55,6 +58,7 @@ const OTPVerification = ({route}) => {
           Toast.success(res.data.msg, 4000);
           setotpRefId(res.data.otp_ref_id);
           settimer(parseInt(res.data.remaining_seconds));
+          console.log(timer, 'TIMER');
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -63,12 +67,12 @@ const OTPVerification = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
   const handleOtpVerification = values => {
-    setIsGlobalLoading(true, dispatch);
+    setisLoading(true);
     let formData = new FormData();
     formData.append('auth_code', getAuthCode(otpRefId));
     formData.append('otp_ref_id', otpRefId);
@@ -81,12 +85,12 @@ const OTPVerification = ({route}) => {
         if (res.data.status === 1) {
           if (route.params && route.params.otpType) {
             if (route.params.otpType === 'sms') {
-              dispatch(setMyProfile({...myProfile, is_mobile_no_verified: 1}));
+              dispatch(setMyProfile({...profile, is_mobile_no_verified: 1}));
             } else {
-              dispatch(setMyProfile({...myProfile, is_email_id_verified: 1}));
+              dispatch(setMyProfile({...profile, is_email_id_verified: 1}));
             }
           } else {
-            dispatch(setMyProfile({...myProfile, is_email_id_verified: 1}));
+            dispatch(setMyProfile({...profile, is_email_id_verified: 1}));
           }
           Toast.success(res.data.msg);
           // navigation.reset({
@@ -103,7 +107,7 @@ const OTPVerification = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
@@ -113,9 +117,9 @@ const OTPVerification = ({route}) => {
       route.params.otpType &&
       route.params.otpType === 'sms'
     ) {
-      return myProfile.mobile;
+      return profile.mobile;
     }
-    return myProfile.email_id;
+    return profile.email_id;
   };
 
   return (
@@ -135,12 +139,16 @@ const OTPVerification = ({route}) => {
         onCodeChanged={handleChange('otp')}
         seconds={timer}
         onResendOtp={() => {
+          settimer(0);
           resendOTPAPICall();
         }}
         errorText={errors.otp && touched.otp ? errors.otp : ''}
         paddingVertical={20}
         paddingBottom={40}
       />
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </AuthScreenHOC>
   );
 };

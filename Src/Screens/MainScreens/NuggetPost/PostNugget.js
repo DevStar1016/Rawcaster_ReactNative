@@ -13,7 +13,7 @@ import React, {useEffect, useState} from 'react';
 import Video from 'react-native-video';
 
 import HOCView from '../../../Components/HOCView';
-import {useInsets, useMyProfile, useToken} from '../../../Utilities/StoreData';
+import {useInsets, useProfile, useToken} from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {COLORS} from '../../../Utilities/Colors';
@@ -44,6 +44,7 @@ import {Camera} from 'react-native-vision-camera';
 import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
 import AudioRecorder from '../../../Modals/AudioRecorder';
 import PollContainer from './PollContainer';
+import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -53,7 +54,7 @@ var isMount = true;
 
 const PostNugget = () => {
   const navigation = useNavigation();
-  const myProfile = useMyProfile();
+  const profile = useProfile();
   const token = useToken();
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenCamera, setisOpenCamera] = useState(false);
@@ -409,16 +410,16 @@ const PostNugget = () => {
           <View style={styles.topContainer}>
             <View style={styles.subContainer}>
               <ProfileWithBadge
-                badge={Badges(myProfile.user_status_id)}
+                badge={Badges(profile.user_status_id)}
                 isEnableGradient={false}
-                profileImage={myProfile.profile_image}
+                profileImage={profile.profile_image}
                 padding={0}
                 profileSize={38}
                 badgeSize={16}
               />
               <View style={styles.nameContainer}>
                 <StyledText style={styles.nameText}>
-                  {getSlicedText(myProfile.name, 10)}
+                  {getSlicedText(profile.name, 10)}
                 </StyledText>
                 <SubmitButton
                   buttonText={getSlicedText(selectedShareType.name, 10)}
@@ -533,7 +534,7 @@ const PostNugget = () => {
           ) : (
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder={`What’s on your mind, ${myProfile.name}!`}
+                placeholder={`What’s on your mind, ${profile.name}!`}
                 style={styles.textInput}
                 multiline
                 maxLength={500}
@@ -544,7 +545,7 @@ const PostNugget = () => {
                 onChangeText={settypedText}
                 numberOfLines={5}
                 textAlignVertical={'top'}
-                placeholderTextColor={COLORS.white}
+                placeholderTextColor={COLORS.placeHolderColor}
               />
               <View style={styles.emojiIconContainer}>
                 <SVGIcon
@@ -586,7 +587,39 @@ const PostNugget = () => {
             />
           </View>
         </View>
-        <EmojiPicker
+
+        {isOpenEmojiContainer ? (
+          <View
+            style={{
+              height: DIMENSIONS.window.height / 2 - 60,
+              backgroundColor: COLORS.white,
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              borderTopStartRadius: 10,
+              borderTopEndRadius: 10,
+            }}>
+            <EmojiSelector
+              showSearchBar={false}
+              showSectionTitles={false}
+              columns="8"
+              showHistory={false}
+              category={Categories.emotion}
+              onEmojiSelected={res => {
+                if (isMount) {
+                  settypedText(pre => {
+                    if (pre.length < 500) {
+                      return pre + res;
+                    }
+                    return pre;
+                  });
+                }
+              }}
+            />
+          </View>
+        ) : null}
+        {/* <EmojiPicker
           onEmojiSelected={res => {
             if (isMount) {
               settypedText(pre => {
@@ -608,7 +641,7 @@ const PostNugget = () => {
             header: {fontFamily: FONTS.DMSans.medium},
           }}
           onClose={() => setisOpenEmojiContainer(false)}
-        />
+        /> */}
         {/* {!isPollClicked && isOpenEmojiContainer && (
           <View style={styles.emojiContainer}>
             <EmojiKeyboard

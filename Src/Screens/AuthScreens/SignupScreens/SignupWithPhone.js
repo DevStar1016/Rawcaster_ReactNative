@@ -17,15 +17,12 @@ import {
   TERMS_CONDTION_URL,
 } from '../../../Services/ServiceConstants';
 import Toast from '../../../Components/Toast';
-import {
-  getAuthCode,
-  setIsGlobalLoading,
-  storeToken,
-} from '../../../Utilities/Methods';
+import {getAuthCode, storeToken} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import {useLocationDetails} from '../../../Utilities/StoreData';
 import {setIsVisibleInfluencers} from '../../../Store/Slices/UtilitySlice';
 import WebUrlLoaderModal from '../../../Modals/WebUrlLoaderModal';
+import Loader from '../../../Components/Loader';
 
 let isMount = true;
 const SignupWithPhone = ({route}) => {
@@ -38,6 +35,7 @@ const SignupWithPhone = ({route}) => {
   const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
     signUpType === 2 ? true : false,
   );
+  const [isLoading, setisLoading] = useState(false);
 
   const [isOpenTermsAndConditionsModal, setisOpenTermsAndConditionsModal] =
     useState(false);
@@ -46,10 +44,10 @@ const SignupWithPhone = ({route}) => {
     name: Yup.string().required('Name is required'),
     password: Yup.string()
       .min(8, 'Password to be at least 8 characters long')
-      .matches(
-        PASSWORD_REGEX,
-        'Password contain uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a number (0-9)',
-      )
+      // .matches(
+      //   PASSWORD_REGEX,
+      //   'Password contain uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a number (0-9)',
+      // )
       .required('Password is required'),
     login_id: isEnablePhoneNumber
       ? Yup.string().required('Phone number is required')
@@ -67,7 +65,8 @@ const SignupWithPhone = ({route}) => {
     validationSchema: validationSchema,
     onSubmit: values => {
       dispatch(setIsVisibleInfluencers(true));
-      setIsGlobalLoading(true, dispatch);
+      setisLoading(true);
+
       handleSignupWithPhone(values);
     },
   });
@@ -122,7 +121,7 @@ const SignupWithPhone = ({route}) => {
         Toast.fail(err.message);
       })
       .finally(() => {
-        setIsGlobalLoading(false, dispatch);
+        setisLoading(false);
       });
   };
 
@@ -222,6 +221,9 @@ const SignupWithPhone = ({route}) => {
             setModal={setisOpenTermsAndConditionsModal}
           />
         </SafeAreaView>
+      </Modal>
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
     </AuthScreenHOC>
   );

@@ -8,10 +8,9 @@ import User from '../Screens/MainScreens/User';
 import Talkshow from '../Screens/MainScreens/Talkshow';
 import CustomBottomTabBar from './CustomBottomTabBar';
 import {
-  useIsGlobalLoading,
   useIsOpenLoginAlert,
   useIsOpenVerifyPopup,
-  useMyProfile,
+  useProfile,
   useToken,
   useUserData,
 } from '../Utilities/StoreData';
@@ -32,8 +31,7 @@ export default function BottomTabNavigation() {
   const dispatch = useDispatch();
   const token = useToken();
   const user = useUserData();
-  const myProfile = useMyProfile();
-  const isLoading = useIsGlobalLoading();
+  const profile = useProfile();
   const isOpenLoginALert = useIsOpenLoginAlert();
   const isOpenVerifyPopup = useIsOpenVerifyPopup();
 
@@ -42,26 +40,24 @@ export default function BottomTabNavigation() {
 
   useEffect(() => {
     dispatch(
-      setIsOpenVerifyPopup(
-        token && isLoading === false && user && user?.acc_verify_status === 0,
-      ),
+      setIsOpenVerifyPopup(token && user && user?.acc_verify_status === 0),
     );
-  }, []);
+  }, [token]);
 
   const handleAccountVerification = () => {
     dispatch(setIsOpenVerifyPopup(false));
-    if (user.acc_verify_status === 0 && myProfile.is_profile_updated === 1) {
+    if (user.acc_verify_status === 0 && profile.is_profile_updated === 1) {
       if (
-        myProfile.two_type_verification === 1 &&
-        myProfile.mobile &&
-        myProfile.email_id
+        profile.two_type_verification === 1 &&
+        profile.mobile &&
+        profile.email_id
       ) {
         setisOpenVerificationOptions(true);
-      } else if (myProfile.email_id) {
+      } else if (profile.email_id) {
         navigation.navigate('OTPVerification', {
           otpType: 'email',
         });
-      } else if (myProfile.mobile) {
+      } else if (profile.mobile) {
         navigation.navigate('OTPVerification', {
           otpType: 'sms',
         });
@@ -69,7 +65,7 @@ export default function BottomTabNavigation() {
         Toast.fail('Phone Number and Email ID Missing');
       }
     } else {
-      navigation.navigate('MyProfile');
+      navigation.navigate('EditProfile');
     }
   };
 
@@ -107,7 +103,7 @@ export default function BottomTabNavigation() {
           }}
           onPressPositiveButton={handleAccountVerification}
           content={
-            user?.acc_verify_status === 0 && myProfile?.is_profile_updated === 1
+            user?.acc_verify_status === 0 && profile?.is_profile_updated === 1
               ? 'You need to complete your account validation before you can do this. Do you want to validate it now?'
               : 'Do you want to complete your profile now?'
           }

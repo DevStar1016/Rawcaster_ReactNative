@@ -28,6 +28,7 @@ import VideoIcon from '../Assets/Svg/video.svg';
 import HeartPinkIcon from '../Assets/Svg/heart_pink.svg';
 import HeartWhiteIcon from '../Assets/Svg/heart_white.svg';
 import CommentIcon from '../Assets/Svg/comment.svg';
+import CommentPinkIcon from '../Assets/Svg/comment_pink.svg';
 import SavePinkIcon from '../Assets/Svg/save_pink.svg';
 import SaveWhiteIcon from '../Assets/Svg/save_white.svg';
 import ShareIcon from '../Assets/Svg/share.svg';
@@ -69,6 +70,9 @@ import CloseRoundedWhiteIcon from '../Assets/Svg/close_rounded_white.svg';
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
 import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
 import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
+import MenuVerticalIcon from '../Assets/Svg/menu_vertical.svg';
+import CloseRoundedDimColorIcon from '../Assets/Svg/close_rounded_dim_color.svg';
+import CameraBlackIcon from '../Assets/Svg/camera_black.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -155,7 +159,11 @@ export type IconType =
   | 'close_rounded_white'
   | 'mute_white'
   | 'speaker_white'
-  | 'menu_horizontal';
+  | 'menu_horizontal'
+  | 'menu_vertical'
+  | 'close_rounded_dim_color'
+  | 'comment_pink'
+  | 'camera_black';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -235,4 +243,8 @@ export const ICONS = {
   mute_white: MuteWhiteIcon,
   speaker_white: SpeakerWhiteIcon,
   menu_horizontal: MenuHorizontalIcon,
+  menu_vertical: MenuVerticalIcon,
+  close_rounded_dim_color: CloseRoundedDimColorIcon,
+  comment_pink: CommentPinkIcon,
+  camera_black: CameraBlackIcon,
 };

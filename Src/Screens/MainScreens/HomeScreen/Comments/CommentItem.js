@@ -1,0 +1,201 @@
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import lodash from 'lodash';
+import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
+import StyledText from '../../../../Components/StyledText';
+import {dateToShortDate} from '../../../../Utilities/Methods';
+import SVGIcon from '../../../../Components/SVGIcon';
+import {COLORS} from '../../../../Utilities/Colors';
+import {FONTS} from '../../../../Utilities/Fonts';
+import {useProfile, useToken} from '../../../../Utilities/StoreData';
+import {likeAndUnlikeNuggetCommentService} from '../../../../Services/ApiService';
+import MenuPopup from '../../../../Components/MenuPopup';
+
+const CommentItem = ({
+  item,
+  replyData,
+  onPressReply,
+  isEnableReply = true,
+  onPressEdit,
+  onDeleteComment,
+}) => {
+  const [likedData, setlikedData] = useState({
+    liked: item.liked,
+    like_count: item.like_count,
+  });
+  const token = useToken();
+
+  const profile = useProfile();
+
+  const handleLikeComment = status => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('comment_id', item.comment_id);
+    formData.append('like', status ? 1 : 2);
+    likeAndUnlikeNuggetCommentService(formData)
+      .then(res => {})
+      .catch(e => {
+        // setlikedData(preData => {
+        //   let totalLikes = parseInt(preData.like_count);
+        //   totalLikes = !status ? totalLikes + 1 : totalLikes - 1;
+        //   return {
+        //     liked: !status,
+        //     like_count: !status ? totalLikes + 1 : totalLikes - 1,
+        //   };
+        // });
+      });
+  };
+
+  const debounceOnLike = useCallback(
+    lodash.debounce(handleLikeComment, 300),
+    [],
+  );
+
+  const ActionButton = ({marginLeft, name = '', icon, onPress, isSelected}) => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={[styles.actionButton, {marginLeft}]}
+        onPress={onPress}>
+        <SVGIcon icon={icon} height={15} width={15} marginRight={5} />
+        <StyledText
+          style={[
+            styles.text,
+            {color: isSelected ? COLORS.secondary : COLORS.white},
+          ]}>
+          {name}
+        </StyledText>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.itemContainer}>
+      <View>
+        <ProfileWithBadge
+          profileImage={item.profile_image}
+          profileSize={40}
+          padding={0}
+          extraMargin={0}
+        />
+      </View>
+      <View style={styles.contentContainer}>
+        <View style={styles.rowContainer}>
+          <StyledText style={styles.nameText}>{item.name}</StyledText>
+          <StyledText style={styles.text}>
+            {dateToShortDate(item.commented_date)}
+          </StyledText>
+        </View>
+        <View style={[styles.rowContainer, {paddingBottom: 0}]}>
+          <View style={{flex: 1}}>
+            <StyledText style={styles.text}>{item.comment}</StyledText>
+          </View>
+          {!item.isLoading && profile.user_id === item.user_id && (
+            <View style={{paddingLeft: 10, paddingVertical: 5}}>
+              <MenuPopup
+                options={[
+                  {id: 1, name: 'Edit'},
+                  {id: 2, name: 'Delete'},
+                ]}
+                onSelectOption={selectedId => {
+                  if (selectedId === 1) {
+                    onPressEdit();
+                  } else {
+                    onDeleteComment();
+                  }
+                }}
+              />
+            </View>
+          )}
+        </View>
+        <View style={styles.actionButtonsContainer}>
+          {item.isLoading ? (
+            <StyledText style={{color: COLORS.dimColor}}>Posting...</StyledText>
+          ) : (
+            <>
+              <ActionButton
+                icon={likedData.liked ? 'heart_pink' : 'heart_white'}
+                name={`Agree ${
+                  parseInt(likedData.like_count) > 0
+                    ? '(' + likedData.like_count + ')'
+                    : ''
+                }`}
+                isSelected={likedData.liked}
+                onPress={() => {
+                  // setcommentItem(pre => {
+                  //   let isLiked = !pre.liked;
+                  //   let likedCount = parseInt(pre.like_count);
+                  //   likedCount = isLiked ? likedCount + 1 : likedCount - 1;
+                  //   return {...pre, liked: isLiked, like_count: likedCount};
+                  // });
+                  setlikedData(pre => {
+                    let isLiked = !pre.liked;
+                    let likedCount = parseInt(pre.like_count);
+                    likedCount = isLiked ? likedCount + 1 : likedCount - 1;
+                    debounceOnLike(isLiked);
+                    return {liked: isLiked, like_count: likedCount};
+                  });
+                }}
+              />
+              {isEnableReply && (
+                <ActionButton
+                  icon={
+                    replyData && replyData.comment_id === item.comment_id
+                      ? 'comment_pink'
+                      : 'comment'
+                  }
+                  isSelected={
+                    replyData && replyData.comment_id === item.comment_id
+                  }
+                  marginLeft={10}
+                  name={`Reply ${
+                    item.reply && item.reply.length > 0
+                      ? '(' + item.reply.length + ')'
+                      : ''
+                  }`}
+                  onPress={onPressReply}
+                />
+              )}
+            </>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default CommentItem;
+
+const styles = StyleSheet.create({
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  text: {
+    color: COLORS.white,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingLeft: 10,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 5,
+    alignItems: 'center',
+  },
+  nameText: {
+    fontFamily: FONTS.DMSans.medium,
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    paddingVertical: 7,
+  },
+});

@@ -7,8 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {LegacyRef, useCallback, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import Badges from '../../../Utilities/Badges';
 import StyledText from '../../../Components/StyledText';
@@ -33,6 +38,7 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
 import {
   useInsets,
+  useProfile,
   useSettings,
   useToken,
   useUserData,
@@ -55,19 +61,23 @@ import lodash from 'lodash';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 import AnimatedBgFillContainer from '../../../Components/AnimatedBgFillContainer';
 import moment from 'moment';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import CommentsList from './Comments/CommentsList';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
   nugget: any;
   isLiked: boolean;
-  onPressLike?: () => void;
-  isSaved: boolean;
+  isSaved: '0' | '1';
   isPaused: boolean;
   isEnableADDButton?: boolean;
   isMuted: boolean;
   isEnableTopInsetsPadding?: boolean;
   textNuggetNumberOfLines?: number;
   headerContainerHeight: number;
+  setTotalComments: (value: number) => void;
+  setisOpenComments: (value: boolean) => void;
+  onPressLike?: () => void;
   onPressSave?: () => void;
   setisMuted?: (value: boolean) => void;
   onPressMuteUnmute?: () => void;
@@ -104,19 +114,24 @@ const NuggetActionsOverlay = ({
   isPaused,
   isEnableTopInsetsPadding,
   isMuted,
+  setisOpenComments,
+  setTotalComments,
   setisMuted,
   textNuggetNumberOfLines,
   headerContainerHeight,
   isEnableADDButton = true,
   onPressMuteUnmute,
+
   onPlayPauseVideo,
 }: Props) => {
   const navigation = useNavigation();
   const token = useToken();
+
   const user = useUserData();
   const settings = useSettings();
   const dispatch = useDispatch();
   const insets = useInsets();
+
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
@@ -126,6 +141,21 @@ const NuggetActionsOverlay = ({
     isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
     votedOptionID: null,
   });
+
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ['90%'], []);
+
+  const handlePresentModalPress = useCallback(() => {
+    setisOpenComments(true);
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleCloseCommentsModal = useCallback(() => {
+    setisOpenComments(false);
+    bottomSheetModalRef.current?.close();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    // console.log('handleSheetChanges', index);
+  }, []);
 
   const getNuggetType = () => {
     const nuggetType = NUGGET_SHARE_TYPE.find(
@@ -169,54 +199,6 @@ const NuggetActionsOverlay = ({
         Toast.fail(e.message);
       });
   };
-
-  const likeAndUnlikeNuggetApiCall = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nugget.nugget_id);
-    formData.append('like', isLiked ? 2 : 1);
-    likeAndUnlikeNuggetService(formData)
-      .then(res => {
-        if (res.data.status === 1 && onPressLike) {
-          onPressLike();
-        }
-        // else if (res.data.status === 0) {
-        //   Toast.fail(res.data.msg);
-        // }
-      })
-      .catch(e => {
-        console.log(e, 'ERROR LIKE AND UNLIKE NUGGET API');
-      });
-  };
-
-  const saveAndUnsaveNuggetApiCall = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nugget.nugget_id);
-    formData.append('save', isSaved ? 2 : 1);
-    saveAndUnsaveNuggetService(formData)
-      .then(res => {
-        if (res.data.status === 1 && onPressSave) {
-          onPressSave();
-        }
-        // else if (res.data.status === 0) {
-        //   Toast.fail(res.data.msg);
-        // }
-      })
-      .catch(e => {
-        console.log(e, 'ERROR SAVE AND UNSAVE NUGGET API');
-      });
-  };
-
-  const debounceOnLike = useCallback(
-    lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
-    [isLiked],
-  );
-
-  const debounceOnSave = useCallback(
-    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
-    [isSaved],
-  );
 
   const getRemainingTimeOfPoll = (duration: string) => {
     const [days, hours, minutes] = duration.split(':').map(Number);
@@ -287,6 +269,19 @@ const NuggetActionsOverlay = ({
     return [...tempPollOptions];
   };
 
+  const onPressUrl = (value: any) => {
+    if (value) {
+      if (value.includes('rawcaster')) {
+        Linking.openURL(value)
+          .then(res => {})
+          .catch(e => {});
+      } else {
+        setopenUrlConfirmation(true);
+        seturl(value);
+      }
+    }
+  };
+
   const ActionIconContainer = ({
     icon,
     text = '',
@@ -338,18 +333,6 @@ const NuggetActionsOverlay = ({
     return <StyledText style={styles.userDetailsText}>{value}</StyledText>;
   };
 
-  const onPressUrl = (value: any) => {
-    if (value) {
-      if (value.includes('rawcaster')) {
-        Linking.openURL(value)
-          .then(res => {})
-          .catch(e => {});
-      } else {
-        setopenUrlConfirmation(true);
-        seturl(value);
-      }
-    }
-  };
   const PollData = () => {
     return (
       <View style={{paddingRight: 20}}>
@@ -368,6 +351,14 @@ const NuggetActionsOverlay = ({
               marginTop={10}
               isDisabled={pollVotedData.isVoted}
               onPress={() => {
+                if (!token) {
+                  dispatch(setIsOpenLoginAlert(true));
+                  return;
+                } else if (token && user && user?.acc_verify_status === 0) {
+                  dispatch(setIsOpenVerifyPopup(true));
+                  return;
+                }
+
                 setpollVotedData({
                   isVoted: true,
                   votedOptionID: item.option_id,
@@ -513,7 +504,7 @@ const NuggetActionsOverlay = ({
                       ? 5
                       : textNuggetNumberOfLines ?? 15
                   }
-                  onPress={onPressUrl}
+                  onPressUrl={onPressUrl}
                   style={{
                     color: COLORS.white,
                     fontSize: 15.5,
@@ -542,16 +533,20 @@ const NuggetActionsOverlay = ({
           <ActionIconContainer
             icon={isLiked ? 'heart_pink' : 'heart_white'}
             text={bigNumberFormater(nugget.total_likes)}
-            onPress={debounceOnLike}
+            onPress={onPressLike}
           />
           <ActionIconContainer
             icon="comment"
             text={bigNumberFormater(nugget.total_comments)}
+            onPress={() => {
+              // setisOpenCommentsModal(true);
+              handlePresentModalPress();
+            }}
           />
           <ActionIconContainer icon="share" text="726" isMustLogin={false} />
           <ActionIconContainer
             icon={isSaved ? 'save_pink' : 'save_white'}
-            onPress={debounceOnSave}
+            onPress={onPressSave}
           />
         </View>
       </View>
@@ -612,6 +607,49 @@ const NuggetActionsOverlay = ({
           }
         />
       </Modal>
+
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        handleStyle={{display: 'none'}}
+        onDismiss={() => {
+          setisOpenComments(false);
+        }}
+        topInset={insets.top ? insets.top : StatusBar.currentHeight}
+        bottomInset={insets.bottom}
+        stackBehavior="push"
+        keyboardBlurBehavior={'restore'}
+        android_keyboardInputMode="adjustPan"
+        backgroundComponent={() => <View />}
+        backdropComponent={props => {
+          return (
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                position: 'absolute',
+                backgroundColor: COLORS.transparentDimColor,
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+              }}
+              activeOpacity={1}
+              onPress={() => {
+                handleCloseCommentsModal();
+              }}
+            />
+          );
+        }}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}>
+        <CommentsList
+          onPressBack={() => {
+            handleCloseCommentsModal();
+          }}
+          id={nugget.nugget_id}
+          setTotalComments={setTotalComments}
+          totalComments={nugget.total_comments}
+        />
+      </BottomSheetModal>
     </TouchableOpacity>
   );
 };

@@ -12,7 +12,9 @@ const TextOnlyNugget = ({
   headerContainerHeight,
   textNuggetNumberOfLines,
   onPressLike,
+  setTotalComments,
   onPressSave,
+  setisOpenComments,
   isEnableTopInsetsPadding,
   isEnableADDButton,
   mediaHeight,
@@ -33,7 +35,9 @@ const TextOnlyNugget = ({
         isEnableTopInsetsPadding={isEnableTopInsetsPadding}
         textNuggetNumberOfLines={textNuggetNumberOfLines}
         isEnableADDButton={isEnableADDButton}
+        setisOpenComments={setisOpenComments}
         headerContainerHeight={headerContainerHeight}
+        setTotalComments={setTotalComments}
         // nuggetType={mediaItem.media_type}
         isLiked={nuggetData.liked}
         onPressLike={onPressLike}

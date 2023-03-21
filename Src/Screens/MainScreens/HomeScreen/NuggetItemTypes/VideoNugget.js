@@ -11,6 +11,7 @@ const VideoNugget = ({
   url,
   paused,
   isMuted,
+  isOpenComments,
   onFinishPlaying,
   index,
   mediaHeight,
@@ -150,9 +151,7 @@ const VideoNugget = ({
         }}
         ignoreSilentSwitch={'ignore'}
         // style={VideoDimensions}
-        style={
-          IS_IOS ? {width: windowWidth, height: windowHeight} : videoDimensions
-        }
+        style={{width: windowWidth, height: windowHeight}}
         resizeMode="contain"
         onError={videoError}
         playInBackground={false}
@@ -161,10 +160,11 @@ const VideoNugget = ({
         useTextureView={true}
         paused={paused}
         muted={isMuted}
-        repeat={false}
+        repeat={isOpenComments}
         onLoad={onLoadComplete}
         onProgress={PlayBackStatusUpdate}
         onEnd={() => {
+          videoPlayer.current.seek(0);
           onFinishPlaying(index);
         }}
       />

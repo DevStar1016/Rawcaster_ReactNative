@@ -1,100 +1,66 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import {StyleSheet, View} from 'react-native';
+import React, {useRef, useState} from 'react';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
 import DefaultBackground from '../../../../Components/DefaultBackground';
 import {useInsets} from '../../../../Utilities/StoreData';
-import Sound from 'react-native-sound';
-// import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-// const audioRecorderPlayer = new AudioRecorderPlayer();
-// var eventListener = undefined;
+import Video from 'react-native-video';
+
 const AudioNugget = ({
   url,
   paused,
+  isOpenComments,
   isMuted,
   onFinishPlaying,
   index,
   mediaHeight,
 }) => {
-  const sound = new Sound(url, Sound.MAIN_BUNDLE, error => {
-    if (error) {
-      console.log(error, 'ERRORRRR');
-      return;
-    }
-    // startPlayer();
-    console.log(sound.getDuration(), 'DURATION');
-  });
+  const videoPlayer = useRef(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setduration] = useState(0);
 
   const insets = useInsets();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
-
-  useEffect(() => {
-    if (paused) {
-      pausePlayer();
-    } else {
-      startPlayer();
-    }
-  }, [paused]);
-
-  useEffect(() => {
-    setPlayerVolume();
-  }, [isMuted]);
-
-  const setPlayerVolume = async () => {
-    if (sound) {
-      sound.setVolume(isMuted ? 0.0 : 1.0);
-      // try {
-      //   await audioRecorderPlayer.setVolume(isMuted ? 0.0 : 1.0);
-      // } catch (e) {
-      //   console.log(e, 'ERROR SET VOLUME');
-      // }
-    }
+  const [videoDimensions, setvideoDimensions] = useState({
+    width: windowWidth,
+    height: windowWidth,
+  });
+  const videoError = error => {
+    console.log(error, 'ERROR VIDEO');
   };
 
-  const pausePlayer = async () => {
-    if (sound) {
-      sound.pause(() => {
-        console.log('Paused');
-      });
-    }
-    // try {
-    //   await audioRecorderPlayer.stopPlayer();
-    //   audioRecorderPlayer.removePlayBackListener();
-    // } catch (e) {
-    //   console.log(e, 'STOP ERROR');
-    // }
+  const PlayBackStatusUpdate = playbackStatus => {
+    try {
+      let currentTime = Math.round(playbackStatus.currentTime);
+      let duration = Math.round(playbackStatus.seekableDuration);
+      if (currentTime)
+        if (duration) setProgress((currentTime / duration) * 100);
+    } catch (error) {}
   };
 
-  const startPlayer = () => {
-    setPlayerVolume();
-    sound.play(success => {
-      console.log(success, 'STATUS');
-      if (success) {
-        console.log('SUCCESS PLAY');
-        sound.stop();
-        onFinishPlaying(index);
-      } else {
-        console.log('ERROR PLAY');
+  const onLoadComplete = event => {
+    const naturalSize = event.naturalSize;
+
+    try {
+      const naturalWidth = naturalSize.width;
+      const naturalHeight = naturalSize.height;
+
+      if (naturalWidth && naturalHeight && naturalWidth > naturalHeight) {
+        setvideoDimensions({
+          width: windowWidth,
+          height: windowWidth * (naturalHeight / naturalWidth),
+        });
+      } else if (naturalWidth && naturalHeight) {
+        setvideoDimensions({
+          width: windowHeight * (naturalWidth / naturalHeight),
+          height: windowHeight,
+        });
       }
-    });
-
-    // audioRecorderPlayer
-    //   .startPlayer(url)
-    //   .then(res => {
-    //     setPlayerVolume();
-    //     audioRecorderPlayer.addPlayBackListener(e => {
-    //       console.log('playBackListener', e);
-    //       if (e.currentPosition === e.duration) {
-    //         stopPlayer();
-    //         onFinishPlaying(index);
-    //       }
-    //     });
-    //     console.log(res, 'AUDIO PLAY');
-    //   })
-    //   .catch(e => {
-    //     console.log('startPlayer error', err.message);
-    //   });
+      setduration(event.duration * 1000);
+    } catch (error) {
+      console.log(error, 'ONLOAD COMPLETE ERROR');
+    }
   };
 
   return (
@@ -104,6 +70,30 @@ const AudioNugget = ({
         {height: windowHeight, width: windowWidth},
       ]}>
       <DefaultBackground />
+      <Video
+        ref={videoPlayer}
+        source={{
+          uri: url,
+        }}
+        ignoreSilentSwitch={'ignore'}
+        // style={VideoDimensions}
+        style={{width: 0, height: 0}}
+        resizeMode="contain"
+        onError={videoError}
+        playInBackground={false}
+        playWhenInactive={false}
+        progressUpdateInterval={1000}
+        useTextureView={true}
+        paused={paused}
+        muted={isMuted}
+        repeat={isOpenComments}
+        onLoad={onLoadComplete}
+        onProgress={PlayBackStatusUpdate}
+        onEnd={() => {
+          videoPlayer.current.seek(0);
+          onFinishPlaying(index);
+        }}
+      />
     </View>
   );
 };

@@ -1,10 +1,9 @@
-import {AppState, Modal} from 'react-native';
+import {AppState} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {useDispatch} from 'react-redux';
-import ToastContainer from 'react-native-toast-message';
 import Geocode from 'react-geocode';
 import LoginIntro from './Src/Screens/IntroScreens.js/LoginIntro';
 import {
@@ -13,14 +12,11 @@ import {
   USER_DATA,
 } from './Src/Utilities/EncryptedStoreConstants';
 import {setToken, setUserData} from './Src/Store/Slices/AuthSlice';
-import {useIsGlobalLoading, useToken} from './Src/Utilities/StoreData';
+import {useToken} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
 import RootStack from './Src/Stacks/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import CustomStatusBar from './Src/Components/CustomStatusBar';
-import {COLORS} from './Src/Utilities/Colors';
-import ToastConfig from './Src/Utilities/ToastConfig';
-import Loader from './Src/Components/Loader';
 import axios from 'axios';
 import {removeToken} from './Src/Utilities/Methods';
 import Toast from './Src/Components/Toast';
@@ -40,7 +36,6 @@ const App = () => {
   const [isIntroSeen, setisIntroSeen] = useState(false);
   const dispatch = useDispatch();
   const token = useToken();
-  const isGlobalLoading = useIsGlobalLoading();
   const [isFetchingToken, setisFetchingToken] = useState(true);
   const appState = useRef(AppState.currentState);
 
@@ -164,14 +159,6 @@ const App = () => {
       ) : (
         <LoginIntro onSkipIntro={onSkipIntro} />
       )}
-      <ToastContainer
-        visibilityTime={3000}
-        config={ToastConfig}
-        topOffset={40}
-      />
-      <Modal onRequestClose={() => {}} transparent visible={isGlobalLoading}>
-        <Loader bgColor={COLORS.transparentDimColor} />
-      </Modal>
     </SafeAreaProvider>
   );
 };

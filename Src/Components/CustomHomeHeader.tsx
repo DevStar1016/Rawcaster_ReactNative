@@ -86,7 +86,7 @@ const CustomHomeHeader = ({
           width={28}
           onPress={() => {
             if (isLogin()) {
-              navigation.navigate('MyProfile');
+              navigation.navigate('ProfileStack');
             }
           }}
           isButton
