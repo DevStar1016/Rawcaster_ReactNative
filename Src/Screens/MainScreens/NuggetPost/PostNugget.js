@@ -600,7 +600,7 @@ const PostNugget = () => {
               borderTopStartRadius: 10,
               borderTopEndRadius: 10,
             }}>
-            <EmojiSelector
+            {/* <EmojiSelector
               showSearchBar={false}
               showSectionTitles={false}
               columns="8"
@@ -615,6 +615,27 @@ const PostNugget = () => {
                     return pre;
                   });
                 }
+              }}
+            /> */}
+            <EmojiKeyboard
+              onEmojiSelected={res => {
+                if (isMount) {
+                  settypedText(pre => {
+                    if (pre.length < 500) {
+                      return pre + res.emoji;
+                    }
+                    return pre;
+                  });
+                }
+              }}
+              disabledCategories={['people_body', 'flags']}
+              categoryPosition="bottom"
+              enableCategoryChangeGesture={false}
+              defaultHeight={DIMENSIONS.window.height / 2 + 10}
+              styles={{
+                header: {fontFamily: FONTS.DMSans.medium},
+                // container
+                // container: {width: },
               }}
             />
           </View>

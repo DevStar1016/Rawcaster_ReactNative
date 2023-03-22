@@ -9,8 +9,13 @@ import Compressor from 'react-native-compressor';
 import {SALT_KEY} from '../Services/ServiceConstants';
 import {setToken, setUserData} from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
+import {
+  setGlobalLoading,
+  setLocationDetails,
+} from '../Store/Slices/UtilitySlice';
 import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 export const getAuthCode = (value = '') => {
   return sha1(SALT_KEY + value);
@@ -314,3 +319,62 @@ export const utcToUserTimezone = (time, zonename) => {
     .format('YYYY-MM-DD HH:mm:ss');
   return moment(displayCutoff);
 };
+
+export function imageVideoPicker({
+  width = undefined,
+  height = undefined,
+  isCrop = true,
+  multiple = false,
+  mediaType,
+}) {
+  const promise = new Promise(async (resolve, reject) => {
+    ImageCropPicker.openPicker({
+      width: width,
+      height: height,
+      cropping: mediaType === 'photo',
+      multiple: multiple,
+      mediaType: mediaType,
+      smartAlbums: [
+        'PhotoStream',
+        'Generic',
+        'Panoramas',
+        'Videos',
+        'Favorites',
+        'Timelapses',
+        'AllHidden',
+        'RecentlyAdded',
+        'Bursts',
+        'SlomoVideos',
+        'UserLibrary',
+        'SelfPortraits',
+        'Screenshots',
+        'DepthEffect',
+        'LivePhotos',
+        'Animated',
+        'LongExposure',
+      ],
+    })
+      .then(res => {
+        if (multiple) {
+          let selectedMediaList = [...res].map(item => {
+            return {
+              uri: getUrlWithFilePrefix(item.path),
+              type: item.mime,
+              name: getFileName(item.path),
+            };
+          });
+          resolve(selectedMediaList);
+        } else {
+          resolve({
+            uri: getUrlWithFilePrefix(res.path),
+            type: res.mime,
+            name: getFileName(res.path),
+          });
+        }
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+  return promise;
+}

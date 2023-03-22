@@ -73,6 +73,11 @@ import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
 import MenuVerticalIcon from '../Assets/Svg/menu_vertical.svg';
 import CloseRoundedDimColorIcon from '../Assets/Svg/close_rounded_dim_color.svg';
 import CameraBlackIcon from '../Assets/Svg/camera_black.svg';
+import CakeGreyIcon from '../Assets/Svg/cake_grey.svg';
+import StudyGreyIcon from '../Assets/Svg/study_grey.svg';
+import LocationGreyIcon from '../Assets/Svg/location_grey.svg';
+import WorkGreyIcon from '../Assets/Svg/work_grey.svg';
+import CalanderGreyIcon from '../Assets/Svg/calander_grey.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -163,7 +168,12 @@ export type IconType =
   | 'menu_vertical'
   | 'close_rounded_dim_color'
   | 'comment_pink'
-  | 'camera_black';
+  | 'camera_black'
+  | 'cake_grey'
+  | 'study_grey'
+  | 'location_grey'
+  | 'work_grey'
+  | 'calander_grey';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -247,4 +257,9 @@ export const ICONS = {
   close_rounded_dim_color: CloseRoundedDimColorIcon,
   comment_pink: CommentPinkIcon,
   camera_black: CameraBlackIcon,
+  cake_grey: CakeGreyIcon,
+  study_grey: StudyGreyIcon,
+  location_grey: LocationGreyIcon,
+  work_grey: WorkGreyIcon,
+  calander_grey: CalanderGreyIcon,
 };

@@ -14,6 +14,7 @@ import {
   BottomSheetFlatList,
   BottomSheetScrollView,
   BottomSheetTextInput,
+  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
 import {useProfile, useToken} from '../../../../Utilities/StoreData';
@@ -29,9 +30,16 @@ import {
 import {getSlicedText} from '../../../../Utilities/Methods';
 import CommentReplyFullItem from './CommentReplyFullItem';
 import Toast from '../../../../Components/Toast';
+import {EmojiKeyboard} from 'rn-emoji-keyboard';
 
 var isMount = true;
-const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
+const CommentsList = ({
+  onPressBack,
+  id,
+  totalComments,
+  setTotalComments,
+  setisEnableContentPanningGesture,
+}) => {
   const [isOpenEmojiContainer, setisOpenEmojiContainer] = useState(false);
   const inpuFieldRef = useRef(null);
   const [replyData, setreplyData] = useState(null);
@@ -322,6 +330,7 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
           Keyboard.dismiss();
           if (isOpenEmojiContainer && isMount) {
             setisOpenEmojiContainer(false);
+            setisEnableContentPanningGesture(true);
           }
         }}>
         {isLoading ? (
@@ -419,6 +428,7 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
               onFocus={() => {
                 if (isMount) {
                   setisOpenEmojiContainer(false);
+                  setisEnableContentPanningGesture(true);
                 }
               }}
               placeholder={
@@ -438,6 +448,7 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
                 onPress={() => {
                   Keyboard.dismiss();
                   if (isMount) {
+                    setisEnableContentPanningGesture(false);
                     setisOpenEmojiContainer(true);
                   }
                 }}
@@ -450,6 +461,7 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
                   if (typedText.trim()) {
                     Keyboard.dismiss();
                     if (isOpenEmojiContainer && isMount) {
+                      setisEnableContentPanningGesture(true);
                       setisOpenEmojiContainer(false);
                     }
                     if (editData) {
@@ -477,8 +489,29 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
             borderTopStartRadius: 10,
             borderTopEndRadius: 10,
           }}>
-          <BottomSheetScrollView nestedScrollEnabled>
-            <EmojiSelector
+          <BottomSheetView style={{flex: 1}}>
+            <EmojiKeyboard
+              onEmojiSelected={res => {
+                if (isMount) {
+                  settypedText(pre => {
+                    if (pre.length < 500) {
+                      return pre + res.emoji;
+                    }
+                    return pre;
+                  });
+                }
+              }}
+              disabledCategories={['people_body', 'flags']}
+              categoryPosition="bottom"
+              enableCategoryChangeGesture={false}
+              defaultHeight={DIMENSIONS.window.height / 2 + 10}
+              styles={{
+                header: {fontFamily: FONTS.DMSans.medium},
+                // container
+                // container: {width: },
+              }}
+            />
+            {/* <EmojiSelector
               showSearchBar={false}
               showSectionTitles={false}
               columns="8"
@@ -494,8 +527,8 @@ const CommentsList = ({onPressBack, id, totalComments, setTotalComments}) => {
                   });
                 }
               }}
-            />
-          </BottomSheetScrollView>
+            /> */}
+          </BottomSheetView>
         </TouchableOpacity>
       ) : null}
     </View>

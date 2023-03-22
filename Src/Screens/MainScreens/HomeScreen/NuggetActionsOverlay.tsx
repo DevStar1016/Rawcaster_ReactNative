@@ -131,6 +131,8 @@ const NuggetActionsOverlay = ({
   const settings = useSettings();
   const dispatch = useDispatch();
   const insets = useInsets();
+  const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
+    useState(true);
 
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
@@ -612,6 +614,7 @@ const NuggetActionsOverlay = ({
         ref={bottomSheetModalRef}
         handleStyle={{display: 'none'}}
         onDismiss={() => {
+          setisEnableContentPanningGesture(true);
           setisOpenComments(false);
         }}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
@@ -620,6 +623,7 @@ const NuggetActionsOverlay = ({
         keyboardBlurBehavior={'restore'}
         android_keyboardInputMode="adjustPan"
         backgroundComponent={() => <View />}
+        enableContentPanningGesture={isEnableContentPanningGesture}
         backdropComponent={props => {
           return (
             <TouchableOpacity
@@ -645,6 +649,7 @@ const NuggetActionsOverlay = ({
           onPressBack={() => {
             handleCloseCommentsModal();
           }}
+          setisEnableContentPanningGesture={setisEnableContentPanningGesture}
           id={nugget.nugget_id}
           setTotalComments={setTotalComments}
           totalComments={nugget.total_comments}
