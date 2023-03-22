@@ -6,11 +6,35 @@ import EventImage from '../../Assets/Png/test_event.png';
 import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import SVGIcon from '../../Components/SVGIcon';
+import moment from 'moment';
 
-const EventListItem = ({item}) => {
+const EventListItem = ({item, eventType = 'event', marginTop = 10}) => {
+  const getNavigationText = () => {
+    switch (eventType) {
+      case 'event':
+        return 'Join Event';
+      case 'talkshow':
+        return 'Start Talkshow';
+      case 'meeting':
+        return 'Join Meeting';
+
+      default:
+        return '';
+    }
+  };
+
   return (
-    <View style={styles.mainContainer}>
-      <Image source={EventImage} resizeMode="cover" style={{height: 140}} />
+    <View style={[styles.mainContainer, {marginTop: marginTop}]}>
+      <Image
+        source={{uri: item.banner_image}}
+        resizeMode="cover"
+        style={{height: 140}}
+      />
+      {eventType !== 'meeting' ? (
+        <View style={styles.eventBadge}>
+          <Text>kjjkjjkjkjkd</Text>
+        </View>
+      ) : null}
       <View style={styles.contentContainer}>
         <View style={styles.titleButtonsContainer}>
           <View>
@@ -26,7 +50,9 @@ const EventListItem = ({item}) => {
             </TouchableOpacity>
           </View>
         </View>
-        <StyledText style={{paddingVertical: 5}}>{item.message}</StyledText>
+        {item.message ? (
+          <StyledText style={{paddingVertical: 5}}>{item.message}</StyledText>
+        ) : null}
         <View style={styles.dateTimeContainer}>
           <View style={styles.dateTime}>
             <SVGIcon
@@ -35,7 +61,9 @@ const EventListItem = ({item}) => {
               height={20}
               width={20}
             />
-            <StyledText style={{paddingVertical: 5}}>20 Dec 2022</StyledText>
+            <StyledText style={{paddingVertical: 5}}>
+              {moment(item.start_date_time).format('DD-MMM-YYYY')}
+            </StyledText>
           </View>
           <View style={styles.dateTime}>
             <SVGIcon
@@ -45,13 +73,15 @@ const EventListItem = ({item}) => {
               width={20}
             />
             <StyledText style={{paddingVertical: 5}}>
-              10:00 PM - (EST)
+              {moment(item.start_date_time).format('hh:mm A')}
             </StyledText>
           </View>
         </View>
         <View style={styles.startButtonContainer}>
           <TouchableOpacity style={styles.startButton} activeOpacity={0.7}>
-            <StyledText style={styles.startText}>Start Event</StyledText>
+            <StyledText style={styles.startText}>
+              {getNavigationText()}
+            </StyledText>
             <SVGIcon icon="right_arrow" height={15} width={15} marginLeft={5} />
           </TouchableOpacity>
         </View>
@@ -120,5 +150,13 @@ const styles = StyleSheet.create({
   startText: {
     fontSize: 16,
     fontFamily: FONTS.DMSans.bold,
+  },
+  eventBadge: {
+    padding: 5,
+    backgroundColor: COLORS.secondary,
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    borderRadius: 5,
   },
 });

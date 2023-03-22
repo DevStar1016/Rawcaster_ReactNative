@@ -19,6 +19,7 @@ type Props = {
   marginVertical?: number;
   marginHorizontal?: number;
   onLayoutHeight?: (height: number) => void;
+  isPrimarySearchButton?: boolean;
 };
 
 const SearchInput = ({
@@ -27,6 +28,7 @@ const SearchInput = ({
   marginVertical = 0,
   marginHorizontal,
   onLayoutHeight,
+  isPrimarySearchButton = true,
 }: Props) => {
   const [searchValue, setsearchValue] = useState('');
   return (
@@ -47,7 +49,14 @@ const SearchInput = ({
         />
       </View>
       <TouchableOpacity
-        style={styles.searchButton}
+        style={[
+          styles.searchButton,
+          {
+            backgroundColor: isPrimarySearchButton
+              ? COLORS.primary
+              : COLORS.secondary,
+          },
+        ]}
         activeOpacity={0.7}
         onPress={() => {
           Keyboard.dismiss();
