@@ -17,6 +17,7 @@ type Props = {
   placeHolderText?: string;
   onPressSearch: (value: string) => void;
   marginVertical?: number;
+  searchButtonColor?: string;
   marginHorizontal?: number;
   onLayoutHeight?: (height: number) => void;
   isPrimarySearchButton?: boolean;
@@ -28,6 +29,7 @@ const SearchInput = ({
   marginVertical = 0,
   marginHorizontal,
   onLayoutHeight,
+  searchButtonColor = COLORS.primary,
   isPrimarySearchButton = true,
 }: Props) => {
   const [searchValue, setsearchValue] = useState('');
@@ -52,9 +54,7 @@ const SearchInput = ({
         style={[
           styles.searchButton,
           {
-            backgroundColor: isPrimarySearchButton
-              ? COLORS.primary
-              : COLORS.secondary,
+            backgroundColor: searchButtonColor,
           },
         ]}
         activeOpacity={0.7}

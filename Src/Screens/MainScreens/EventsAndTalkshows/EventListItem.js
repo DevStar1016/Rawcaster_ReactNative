@@ -1,14 +1,13 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
-import {COLORS} from '../../Utilities/Colors';
-import BOX_SHADOW from '../../Utilities/BoxShadow';
-import EventImage from '../../Assets/Png/test_event.png';
-import StyledText from '../../Components/StyledText';
-import {FONTS} from '../../Utilities/Fonts';
-import SVGIcon from '../../Components/SVGIcon';
+import {COLORS} from '../../../Utilities/Colors';
+import BOX_SHADOW from '../../../Utilities/BoxShadow';
+import StyledText from '../../../Components/StyledText';
+import {FONTS} from '../../../Utilities/Fonts';
+import SVGIcon from '../../../Components/SVGIcon';
 import moment from 'moment';
 
-const EventListItem = ({item, eventType = 'event', marginTop = 10}) => {
+const EventListItem = ({item, eventType = 'event', bgColor = COLORS.white}) => {
   const getNavigationText = () => {
     switch (eventType) {
       case 'event':
@@ -24,7 +23,7 @@ const EventListItem = ({item, eventType = 'event', marginTop = 10}) => {
   };
 
   return (
-    <View style={[styles.mainContainer, {marginTop: marginTop}]}>
+    <View style={styles.mainContainer}>
       <Image
         source={{uri: item.banner_image}}
         resizeMode="cover"
@@ -32,7 +31,7 @@ const EventListItem = ({item, eventType = 'event', marginTop = 10}) => {
       />
       {eventType !== 'meeting' ? (
         <View style={styles.eventBadge}>
-          <Text>kjjkjjkjkjkd</Text>
+          <StyledText>Talkshow</StyledText>
         </View>
       ) : null}
       <View style={styles.contentContainer}>

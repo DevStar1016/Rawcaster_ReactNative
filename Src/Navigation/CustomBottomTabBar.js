@@ -49,7 +49,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           Icon = NotificationsIcon;
         } else if (route.name === 'HomeStack') {
           Icon = EventsIcon;
-        } else if (route.name === 'Talkshow') {
+        } else if (route.name === 'TalkshowStack') {
           Icon = TalkShowIcon;
         } else if (route.name === 'User') {
           Icon = UserIcon;

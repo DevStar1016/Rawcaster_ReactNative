@@ -5,7 +5,6 @@ import Events from '../Screens/MainScreens/Events';
 import HomeStack from '../Stacks/HomeStack';
 import Notifications from '../Screens/MainScreens/Notifications';
 import User from '../Screens/MainScreens/User';
-import Talkshow from '../Screens/MainScreens/Talkshow';
 import CustomBottomTabBar from './CustomBottomTabBar';
 import {
   useIsOpenLoginAlert,
@@ -24,6 +23,7 @@ import {
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
 } from '../Store/Slices/UtilitySlice';
+import TalkshowStack from '../Stacks/TalkshowStack';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -92,7 +92,7 @@ export default function BottomTabNavigation() {
         <Tab.Screen name="Events" component={Events} />
         <Tab.Screen name="Notifications" component={Notifications} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
-        <Tab.Screen name="Talkshow" component={Talkshow} />
+        <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
         <Tab.Screen name="User" component={User} />
       </Tab.Navigator>
       <Modal onRequestClose={() => {}} transparent visible={isOpenVerifyPopup}>
