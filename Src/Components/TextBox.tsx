@@ -1,12 +1,15 @@
 import {
   KeyboardTypeOptions,
+  NativeSyntheticEvent,
+  ReturnKeyTypeOptions,
   StyleSheet,
   TextInput,
+  TextInputSubmitEditingEventData,
   TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {LegacyRef, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 
 import SVGIcon, {SVGIconProps} from './SVGIcon';
@@ -15,9 +18,17 @@ import {FONTS} from '../Utilities/Fonts';
 import StyledText from './StyledText';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 
+type AppendedListProps = {
+  list?: [];
+  fieldName?: string;
+  onRemoveItem?: (item: any) => void;
+};
+
 interface TextBoxProps {
   placeHolder?: string;
   title?: string;
+  returnKeyType?: ReturnKeyTypeOptions;
+  innerRef?: LegacyRef<TextInput> | undefined;
   isSecure?: boolean;
   errorText?: string;
   icon?: IconType;
@@ -26,11 +37,11 @@ interface TextBoxProps {
   value?: string;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
+  mainContainerMarginTop?: number;
   isEditable?: boolean;
   backgroundColor?: string;
   isEnablePasswordConditionText?: boolean;
   passwordConditionTextStyle?: TextStyle;
-  onChangeText?: (text: string) => void;
   mainContainerMarginVertical?: number;
   inputContainerMarginVertical?: number;
   titlePaddingVertical?: number;
@@ -39,11 +50,32 @@ interface TextBoxProps {
   textColor?: string;
   isEnableOuterRightIcon?: boolean;
   outerRightIconProps: SVGIconProps;
+  multiline?: boolean;
+  isVisible?: boolean;
+  inputContainerHeight?: number;
+  isEnableListAppend?: boolean;
+  appendedListProps?: AppendedListProps;
+
+  clearButtonMode?:
+    | 'never'
+    | 'while-editing'
+    | 'unless-editing'
+    | 'always'
+    | undefined;
+
+  onChangeText?: (text: string) => void;
+  onSubmitEditing?: (
+    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
+  ) => void | undefined;
+  textAlignVertical?: 'auto' | 'top' | 'bottom' | 'center' | undefined;
 }
 
 const TextBox = ({
+  innerRef,
+  isVisible = true,
   placeHolder = '',
   title = '',
+  returnKeyType,
   iconHeight = 25,
   iconWidth = 25,
   isSecure = false,
@@ -64,20 +96,62 @@ const TextBox = ({
   textColor = COLORS.black,
   isEnableOuterRightIcon = false,
   outerRightIconProps = {},
+  multiline = false,
+  inputContainerHeight = TEXT_INPUT_HEIGHT,
+  textAlignVertical,
+  appendedListProps,
+  onSubmitEditing,
+  clearButtonMode,
+  mainContainerMarginTop,
+  isEnableListAppend = false,
 }: TextBoxProps) => {
   const [isVisiblePassword, setisVisiblePassword] = useState(false);
+
+  const getListItemText = (item: any) => {
+    if (appendedListProps?.fieldName) {
+      return item[appendedListProps?.fieldName];
+    }
+    return item;
+  };
 
   return (
     <View
       style={[
         styles.mainContainer,
-        {marginVertical: mainContainerMarginVertical},
+        {
+          marginVertical: mainContainerMarginVertical,
+          marginTop: mainContainerMarginTop,
+          display: isVisible ? 'flex' : 'none',
+        },
       ]}>
       {title && (
         <StyledText
           style={{paddingVertical: titlePaddingVertical, ...titleStyle}}>
           {title}
         </StyledText>
+      )}
+      {isEnableListAppend && (
+        <View style={styles.listContainer}>
+          {appendedListProps?.list?.map((item, index) => {
+            return (
+              <View key={index.toString()} style={styles.listItemContainer}>
+                <StyledText>{getListItemText(item)}</StyledText>
+                <SVGIcon
+                  icon="close_rounded_pink"
+                  height={18}
+                  isButton
+                  onPress={() => {
+                    if (appendedListProps && appendedListProps.onRemoveItem) {
+                      appendedListProps?.onRemoveItem(item);
+                    }
+                  }}
+                  width={18}
+                  marginLeft={5}
+                />
+              </View>
+            );
+          })}
+        </View>
       )}
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <View
@@ -87,9 +161,11 @@ const TextBox = ({
               borderColor: errorText ? 'red' : borderColor,
               marginVertical: inputContainerMarginVertical,
               backgroundColor,
+              height: inputContainerHeight,
             },
           ]}>
           <TextInput
+            ref={innerRef}
             value={value}
             onChangeText={onChangeText}
             editable={isEditable}
@@ -102,10 +178,15 @@ const TextBox = ({
                 color: textColor,
               },
             ]}
+            returnKeyType={returnKeyType}
             placeholder={placeHolder}
             keyboardType={keyboardType}
             maxLength={maxLength}
             placeholderTextColor={COLORS.placeHolderColor}
+            multiline={multiline}
+            textAlignVertical={textAlignVertical}
+            clearButtonMode={clearButtonMode}
+            onSubmitEditing={onSubmitEditing}
           />
           {isSecure && (
             <View style={styles.iconContainer}>
@@ -183,5 +264,17 @@ const styles = StyleSheet.create({
   errorText: {
     color: 'red',
     fontSize: 14,
+  },
+  listContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  listItemContainer: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.lightGrey,
+    borderRadius: 10,
+    padding: 5,
+    marginHorizontal: 5,
+    marginVertical: 5,
   },
 });

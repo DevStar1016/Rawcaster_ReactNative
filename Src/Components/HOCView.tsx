@@ -23,6 +23,7 @@ interface Props {
   isEnableScroll?: boolean;
   backgroundColor?: string;
   isEnableHeader?: boolean;
+  paddingBottom?: number;
   paddingHorizontal?: number;
   headerType?: 'header_with_back' | 'home_header';
   headerProps?: CustomHomeHeaderProps;
@@ -46,6 +47,7 @@ const HOCView = ({
   paddingHorizontal = 10,
   headerType = 'header_with_back',
   headerProps = {},
+  paddingBottom,
   isEnableDefaultBackground = false,
   backHeaderProps = {},
   backHeaderContainerStyle = {},
@@ -90,6 +92,7 @@ const HOCView = ({
           backgroundColor: isEnableDefaultBackground
             ? undefined
             : backgroundColor,
+          paddingBottom,
         }}>
         {isEnableHeader && headerType === 'home_header' && (
           <CustomHomeHeader

@@ -1,7 +1,6 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useDispatch} from 'react-redux';
 import {Modal} from 'react-native';
-import Events from '../Screens/MainScreens/Events';
 import HomeStack from '../Stacks/HomeStack';
 import Notifications from '../Screens/MainScreens/Notifications';
 import User from '../Screens/MainScreens/User';
@@ -24,6 +23,7 @@ import {
   setIsOpenVerifyPopup,
 } from '../Store/Slices/UtilitySlice';
 import TalkshowStack from '../Stacks/TalkshowStack';
+import EventsStack from '../Stacks/EventsStack';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -89,7 +89,7 @@ export default function BottomTabNavigation() {
           tabBarHideOnKeyboard: true,
           tabBarShowLabel: false,
         })}>
-        <Tab.Screen name="Events" component={Events} />
+        <Tab.Screen name="EventsStack" component={EventsStack} />
         <Tab.Screen name="Notifications" component={Notifications} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
         <Tab.Screen name="TalkshowStack" component={TalkshowStack} />

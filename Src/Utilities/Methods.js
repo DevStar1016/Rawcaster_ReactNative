@@ -16,6 +16,7 @@ import {
 import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import {getTimezone} from 'countries-and-timezones';
 
 export const getAuthCode = (value = '') => {
   return sha1(SALT_KEY + value);
@@ -320,61 +321,36 @@ export const utcToUserTimezone = (time, zonename) => {
   return moment(displayCutoff);
 };
 
-export function imageVideoPicker({
-  width = undefined,
-  height = undefined,
-  isCrop = true,
-  multiple = false,
-  mediaType,
-}) {
-  const promise = new Promise(async (resolve, reject) => {
-    ImageCropPicker.openPicker({
-      width: width,
-      height: height,
-      cropping: mediaType === 'photo',
-      multiple: multiple,
-      mediaType: mediaType,
-      smartAlbums: [
-        'PhotoStream',
-        'Generic',
-        'Panoramas',
-        'Videos',
-        'Favorites',
-        'Timelapses',
-        'AllHidden',
-        'RecentlyAdded',
-        'Bursts',
-        'SlomoVideos',
-        'UserLibrary',
-        'SelfPortraits',
-        'Screenshots',
-        'DepthEffect',
-        'LivePhotos',
-        'Animated',
-        'LongExposure',
-      ],
-    })
-      .then(res => {
-        if (multiple) {
-          let selectedMediaList = [...res].map(item => {
-            return {
-              uri: getUrlWithFilePrefix(item.path),
-              type: item.mime,
-              name: getFileName(item.path),
-            };
-          });
-          resolve(selectedMediaList);
-        } else {
-          resolve({
-            uri: getUrlWithFilePrefix(res.path),
-            type: res.mime,
-            name: getFileName(res.path),
-          });
-        }
-      })
-      .catch(err => {
-        reject(err);
-      });
-  });
-  return promise;
-}
+export const {utcOffsetStr} = getTimezone(moment.tz.guess());
+
+export const utctoUserTimezone = (time, zonename) => {
+  let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
+  let displayCutoff = momentTZ(utcCutoff)
+    .tz(getTimezoneName(zonename))
+    .format('YYYY-MM-DD HH:mm:ss');
+  return moment(displayCutoff);
+};
+
+export const getDisplayEventTime = time => {
+  if (time) {
+    return moment(time, 'YYYY-MM-DD hh:mm:ss').format('hh:mm A');
+  }
+  return '';
+};
+
+export const getDisplayEventDate = (
+  receivedDate,
+  dateFormat = 'MM/DD/YYYY',
+) => {
+  if (receivedDate) {
+    let todaysDate;
+    if (utcOffsetStr) {
+      todaysDate = utctoUserTimezone(
+        receivedDate,
+        moment.tz.guess() + ' (+' + utcOffsetStr + ')',
+      ).format(dateFormat);
+    }
+    return utcOffsetStr ? todaysDate : '';
+  }
+  return '';
+};

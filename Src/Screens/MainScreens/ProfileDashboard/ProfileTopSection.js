@@ -4,13 +4,14 @@ import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {useProfile, useToken} from '../../../Utilities/StoreData';
 import FansProfilesContainer from './FansProfilesContainer';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
-import {getAuthCode, imageVideoPicker} from '../../../Utilities/Methods';
+import {getAuthCode} from '../../../Utilities/Methods';
 import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
 import {updateMyProfileService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
+import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 
 const BANNER_IMAGE_HEIGHT = 140;
 const PROFILE_SIZE = 100;
@@ -87,7 +88,7 @@ const ProfileTopSection = () => {
           icon="camera_black"
           iconSize={18}
           onPress={() => {
-            imageVideoPicker({mediaType: 'photo', height: 150, width: 500})
+            ImageVideoPicker({mediaType: 'photo', height: 150, width: 500})
               .then(res => {
                 setcoverImage(res);
                 setActionLoader(true, 'Updating Cover Image');

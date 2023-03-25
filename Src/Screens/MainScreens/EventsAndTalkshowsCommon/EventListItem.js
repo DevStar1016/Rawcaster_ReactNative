@@ -6,42 +6,63 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
 import moment from 'moment';
+import {EVENT_TYPE} from '../../../Utilities/Constants';
 
-const EventListItem = ({item, eventType = 'event', bgColor = COLORS.white}) => {
-  const getNavigationText = () => {
-    switch (eventType) {
-      case 'event':
-        return 'Join Event';
-      case 'talkshow':
-        return 'Start Talkshow';
-      case 'meeting':
-        return 'Join Meeting';
-
-      default:
-        return '';
+const EventListItem = ({item, isDarkTheme = false, onPressEdit}) => {
+  const getBgColor = () => {
+    if (isDarkTheme) {
+      return COLORS.whiteTransparent;
     }
+    return COLORS.white;
+  };
+
+  const getTextColor = () => {
+    if (isDarkTheme) {
+      return COLORS.white;
+    }
+    return COLORS.black;
+  };
+
+  const getEventTypeText = () => {
+    if (item.type === EVENT_TYPE.event) {
+      return 'Event';
+    } else if (item.type === EVENT_TYPE.talkshow) {
+      return 'Talkshow';
+    } else if (item.type === EVENT_TYPE.live) {
+      return 'Live';
+    }
+    return '';
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer, {backgroundColor: getBgColor()}]}>
       <Image
         source={{uri: item.banner_image}}
         resizeMode="cover"
-        style={{height: 140}}
+        style={{height: 140, borderRadius: 10}}
       />
-      {eventType !== 'meeting' ? (
-        <View style={styles.eventBadge}>
-          <StyledText>Talkshow</StyledText>
+      {item.type !== 1 && (
+        <View style={styles.eventTypeBadgeContainer}>
+          <SVGIcon icon="record_white" height={15} width={15} marginRight={5} />
+          <StyledText style={styles.text}>{getEventTypeText()}</StyledText>
         </View>
-      ) : null}
+      )}
+
       <View style={styles.contentContainer}>
         <View style={styles.titleButtonsContainer}>
           <View>
-            <StyledText style={styles.titleText}>{item.event_name}</StyledText>
-            <StyledText>Hosted by {item.original_user_name}</StyledText>
+            <StyledText style={[styles.titleText, {color: getTextColor()}]}>
+              {item.event_name}
+            </StyledText>
+            <StyledText style={{color: getTextColor()}}>
+              Hosted by {item.original_user_name}
+            </StyledText>
           </View>
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.7}
+              onPress={onPressEdit}>
               <SVGIcon icon="edit_black" height={20} width={20} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} activeOpacity={0.7}>
@@ -50,38 +71,45 @@ const EventListItem = ({item, eventType = 'event', bgColor = COLORS.white}) => {
           </View>
         </View>
         {item.message ? (
-          <StyledText style={{paddingVertical: 5}}>{item.message}</StyledText>
+          <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
+            {item.message}
+          </StyledText>
         ) : null}
         <View style={styles.dateTimeContainer}>
           <View style={styles.dateTime}>
             <SVGIcon
-              icon="calendar_black"
+              icon={isDarkTheme ? 'calendar_white' : 'calendar_black'}
               marginRight={5}
               height={20}
               width={20}
             />
-            <StyledText style={{paddingVertical: 5}}>
+            <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
               {moment(item.start_date_time).format('DD-MMM-YYYY')}
             </StyledText>
           </View>
           <View style={styles.dateTime}>
             <SVGIcon
-              icon="clock_black"
+              icon={isDarkTheme ? 'clock_white' : 'clock_black'}
               marginRight={5}
               height={20}
               width={20}
             />
-            <StyledText style={{paddingVertical: 5}}>
+            <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
               {moment(item.start_date_time).format('hh:mm A')}
             </StyledText>
           </View>
         </View>
         <View style={styles.startButtonContainer}>
           <TouchableOpacity style={styles.startButton} activeOpacity={0.7}>
-            <StyledText style={styles.startText}>
-              {getNavigationText()}
+            <StyledText style={[styles.startText, {color: getTextColor()}]}>
+              {`Join ${getEventTypeText()}`}
             </StyledText>
-            <SVGIcon icon="right_arrow" height={15} width={15} marginLeft={5} />
+            <SVGIcon
+              icon={isDarkTheme ? 'right_arrow_white' : 'right_arrow'}
+              height={15}
+              width={15}
+              marginLeft={5}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -96,10 +124,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 10,
     overflow: 'hidden',
-    ...BOX_SHADOW,
+    // ...BOX_SHADOW,
   },
   contentContainer: {
     paddingHorizontal: 10,
+  },
+  text: {
+    color: COLORS.white,
+    fontFamily: FONTS.DMSans.bold,
   },
   titleButtonsContainer: {
     flexDirection: 'row',
@@ -150,12 +182,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.DMSans.bold,
   },
-  eventBadge: {
+  eventTypeBadgeContainer: {
     padding: 5,
     backgroundColor: COLORS.secondary,
     position: 'absolute',
     left: 10,
     top: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
     borderRadius: 5,
   },
 });

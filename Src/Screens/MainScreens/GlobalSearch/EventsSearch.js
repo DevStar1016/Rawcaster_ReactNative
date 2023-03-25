@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
-import EventListItem from '../EventsAndTalkshows/EventListItem';
+import EventListItem from '../EventsAndTalkshowsCommon/EventListItem';
 import {useGlobalSearch} from '../../../Utilities/Contexts';
 import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';

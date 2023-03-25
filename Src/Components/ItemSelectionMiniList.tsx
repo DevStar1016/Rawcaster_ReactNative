@@ -73,7 +73,7 @@ const ItemSelectionMiniList = ({
                     style={{padding: 5}}
                     activeOpacity={0.7}
                     onPress={onClose}>
-                    <SVGIcon icon="close_rounded" />
+                    <SVGIcon icon="close_rounded_black" />
                   </TouchableOpacity>
                 )}
               </View>

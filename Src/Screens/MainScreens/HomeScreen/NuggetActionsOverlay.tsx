@@ -621,7 +621,7 @@ const NuggetActionsOverlay = ({
         bottomInset={insets.bottom}
         stackBehavior="push"
         keyboardBlurBehavior={'restore'}
-        android_keyboardInputMode="adjustPan"
+        android_keyboardInputMode="adjustResize"
         backgroundComponent={() => <View />}
         enableContentPanningGesture={isEnableContentPanningGesture}
         backdropComponent={props => {

@@ -1,5 +1,6 @@
 import {
   Linking,
+  StyleProp,
   StyleSheet,
   Text,
   TextStyle,
@@ -16,7 +17,7 @@ type Props = {
   children?: JSX.Element | JSX.Element[] | string;
   textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
   numberOfLines?: number;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   readMoreButtonTextStyle?: TextStyle;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;

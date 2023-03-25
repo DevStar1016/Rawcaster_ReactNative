@@ -95,6 +95,27 @@ export const GENDER_LIST = [
   },
 ];
 
+export const EVENT_VISIBILITY_TYPE_LIST = [
+  {
+    id: 3,
+    name: 'Public',
+  },
+  {
+    id: 1,
+    name: 'Private',
+  },
+  {
+    id: 2,
+    name: 'Fans',
+  },
+];
+
+export const EVENT_TYPE = {
+  event: 1,
+  talkshow: 2,
+  live: 3,
+};
+
 export const NUGGET_SHARE_TYPE = [
   {id: 1, name: 'Public'},
   {id: 2, name: 'Only me'},

@@ -8,16 +8,21 @@ import {
   View,
 } from 'react-native';
 import React, {useState} from 'react';
+import DateTimePickerModal, {
+  ReactNativeModalDateTimePickerProps,
+} from 'react-native-modal-datetime-picker';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import ItemSelectionMiniList from './ItemSelectionMiniList';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {IconType} from '../Utilities/Icons';
+import moment from 'moment';
 
 type Props = {
   title?: string;
   value?: any;
+  dateValue?: string;
   dropDownIconSize?: number;
   dataList?: number[] | string[];
   placeHolderText?: string;
@@ -31,7 +36,9 @@ type Props = {
   inputContainerMarginVertical?: number;
   fieldName?: string;
   listTitle?: string;
+  isDateTime?: boolean;
   errorText?: string;
+  datePickerProps?: ReactNativeModalDateTimePickerProps;
   dropDownIcon?: IconType;
   isDropDownIconAsButton?: boolean;
   onPressIcon?: () => void;
@@ -46,6 +53,7 @@ type Props = {
 const DropDownPicker = ({
   title,
   value,
+  dateValue,
   errorText = '',
   dropDownIconSize = 13,
   mainContainerWidth = '100%',
@@ -56,6 +64,7 @@ const DropDownPicker = ({
   isDisabled = false,
   onSelectItem,
   fieldName,
+  isDateTime = false,
   mainContainerMarginVertical = 5,
   titlePaddingVertical = 5,
   inputContainerMarginVertical = 5,
@@ -69,8 +78,10 @@ const DropDownPicker = ({
   backgroundColor = COLORS.white,
   borderColor = COLORS.borderColor,
   additionalDisplayText = '',
+  datePickerProps,
 }: Props) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
+  const [isOpenDatePicker, setisOpenDatePicker] = useState(false);
 
   const getValueText = () => {
     if (value) {
@@ -102,14 +113,18 @@ const DropDownPicker = ({
           {
             marginVertical: inputContainerMarginVertical,
             backgroundColor,
-            borderColor,
+            borderColor: errorText ? 'red' : borderColor,
           },
         ]}
         disabled={isDisabled}
         activeOpacity={0.7}
         onPress={() => {
           if (isInsideList) {
-            setisOpenDataListModal(true);
+            if (isDateTime) {
+              setisOpenDatePicker(true);
+            } else {
+              setisOpenDataListModal(true);
+            }
           } else {
             if (onPress) {
               onPress();
@@ -170,6 +185,25 @@ const DropDownPicker = ({
           />
         </SafeAreaView>
       </Modal>
+
+      {isOpenDatePicker && (
+        <DateTimePickerModal
+          isVisible={isOpenDatePicker}
+          mode="date"
+          date={dateValue ? new Date(dateValue) : new Date()}
+          minimumDate={new Date()}
+          {...datePickerProps}
+          onConfirm={date => {
+            setisOpenDatePicker(false);
+            if (onSelectItem) {
+              onSelectItem(date);
+            }
+          }}
+          onCancel={() => {
+            setisOpenDatePicker(false);
+          }}
+        />
+      )}
     </View>
   );
 };

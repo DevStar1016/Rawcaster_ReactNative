@@ -8,7 +8,7 @@ import InstagramIcon from '../Assets/Svg/instagram.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
-import CloseRoundedIcon from '../Assets/Svg/close_rounded.svg';
+import CloseRoundedBlackIcon from '../Assets/Svg/close_rounded_black.svg';
 import AppLogoIcon from '../Assets/Svg/app_logo_white.svg';
 import SearchIcon from '../Assets/Svg/search.svg';
 import LiveIcon from '../Assets/Svg/live.svg';
@@ -64,9 +64,14 @@ import EditBlackIcon from '../Assets/Svg/edit_black.svg';
 import DeleteBlackIcon from '../Assets/Svg/delete_black.svg';
 import CalendarBlackIcon from '../Assets/Svg/calendar_black.svg';
 import ClockBlackIcon from '../Assets/Svg/clock_black.svg';
+import ClockWhiteIcon from '../Assets/Svg/clock_white.svg';
 import DeleteWhiteIcon from '../Assets/Svg/delete_white.svg';
 import DownArrowWhiteIcon from '../Assets/Svg/down_arrow_white.svg';
 import CloseRoundedWhiteIcon from '../Assets/Svg/close_rounded_white.svg';
+import CloseRoundedPinkIcon from '../Assets/Svg/close_rounded_pink.svg';
+import SearchBlackIcon from '../Assets/Svg/search_black.svg';
+import ImagePlaceholderIcon from '../Assets/Svg/image_placeholder.svg';
+
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
 import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
 import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
@@ -78,6 +83,9 @@ import StudyGreyIcon from '../Assets/Svg/study_grey.svg';
 import LocationGreyIcon from '../Assets/Svg/location_grey.svg';
 import WorkGreyIcon from '../Assets/Svg/work_grey.svg';
 import CalanderGreyIcon from '../Assets/Svg/calander_grey.svg';
+import CalanderWhiteIcon from '../Assets/Svg/calendar_white.svg';
+
+import RecordWhiteIcon from '../Assets/Svg/record_white.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -98,7 +106,7 @@ export type IconType =
   | 'twitter'
   | 'apple'
   | 'instagram'
-  | 'close_rounded'
+  | 'close_rounded_black'
   | 'live'
   | 'search'
   | 'user'
@@ -173,7 +181,13 @@ export type IconType =
   | 'study_grey'
   | 'location_grey'
   | 'work_grey'
-  | 'calander_grey';
+  | 'calander_grey'
+  | 'calendar_white'
+  | 'clock_white'
+  | 'record_white'
+  | 'close_rounded_pink'
+  | 'search_black'
+  | 'image_placeholder';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -185,7 +199,7 @@ export const ICONS = {
   twitter: TwitterIcon,
   apple: AppleIcon,
   down_arrow: DownArrowIcon,
-  close_rounded: CloseRoundedIcon,
+  close_rounded_black: CloseRoundedBlackIcon,
   app_logo_white: AppLogoIcon,
   search: SearchIcon,
   live: LiveIcon,
@@ -262,4 +276,10 @@ export const ICONS = {
   location_grey: LocationGreyIcon,
   work_grey: WorkGreyIcon,
   calander_grey: CalanderGreyIcon,
+  calendar_white: CalanderWhiteIcon,
+  record_white: RecordWhiteIcon,
+  clock_white: ClockWhiteIcon,
+  close_rounded_pink: CloseRoundedPinkIcon,
+  search_black: SearchBlackIcon,
+  image_placeholder: ImagePlaceholderIcon,
 };
