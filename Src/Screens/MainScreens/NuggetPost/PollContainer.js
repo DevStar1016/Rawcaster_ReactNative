@@ -65,6 +65,7 @@ const PollContainer = ({
         titleStyle={{color: COLORS.white}}
         backgroundColor={COLORS.transparent}
         borderColor={COLORS.white}
+        maxLength={25}
       />
     );
   }
@@ -81,6 +82,7 @@ const PollContainer = ({
           numberOfLines={2}
           textAlignVertical={'top'}
           placeholderTextColor={COLORS.white}
+          maxLength={280}
         />
         {choiceList.length < 4 && (
           <View style={styles.addPollOptionsButton}>

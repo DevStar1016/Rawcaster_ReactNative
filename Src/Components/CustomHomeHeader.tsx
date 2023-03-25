@@ -1,5 +1,5 @@
-import {LayoutChangeEvent, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import {LayoutChangeEvent, Modal, StyleSheet, Text, View} from 'react-native';
+import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import {removeToken} from '../Utilities/Methods';
@@ -7,6 +7,7 @@ import {useDispatch} from 'react-redux';
 import {useToken} from '../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import {setIsOpenLoginAlert} from '../Store/Slices/UtilitySlice';
+import ConectionRequestModal from '../Modals/ConectionRequestModal';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -22,12 +23,16 @@ const CustomHomeHeader = ({
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
+  const [isOpenConnection, setisOpenConnection] = useState(false);
 
   const isLogin = () => {
     if (token) {
       return true;
     }
     dispatch(setIsOpenLoginAlert(true));
+  };
+  const onCloseConections = () => {
+    setisOpenConnection(false);
   };
 
   return (
@@ -73,6 +78,7 @@ const CustomHomeHeader = ({
             width={28}
             onPress={() => {
               if (isLogin()) {
+                setisOpenConnection(true);
               }
             }}
             marginLeft={5}
@@ -92,6 +98,12 @@ const CustomHomeHeader = ({
           isButton
         />
       </View>
+      <Modal
+        transparent
+        visible={isOpenConnection}
+        onRequestClose={() => onCloseConections()}>
+        <ConectionRequestModal onClose={onCloseConections} />
+      </Modal>
     </View>
   );
 };

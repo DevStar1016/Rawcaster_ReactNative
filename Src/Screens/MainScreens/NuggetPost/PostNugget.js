@@ -289,6 +289,11 @@ const PostNugget = () => {
       return question &&
         choiceList &&
         pollLength &&
+        !(
+          pollLength.days === 0 &&
+          pollLength.hours === 0 &&
+          pollLength.minutes === 0
+        ) &&
         choiceList.filter(item => item.value).length >= 2
         ? false
         : true;

@@ -84,8 +84,11 @@ import LocationGreyIcon from '../Assets/Svg/location_grey.svg';
 import WorkGreyIcon from '../Assets/Svg/work_grey.svg';
 import CalanderGreyIcon from '../Assets/Svg/calander_grey.svg';
 import CalanderWhiteIcon from '../Assets/Svg/calendar_white.svg';
-
 import RecordWhiteIcon from '../Assets/Svg/record_white.svg';
+import ArrowLeftIcon from '../Assets/Svg/arrow_left.svg';
+import ArrowRightIcon from '../Assets/Svg/arrow_right.svg';
+import ArrowLeftGreyIcon from '../Assets/Svg/arrow_left_grey.svg';
+import ArrowRightGreyIcon from '../Assets/Svg/arrow_right_grey.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -187,7 +190,11 @@ export type IconType =
   | 'record_white'
   | 'close_rounded_pink'
   | 'search_black'
-  | 'image_placeholder';
+  | 'image_placeholder'
+  | 'arrow_left'
+  | 'arrow_right'
+  | 'arrow_left_grey'
+  | 'arrow_right_grey';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -282,4 +289,8 @@ export const ICONS = {
   close_rounded_pink: CloseRoundedPinkIcon,
   search_black: SearchBlackIcon,
   image_placeholder: ImagePlaceholderIcon,
+  arrow_left: ArrowLeftIcon,
+  arrow_right: ArrowRightIcon,
+  arrow_left_grey: ArrowLeftGreyIcon,
+  arrow_right_grey: ArrowRightGreyIcon,
 };
