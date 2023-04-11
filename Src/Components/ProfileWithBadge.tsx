@@ -13,6 +13,7 @@ import {BadgesType} from '../Utilities/Badges';
 import LinearGradient from 'react-native-linear-gradient';
 import {COLORS} from '../Utilities/Colors';
 import {getFileName, getUrlWithFilePrefix} from '../Utilities/Methods';
+import {IconType} from '../Utilities/Icons';
 
 type ProfileImageProps = {
   uri: string;
@@ -26,6 +27,11 @@ type Props = {
   profileImage?: any;
   borderRadius?: number;
   badge?: BadgesType;
+  topRightIcon?: IconType;
+  isOnline?: boolean;
+  topRightIconSize?: number;
+  topRightIconContainerBackgroundColor?: string;
+  topRightIconContainerStyle?: ViewStyle;
   isEnableGradient?: boolean;
   isEnableWhiteBorderArroundGradient?: boolean;
   isEnableImagePicker?: boolean;
@@ -34,6 +40,9 @@ type Props = {
   cameraIconSize?: number;
   extraMargin?: number;
   padding?: number;
+  isEnableOnlineOfflineStatus?: boolean;
+  isButton?: boolean;
+  onPressProfile?: () => void;
   badgeContainerStyle?: ViewStyle;
   cameraIconContainerStyle?: ViewStyle;
   onSelectImage?: (value: ProfileImageProps) => void;
@@ -44,12 +53,20 @@ const ProfileWithBadge = ({
   borderRadius = profileSize / 2,
   profileImage,
   badge,
+  isEnableOnlineOfflineStatus = false,
+  isButton = false,
+  onPressProfile,
+  isOnline = false,
   isEnableWhiteBorderArroundGradient = false,
   extraMargin = 10,
+  topRightIconContainerBackgroundColor,
   containerStyle = {},
   badgeContainerStyle = {},
   cameraIconContainerStyle = {},
   badgeSize = 25,
+  topRightIcon,
+  topRightIconSize = 25,
+  topRightIconContainerStyle = {},
   cameraIconSize = 18,
   isEnableImagePicker = false,
   isEnableGradient = true,
@@ -96,7 +113,7 @@ const ProfileWithBadge = ({
   };
 
   return (
-    <View
+    <TouchableOpacity
       style={[
         styles.mainConatiner,
         {
@@ -104,7 +121,10 @@ const ProfileWithBadge = ({
           width: profileSize + extraMargin,
           ...containerStyle,
         },
-      ]}>
+      ]}
+      onPress={onPressProfile}
+      disabled={!isButton}
+      activeOpacity={isButton ? 0.9 : 1}>
       {isEnableGradient ? (
         <View
           style={[
@@ -132,7 +152,11 @@ const ProfileWithBadge = ({
               },
             ]}>
             {profileImage ? (
-              <Image source={{uri: profileImage}} style={styles.profileImage} />
+              <Image
+                source={{uri: profileImage}}
+                style={styles.profileImage}
+                borderRadius={borderRadius}
+              />
             ) : (
               alternateProfileImageComponent &&
               alternateProfileImageComponent(undefined)
@@ -173,7 +197,43 @@ const ProfileWithBadge = ({
           </View>
         )
       )}
-    </View>
+
+      {topRightIcon ? (
+        <View
+          style={[
+            styles.topRightIconContainer,
+            {
+              height: topRightIconSize + 10,
+              width: topRightIconSize + 10,
+              borderRadius: (topRightIconSize + 10) / 2,
+              backgroundColor: topRightIconContainerBackgroundColor,
+              ...topRightIconContainerStyle,
+            },
+          ]}>
+          <SVGIcon
+            icon={topRightIcon}
+            height={topRightIconSize}
+            width={topRightIconSize}
+          />
+        </View>
+      ) : (
+        isEnableOnlineOfflineStatus && (
+          <View
+            style={[
+              styles.topRightIconContainer,
+              {
+                right: 5,
+                top: 10,
+                height: 13,
+                width: 13,
+                borderRadius: 13 / 2,
+                backgroundColor: isOnline ? COLORS.lightGreen : 'red',
+              },
+            ]}
+          />
+        )
+      )}
+    </TouchableOpacity>
   );
 };
 
@@ -198,6 +258,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     bottom: 5,
+  },
+  topRightIconContainer: {
+    position: 'absolute',
+    right: -6,
+    top: 0,
+    height: 32,
+    width: 32,
+    // backgroundColor: COLORS.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 32 / 2,
   },
   cameraIconContainer: {
     position: 'absolute',

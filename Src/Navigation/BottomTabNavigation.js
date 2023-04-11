@@ -3,7 +3,6 @@ import {useDispatch} from 'react-redux';
 import {Modal} from 'react-native';
 import HomeStack from '../Stacks/HomeStack';
 import Notifications from '../Screens/MainScreens/Notifications';
-import User from '../Screens/MainScreens/User';
 import CustomBottomTabBar from './CustomBottomTabBar';
 import {
   useIsOpenLoginAlert,
@@ -24,6 +23,7 @@ import {
 } from '../Store/Slices/UtilitySlice';
 import TalkshowStack from '../Stacks/TalkshowStack';
 import EventsStack from '../Stacks/EventsStack';
+import UsersStack from '../Stacks/UsersStack';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -40,7 +40,12 @@ export default function BottomTabNavigation() {
 
   useEffect(() => {
     dispatch(
-      setIsOpenVerifyPopup(token && user && user?.acc_verify_status === 0),
+      setIsOpenVerifyPopup(
+        token &&
+          user &&
+          user?.acc_verify_status === 0 &&
+          profile?.acc_verify_status === 0,
+      ),
     );
   }, [token]);
 
@@ -93,7 +98,7 @@ export default function BottomTabNavigation() {
         <Tab.Screen name="Notifications" component={Notifications} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
         <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
-        <Tab.Screen name="User" component={User} />
+        <Tab.Screen name="UsersStack" component={UsersStack} />
       </Tab.Navigator>
       <Modal onRequestClose={() => {}} transparent visible={isOpenVerifyPopup}>
         <ConfirmationPopup

@@ -64,6 +64,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
         audioSet,
         meteringEnabled,
       );
+
       setrecordedAudio(result);
       audioPlayer.addRecordBackListener(e => {
         if (Math.floor(e.currentPosition / 1000) >= 0) {
@@ -109,7 +110,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
       audioPlayer.removePlayBackListener();
     } catch (e) {
     } finally {
-      console.log('FINALLY');
       setisPlaying(false);
       setisPaused(false);
     }
@@ -212,7 +212,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
               /> */}
               <ActionButton
                 onPress={() => {
-                  console.log(isRecording, isPlaying, 'ISRECORDING');
                   if (isRecording) {
                     handleStopAudioRecord();
                   } else if (isPlaying) {

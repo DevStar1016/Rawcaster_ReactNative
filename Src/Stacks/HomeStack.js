@@ -30,7 +30,7 @@ const HomeStack = () => {
         },
       }}>
       <Stack.Screen name="Dashboard" component={Dashboard} />
-      <Stack.Screen name="GlobalSearchStack" component={GlobalSearchStack} />
+      {/* <Stack.Screen name="GlobalSearchStack" component={GlobalSearchStack} /> */}
       <Stack.Screen name="ProfileStack" component={ProfileStack} />
     </Stack.Navigator>
   );

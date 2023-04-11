@@ -10,7 +10,7 @@ import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import {IconType} from '../Utilities/Icons';
 
-type Props = {
+export type RoundedIconButtonProps = {
   icon: IconType;
   buttonStyle?: ViewStyle;
   iconSize?: number;
@@ -26,7 +26,7 @@ const RoundedIconButton = ({
   bgColor = COLORS.lightGrey,
   buttonStyle = {},
   onPress,
-}: Props) => {
+}: RoundedIconButtonProps) => {
   return (
     <TouchableOpacity
       style={[

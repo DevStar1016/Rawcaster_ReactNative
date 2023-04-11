@@ -9,9 +9,8 @@ import {getFollowListService} from '../../../Services/ApiService';
 import {getAuthCode} from '../../../Utilities/Methods';
 import FansProfilesLoader from '../../../Components/Skelotons/FansProfilesLoader';
 
-var isMount = true;
-const FansProfilesContainer = ({profileSize = 40}) => {
-  const profile = useProfile();
+const FansProfilesContainer = ({profileSize = 40, userId}) => {
+  let isMount = true;
   const token = useToken();
   const [fansListData, setfansListData] = useState({
     list: [],
@@ -30,6 +29,9 @@ const FansProfilesContainer = ({profileSize = 40}) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('type', 1);
+    if (userId) {
+      formData.append('user_id', userId);
+    }
     getFollowListService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -61,11 +63,11 @@ const FansProfilesContainer = ({profileSize = 40}) => {
         <FansProfilesLoader profileSize={profileSize} />
       ) : (
         fansListData.list.length > 0 &&
-        [...fansListData.list].slice(0, 4).map((_, index) => {
+        [...fansListData.list].slice(0, 4).map((item, index) => {
           return (
             <ProfileWithBadge
               key={index.toString()}
-              profileImage={index < 3 ? profile.profile_image : null}
+              profileImage={index < 3 ? item.profile_img : null}
               profileSize={profileSize}
               containerStyle={{marginLeft: -12}}
               extraMargin={0}

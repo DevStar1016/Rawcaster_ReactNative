@@ -5,11 +5,13 @@ import {FONTS} from '../../../Utilities/Fonts';
 import StyledText from '../../../Components/StyledText';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useNavigation} from '@react-navigation/native';
+import moment from 'moment';
+import TitleRowContainer from './TitleRowContainer';
 
-const ProfileIntroContainer = () => {
+const ProfileIntroContainer = ({userId, profile, paddingHorizontal}) => {
   const navigation = useNavigation();
   const RowContainer = ({icon, text = '', iconSize = 25}) => {
-    return (
+    return text ? (
       <View style={styles.rowContainer}>
         <SVGIcon
           icon={icon}
@@ -21,31 +23,33 @@ const ProfileIntroContainer = () => {
           <StyledText>{text}</StyledText>
         </View>
       </View>
-    );
+    ) : null;
   };
 
   return (
-    <View style={styles.mainContainer}>
-      <View style={[styles.rowContainer, {paddingTop: 0}]}>
-        <StyledText style={styles.titleText}>Intro</StyledText>
-        <RoundedIconButton
-          buttonSize={30}
-          iconSize={16}
-          icon="edit_black"
-          onPress={() => {
-            navigation.navigate('EditProfile');
-          }}
-        />
-      </View>
+    <View style={[styles.mainContainer, {paddingHorizontal}]}>
+      <TitleRowContainer
+        title="Intro"
+        onPressButton={() => {
+          navigation.navigate('EditProfile');
+        }}
+        isDisplayButton={userId ? false : true}
+        buttonType="rounded"
+      />
+
       <RowContainer text="Work at Rawcaster" icon={'work_grey'} />
       <RowContainer text="Studied at ABCD" icon={'study_grey'} />
+      <RowContainer text={profile.geo_location} icon={'location_grey'} />
       <RowContainer
-        text="Alpharetta, Georgia, United State"
-        icon={'location_grey'}
+        text={`Date of Birth ${moment(profile.dob, 'YYYY-MM-DD').format(
+          'DD/MM/YYYY',
+        )}`}
+        icon={'cake_grey'}
       />
-      <RowContainer text="Date of Birth 02/03/1992" icon={'cake_grey'} />
       <RowContainer
-        text="Joined RAWCASTER on 03 Jan 2020"
+        text={`Joined RAWCASTER on ${moment(profile.date_of_join).format(
+          'DD MMM YYYY',
+        )}`}
         icon={'calander_grey'}
         iconSize={23}
       />
@@ -64,9 +68,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 18,
-  },
-  titleText: {
-    fontFamily: FONTS.DMSans.bold,
-    fontSize: 16,
   },
 });

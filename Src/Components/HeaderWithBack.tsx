@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StatusBar, StyleSheet, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
@@ -6,6 +6,7 @@ import StyledText from './StyledText';
 import {useNavigation} from '@react-navigation/native';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
+import {useInsets} from '../Utilities/StoreData';
 
 export type BackHeaderProps = {
   title?: string;
@@ -15,6 +16,7 @@ export type BackHeaderProps = {
   isTitleCenter?: boolean;
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
+  isEnableSafeArea?: boolean;
   onPressRightIcon?: () => void;
   rightIconSize?: number;
   isEnableBackButton?: boolean;
@@ -26,6 +28,7 @@ const HeaderWithBack = ({
   backIcon = 'back',
   isModal = false,
   setModal,
+  isEnableSafeArea = false,
   isTitleCenter = false,
   isEnableRightIcon = false,
   rightIcon,
@@ -35,6 +38,7 @@ const HeaderWithBack = ({
   bgColor = COLORS.primary,
 }: BackHeaderProps) => {
   const navigation = useNavigation();
+  const insets = useInsets();
   return (
     //   <View
     //   style={{
@@ -49,6 +53,13 @@ const HeaderWithBack = ({
         {
           justifyContent: isTitleCenter ? 'space-between' : 'flex-start',
           backgroundColor: bgColor,
+          paddingTop: isEnableSafeArea
+            ? insets.top
+              ? insets.top + 12
+              : StatusBar.currentHeight
+              ? StatusBar.currentHeight + 12
+              : 12
+            : 12,
         },
       ]}>
       <View

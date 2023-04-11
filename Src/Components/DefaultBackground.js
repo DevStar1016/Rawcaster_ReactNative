@@ -1,10 +1,11 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import LinearGradient from 'react-native-linear-gradient';
+import StyledText from './StyledText';
 
-const DefaultBackground = () => {
+const DefaultBackground = ({centerText = '', isEnableLoading = false}) => {
   return (
     <View style={styles.mainContainer}>
       <View
@@ -24,6 +25,25 @@ const DefaultBackground = () => {
         />
       </View>
       <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
+      {centerText.trim() || isEnableLoading ? (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          {isEnableLoading && (
+            <ActivityIndicator color={COLORS.white} size="large" />
+          )}
+          {centerText.trim() ? (
+            <StyledText style={{color: COLORS.white}}>{centerText}</StyledText>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 };

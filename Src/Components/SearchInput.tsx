@@ -15,27 +15,34 @@ import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 
 type Props = {
   placeHolderText?: string;
-  onPressSearch: (value: string) => void;
+  onSearch: (value: string) => void;
   marginVertical?: number;
+  marginTop?: number;
+  marginBottom?: number;
   searchButtonColor?: string;
   marginHorizontal?: number;
+  searchWhenClickedButton?: boolean;
   onLayoutHeight?: (height: number) => void;
-  isPrimarySearchButton?: boolean;
 };
 
 const SearchInput = ({
   placeHolderText = 'Search',
-  onPressSearch,
+  onSearch,
   marginVertical = 0,
+  marginTop,
+  marginBottom,
   marginHorizontal,
   onLayoutHeight,
+  searchWhenClickedButton = true,
   searchButtonColor = COLORS.primary,
-  isPrimarySearchButton = true,
 }: Props) => {
   const [searchValue, setsearchValue] = useState('');
   return (
     <View
-      style={[styles.mainContainer, {marginVertical, marginHorizontal}]}
+      style={[
+        styles.mainContainer,
+        {marginVertical, marginHorizontal, marginTop, marginBottom},
+      ]}
       onLayout={event => {
         if (onLayoutHeight) {
           onLayoutHeight(event.nativeEvent.layout.height);
@@ -44,7 +51,12 @@ const SearchInput = ({
       <View style={styles.inputContainer}>
         <TextInput
           value={searchValue}
-          onChangeText={setsearchValue}
+          onChangeText={text => {
+            setsearchValue(text);
+            if (!searchWhenClickedButton) {
+              onSearch(text);
+            }
+          }}
           style={styles.inputField}
           placeholder={placeHolderText}
           placeholderTextColor={COLORS.placeHolderColor}
@@ -57,10 +69,11 @@ const SearchInput = ({
             backgroundColor: searchButtonColor,
           },
         ]}
+        disabled={!searchWhenClickedButton}
         activeOpacity={0.7}
         onPress={() => {
           Keyboard.dismiss();
-          onPressSearch(searchValue);
+          onSearch(searchValue);
         }}>
         <SVGIcon icon="search" />
       </TouchableOpacity>

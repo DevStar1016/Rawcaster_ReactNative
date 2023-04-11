@@ -13,7 +13,14 @@ import React, {useEffect, useState} from 'react';
 import Video from 'react-native-video';
 
 import HOCView from '../../../Components/HOCView';
-import {useInsets, useProfile, useToken} from '../../../Utilities/StoreData';
+import {
+  useConnectionsList,
+  useGroupsList,
+  useNuggetsList,
+  useProfile,
+  useSearchedNuggetsList,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {COLORS} from '../../../Utilities/Colors';
@@ -29,22 +36,32 @@ import {
 } from '../../../Utilities/Constants';
 import {FlatList} from 'react-native-gesture-handler';
 import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
-import {addNuggetsService} from '../../../Services/ApiService';
+import {
+  addNuggetsService,
+  editNuggetService,
+} from '../../../Services/ApiService';
 import {
   compressMedia,
   getFileName,
+  getMediaMimeType,
   getSlicedText,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
-import EmojiPicker, {EmojiKeyboard} from 'rn-emoji-keyboard';
+import {EmojiKeyboard} from 'rn-emoji-keyboard';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Toast from '../../../Components/Toast';
-
+import EmojiPicker from 'react-native-emoji-picker-staltz';
 import {Camera} from 'react-native-vision-camera';
 import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
 import AudioRecorder from '../../../Modals/AudioRecorder';
 import PollContainer from './PollContainer';
-import EmojiSelector, {Categories} from 'react-native-emoji-selector';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {useDispatch} from 'react-redux';
+import {
+  setNuggetsList,
+  setSearchedNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
+import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -52,21 +69,39 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 
 var isMount = true;
 
-const PostNugget = () => {
+const PostEditNugget = ({route}) => {
+  const {nugget, isSearchNugget} = route.params ?? {};
+  const searchedNuggetsList = useSearchedNuggetsList();
+  const dispatch = useDispatch();
+  const nuggetsList = useNuggetsList();
+  const connectionsList = useConnectionsList();
+  const groupsList = useGroupsList();
   const navigation = useNavigation();
   const profile = useProfile();
   const token = useToken();
+  const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenCamera, setisOpenCamera] = useState(false);
   const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [isOpenEmojiContainer, setisOpenEmojiContainer] = useState(false);
   const [selectedMediaList, setselectedMediaList] = useState([]);
+  const [shareConnectionsGroupsIdsList, setshareConnectionsGroupsIdsList] =
+    useState([]);
   const [selectedShareType, setselectedShareType] = useState(
-    NUGGET_SHARE_TYPE.find(item => item.id === 1),
+    NUGGET_SHARE_TYPE.find(
+      item => item.id === (nugget ? parseInt(nugget.share_type) : 1),
+    ),
   );
+  const [preSelectdeShareTypeAndList, setpreSelectdeShareTypeAndList] =
+    useState({
+      shareType: {...selectedShareType},
+      list: [...shareConnectionsGroupsIdsList],
+    });
   const [isPollClicked, setisPollClicked] = useState(false);
   const [isLoading, setisLoading] = useState(false);
-  const [typedText, settypedText] = useState('');
+  const [typedText, settypedText] = useState(
+    nugget ? nugget.content ?? '' : '',
+  );
 
   const [question, setquestion] = useState('');
   const [pollLength, setpollLength] = useState(null);
@@ -82,18 +117,48 @@ const PostNugget = () => {
   ]);
 
   useEffect(() => {
+    AvoidSoftInput.setAdjustPan();
     return () => {
       Keyboard.dismiss();
     };
   }, []);
 
-  const handlePostNuggets = () => {
+  useEffect(() => {
+    if (nugget) {
+      if (nugget.media_list && nugget.media_list.length > 0) {
+        const tempMediaList = [...nugget.media_list].map(item => {
+          return {
+            media_id: item.media_id,
+            uri: getUrlWithFilePrefix(item.path),
+            name: getFileName(item.path),
+            type: getMediaMimeType(item.path, item.media_type),
+          };
+        });
+
+        setselectedMediaList(tempMediaList);
+      }
+    }
+  }, []);
+
+  function handlePostNuggets() {
     if (isMount) {
       setisLoading(true);
     }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('share_type', selectedShareType.id);
+
+    if (selectedShareType.id === 3 || selectedShareType.id === 4) {
+      formData.append(
+        'share_with',
+        JSON.stringify(
+          selectedShareType.id === 3
+            ? {groups: shareConnectionsGroupsIdsList}
+            : {friends: shareConnectionsGroupsIdsList},
+        ),
+      );
+    }
+
     if (typedText.trim() || (isPollClicked && question.trim())) {
       formData.append(
         'content',
@@ -116,11 +181,8 @@ const PostNugget = () => {
         });
       }
     }
-
     addNuggetsService(formData)
       .then(res => {
-        console.log(res.data, 'POST NUGGET RESPONSE');
-        console.log(JSON.stringify(res.data), 'POST NUGGET STRING');
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
@@ -138,31 +200,99 @@ const PostNugget = () => {
           setisLoading(false);
         }
       });
-  };
+  }
 
-  const openCloseEmojiPicker = status => {
-    // const CustomLayoutAnimation = {
-    //   duration: 100,
-    //   delete: {
-    //     type: LayoutAnimation.Types.easeInEaseOut,
-    //     property: LayoutAnimation.Properties.scaleXY,
-    //   },
-    //   create: {
-    //     type: LayoutAnimation.Types.easeInEaseOut,
-    //     property: LayoutAnimation.Properties.scaleXY,
-    //   },
-    //   update: {
-    //     type: LayoutAnimation.Types.easeInEaseOut,
-    //     property: LayoutAnimation.Properties.scaleXY,
-    //   },
-    // };
-    // LayoutAnimation.configureNext(CustomLayoutAnimation);
+  function handleEditNugget() {
+    if (isMount) {
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    if (typedText.trim()) {
+      formData.append('content', typedText.trim());
+    }
+    formData.append('share_type', selectedShareType.id);
+    if (selectedShareType.id === 3 || selectedShareType.id === 4) {
+      formData.append(
+        'share_with',
+        JSON.stringify(
+          selectedShareType.id === 3
+            ? {groups: shareConnectionsGroupsIdsList}
+            : {friends: shareConnectionsGroupsIdsList},
+        ),
+      );
+    }
+
+    if (selectedMediaList.length > 0) {
+      const tempSelectdeMediaList = [...selectedMediaList].filter(
+        item => !item.media_id,
+      );
+      if (tempSelectdeMediaList.length > 0) {
+        tempSelectdeMediaList.map(item => {
+          formData.append('nuggets_media[]', item);
+        });
+      }
+      const tempRemovedMediaList = [...nugget.media_list].filter(
+        item =>
+          !selectedMediaList.find(
+            subItem => subItem.media_id === item.media_id,
+          ),
+      );
+      if (tempRemovedMediaList.length > 0) {
+        formData.append(
+          'delete_media_id',
+          JSON.stringify([...tempRemovedMediaList].map(item => item.media_id)),
+        );
+      }
+    }
+
+    editNuggetService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (isSearchNugget) {
+            let tempSearchedNuggetsList = [...searchedNuggetsList];
+            const tempIndex = tempSearchedNuggetsList.findIndex(
+              item => item.nugget_id === nugget.nugget_id,
+            );
+            if (tempIndex !== -1) {
+              tempSearchedNuggetsList[tempIndex] = {...res.data.nugget_detail};
+            }
+            dispatch(setSearchedNuggetsList(tempSearchedNuggetsList));
+          }
+
+          let tempNuggetsList = [...nuggetsList];
+          const tempIndex = tempNuggetsList.findIndex(
+            item => item.nugget_id === nugget.nugget_id,
+          );
+          if (tempIndex !== -1) {
+            tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
+          }
+          dispatch(setNuggetsList(tempNuggetsList));
+
+          navigation.goBack();
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
+  function openCloseEmojiPicker(status) {
     if (isMount) {
       setisOpenEmojiContainer(status);
     }
-  };
+  }
 
-  const pickMedia = type => {
+  function pickMedia(type) {
     openCloseEmojiPicker(false);
     ImageCropPicker.openPicker({
       multiple: true,
@@ -219,18 +349,18 @@ const PostNugget = () => {
       .catch(e => {
         console.log(e, 'ERRORRR');
       });
-  };
+  }
 
-  const handleRemoveSelectedMediaItem = selectedIndex => {
+  function handleRemoveSelectedMediaItem(selectedIndex) {
     const filteredSelectedMediaList = [...selectedMediaList].filter(
       (_, index) => index !== selectedIndex,
     );
     if (isMount) {
       setselectedMediaList(filteredSelectedMediaList);
     }
-  };
+  }
 
-  const handleOpenCamera = async () => {
+  async function handleOpenCamera() {
     try {
       // const cameraPermission = await Camera.getCameraPermissionStatus();
       // const microphonePermission = await Camera.getMicrophonePermissionStatus();
@@ -243,15 +373,30 @@ const PostNugget = () => {
         newMicrophonePermission === 'authorized'
       ) {
         if (isMount) {
+          setisLoading(false);
           setisOpenCamera(true);
+        }
+      } else {
+        if (isMount) {
+          setisLoading(false);
+        }
+        if (newCameraPermission === 'denied') {
+          Toast.fail('Camera Permission Denied');
+        } else if (newMicrophonePermission === 'denied') {
+          Toast.fail('Microphone Permission Denied');
+        } else {
+          Toast.fail('Permissions Denied');
         }
       }
     } catch (e) {
+      if (isMount) {
+        setisLoading(false);
+      }
       Toast.fail(e.message);
     }
-  };
+  }
 
-  const handleOpenAudioRecorder = async () => {
+  async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
     if (newMicrophonePermission === 'authorized') {
       if (isMount) {
@@ -260,9 +405,9 @@ const PostNugget = () => {
     } else {
       Toast.fail('Microphone Permission Denied');
     }
-  };
+  }
 
-  const onSelectMediaFromCamera = async mediaItem => {
+  async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
     setselectedMediaList(pre => [
@@ -273,19 +418,24 @@ const PostNugget = () => {
         uri: mediaPath,
       },
     ]);
-  };
+  }
 
-  const handleSubmitAudio = audioFile => {
+  function handleSubmitAudio(audioFile) {
     setselectedMediaList(pre => [
       ...pre,
       {
         ...audioFile,
       },
     ]);
-  };
+  }
 
-  const isDisabledPostButton = () => {
-    if (isPollClicked) {
+  function isDisabledPostButton() {
+    if (
+      (selectedShareType.id === 3 || selectedShareType.id === 4) &&
+      shareConnectionsGroupsIdsList.length <= 0
+    ) {
+      return true;
+    } else if (isPollClicked) {
       return question &&
         choiceList &&
         pollLength &&
@@ -299,9 +449,9 @@ const PostNugget = () => {
         : true;
     }
     return !typedText.trim() && selectedMediaList.length <= 0;
-  };
+  }
 
-  const getMediaItem = item => {
+  function getMediaItem(item) {
     if (IS_IOS && item.type.includes('video')) {
       return (
         <Video
@@ -326,12 +476,6 @@ const PostNugget = () => {
             borderRadius: 10,
           }}>
           <SVGIcon icon="logo_R" width={'80%'} height={'80%'} />
-          {/* <Image
-            style={{height: '100%', width: '100%'}}
-            source={{uri: item.uri}}
-            borderRadius={10}
-            resizeMode="cover"
-          /> */}
         </View>
       );
     }
@@ -344,9 +488,9 @@ const PostNugget = () => {
         resizeMode="cover"
       />
     );
-  };
+  }
 
-  const renderSelectedNuggetItem = ({item, index}) => {
+  function renderSelectedNuggetItem({item, index}) {
     return (
       <View
         style={{
@@ -362,17 +506,16 @@ const PostNugget = () => {
         <TouchableOpacity
           style={styles.itemActionButtonsContainer}
           activeOpacity={1}>
-          {item.type.includes('video') ||
-            (item.type.includes('audio') && (
-              <View style={styles.playIconContainer}>
-                <SVGIcon
-                  icon="play_white"
-                  height={10}
-                  width={10}
-                  marginLeft={3}
-                />
-              </View>
-            ))}
+          {(item.type.includes('video') || item.type.includes('audio')) && (
+            <View style={styles.playIconContainer}>
+              <SVGIcon
+                icon="play_white"
+                height={10}
+                width={10}
+                marginLeft={3}
+              />
+            </View>
+          )}
           <TouchableOpacity
             style={styles.itemRemoveIconContainer}
             activeOpacity={0.7}
@@ -384,7 +527,18 @@ const PostNugget = () => {
         </TouchableOpacity>
       </View>
     );
-  };
+  }
+
+  function resetSelectedShareType() {
+    if (isMount) {
+      setselectedShareType(
+        preSelectdeShareTypeAndList.shareType
+          ? {...preSelectdeShareTypeAndList.shareType}
+          : NUGGET_SHARE_TYPE.find(item => item.id === 1),
+      );
+      setshareConnectionsGroupsIdsList([...preSelectdeShareTypeAndList.list]);
+    }
+  }
 
   return (
     <HOCView
@@ -394,7 +548,7 @@ const PostNugget = () => {
       paddingHorizontal={5}
       backHeaderProps={{
         bgColor: COLORS.transparent,
-        title: 'Post Nugget',
+        title: `${nugget ? 'Edit' : 'Post'} Nugget`,
         isEnableBackButton: false,
         isTitleCenter: true,
         isEnableRightIcon: true,
@@ -426,29 +580,44 @@ const PostNugget = () => {
                 <StyledText style={styles.nameText}>
                   {getSlicedText(profile.name, 10)}
                 </StyledText>
-                <SubmitButton
-                  buttonText={getSlicedText(selectedShareType.name, 10)}
-                  marginTop={2}
-                  iconSize={9}
-                  textMarginLeftWhenIcon={2}
-                  textMarginRightWhenIcon={2}
-                  buttonTextStyle={{fontSize: 10}}
-                  paddingHorizontal={3}
-                  paddingVertical={0}
-                  marginBottom={0}
-                  rightIcon={'down_fill_white'}
-                  rightIconSize={7}
-                  icon="lock_fill_white"
-                  marginHorizontal={0}
-                  padding={0}
-                  bgColor={COLORS.orange}
-                  borderColor={COLORS.orange}
-                  onPress={() => {
-                    if (isMount) {
-                      setisOpenSharTypeList(true);
-                    }
-                  }}
-                />
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <SubmitButton
+                    buttonText={getSlicedText(selectedShareType.name, 10)}
+                    marginTop={2}
+                    iconSize={9}
+                    textMarginLeftWhenIcon={2}
+                    textMarginRightWhenIcon={2}
+                    buttonTextStyle={{fontSize: 10}}
+                    paddingHorizontal={3}
+                    paddingVertical={0}
+                    marginBottom={0}
+                    rightIcon={'down_fill_white'}
+                    rightIconSize={7}
+                    icon="lock_fill_white"
+                    marginHorizontal={0}
+                    padding={0}
+                    bgColor={COLORS.orange}
+                    borderColor={COLORS.orange}
+                    onPress={() => {
+                      if (isMount) {
+                        setisOpenSharTypeList(true);
+                      }
+                    }}
+                  />
+                  {(selectedShareType.id === 3 ||
+                    selectedShareType.id === 4) && (
+                    <SVGIcon
+                      icon="edit"
+                      height={13}
+                      width={13}
+                      marginLeft={10}
+                      isButton
+                      onPress={() => {
+                        setisOpenSelectionModal(true);
+                      }}
+                    />
+                  )}
+                </View>
               </View>
             </View>
             <View
@@ -456,7 +625,7 @@ const PostNugget = () => {
                 styles.subContainer,
                 {justifyContent: 'flex-end', paddingLeft: 15},
               ]}>
-              {!isPollClicked && (
+              {!isPollClicked && !nugget && (
                 <SVGIcon
                   icon="poll_fill_white"
                   height={19}
@@ -491,7 +660,9 @@ const PostNugget = () => {
                 onPress={() => {
                   if (isMount) {
                     setisPollClicked(false);
+                    setisLoading(true);
                   }
+
                   handleOpenCamera();
                 }}
               />
@@ -581,12 +752,33 @@ const PostNugget = () => {
           )}
           <View>
             <SubmitButton
-              buttonText={isPollClicked ? 'Post Poll' : 'Post Nugget'}
+              buttonText={
+                isPollClicked
+                  ? 'Post Poll'
+                  : `${nugget ? 'Edit' : 'Post'} Nugget`
+              }
               isDisabled={isDisabledPostButton()}
               disabledColor={COLORS.dimColor}
               onPress={() => {
                 if (!isDisabledPostButton()) {
-                  handlePostNuggets();
+                  if (
+                    (selectedShareType.id === 3 ||
+                      selectedShareType.id === 4) &&
+                    shareConnectionsGroupsIdsList.length <= 0
+                  ) {
+                    Toast.fail(
+                      selectedShareType.id === 3
+                        ? 'Select groups'
+                        : 'Select connections',
+                    );
+                    setisOpenSelectionModal(true);
+                    return;
+                  }
+                  if (nugget) {
+                    handleEditNugget();
+                  } else {
+                    handlePostNuggets();
+                  }
                 }
               }}
             />
@@ -643,6 +835,25 @@ const PostNugget = () => {
                 // container: {width: },
               }}
             />
+            {/* <EmojiPicker
+              onEmojiSelected={res => {
+                console.log(res, 'EMOJIIII');
+              }}
+              rows={7}
+              onPressOutside={() => {}}
+              hideClearButton
+              localizedCategories={[
+                // Always in this order:
+                'Smileys and emotion',
+                'People and body',
+                'Animals and nature',
+                'Food and drink',
+                'Activities',
+                'Travel and places',
+                'Objects',
+                'Symbols',
+              ]}
+            /> */}
           </View>
         ) : null}
         {/* <EmojiPicker
@@ -712,7 +923,21 @@ const PostNugget = () => {
             onSelectItem={item => {
               if (isMount) {
                 setisOpenSharTypeList(false);
-                setselectedShareType(item);
+                setselectedShareType(pre => {
+                  setpreSelectdeShareTypeAndList({
+                    shareType: pre,
+                    list: [...shareConnectionsGroupsIdsList],
+                  });
+                  if (pre) {
+                    if (pre.id !== item.id) {
+                      setshareConnectionsGroupsIdsList([]);
+                    }
+                  }
+                  return item;
+                });
+                if (item.id === 3 || item.id === 4) {
+                  setisOpenSelectionModal(true);
+                }
               }
             }}
           />
@@ -738,7 +963,6 @@ const PostNugget = () => {
         visible={isOpenAudioRecorder}
         statusBarTranslucent
         transparent
-        animationType="fade"
         onRequestClose={() => {
           if (isMount) {
             setisOpenAudioRecorder(false);
@@ -749,11 +973,49 @@ const PostNugget = () => {
           onSubmitAudio={handleSubmitAudio}
         />
       </Modal>
+      <Modal
+        visible={isOpenSelectionModal}
+        statusBarTranslucent
+        onRequestClose={() => {
+          resetSelectedShareType();
+          if (isMount) {
+            setisOpenSelectionModal(false);
+          }
+        }}>
+        <MultiItemsSelectList
+          title={
+            selectedShareType.id === 3
+              ? 'Specific Group'
+              : 'Specific Connection'
+          }
+          preSelectedIds={shareConnectionsGroupsIdsList}
+          imageFieldName={
+            selectedShareType.id === 3 ? 'group_icon' : 'profile_img'
+          }
+          onCloseModal={() => {
+            resetSelectedShareType();
+            if (isMount) {
+              setisOpenSelectionModal(false);
+            }
+          }}
+          displayFieldName={
+            selectedShareType.id === 3 ? 'group_name' : 'display_name'
+          }
+          idFieldName={selectedShareType.id === 3 ? 'group_id' : 'user_id'}
+          list={selectedShareType.id === 3 ? groupsList : connectionsList}
+          onSelectItems={list => {
+            if (isMount) {
+              setisOpenSelectionModal(false);
+              setshareConnectionsGroupsIdsList(list);
+            }
+          }}
+        />
+      </Modal>
     </HOCView>
   );
 };
 
-export default PostNugget;
+export default PostEditNugget;
 
 const styles = StyleSheet.create({
   topContainer: {

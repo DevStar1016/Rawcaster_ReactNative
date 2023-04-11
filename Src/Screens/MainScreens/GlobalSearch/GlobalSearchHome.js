@@ -27,6 +27,7 @@ const GlobalSearchHome = () => {
         onLayoutHeight={height => {
           settopLayerHeight(pre => pre + height);
         }}
+        isEnableSafeArea={false}
         paddingHorizontal={0}
         backHeaderProps={{title: 'Search Rawcaster'}}>
         <SearchInput
@@ -35,7 +36,7 @@ const GlobalSearchHome = () => {
           onLayoutHeight={height => {
             settopLayerHeight(pre => pre + height + 20);
           }}
-          onPressSearch={setsearchText}
+          onSearch={setsearchText}
           placeHolderText={'Search ' + focusedTab}
         />
         <GlobalSearchTopTabNavigation />

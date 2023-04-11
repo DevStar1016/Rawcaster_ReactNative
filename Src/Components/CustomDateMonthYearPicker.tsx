@@ -48,6 +48,7 @@ type Props = {
   mainContainerMarginVertical?: number;
   parentContainerPaddingVertical?: number;
   value?: string;
+  onSelectDateMonthYearError?: () => void;
   titleStyle?: TextStyle;
   dropDownIcon?: IconType;
   title?: string;
@@ -71,6 +72,7 @@ const CustomDateMonthYearPicker = ({
   isDisabled = false,
   titlePaddingVertical = 5,
   value,
+  onSelectDateMonthYearError,
   titleStyle = {},
   inputContainerMarginVertical = 5,
   mainContainerMarginVertical = 5,
@@ -95,7 +97,7 @@ const CustomDateMonthYearPicker = ({
   const [dateMonthYear, setdateMonthYear] = useState<DateMonthYearType>({
     date: value ? moment(value, format).date() : null,
     month: value
-      ? DATES_MONTHS_YEARS_DATA.months[moment(value, format).month() + 1]
+      ? DATES_MONTHS_YEARS_DATA.months[moment(value, format).month()]
       : null,
     year: value ? moment(value, format).year() : null,
   });
@@ -197,6 +199,11 @@ const CustomDateMonthYearPicker = ({
         (date: number | string) => date === tempDateMonthYear.date,
       );
       if (dateIndex === -1) {
+        if (tempDateMonthYear.date) {
+          console.log('Date ERRORRR');
+
+          onSelectDateMonthYearError && onSelectDateMonthYearError();
+        }
         tempDateMonthYear = {...tempDateMonthYear, date: null};
       }
     }
@@ -211,6 +218,11 @@ const CustomDateMonthYearPicker = ({
           (date: number | string) => date === tempDateMonthYear.date,
         );
         if (dateIndex === -1) {
+          if (tempDateMonthYear.date) {
+            console.log('Date ERRORRR');
+
+            onSelectDateMonthYearError && onSelectDateMonthYearError();
+          }
           tempDateMonthYear = {...tempDateMonthYear, date: null};
         }
       }
@@ -220,6 +232,10 @@ const CustomDateMonthYearPicker = ({
         );
 
         if (monthIndex === -1) {
+          if (tempDateMonthYear.month) {
+            console.log('Month ERRORRR');
+            onSelectDateMonthYearError && onSelectDateMonthYearError();
+          }
           tempDateMonthYear = {...tempDateMonthYear, month: null};
         }
       }

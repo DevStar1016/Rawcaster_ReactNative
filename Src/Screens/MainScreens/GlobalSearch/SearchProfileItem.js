@@ -6,6 +6,7 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {COLORS} from '../../../Utilities/Colors';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {FONTS} from '../../../Utilities/Fonts';
+import {getSlicedText} from '../../../Utilities/Methods';
 
 const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
   return (
@@ -23,9 +24,10 @@ const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
       </View>
       <View style={styles.rightContainer}>
         <View style={styles.headerContainer}>
-          <View>
-            <StyledText style={styles.nameText}>{item.display_name}</StyledText>
-            {/* <StyledText paddingVertical={3}>@TheTweetOfGod</StyledText> */}
+          <View style={{flex: 1}}>
+            <StyledText style={styles.nameText}>
+              {getSlicedText(item.display_name, 18)}
+            </StyledText>
           </View>
           <View style={styles.buttonsContainer}>
             {!item.follow && (
@@ -43,7 +45,10 @@ const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
               />
             )}
             {item.friend_request_status === '' && (
-              <RoundedPlusButton style={styles.connectionRequestButton} />
+              <RoundedPlusButton
+                style={styles.connectionRequestButton}
+                onPress={onConnectionRequest}
+              />
             )}
           </View>
         </View>

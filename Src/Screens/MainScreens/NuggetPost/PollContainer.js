@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {FONTS} from '../../../Utilities/Fonts';
 import {COLORS} from '../../../Utilities/Colors';
 import TextBox from '../../../Components/TextBox';
 import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPicker';
 import SVGIcon from '../../../Components/SVGIcon';
 import StyledText from '../../../Components/StyledText';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
 
 const PollContainer = ({
   onPressRemovePoll,
@@ -23,6 +24,13 @@ const PollContainer = ({
   setchoiceList,
   setpollLength,
 }) => {
+  useEffect(() => {
+    AvoidSoftInput.setAdjustResize();
+    return () => {
+      AvoidSoftInput.setAdjustPan();
+    };
+  }, []);
+
   const handleRemoveOption = index => {
     setchoiceList(preList => {
       if (preList.length > 2) {
@@ -82,7 +90,7 @@ const PollContainer = ({
           numberOfLines={2}
           textAlignVertical={'top'}
           placeholderTextColor={COLORS.white}
-          maxLength={280}
+          maxLength={150}
         />
         {choiceList.length < 4 && (
           <View style={styles.addPollOptionsButton}>

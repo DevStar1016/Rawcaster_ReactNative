@@ -217,7 +217,6 @@ const CommentsList = ({
     formData.append('token', token);
     formData.append('comment_id', commentId);
     formData.append('comment', comment);
-    console.log(formData, 'EDIT FORMDATA');
     editNuggetCommentService(formData)
       .then(res => {
         console.log(res.data, 'EDITTTT RESPONSE');

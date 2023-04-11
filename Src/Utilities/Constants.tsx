@@ -110,6 +110,14 @@ export const EVENT_VISIBILITY_TYPE_LIST = [
   },
 ];
 
+export const NUGGET_ACTIONS = [
+  {id: 1, buttonName: 'Edit'},
+  {id: 2, buttonName: 'Delete'},
+  {id: 3, buttonName: 'Block User'},
+  {id: 4, buttonName: 'Report Abuse'},
+  {id: 5, buttonName: 'Share Link'},
+];
+
 export const EVENT_TYPE = {
   event: 1,
   talkshow: 2,

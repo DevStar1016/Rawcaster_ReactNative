@@ -13,12 +13,13 @@ import {IconType} from '../Utilities/Icons';
 import SVGIcon from './SVGIcon';
 import {FONTS} from '../Utilities/Fonts';
 
-type ButtonProps = {
+export type SubmitButtonProps = {
   buttonText: string;
   bgColor?: string;
   textColor?: string;
   borderColor?: string;
   buttonTextStyle?: TextStyle;
+  buttonWidth?: string | number;
   onPress?: () => void;
   icon?: IconType;
   marginTop?: number;
@@ -57,6 +58,7 @@ const SubmitButton = ({
   isLoading = false,
   marginTop = 20,
   marginBottom,
+  buttonWidth,
   textMarginLeftWhenIcon = 10,
   textMarginRightWhenIcon = 10,
   padding = 10,
@@ -65,12 +67,13 @@ const SubmitButton = ({
   paddingHorizontal,
   marginHorizontal,
   borderRadius = 6,
-}: ButtonProps) => {
+}: SubmitButtonProps) => {
   return (
     <TouchableOpacity
       style={[
         styles.mainContainer,
         {
+          width: buttonWidth,
           backgroundColor:
             isDisabled && disabledColor ? disabledColor : bgColor,
           borderColor:

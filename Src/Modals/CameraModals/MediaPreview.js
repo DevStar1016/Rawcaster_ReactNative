@@ -29,7 +29,6 @@ const MediaPreview = ({setModal, data, onSendMedia}) => {
 
   const openEditer = async () => {
     try {
-      console.log(mediaData.uri, 'URIIII');
       const resultUri = await PhotoEditor.open({
         path: mediaData.uri,
         stickers: [
@@ -86,20 +85,21 @@ const MediaPreview = ({setModal, data, onSendMedia}) => {
               <TopActionButton
                 icon={'crop'}
                 iconSize={23}
-                marginRight={15}
+                // marginRight={15}
+                marginRight={0}
                 onPress={() => {
                   setisOpenCrop(true);
                 }}
               />
 
-              <TopActionButton
+              {/* <TopActionButton
                 icon={'edit'}
                 iconSize={22}
                 marginRight={0}
                 onPress={() => {
                   openEditer();
                 }}
-              />
+              /> */}
             </View>
           )}
         </View>

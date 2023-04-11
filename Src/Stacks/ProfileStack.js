@@ -1,13 +1,22 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import Profile from '../Screens/MainScreens/ProfileDashboard/Profile';
+import ProfileSeeAllUsersList from '../Screens/MainScreens/ProfileDashboard/ProfileSeeAllUsersList';
 
 const Stack = createStackNavigator();
 
-const ProfileStack = () => {
+const ProfileStack = ({route}) => {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        initialParams={route.params}
+      />
+      <Stack.Screen
+        name="ProfileSeeAllUsersList"
+        component={ProfileSeeAllUsersList}
+      />
     </Stack.Navigator>
   );
 };

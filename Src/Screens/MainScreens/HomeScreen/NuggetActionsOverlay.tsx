@@ -7,13 +7,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {LegacyRef, useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import Badges from '../../../Utilities/Badges';
 import StyledText from '../../../Components/StyledText';
@@ -24,74 +20,63 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {
   bigNumberFormater,
   dateToShortDate,
-  getDoubleDigit,
   getSlicedText,
   htmlDecodeText,
-  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {
   DIMENSIONS,
-  IS_IOS,
+  NUGGET_ACTIONS,
   NUGGET_SHARE_TYPE,
 } from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
 import {
   useInsets,
+  useLikedNuggetsIds,
   useProfile,
+  useSavedNuggetsIds,
   useSettings,
   useToken,
   useUserData,
 } from '../../../Utilities/StoreData';
-import {useNavigation} from '@react-navigation/native';
+import {StackActions, useNavigation} from '@react-navigation/native';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useDispatch} from 'react-redux';
 import {
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
 } from '../../../Store/Slices/UtilitySlice';
-import Hyperlink from 'react-native-hyperlink';
-import {
-  likeAndUnlikeNuggetService,
-  saveAndUnsaveNuggetService,
-  pollVoteService,
-} from '../../../Services/ApiService';
+import {pollVoteService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
-import lodash from 'lodash';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 import AnimatedBgFillContainer from '../../../Components/AnimatedBgFillContainer';
-import moment from 'moment';
-import RBSheet from 'react-native-raw-bottom-sheet';
 import CommentsList from './Comments/CommentsList';
+import MenuContainer from '../../../Modals/MenuContainer';
+import {
+  useNuggetItemActions,
+  useNuggetParentActions,
+} from '../../../Utilities/Contexts';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
-  nugget: any;
-  isLiked: boolean;
-  isSaved: '0' | '1';
   isPaused: boolean;
-  isEnableADDButton?: boolean;
-  isMuted: boolean;
-  isEnableTopInsetsPadding?: boolean;
-  textNuggetNumberOfLines?: number;
-  headerContainerHeight: number;
-  setTotalComments: (value: number) => void;
-  setisOpenComments: (value: boolean) => void;
-  onPressLike?: () => void;
-  onPressSave?: () => void;
-  setisMuted?: (value: boolean) => void;
-  onPressMuteUnmute?: () => void;
+  onPressShare?: () => void;
+  onEditNugget: () => void;
+  onPressShareType: () => void;
+  onDeleteNugget: () => void;
   onPlayPauseVideo?: () => void;
 };
 type ActionContainerProps = {
   icon: IconType;
   isMustLogin?: boolean;
   text?: string;
+  isEnableText?: boolean;
   onPress?: () => void;
 };
 
 type NuggetDetailsProps = {
   value: any;
+  onPress?: () => void;
 };
 
 type PollOptionsItemProp = {
@@ -104,60 +89,66 @@ type PollVotedDataProp = {
   votedOptionID: any;
 };
 
-const NuggetActionsOverlay = ({
-  nugget,
+function NuggetActionsOverlay({
   nuggetType,
-  isLiked,
-  onPressLike,
-  isSaved,
-  onPressSave,
   isPaused,
-  isEnableTopInsetsPadding,
-  isMuted,
-  setisOpenComments,
-  setTotalComments,
-  setisMuted,
-  textNuggetNumberOfLines,
-  headerContainerHeight,
-  isEnableADDButton = true,
-  onPressMuteUnmute,
-
+  onPressShare,
+  onEditNugget,
+  onDeleteNugget,
+  onPressShareType,
   onPlayPauseVideo,
-}: Props) => {
+}: Props) {
+  const {
+    headerContainerHeight,
+    isMuted,
+    setisMuted,
+    isEnableADDButton,
+    isFromGlobalSearch,
+    isEnableHeaderContainerHeightforTopButtons,
+    isEnableTopInsetsPadding,
+    textNuggetNumberOfLines,
+  } = useNuggetParentActions();
+
+  const {
+    totalViews,
+    totalComments,
+    setTotalComments,
+    setisRepeatVideo,
+    nugget,
+    updateLike,
+    updateSave,
+    updateIsFan,
+  } = useNuggetItemActions();
+
   const navigation = useNavigation();
   const token = useToken();
-
   const user = useUserData();
+  const profile = useProfile();
   const settings = useSettings();
   const dispatch = useDispatch();
   const insets = useInsets();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
-
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
     useState(0);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
   const [url, seturl] = useState('');
-
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
     isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
     votedOptionID: null,
   });
-
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [openMenuOptions, setopenMenuOptions] = useState(false);
+  const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
-
   const handlePresentModalPress = useCallback(() => {
-    setisOpenComments(true);
-    bottomSheetModalRef.current?.present();
+    setisRepeatVideo(true);
+    commentsBottomSheetModalRef.current?.present();
   }, []);
   const handleCloseCommentsModal = useCallback(() => {
-    setisOpenComments(false);
-    bottomSheetModalRef.current?.close();
+    setisRepeatVideo(false);
+    commentsBottomSheetModalRef.current?.close();
   }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    // console.log('handleSheetChanges', index);
-  }, []);
+  const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const getNuggetType = () => {
     const nuggetType = NUGGET_SHARE_TYPE.find(
@@ -191,9 +182,8 @@ const NuggetActionsOverlay = ({
       .then(res => {
         if (res.data.status === 1) {
         } else if (res.data.status === 0) {
-          setpollVotedData({isVoted: false, votedOptionID: null});
-
-          Toast.fail(res.data.msg);
+          // setpollVotedData({isVoted: false, votedOptionID: null});
+          // Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
@@ -267,7 +257,6 @@ const NuggetActionsOverlay = ({
         ).toFixed(2),
       };
     });
-
     return [...tempPollOptions];
   };
 
@@ -284,10 +273,56 @@ const NuggetActionsOverlay = ({
     }
   };
 
+  const getMenuOptions = () => {
+    if (nugget.is_nugget_owner === 1) {
+      if (nugget.poll_option && nugget.poll_option.length > 0) {
+        return [...NUGGET_ACTIONS].filter(item => item.id === 2);
+      }
+      return [...NUGGET_ACTIONS].filter(item => item.id < 3);
+    } else {
+      if (nugget.type === 2) {
+        return [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 5);
+      }
+      return [...NUGGET_ACTIONS].filter(item => item.id > 2);
+    }
+  };
+
+  const onPressNuggetAction = (id: number) => {
+    setopenMenuOptions(false);
+    switch (id) {
+      case 1:
+        onEditNugget();
+        break;
+      case 2:
+        onDeleteNugget();
+        break;
+      case 3:
+      case 4:
+      case 5:
+    }
+  };
+
+  const isVerified = () => {
+    if (user && user.acc_verify_status === 1) {
+      return true;
+    }
+    dispatch(setIsOpenVerifyPopup(true));
+    return false;
+  };
+
+  const isLogin = () => {
+    if (token) {
+      return true;
+    }
+    dispatch(setIsOpenLoginAlert(true));
+    return false;
+  };
+
   const ActionIconContainer = ({
     icon,
     text = '',
     onPress = () => {},
+    isEnableText = true,
     isMustLogin = true,
   }: ActionContainerProps) => {
     return (
@@ -297,21 +332,20 @@ const NuggetActionsOverlay = ({
           isButton
           onPress={() => {
             if (isMustLogin) {
-              if (!token) {
-                dispatch(setIsOpenLoginAlert(true));
-                return;
-              } else if (token && user && user?.acc_verify_status === 0) {
-                dispatch(setIsOpenVerifyPopup(true));
-                return;
+              if (isLogin() && isVerified()) {
+                onPress();
               }
+            } else {
+              onPress();
             }
-            onPress();
           }}
         />
 
-        <StyledText style={styles.actionButtonText}>
-          {text ? text : ''}
-        </StyledText>
+        {isEnableText && (
+          <StyledText style={styles.actionButtonText}>
+            {text ? text : ''}
+          </StyledText>
+        )}
       </View>
     );
   };
@@ -331,15 +365,21 @@ const NuggetActionsOverlay = ({
     ) : null;
   };
 
-  const UserNuggetDetail = ({value}: NuggetDetailsProps) => {
-    return <StyledText style={styles.userDetailsText}>{value}</StyledText>;
+  const UserNuggetDetail = ({value, onPress}: NuggetDetailsProps) => {
+    return (
+      <StyledText style={styles.userDetailsText} onPress={onPress}>
+        {value}
+      </StyledText>
+    );
   };
 
-  const PollData = () => {
+  const PollData = useCallback(() => {
     return (
       <View style={{paddingRight: 20}}>
         {getPollOptions().map((item: PollOptionsItemProp) => {
-          return pollVotedData.isVoted ? (
+          return pollVotedData.isVoted ||
+            getRemainingTimeOfPoll(nugget.poll_duration) === '' ? (
+            // ||!getRemainingTimeOfPoll(nugget.poll_duration)
             <AnimatedBgFillContainer
               key={item.option_id.toString()}
               percentage={item.option_percentage}
@@ -349,23 +389,18 @@ const NuggetActionsOverlay = ({
           ) : (
             <SubmitButton
               key={item.option_id.toString()}
+              paddingVertical={5}
               buttonText={item.option_name}
               marginTop={10}
               isDisabled={pollVotedData.isVoted}
               onPress={() => {
-                if (!token) {
-                  dispatch(setIsOpenLoginAlert(true));
-                  return;
-                } else if (token && user && user?.acc_verify_status === 0) {
-                  dispatch(setIsOpenVerifyPopup(true));
-                  return;
+                if (isLogin() && isVerified()) {
+                  setpollVotedData({
+                    isVoted: true,
+                    votedOptionID: item.option_id,
+                  });
+                  pollVotingAPICall(item.option_id);
                 }
-
-                setpollVotedData({
-                  isVoted: true,
-                  votedOptionID: item.option_id,
-                });
-                pollVotingAPICall(item.option_id);
               }}
             />
           );
@@ -378,7 +413,7 @@ const NuggetActionsOverlay = ({
         </StyledText>
       </View>
     );
-  };
+  }, [pollVotedData, getPollOptions(), nugget]);
 
   return (
     <TouchableOpacity
@@ -429,7 +464,11 @@ const NuggetActionsOverlay = ({
       <View
         style={{
           position: 'absolute',
-          bottom: 85,
+          bottom: isFromGlobalSearch
+            ? insets.bottom
+              ? insets.bottom
+              : 30
+            : 85,
           left: 0,
           right: 0,
           paddingHorizontal: 10,
@@ -447,23 +486,78 @@ const NuggetActionsOverlay = ({
               profileImage={nugget.user_image}
               isEnableGradient={false}
               profileSize={45}
+              isButton
+              onPressProfile={() => {
+                if (isLogin()) {
+                  const pushAction = StackActions.push('ProfileStack', {
+                    userId:
+                      nugget.user_id === profile.user_id
+                        ? null
+                        : nugget.user_id,
+                  });
+                  navigation.dispatch(pushAction);
+                }
+              }}
               badgeSize={18}
               badgeContainerStyle={{right: 7}}
               containerStyle={{alignItems: 'flex-start'}}
             />
             <View style={styles.userDetailsContainer}>
-              <StyledText style={styles.nameText}>
-                {getSlicedText(
-                  htmlDecodeText(nugget.user_name),
-                  token ? 15 : 30,
-                )}
-              </StyledText>
-              {token ? (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  if (isLogin()) {
+                    const pushAction = StackActions.push('ProfileStack', {
+                      userId:
+                        nugget.user_id === profile.user_id
+                          ? null
+                          : nugget.user_id,
+                    });
+                    navigation.dispatch(pushAction);
+                  }
+                }}>
+                <StyledText style={styles.nameText}>
+                  {getSlicedText(
+                    htmlDecodeText(nugget.user_name),
+                    token ? 15 : 30,
+                  )}
+                </StyledText>
+              </TouchableOpacity>
+              {nugget.type === 2 && (
+                <>
+                  <StyledText style={{color: COLORS.white}}>
+                    {' ' + 'shared' + ' '}
+                  </StyledText>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      if (isLogin()) {
+                        const pushAction = StackActions.push('ProfileStack', {
+                          userId:
+                            nugget.user_id === profile.user_id
+                              ? null
+                              : nugget.user_id,
+                        });
+                        navigation.dispatch(pushAction);
+                      }
+                    }}>
+                    <StyledText style={styles.nameText}>
+                      {getSlicedText(
+                        htmlDecodeText(nugget.original_user_name),
+                        token ? 15 : 30,
+                      ) + "'s "}
+                    </StyledText>
+                  </TouchableOpacity>
+                  <StyledText style={{color: COLORS.white}}>Nugget</StyledText>
+                </>
+              )}
+              {token && !nugget.following ? (
                 <SubmitButton
                   buttonText="Become a Fan"
                   marginTop={0}
                   paddingVertical={0}
                   padding={0}
+                  onPress={updateIsFan}
                   marginHorizontal={10}
                   paddingHorizontal={2}
                   buttonTextStyle={{fontSize: 10}}
@@ -473,9 +567,14 @@ const NuggetActionsOverlay = ({
             <View style={[styles.userDetailsContainer, {paddingVertical: 5}]}>
               <UserNuggetDetail value={dateToShortDate(nugget.created_date)} />
               <Dot />
-              <UserNuggetDetail value={`${nugget.total_views} Views`} />
+              <UserNuggetDetail value={`${totalViews} Views`} />
               <Dot />
-              <UserNuggetDetail value={getNuggetType()} />
+              <TouchableOpacity
+                disabled={nugget.share_type !== 3 && nugget.share_type !== 4}
+                activeOpacity={0.7}
+                onPress={onPressShareType}>
+                <UserNuggetDetail value={getNuggetType()} />
+              </TouchableOpacity>
               <Dot />
               <UserNuggetDetail value={`${nugget.follow_count} Fans`} />
             </View>
@@ -488,9 +587,19 @@ const NuggetActionsOverlay = ({
                 maxHeight:
                   nugget.media_list.length > 0
                     ? 200
+                    : nugget.poll_option && nugget.poll_option.length > 0
+                    ? isEnableHeaderContainerHeightforTopButtons
+                      ? 150
+                      : nugget.poll_option.length > 2
+                      ? 60
+                      : 150
                     : DIMENSIONS.window.height -
                       (headerContainerHeight +
-                        85 /*85 is Bottom Tab Bar Height*/ +
+                        (isFromGlobalSearch
+                          ? insets.bottom
+                            ? insets.bottom
+                            : 30
+                          : 85) /*85 is Bottom Tab Bar Height*/ +
                         profileDataContainerHeight +
                         (insets.top ? insets.top : StatusBar.currentHeight)),
               }}>
@@ -502,8 +611,13 @@ const NuggetActionsOverlay = ({
                 <StyledText
                   textMode="read_more_hyper_link"
                   numberOfLines={
-                    nugget.media_list.length > 0
-                      ? 5
+                    nugget.media_list.length > 0 ||
+                    (nugget.poll_option && nugget.poll_option.length > 0)
+                      ? isEnableHeaderContainerHeightforTopButtons
+                        ? 5
+                        : nugget.poll_option.length > 2
+                        ? 2
+                        : 5
                       : textNuggetNumberOfLines ?? 15
                   }
                   onPressUrl={onPressUrl}
@@ -517,7 +631,7 @@ const NuggetActionsOverlay = ({
               </ScrollView>
             </TouchableOpacity>
           ) : null}
-          {nugget.poll_option && nugget.poll_option.length > 0 && <PollData />}
+          {nugget.poll_option && nugget.poll_option.length > 0 && PollData()}
         </View>
         <View style={{alignItems: 'center'}}>
           {token && isEnableADDButton ? (
@@ -526,29 +640,33 @@ const NuggetActionsOverlay = ({
                 if (token && user && user?.acc_verify_status === 0) {
                   dispatch(setIsOpenVerifyPopup(true));
                 } else {
-                  navigation.navigate('PostNugget');
+                  navigation.navigate('PostEditNugget');
                 }
               }}
               style={{marginBottom: 20}}
             />
           ) : null}
           <ActionIconContainer
-            icon={isLiked ? 'heart_pink' : 'heart_white'}
+            icon={nugget.liked ? 'heart_pink' : 'heart_white'}
             text={bigNumberFormater(nugget.total_likes)}
-            onPress={onPressLike}
+            onPress={updateLike}
           />
           <ActionIconContainer
             icon="comment"
-            text={bigNumberFormater(nugget.total_comments)}
+            text={bigNumberFormater(totalComments)}
             onPress={() => {
-              // setisOpenCommentsModal(true);
+              // setisRepeatVideo(true);
               handlePresentModalPress();
             }}
           />
-          <ActionIconContainer icon="share" text="726" isMustLogin={false} />
+          {parseInt(nugget.share_type) === 1 &&
+            !(nugget.poll_option && nugget.poll_option.length > 0) && (
+              <ActionIconContainer icon="share" onPress={onPressShare} />
+            )}
           <ActionIconContainer
-            icon={isSaved ? 'save_pink' : 'save_white'}
-            onPress={onPressSave}
+            icon={nugget.saved ? 'save_pink' : 'save_white'}
+            isEnableText={false}
+            onPress={updateSave}
           />
         </View>
       </View>
@@ -556,34 +674,53 @@ const NuggetActionsOverlay = ({
       {(nuggetType === 'video' || nuggetType === 'audio') && (
         <MediaControllers />
       )}
-      {(nuggetType === 'video' || nuggetType === 'audio') && (
-        <TouchableOpacity
-          style={[
-            styles.muteButton,
-            {
-              top:
-                headerContainerHeight +
-                10 +
-                (isEnableTopInsetsPadding
+
+      <View
+        style={[
+          styles.topRightButtonsContainer,
+          {
+            top:
+              (isEnableHeaderContainerHeightforTopButtons
+                ? headerContainerHeight
+                : 0) +
+              10 +
+              (isEnableTopInsetsPadding
+                ? insets.top
                   ? insets.top
-                    ? insets.top
-                    : StatusBar.currentHeight
-                  : 0),
-            },
-          ]}
+                  : StatusBar.currentHeight
+                : 0),
+          },
+        ]}>
+        <TouchableOpacity
+          style={styles.moreIconButton}
           activeOpacity={0.7}
           onPress={() => {
-            if (setisMuted) {
-              setisMuted(!isMuted);
+            if (isLogin() && isVerified()) {
+              setopenMenuOptions(true);
+              setisRepeatVideo(true);
             }
           }}>
-          <SVGIcon
-            icon={isMuted ? 'mute_white' : 'speaker_white'}
-            height={20}
-            width={20}
-          />
+          <SVGIcon icon="menu_horizontal_white" height={23} width={23} />
         </TouchableOpacity>
-      )}
+
+        {(nuggetType === 'video' || nuggetType === 'audio') && (
+          <TouchableOpacity
+            style={styles.muteButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              if (setisMuted) {
+                setisMuted(!isMuted);
+              }
+            }}>
+            <SVGIcon
+              icon={isMuted ? 'mute_white' : 'speaker_white'}
+              height={20}
+              width={20}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+
       <Modal visible={openUrlConfirmation} transparent>
         <ConfirmationPopup
           onClose={() => {
@@ -609,19 +746,35 @@ const NuggetActionsOverlay = ({
           }
         />
       </Modal>
+      <Modal
+        visible={openMenuOptions}
+        transparent
+        onRequestClose={() => {
+          setopenMenuOptions(false);
+          setisRepeatVideo(false);
+        }}>
+        <MenuContainer
+          setModal={status => {
+            setopenMenuOptions(status);
+            setisRepeatVideo(status);
+          }}
+          buttonsOptions={getMenuOptions()}
+          onPressOption={onPressNuggetAction}
+        />
+      </Modal>
 
       <BottomSheetModal
-        ref={bottomSheetModalRef}
+        ref={commentsBottomSheetModalRef}
         handleStyle={{display: 'none'}}
         onDismiss={() => {
           setisEnableContentPanningGesture(true);
-          setisOpenComments(false);
+          setisRepeatVideo(false);
         }}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
         bottomInset={insets.bottom}
         stackBehavior="push"
         keyboardBlurBehavior={'restore'}
-        android_keyboardInputMode="adjustResize"
+        android_keyboardInputMode="adjustPan"
         backgroundComponent={() => <View />}
         enableContentPanningGesture={isEnableContentPanningGesture}
         backdropComponent={props => {
@@ -652,12 +805,12 @@ const NuggetActionsOverlay = ({
           setisEnableContentPanningGesture={setisEnableContentPanningGesture}
           id={nugget.nugget_id}
           setTotalComments={setTotalComments}
-          totalComments={nugget.total_comments}
+          totalComments={totalComments}
         />
       </BottomSheetModal>
     </TouchableOpacity>
   );
-};
+}
 
 export default NuggetActionsOverlay;
 
@@ -725,7 +878,16 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 40 / 2,
+  },
+  topRightButtonsContainer: {
     position: 'absolute',
     right: 10,
+    alignItems: 'center',
+  },
+  moreIconButton: {
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 5,
   },
 });

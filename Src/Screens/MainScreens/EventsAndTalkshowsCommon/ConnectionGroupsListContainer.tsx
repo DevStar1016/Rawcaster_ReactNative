@@ -13,13 +13,22 @@ import StyledText from '../../../Components/StyledText';
 import SVGIcon from '../../../Components/SVGIcon';
 import {COLORS} from '../../../Utilities/Colors';
 import {DIMENSIONS} from '../../../Utilities/Constants';
-import {useToken} from '../../../Utilities/StoreData';
+import {
+  useConnectionsList,
+  useGroupsList,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {
   listAllFriendGroupsService,
   listAllFriendsService,
 } from '../../../Services/ApiService';
 import {getSlicedText} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
+import {useDispatch} from 'react-redux';
+import {
+  setConnectionsList,
+  setGroupsList,
+} from '../../../Store/Slices/HomeSlice';
 
 type Props = {
   titleText: string;
@@ -47,17 +56,20 @@ const ConnectionGroupsListContainer = ({
   onPressItem,
 }: Props) => {
   const token = useToken();
+  const dispatch = useDispatch();
   const [searchText, setsearchText] = useState('');
-  const [isLoading, setisLoading] = useState(true);
-  const [list, setlist] = useState([]);
+  const connectionsList = useConnectionsList();
+  const groupsList = useGroupsList();
+  const [isLoading, setisLoading] = useState(false);
+
   const inputRef = useRef<TextInput>(null);
   const [isEnableSearchBar, setisEnableSearchBar] = useState(false);
 
   useEffect(() => {
     isMount = true;
-    if (type === 'connection') {
+    if (type === 'connection' && connectionsList?.length <= 0) {
       connectionsAPICall();
-    } else if (type === 'group') {
+    } else if (type === 'group' && groupsList?.length <= 0) {
       groupsAPICall();
     }
     return () => {
@@ -65,7 +77,19 @@ const ConnectionGroupsListContainer = ({
     };
   }, []);
 
+  const getList = () => {
+    if (type === 'connection') {
+      return connectionsList;
+    } else if (type === 'group') {
+      return groupsList;
+    }
+    return [];
+  };
+
   const connectionsAPICall = () => {
+    if (isMount) {
+      setisLoading(true);
+    }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('allfriends', 1);
@@ -73,7 +97,7 @@ const ConnectionGroupsListContainer = ({
     listAllFriendsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          setlist(res.data.friends_list);
+          dispatch(setConnectionsList(res.data.friends_list));
         }
       })
       .catch(e => {})
@@ -85,13 +109,16 @@ const ConnectionGroupsListContainer = ({
   };
 
   const groupsAPICall = () => {
+    if (isMount) {
+      setisLoading(true);
+    }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('page_number', 1);
     listAllFriendGroupsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          setlist(res.data.friend_group_list);
+          dispatch(setGroupsList(res.data.friend_group_list));
         }
       })
       .catch(e => {})
@@ -111,7 +138,7 @@ const ConnectionGroupsListContainer = ({
   };
 
   const isSelectedAll = () => {
-    return selectedIdsList.length === list.length;
+    return selectedIdsList.length === getList().length;
   };
 
   const getSelectedCountText = () => {
@@ -123,11 +150,11 @@ const ConnectionGroupsListContainer = ({
 
   const getFilteredList = () => {
     if (searchText.trim()) {
-      return [...list].filter((item: any) =>
+      return [...getList()].filter((item: any) =>
         item[displayFieldName]?.includes(searchText.trim()),
       );
     }
-    return [...list];
+    return [...getList()];
   };
 
   const renderItem = (item: any, index: number) => {
@@ -187,7 +214,7 @@ const ConnectionGroupsListContainer = ({
           activeOpacity={0.7}
           onPress={() => {
             onPressSelectAll(
-              list.map((item: any) => item[idFieldName]),
+              getList().map((item: any) => item[idFieldName]),
               !isSelectedAll(),
             );
           }}>

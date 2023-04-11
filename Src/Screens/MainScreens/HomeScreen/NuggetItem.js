@@ -1,122 +1,111 @@
-import {View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import NuggetActionsOverlay from './NuggetActionsOverlay';
 import VideoNugget from './NuggetItemTypes/VideoNugget';
 import ImageNugget from './NuggetItemTypes/ImageNugget';
 import {useIsAppForeground} from '../../../Utilities/StoreData';
-import {useIsFocused} from '@react-navigation/native';
 import AudioNugget from './NuggetItemTypes/AudioNugget';
+import {
+  useNuggetItemActions,
+  useNuggetParentActions,
+} from '../../../Utilities/Contexts';
+import {useIsFocused} from '@react-navigation/native';
 
 function NuggetItem({
   index,
-  viewableItem,
-  viewableNuggetItem,
   mediaItem,
-  onFinishPlaying,
-  isOpenComments,
-  isEnableTopInsetsPadding,
-  nuggetId,
-  headerContainerHeight,
-  nugget,
-  isLiked,
-  onPressLike,
-  setTotalComments,
-  isSaved,
-  onPressSave,
-  textNuggetNumberOfLines,
-  isMuted,
-  setisOpenComments,
-  setisMuted,
-  mediaHeight,
-  isEnableADDButton,
+  onEditNugget,
+  onDeleteNugget,
+  onPressShare,
+  onPressShareType,
 }) {
+  const {isMuted, viewableNuggetItem, mediaHeight, isAutoPlay} =
+    useNuggetParentActions();
+
+  const {isRepeatVideo, nugget, viewableItem, parentNuggetIndex} =
+    useNuggetItemActions();
+
   const [paused, setpaused] = useState(true);
   const isFocused = useIsFocused();
+  const videoPlayer = useRef(null);
 
   const isAppForeground = useIsAppForeground();
 
-  useEffect(() => {
-    if (
+  const shouldPauseVideo = useMemo(() => {
+    if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
+      return true;
+    }
+    return (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&
-      nuggetId === viewableNuggetItem &&
+      nugget.nugget_id === viewableNuggetItem &&
       isFocused &&
-      !isOpenComments
-    ) {
-      setpaused(false);
-    } else {
-      setpaused(true);
-    }
+      isAutoPlay &&
+      !isRepeatVideo
+    );
   }, [
+    isAppForeground,
     viewableItem,
     viewableNuggetItem,
-    nuggetId,
-    mediaItem,
-    isAppForeground,
+    // nugget.nugget_id,
+    mediaItem.media_id,
     isFocused,
+    isAutoPlay,
+    isRepeatVideo,
   ]);
 
-  const getNuggetItem = () => {
+  useEffect(() => {
+    setpaused(!shouldPauseVideo);
+  }, [shouldPauseVideo]);
+
+  function getNuggetItem() {
     if (mediaItem.media_type.includes('video')) {
       return (
         <VideoNugget
-          mediaHeight={mediaHeight}
+          videoPlayer={videoPlayer}
           paused={paused}
-          isOpenComments={isOpenComments}
-          isMuted={isMuted}
-          onFinishPlaying={onFinishPlaying}
           url={mediaItem.path}
           index={index}
         />
       );
     } else if (mediaItem.media_type.includes('audio')) {
-      return (
-        <AudioNugget
-          mediaHeight={mediaHeight}
-          paused={paused}
-          isOpenComments={isOpenComments}
-          isMuted={isMuted}
-          onFinishPlaying={onFinishPlaying}
-          url={mediaItem.path}
-          index={index}
-        />
-      );
+      return <AudioNugget paused={paused} url={mediaItem.path} index={index} />;
     } else if (mediaItem.media_type.includes('image')) {
       return <ImageNugget url={mediaItem.path} mediaHeight={mediaHeight} />;
-    } else {
-      return null;
     }
-  };
+    return null;
+  }
 
-  return (
-    <View style={{flex: 1}}>
-      {getNuggetItem()}
+  return useMemo(
+    () => (
+      <View style={{flex: 1}}>
+        {getNuggetItem()}
 
-      <NuggetActionsOverlay
-        nugget={nugget}
-        textNuggetNumberOfLines={textNuggetNumberOfLines}
-        isEnableTopInsetsPadding={isEnableTopInsetsPadding}
-        headerContainerHeight={headerContainerHeight}
-        isEnableADDButton={isEnableADDButton}
-        nuggetType={mediaItem.media_type}
-        setisOpenComments={setisOpenComments}
-        isLiked={isLiked}
-        setTotalComments={setTotalComments}
-        onPressLike={onPressLike}
-        isSaved={isSaved}
-        isPaused={paused}
-        isMuted={isMuted}
-        setisMuted={setisMuted}
-        onPressMuteUnmute={() => {
-          setisMuted(pre => !pre);
-        }}
-        onPlayPauseVideo={() => {
-          setpaused(pre => !pre);
-        }}
-        onPressSave={onPressSave}
-      />
-    </View>
+        <NuggetActionsOverlay
+          nugget={nugget}
+          nuggetType={mediaItem.media_type}
+          onPressShareType={onPressShareType}
+          onPressShare={onPressShare}
+          onEditNugget={onEditNugget}
+          onDeleteNugget={onDeleteNugget}
+          isPaused={paused}
+          onPlayPauseVideo={() => {
+            setpaused(pre => !pre);
+          }}
+        />
+      </View>
+    ),
+    [
+      isMuted,
+      viewableNuggetItem,
+      paused,
+      mediaHeight,
+      isRepeatVideo,
+      mediaItem.path,
+      index,
+      nugget,
+    ],
   );
 }
 

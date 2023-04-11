@@ -1,0 +1,217 @@
+import {
+  ListRenderItem,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useState} from 'react';
+import HeaderWithBack from '../Components/HeaderWithBack';
+import {IconType} from '../Utilities/Icons';
+import SearchInput from '../Components/SearchInput';
+import {FlatList} from 'react-native-gesture-handler';
+import {COLORS} from '../Utilities/Colors';
+import SVGIcon from '../Components/SVGIcon';
+import ProfileWithBadge from '../Components/ProfileWithBadge';
+import StyledText from '../Components/StyledText';
+
+type Props = {
+  title: string;
+  onCloseModal?: () => void;
+  onSelectItems: (list: any[]) => void;
+  preSelectedIds?: any[];
+  isEnableRightIcon?: boolean;
+  rightIcon?: IconType;
+  list?: any[];
+  isEnableSelection?: boolean;
+  displayFieldName?: string;
+  idFieldName?: string;
+  imageFieldName?: string;
+  isEnableLocalSearch?: boolean;
+};
+
+type RenderProps = {
+  item: any;
+  index: number;
+};
+
+const MultiItemsSelectList = ({
+  title = '',
+  onCloseModal,
+  preSelectedIds = [],
+  onSelectItems,
+  isEnableRightIcon = true,
+  rightIcon = 'tick',
+  list = [],
+  isEnableSelection = true,
+  isEnableLocalSearch = true,
+  displayFieldName,
+  imageFieldName,
+  idFieldName,
+}: Props) => {
+  const [selectedIdsList, setselectedIdsList] = useState<any[]>(
+    preSelectedIds ?? [],
+  );
+  const [searchText, setsearchText] = useState('');
+
+  const getList = () => {
+    if (searchText) {
+      if (displayFieldName) {
+        return [...list].filter((item: any) =>
+          item[displayFieldName]
+            ?.toLowerCase()
+            .includes(searchText.toLowerCase()),
+        );
+      }
+      return [...list].filter((item: any) =>
+        item.toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
+    return [...list];
+  };
+
+  const handleSelectItem = (id: any) => {
+    if (isSelected(id)) {
+      setselectedIdsList(preList =>
+        [...preList].filter(itemId => itemId !== id),
+      );
+    } else {
+      setselectedIdsList(preList => [...preList, id]);
+    }
+  };
+
+  const isSelected = (id: any) => {
+    const tempItemIndex = [...selectedIdsList].findIndex(
+      (itemId: any) => itemId === id,
+    );
+    if (tempItemIndex !== -1) {
+      return true;
+    }
+    return false;
+  };
+
+  const renderItem = ({item}: RenderProps) => {
+    return (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        disabled={!isEnableSelection}
+        activeOpacity={0.7}
+        onPress={() => {
+          if (isEnableSelection) {
+            handleSelectItem(idFieldName ? item[idFieldName] : item);
+          }
+        }}>
+        {isEnableSelection && (
+          <View
+            style={[
+              styles.checkBox,
+              {
+                backgroundColor: isSelected(
+                  idFieldName ? item[idFieldName] : item,
+                )
+                  ? COLORS.primary
+                  : COLORS.white,
+              },
+            ]}>
+            {isSelected(idFieldName ? item[idFieldName] : item) && (
+              <SVGIcon icon="tick" height={12} width={12} />
+            )}
+          </View>
+        )}
+        {imageFieldName && (
+          <ProfileWithBadge
+            profileImage={item[imageFieldName]}
+            extraMargin={0}
+            isEnableGradient
+            padding={0}
+            profileSize={50}
+            containerStyle={{marginHorizontal: 10}}
+          />
+        )}
+        <View style={styles.displayTextContainer}>
+          <StyledText>
+            {displayFieldName ? item[displayFieldName] : item}
+          </StyledText>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.mainContainer}>
+      <HeaderWithBack
+        isEnableRightIcon={
+          selectedIdsList.length <= 0 ? false : isEnableRightIcon
+        }
+        rightIcon={rightIcon}
+        title={title}
+        isTitleCenter
+        rightIconSize={20}
+        isEnableSafeArea
+        isModal={true}
+        onPressRightIcon={() => {
+          onSelectItems(selectedIdsList);
+        }}
+        setModal={onCloseModal}
+      />
+      <View style={styles.contentContainer}>
+        {isEnableLocalSearch && (
+          <SearchInput
+            onSearch={setsearchText}
+            searchWhenClickedButton={false}
+          />
+        )}
+        <View
+          style={[
+            styles.listContainer,
+            {paddingTop: isEnableLocalSearch ? 10 : 0},
+          ]}>
+          <FlatList
+            data={getList()}
+            keyboardShouldPersistTaps={'handled'}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => {
+              return <View style={{height: 10}} />;
+            }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default MultiItemsSelectList;
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: COLORS.lightGrey,
+    borderRadius: 10,
+  },
+  checkBox: {
+    height: 20,
+    width: 20,
+    borderRadius: 20 / 2,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  displayTextContainer: {
+    flex: 1,
+  },
+});

@@ -53,15 +53,16 @@ const AnimatedBgFillContainer = ({
           ]}
         />
       )}
-      <StyledText
-        style={{
-          fontFamily: FONTS.DMSans.medium,
-          padding: 10,
-          color: COLORS.white,
-          paddingVertical: 15,
-        }}>
-        {name}
-      </StyledText>
+      <View style={{flex: 1}}>
+        <StyledText
+          style={{
+            fontFamily: FONTS.DMSans.medium,
+            padding: 10,
+            color: COLORS.white,
+          }}>
+          {name}
+        </StyledText>
+      </View>
       <StyledText
         style={{
           fontFamily: FONTS.DMSans.medium,
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     width: '100%',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     overflow: 'hidden',
     borderRadius: 10,
     backgroundColor: COLORS.transparent,

@@ -3,7 +3,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import moment from 'moment';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
-import HOCView from '../../../Components/HOCView';
 import TextBox from '../../../Components/TextBox';
 import DropDownPicker from '../../../Components/DropDownPicker';
 import {EVENT_VISIBILITY_TYPE_LIST} from '../../../Utilities/Constants';
@@ -11,6 +10,9 @@ import {useSettings, useToken} from '../../../Utilities/StoreData';
 import {
   getDisplayEventDate,
   getDisplayEventTime,
+  getFileName,
+  htmlDecodeText,
+  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import EventImagePicker from '../EventsAndTalkshowsCommon/EventImagePicker';
 import Toast from '../../../Components/Toast';
@@ -20,26 +22,34 @@ import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
 import {
   addLiveEventService,
+  editLiveEventService,
   getEventTypeService,
+  viewEventService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import {useNavigation} from '@react-navigation/native';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import HeaderWithBack from '../../../Components/HeaderWithBack';
+import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
 
 var isMount = true;
 
 const validationSchema = yup.object({
   eventTitle: yup
     .string()
-    .min(1, 'Invalid event Title.')
-    .required('Event Title required.'),
+    .min(1, 'Invalid Event Title.')
+    .max(60, 'Invalid Event Title.')
+    .required('Event Title is required.'),
   eventTime: yup.string().required('Select valid Time'),
 });
-const CreateEditTalkshow = () => {
+const CreateEditTalkshow = ({route}) => {
+  const eventId =
+    route.params && route.params.eventId ? route.params.eventId : null;
   const token = useToken();
   const settings = useSettings();
   const navigation = useNavigation();
-  const [eventVisibilityType, seteventVisibilityType] = useState(null);
-
+  const [eventVisibilityTypeId, seteventVisibilityTypeId] = useState(null);
   const [bannerImage, setbannerImage] = useState(null);
   const [eventTypesList, seteventTypesList] = useState([]);
   const [inviteUserText, setinviteUserText] = useState('');
@@ -49,11 +59,16 @@ const CreateEditTalkshow = () => {
   const [selectedConnectionsIdsList, setselectedConnectionsIdsList] = useState(
     [],
   );
+  const [removedInvitedUsersList, setremovedInvitedUsersList] = useState([]);
+  const [removedConnectionsIdsList, setremovedConnectionsIdsList] = useState(
+    [],
+  );
+  const [removedGroupsIdsList, setremovedGroupsIdsList] = useState([]);
   const [loaderText, setloaderText] = useState('Fetching Event Types');
   const [selectedGroupsIdsList, setselectedGroupsIdsList] = useState([]);
   const [isLoading, setisLoading] = useState(true);
 
-  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
+  const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
     useFormik({
       initialValues: {
         eventTitle: settings.event_name,
@@ -68,20 +83,26 @@ const CreateEditTalkshow = () => {
           );
         } else {
           if (isMount) {
-            setloaderText('Creating Talkshow...');
+            setloaderText(`${eventId ? 'Editing' : 'Creating'} Talkshow...`);
             setisLoading(true);
           }
-          createTalkshowAPICall();
+          if (eventId) {
+            editTalkshowAPICall();
+          } else {
+            createTalkshowAPICall();
+          }
         }
-        // setisLoading(true);
-        // handleLogin(values);
       },
     });
 
   useEffect(() => {
     isMount = true;
+    AvoidSoftInput.setAdjustResize();
     getEventVisibilityTypesAPICall();
+
     return () => {
+      AvoidSoftInput.setAdjustPan();
+      Keyboard.dismiss();
       isMount = false;
     };
   }, []);
@@ -92,12 +113,69 @@ const CreateEditTalkshow = () => {
     getEventTypeService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data.event_types);
-          seteventVisibilityType(res.data.event_types[0]);
           seteventTypesList(res.data.event_types);
+          seteventVisibilityTypeId(res.data.event_types[0].id);
         }
       })
       .catch(e => {})
+      .finally(() => {
+        if (eventId) {
+          setloaderText('Fetching Event Details');
+          getEventDetailsAPICall();
+        } else {
+          if (isMount) {
+            setisLoading(false);
+          }
+        }
+      });
+  };
+
+  const getEventDetailsAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('event_id', eventId);
+    viewEventService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          if (res.data.event_detail.banner_image) {
+            setbannerImage({
+              uri: res.data.event_detail.banner_image,
+            });
+          }
+          setValues(preValues => {
+            return {
+              ...preValues,
+              eventTitle: htmlDecodeText(res.data.event_detail.event_name),
+              eventTime: utcToUserTimezone(
+                res.data.event_detail.start_date_time,
+                settings.time_zone,
+              ),
+            };
+          });
+          setliveEventDate(
+            utcToUserTimezone(
+              res.data.event_detail.start_date_time,
+              settings.time_zone,
+            ),
+          );
+
+          seteventVisibilityTypeId(res.data.event_detail.event_type_id);
+
+          setselectedGroupsIdsList(res.data.event_detail.invite_groups_id);
+          setremovedGroupsIdsList(res.data.event_detail.invite_groups_id);
+          setselectedConnectionsIdsList(
+            res.data.event_detail.invite_friends_id,
+          );
+          setremovedConnectionsIdsList(res.data.event_detail.invite_friends_id);
+          setinvitedUsersList(res.data.event_detail.invite_mails);
+          setremovedInvitedUsersList(res.data.event_detail.invite_mails);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
       .finally(() => {
         if (isMount) {
           setisLoading(false);
@@ -105,11 +183,11 @@ const CreateEditTalkshow = () => {
       });
   };
 
-  const createTalkshowAPICall = () => {
+  const getDefaultCreateEditFormData = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_title', values.eventTitle);
-    formData.append('event_type', eventVisibilityType.id);
+    formData.append('event_type', eventVisibilityTypeId);
     formData.append(
       'event_start_date',
       moment(liveEventDate).utc().format('YYYY-MM-DD'),
@@ -118,7 +196,7 @@ const CreateEditTalkshow = () => {
       'event_start_time',
       moment(values.eventTime).utc().format('HH:mm'),
     );
-    if (bannerImage) {
+    if (bannerImage && bannerImage.type) {
       formData.append('event_banner', bannerImage);
     }
     formData.append(
@@ -133,8 +211,64 @@ const CreateEditTalkshow = () => {
     if (invitedUsersList) {
       formData.append('event_invite_mails', JSON.stringify(invitedUsersList));
     }
+    return formData;
+  };
 
+  const createTalkshowAPICall = () => {
+    const formData = getDefaultCreateEditFormData();
     addLiveEventService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          navigation.reset({
+            routes: [{name: 'Talkshow'}],
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
+
+  const editTalkshowAPICall = () => {
+    const formData = getDefaultCreateEditFormData();
+    formData.append('event_id', eventId);
+    let tempRemovedUsersList = [...removedInvitedUsersList].filter(
+      mailItem => ![...invitedUsersList].includes(mailItem),
+    );
+    let tempRemovedGroupsIdsList = [...removedGroupsIdsList].filter(
+      id => ![...selectedGroupsIdsList].includes(id),
+    );
+    let tempRemovedConnectionsIdsList = [...removedConnectionsIdsList].filter(
+      id => ![...selectedConnectionsIdsList].includes(id),
+    );
+
+    if (tempRemovedUsersList.length > 0) {
+      formData.append(
+        'delete_invite_mails',
+        JSON.stringify(tempRemovedUsersList),
+      );
+    }
+    if (tempRemovedConnectionsIdsList.length > 0) {
+      formData.append(
+        'delete_invite_friends',
+        JSON.stringify(tempRemovedConnectionsIdsList),
+      );
+    }
+    if (tempRemovedGroupsIdsList.length > 0) {
+      formData.append(
+        'delete_invite_groups',
+        JSON.stringify(tempRemovedGroupsIdsList),
+      );
+    }
+    editLiveEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
@@ -270,154 +404,179 @@ const CreateEditTalkshow = () => {
 
   const eventVisibilityTypeError = () => {
     return (
-      eventVisibilityType?.id === 2 &&
+      eventVisibilityTypeId === 2 &&
       selectedConnectionsIdsList.length <= 0 &&
       selectedGroupsIdsList.length <= 0 &&
       invitedUsersList.length <= 0
     );
   };
 
+  const getEventVisibilityType = (eventTypeId = eventVisibilityTypeId) => {
+    return [...eventTypesList].find(item => item.id === eventTypeId);
+  };
+
   return (
-    <HOCView isEnableKeyboardAware backHeaderProps={{title: 'Create Talkshow'}}>
-      <TextBox
-        title="Event Title"
-        value={values.eventTitle}
-        onChangeText={handleChange('eventTitle')}
-        errorText={errors.eventTitle}
-        placeHolder="Event Title"
-        mainContainerMarginVertical={0}
-        mainContainerMarginTop={15}
-        inputContainerMarginVertical={5}
-        titlePaddingVertical={5}
-      />
-      <DropDownPicker
-        title="Event Type"
-        dataList={[...eventTypesList]}
-        value={eventVisibilityType}
-        fieldName="type"
-        placeHolderText="Event Type"
-        onSelectItem={seteventVisibilityType}
-      />
-      <DropDownPicker
-        title="Date"
-        isDateTime
-        value={getDisplayEventDate(liveEventDate, settings.default_date_format)}
-        dateValue={liveEventDate}
-        dropDownIcon="calendar_black"
-        placeHolderText="Date"
-        onSelectItem={onSelectLiveEventDate}
-      />
-      <DropDownPicker
-        title="Time"
-        isDateTime
-        mainContainerMarginVertical={0}
-        errorText={errors.eventTime}
-        inputContainerMarginVertical={5}
-        titlePaddingVertical={5}
-        value={getDisplayEventTime(values.eventTime)}
-        dateValue={values.eventTime}
-        datePickerProps={{
-          mode: 'time',
-          is24Hour: false,
-        }}
-        dropDownIcon="clock_black"
-        placeHolderText={getDisplayEventTime(new Date())}
-        onSelectItem={onSelectLiveEventTime}
-      />
-      <EventImagePicker
-        mainContainerStyle={{marginTop: 10}}
-        selectedImage={bannerImage}
-        setselectedImage={setbannerImage}
-      />
-      {eventVisibilityTypeError() && (
-        <StyledText style={styles.errorText}>
-          Event type is Private, you must select the participants.
-        </StyledText>
-      )}
-      <TextBox
-        innerRef={inviteUserInputRef}
-        isVisible={eventVisibilityType?.id !== 3}
-        title="Invite Users"
-        placeHolder="Enter email address to send event invitation"
-        value={inviteUserText}
-        onChangeText={text => {
-          if (isMount) {
-            setinviteUserText(text);
-          }
-          if (text.includes(',') || text.includes(' ')) {
-            addInvitedUsers();
-          }
-        }}
-        isEnableListAppend
-        appendedListProps={{
-          list: invitedUsersList,
-          onRemoveItem: handleRemoveInvitedUser,
-        }}
-        returnKeyType="send"
-        clearButtonMode="while-editing"
-        onSubmitEditing={addInvitedUsers}
-        textAlignVertical={'top'}
-      />
-
-      <ConnectionGroupsListContainer
-        isVisible={eventVisibilityType?.id !== 3}
-        displayFieldName="display_name"
-        idFieldName="friend_request_id"
-        titleText="Connections"
-        selectedAllButtonText="Remove All"
-        onPressItem={onSelectUnSelectConnection}
-        onPressSelectAll={(idsList, isSelectedAll) => {
-          if (isMount) {
-            if (isSelectedAll) {
-              setselectedConnectionsIdsList(idsList);
-            } else {
-              setselectedConnectionsIdsList([]);
+    <View style={{flex: 1, backgroundColor: COLORS.white}}>
+      <ReplaceStatusBar />
+      <HeaderWithBack title={eventId ? 'Edit Talkshow' : 'Create Talkshow'} />
+      <KeyboardAwareScrollView
+        extraScrollHeight={55}
+        style={{paddingHorizontal: 10}}
+        enableOnAndroid={true}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={'handled'}
+        scrollEnabled={true}>
+        <TextBox
+          title="Event Title"
+          value={values.eventTitle}
+          onChangeText={handleChange('eventTitle')}
+          errorText={errors.eventTitle}
+          placeHolder="Event Title"
+          maxLength={60}
+          mainContainerMarginVertical={0}
+          mainContainerMarginTop={15}
+          inputContainerMarginVertical={5}
+          titlePaddingVertical={5}
+        />
+        <DropDownPicker
+          title="Event Type"
+          dataList={[...eventTypesList]}
+          value={getEventVisibilityType()}
+          fieldName="type"
+          placeHolderText="Event Type"
+          onSelectItem={item => {
+            seteventVisibilityTypeId(item.id);
+          }}
+        />
+        <DropDownPicker
+          title="Date"
+          isDateTime
+          value={getDisplayEventDate(
+            liveEventDate,
+            settings.default_date_format,
+          )}
+          dateValue={liveEventDate}
+          dropDownIcon="calendar_black"
+          placeHolderText="Date"
+          onSelectItem={onSelectLiveEventDate}
+        />
+        <DropDownPicker
+          title="Time"
+          isDateTime
+          mainContainerMarginVertical={0}
+          errorText={errors.eventTime}
+          inputContainerMarginVertical={5}
+          titlePaddingVertical={5}
+          value={getDisplayEventTime(values.eventTime)}
+          dateValue={values.eventTime}
+          datePickerProps={{
+            mode: 'time',
+            is24Hour: false,
+          }}
+          dropDownIcon="clock_black"
+          placeHolderText={getDisplayEventTime(new Date())}
+          onSelectItem={onSelectLiveEventTime}
+        />
+        <EventImagePicker
+          mainContainerStyle={{marginTop: 10}}
+          selectedImage={bannerImage}
+          setselectedImage={setbannerImage}
+        />
+        {eventVisibilityTypeError() && (
+          <StyledText style={styles.errorText}>
+            Event type is Private, you must select the participants.
+          </StyledText>
+        )}
+        <TextBox
+          innerRef={inviteUserInputRef}
+          isVisible={eventVisibilityTypeId !== 3}
+          title="Invite Users"
+          placeHolder="Enter email address to send event invitation"
+          value={inviteUserText}
+          onChangeText={text => {
+            if (isMount) {
+              setinviteUserText(text);
             }
-          }
-        }}
-        selectAllButtonText="Invite All"
-        type="connection"
-        selectedIdsList={selectedConnectionsIdsList}
-      />
-      <ConnectionGroupsListContainer
-        isVisible={eventVisibilityType?.id !== 3}
-        displayFieldName="group_name"
-        idFieldName="group_id"
-        titleText="Groups"
-        selectedAllButtonText="Remove All"
-        onPressItem={onSelectUnSelectGroup}
-        onPressSelectAll={(idsList, isSelectedAll) => {
-          if (isMount) {
-            if (isSelectedAll) {
-              setselectedGroupsIdsList(idsList);
-            } else {
-              setselectedGroupsIdsList([]);
+            if (text.includes(',') || text.includes(' ')) {
+              addInvitedUsers();
             }
-          }
-        }}
-        selectAllButtonText="Add All"
-        type="group"
-        selectedIdsList={selectedGroupsIdsList}
-      />
+          }}
+          isEnableListAppend
+          appendedListProps={{
+            list: invitedUsersList,
+            onRemoveItem: handleRemoveInvitedUser,
+          }}
+          returnKeyType="send"
+          clearButtonMode="while-editing"
+          onSubmitEditing={addInvitedUsers}
+          textAlignVertical={'top'}
+        />
 
-      <SubmitButton
-        buttonText="Create Event"
-        marginTop={10}
-        onPress={() => {
-          handleSubmit();
-        }}
-      />
-      <SubmitButton
-        buttonText="Cancel"
-        bgColor={COLORS.white}
-        textColor={COLORS.secondary}
-        marginBottom={30}
-        marginTop={10}
-      />
+        <ConnectionGroupsListContainer
+          isVisible={eventVisibilityTypeId !== 3}
+          displayFieldName="display_name"
+          idFieldName="user_id"
+          titleText="Connections"
+          selectedAllButtonText="Remove All"
+          onPressItem={onSelectUnSelectConnection}
+          onPressSelectAll={(idsList, isSelectedAll) => {
+            if (isMount) {
+              if (isSelectedAll) {
+                setselectedConnectionsIdsList(idsList);
+              } else {
+                setselectedConnectionsIdsList([]);
+              }
+            }
+          }}
+          selectAllButtonText="Invite All"
+          type="connection"
+          selectedIdsList={selectedConnectionsIdsList}
+        />
+        <ConnectionGroupsListContainer
+          isVisible={eventVisibilityTypeId !== 3}
+          displayFieldName="group_name"
+          idFieldName="group_id"
+          titleText="Groups"
+          selectedAllButtonText="Remove All"
+          onPressItem={onSelectUnSelectGroup}
+          onPressSelectAll={(idsList, isSelectedAll) => {
+            if (isMount) {
+              if (isSelectedAll) {
+                setselectedGroupsIdsList(idsList);
+              } else {
+                setselectedGroupsIdsList([]);
+              }
+            }
+          }}
+          selectAllButtonText="Add All"
+          type="group"
+          selectedIdsList={selectedGroupsIdsList}
+        />
+
+        <SubmitButton
+          buttonText={eventId ? 'Edit Event' : 'Create Event'}
+          marginTop={10}
+          onPress={() => {
+            handleSubmit();
+          }}
+        />
+        <SubmitButton
+          buttonText="Cancel"
+          bgColor={COLORS.white}
+          textColor={COLORS.secondary}
+          marginBottom={30}
+          marginTop={10}
+          onPress={() => {
+            navigation.goBack();
+          }}
+        />
+      </KeyboardAwareScrollView>
+
       <Modal visible={isLoading} transparent>
         <Loader bgColor={COLORS.transparentDimColor} loaderText={loaderText} />
       </Modal>
-    </HOCView>
+    </View>
   );
 };
 

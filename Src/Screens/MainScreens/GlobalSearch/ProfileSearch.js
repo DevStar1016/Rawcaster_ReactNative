@@ -9,7 +9,7 @@ import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
 import SearchProfileItem from './SearchProfileItem';
 import {useGlobalSearch} from '../../../Utilities/Contexts';
-import {useToken} from '../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 import {
   getAuthCode,
   getFilteredDuplicatesList,
@@ -18,10 +18,13 @@ import {
 import {
   searchRawcasterUsersService,
   followAndUnfollowService,
+  sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
+import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 var isMount = true;
 var currentPage = 1;
@@ -29,6 +32,7 @@ var totalPages = 1;
 const ProfileSearch = () => {
   const {searchText, setisActionLoading} = useGlobalSearch();
   const token = useToken();
+  const profile = useProfile();
   const [profileList, setprofileList] = useState([]);
   const [isLoadMore, setisLoadMore] = useState(false);
   const [listContainerHeight, setlistContainerHeight] = useState(undefined);
@@ -98,7 +102,7 @@ const ProfileSearch = () => {
       });
   };
 
-  const handleBecomeFan = (userRefId, followType) => {
+  const handleBecomeFan = userRefId => {
     // 1 - follow, 2 - unfollow
     if (isMount) {
       setisActionLoading(true);
@@ -106,7 +110,7 @@ const ProfileSearch = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('follow_userid', userRefId);
-    formData.append('type', followType);
+    formData.append('type', 1);
     followAndUnfollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -119,11 +123,60 @@ const ProfileSearch = () => {
             if (tempIndex !== -1) {
               tempProfileList[tempIndex] = {
                 ...tempProfileList[tempIndex],
-                follow: followType ? true : false,
+                follow: 1,
               };
             }
             return tempProfileList;
           });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  };
+
+  const handleSendFriendRequest = (userRefId, user_id) => {
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    formData.append('user_ids', JSON.stringify([userRefId]));
+    sendFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setprofileList(preList => {
+            let tempProfileList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempProfileList[tempIndex] = {
+                ...tempProfileList[tempIndex],
+                friend_request_status: '1',
+              };
+            }
+            return tempProfileList;
+          });
+          if (res.data?.friend_request_ids?.length > 0) {
+            let data = {
+              friend_request_id: res.data.friend_request_ids[0],
+              display_name: profile.name,
+              profile_img: profile.profile_image,
+              user_id: profile.user_id,
+            };
+            console.log('SEND FRIEND REQUEST SOCKET', data);
+            friendRequestSocket(user_id, data);
+          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -156,6 +209,7 @@ const ProfileSearch = () => {
       }
     }
   };
+
   const renderFooter = () => {
     return isLoadMore ? (
       <ActivityIndicator size={'small'} color={COLORS.primary} />
@@ -166,9 +220,23 @@ const ProfileSearch = () => {
     return <View style={styles.divider} />;
   };
 
+  function renderEmptyComponent() {
+    return (
+      <View style={[styles.emptyComponent, {height: listContainerHeight}]}>
+        <DefaultBackground />
+        <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
+          We didn't find any results!
+        </StyledText>
+      </View>
+    );
+  }
+
   return (
     <View
-      style={styles.mainContainer}
+      style={[
+        styles.mainContainer,
+        profileList.length > 0 && {paddingVertical: 5, paddingHorizontal: 15},
+      ]}
       onLayout={e => {
         setlistContainerHeight(e.nativeEvent.layout.height);
       }}>
@@ -184,22 +252,15 @@ const ProfileSearch = () => {
               <SearchProfileItem
                 item={item}
                 onBecomeFan={() => {
-                  handleBecomeFan(item.user_ref_id, 1);
+                  handleBecomeFan(item.user_ref_id);
                 }}
-                onConnectionRequest={() => {}}
+                onConnectionRequest={() => {
+                  handleSendFriendRequest(item.user_ref_id, item.user_id);
+                }}
               />
             );
           }}
-          ListEmptyComponent={() => {
-            return (
-              <View
-                style={[styles.emptyComponent, {height: listContainerHeight}]}>
-                <StyledText style={{paddingVertical: 5}}>
-                  We didn't find any results!
-                </StyledText>
-              </View>
-            );
-          }}
+          ListEmptyComponent={renderEmptyComponent}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -225,8 +286,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
   },
   divider: {
     backgroundColor: COLORS.borderColor,

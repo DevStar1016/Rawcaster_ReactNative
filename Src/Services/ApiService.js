@@ -119,8 +119,8 @@ export const addNuggetsService = data => {
   return axios.post('addnuggets', data);
 };
 
-export const listNuggetsService = data => {
-  return axios.post('listnuggets', data);
+export const listNuggetsService = (data, signal) => {
+  return axios.post('listnuggets', data, {signal: signal});
 };
 
 export const likeAndUnlikeNuggetService = data => {

@@ -24,7 +24,7 @@ const ItemSelectionMiniList = ({
   title = '',
   listData = [],
   fieldName = '',
-  containerWidth = '60%',
+  containerWidth = '70%',
   onClose,
   maxHeight = '50%',
   onSelectItem,
@@ -44,7 +44,7 @@ const ItemSelectionMiniList = ({
               onSelectItem(item);
             }
           }}>
-          <StyledText style={{paddingVertical: 5}}>
+          <StyledText style={{paddingVertical: 5, textAlign: 'center'}}>
             {fieldName ? item[fieldName] : item}
           </StyledText>
         </TouchableOpacity>

@@ -28,6 +28,7 @@ interface Props {
   headerType?: 'header_with_back' | 'home_header';
   headerProps?: CustomHomeHeaderProps;
   isLoading?: boolean;
+  isEnableSafeArea?: boolean;
   isEnableDefaultBackground?: boolean;
   backHeaderProps?: BackHeaderProps;
   backHeaderContainerStyle?: ViewStyle;
@@ -47,6 +48,7 @@ const HOCView = ({
   paddingHorizontal = 10,
   headerType = 'header_with_back',
   headerProps = {},
+  isEnableSafeArea = true,
   paddingBottom,
   isEnableDefaultBackground = false,
   backHeaderProps = {},
@@ -86,74 +88,145 @@ const HOCView = ({
         />
       )}
 
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: isEnableDefaultBackground
-            ? undefined
-            : backgroundColor,
-          paddingBottom,
-        }}>
-        {isEnableHeader && headerType === 'home_header' && (
-          <CustomHomeHeader
-            paddingTop={
-              isEnableTopSafeAreaHomeHeader ? safeAreaPaddingTop : undefined
-            }
-            {...headerProps}
-          />
-        )}
-        {isEnableHeader && headerType === 'header_with_back' && (
-          <View
-            onLayout={event => {
-              if (onLayoutHeight) {
-                onLayoutHeight(
-                  event.nativeEvent.layout.height +
-                    (IS_IOS
-                      ? insets.top
-                        ? insets.top
-                        : 20
-                      : StatusBar.currentHeight),
-                );
+      {isEnableSafeArea ? (
+        <SafeAreaView
+          style={{
+            flex: 1,
+            backgroundColor: isEnableDefaultBackground
+              ? undefined
+              : backgroundColor,
+            paddingBottom,
+          }}>
+          {isEnableHeader && headerType === 'home_header' && (
+            <CustomHomeHeader
+              paddingTop={
+                isEnableTopSafeAreaHomeHeader ? safeAreaPaddingTop : undefined
               }
-            }}
-            style={{
-              paddingTop:
-                isEnablePrimaryColorStatusBar && !isEnableDefaultBackground
-                  ? 0
-                  : safeAreaPaddingTop,
-              backgroundColor: backHeaderProps.bgColor ?? COLORS.primary,
-              ...backHeaderContainerStyle,
-            }}>
-            <HeaderWithBack {...backHeaderProps} />
-          </View>
-        )}
-        {isEnableKeyboardAware ? (
-          <KeyboardAwareScrollView
-            extraScrollHeight={55}
-            style={{paddingHorizontal}}
-            enableOnAndroid={true}
-            bounces={false}
-            contentContainerStyle={keyboardAwareContentContainerStyle}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps={'handled'}
-            // contentContainerStyle={{flex: 1}}
-            scrollEnabled={true}>
-            {children}
-          </KeyboardAwareScrollView>
-        ) : (
-          <View style={{flex: 1, paddingHorizontal}}>
-            {isEnableScroll ? (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled">
-                {children}
-              </ScrollView>
-            ) : (
-              children
-            )}
-          </View>
-        )}
-      </SafeAreaView>
+              {...headerProps}
+            />
+          )}
+          {isEnableHeader && headerType === 'header_with_back' && (
+            <View
+              onLayout={event => {
+                if (onLayoutHeight) {
+                  onLayoutHeight(
+                    event.nativeEvent.layout.height +
+                      (IS_IOS
+                        ? insets.top
+                          ? insets.top
+                          : 20
+                        : StatusBar.currentHeight),
+                  );
+                }
+              }}
+              style={{
+                paddingTop:
+                  isEnablePrimaryColorStatusBar && !isEnableDefaultBackground
+                    ? 0
+                    : safeAreaPaddingTop,
+                backgroundColor: backHeaderProps.bgColor ?? COLORS.primary,
+                ...backHeaderContainerStyle,
+              }}>
+              <HeaderWithBack {...backHeaderProps} />
+            </View>
+          )}
+          {isEnableKeyboardAware ? (
+            <KeyboardAwareScrollView
+              extraScrollHeight={55}
+              style={{paddingHorizontal}}
+              enableOnAndroid={true}
+              bounces={false}
+              contentContainerStyle={keyboardAwareContentContainerStyle}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps={'handled'}
+              // contentContainerStyle={{flex: 1}}
+              scrollEnabled={true}>
+              {children}
+            </KeyboardAwareScrollView>
+          ) : (
+            <View style={{flex: 1, paddingHorizontal}}>
+              {isEnableScroll ? (
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled">
+                  {children}
+                </ScrollView>
+              ) : (
+                children
+              )}
+            </View>
+          )}
+        </SafeAreaView>
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: isEnableDefaultBackground
+              ? undefined
+              : backgroundColor,
+            paddingBottom,
+          }}>
+          {isEnableHeader && headerType === 'home_header' && (
+            <CustomHomeHeader
+              paddingTop={
+                isEnableTopSafeAreaHomeHeader ? safeAreaPaddingTop : undefined
+              }
+              {...headerProps}
+            />
+          )}
+          {isEnableHeader && headerType === 'header_with_back' && (
+            <View
+              onLayout={event => {
+                if (onLayoutHeight) {
+                  onLayoutHeight(
+                    event.nativeEvent.layout.height +
+                      (IS_IOS
+                        ? insets.top
+                          ? insets.top
+                          : 20
+                        : StatusBar.currentHeight),
+                  );
+                }
+              }}
+              style={{
+                paddingTop:
+                  isEnablePrimaryColorStatusBar && !isEnableDefaultBackground
+                    ? 0
+                    : safeAreaPaddingTop,
+                backgroundColor: backHeaderProps.bgColor ?? COLORS.primary,
+                ...backHeaderContainerStyle,
+              }}>
+              <HeaderWithBack {...backHeaderProps} />
+            </View>
+          )}
+          {isEnableKeyboardAware ? (
+            <KeyboardAwareScrollView
+              extraScrollHeight={55}
+              style={{paddingHorizontal}}
+              enableOnAndroid={true}
+              bounces={false}
+              contentContainerStyle={keyboardAwareContentContainerStyle}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps={'handled'}
+              // contentContainerStyle={{flex: 1}}
+              scrollEnabled={true}>
+              {children}
+            </KeyboardAwareScrollView>
+          ) : (
+            <View style={{flex: 1, paddingHorizontal}}>
+              {isEnableScroll ? (
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled">
+                  {children}
+                </ScrollView>
+              ) : (
+                children
+              )}
+            </View>
+          )}
+        </View>
+      )}
 
       <Modal onRequestClose={() => {}} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} {...loaderProps} />

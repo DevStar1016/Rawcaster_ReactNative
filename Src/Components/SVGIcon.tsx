@@ -12,7 +12,7 @@ export interface SVGIconProps {
   onPress?: () => void;
 }
 
-const SVGIcon = ({
+function SVGIcon({
   height = 25,
   width = 25,
   icon = 'visibility_on',
@@ -20,7 +20,7 @@ const SVGIcon = ({
   marginRight = 0,
   isButton = false,
   onPress,
-}: SVGIconProps) => {
+}: SVGIconProps) {
   const Icon = ICONS[icon];
   return isButton ? (
     <TouchableOpacity
@@ -37,6 +37,6 @@ const SVGIcon = ({
   ) : (
     <Icon height={height} width={width} style={{marginLeft, marginRight}} />
   );
-};
+}
 
 export default SVGIcon;

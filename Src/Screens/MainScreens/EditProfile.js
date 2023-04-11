@@ -4,11 +4,11 @@ import {
   Modal,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
-import HOCView from '../../Components/HOCView';
 import SVGIcon from '../../Components/SVGIcon';
 import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
@@ -35,6 +35,10 @@ import {setMyProfile} from '../../Store/Slices/AuthSlice';
 import {useNavigation} from '@react-navigation/native';
 import VerificationMethodChoose from '../../Modals/VerificationMethodOptions';
 import Loader from '../../Components/Loader';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import HeaderWithBack from '../../Components/HeaderWithBack';
+import ReplaceStatusBar from '../../Components/ReplaceStatusBar';
 
 var isMount = true;
 const EditProfile = ({route}) => {
@@ -58,7 +62,6 @@ const EditProfile = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
-      .matches(/^[^\p{Emoji}]*$/, 'First name is invalid')
       .min(2, 'Enter valid First name')
       .max(20, 'First name is too long')
       .required('Required'),
@@ -105,30 +108,39 @@ const EditProfile = ({route}) => {
     location: yup.string().min(2, 'Enter Valid location').required('Required'),
   });
 
-  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
-    useFormik({
-      initialValues: {
-        firstName: profile.first_name ?? '',
-        lastName: profile.last_name ?? '',
-        displayName: profile.name ?? '',
-        gender: GENDER_LIST.find(item => item.id === profile.gender) ?? null,
-        dob: profile.dob ?? '',
-        mobileNumber: profile.mobile ?? '',
-        email: profile.email_id ?? '',
-        location: profile.geo_location ?? '',
-      },
-      validationSchema: validationSchema,
-      onSubmit: values => {
-        if (isMount) {
-          setisLoading(true);
-          handleUpdateProfile(values);
-        }
-      },
-    });
+  const {
+    handleSubmit,
+    handleChange,
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldError,
+  } = useFormik({
+    initialValues: {
+      firstName: profile.first_name ?? '',
+      lastName: profile.last_name ?? '',
+      displayName: profile.name ?? '',
+      gender: GENDER_LIST.find(item => item.id === profile.gender) ?? null,
+      dob: profile.dob ?? '',
+      mobileNumber: profile.mobile ?? '',
+      email: profile.email_id ?? '',
+      location: profile.geo_location ?? '',
+    },
+    validationSchema: validationSchema,
+    onSubmit: values => {
+      if (isMount) {
+        setisLoading(true);
+        handleUpdateProfile(values);
+      }
+    },
+  });
 
   useEffect(() => {
     isMount = true;
+    AvoidSoftInput.setAdjustResize();
     return () => {
+      AvoidSoftInput.setAdjustPan();
       Keyboard.dismiss();
       isMount = false;
     };
@@ -263,140 +275,151 @@ const EditProfile = ({route}) => {
   };
 
   return (
-    <HOCView
-      isEnableKeyboardAware
-      isEnableScroll
-      backHeaderProps={{title: 'Update Profile'}}>
-      <SVGIcon icon="app_text_logo_colored" height={55} width={180} />
-      <StyledText style={styles.titleText}>
-        Please update your profile
-      </StyledText>
-      <StyledText style={styles.subTitleText}>
-        Please update your profile info to continue on Rawcaster
-      </StyledText>
-      <TouchableOpacity
-        style={styles.profileImageContainer}
-        activeOpacity={0.7}
-        onPress={() => {
-          onSelectProfilePhoto();
-        }}>
-        <Image
-          source={{
-            uri: selectedProfileImage
-              ? selectedProfileImage.path
-              : profile.profile_image,
-          }}
-          style={styles.profileImage}
-        />
-      </TouchableOpacity>
-      <StyledText style={styles.uploadImageText}>Upload Image</StyledText>
-      <TextBox
-        title="First Name"
-        errorText={touched.firstName && errors.firstName}
-        value={values.firstName}
-        onChangeText={handleChange('firstName')}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolder={'Enter your first name'}
-      />
-      <TextBox
-        title="Last Name"
-        errorText={touched.lastName && errors.lastName}
-        value={values.lastName}
-        onChangeText={handleChange('lastName')}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolder={'Enter your last name'}
-      />
-      <TextBox
-        title="Display Name"
-        errorText={touched.displayName && errors.displayName}
-        value={values.displayName}
-        onChangeText={handleChange('displayName')}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolder={'Enter your display name'}
-      />
-      <DropDownPicker
-        dataList={GENDER_LIST}
-        title={'Gender'}
-        errorText={touched.gender && errors.gender}
-        value={values.gender}
-        fieldName="name"
-        onSelectItem={item => {
-          setFieldValue('gender', item);
-        }}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolderText={'Select gender'}
-      />
-      <CustomDateMonthYearPicker
-        titlePaddingVertical={3}
-        value={values.dob}
-        errorText={errors.dob && touched.dob ? errors.dob : ''}
-        onSelect={handleChange('dob')}
-        inputContainerMarginVertical={0}
-        mainContainerMarginVertical={2}
-      />
-
-      <DropDownPicker
-        title={'Location'}
-        isInsideList={false}
-        errorText={touched.location && errors.location}
-        dropDownIcon="gps"
-        isDropDownIconAsButton={true}
-        dropDownIconSize={20}
-        value={values.location}
-        isLoadingIcon={isFetchingLocation}
-        onPress={() => {
-          setisOpenGooglePlacesListModal(true);
-        }}
-        onPressIcon={() => {
-          handleGetCurrentLocationAddress();
-        }}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolderText={'Select Location'}
-      />
-      <TextBox
-        title="Phone Number"
-        value={values.mobileNumber}
-        onChangeText={handleChange('mobileNumber')}
-        errorText={touched.mobileNumber && errors.mobileNumber}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolder={'Enter your phone number'}
-      />
-      <TextBox
-        title="Email"
-        value={values.email}
-        onChangeText={handleChange('email')}
-        errorText={touched.email && errors.email}
-        titlePaddingVertical={3}
-        inputContainerMarginVertical={0}
-        placeHolder={'Enter your email'}
-      />
-
-      <SubmitButton
-        buttonText="Update Info"
-        onPress={() => {
-          isValidateEmail.current = false;
-          handleSubmit();
-        }}
-      />
-      {profile.acc_verify_status === 0 && (
-        <SubmitButton
-          buttonText="Next"
-          marginTop={10}
+    <View style={{flex: 1, backgroundColor: COLORS.white}}>
+      <ReplaceStatusBar />
+      <HeaderWithBack title={'Update Profile'} />
+      <KeyboardAwareScrollView
+        extraScrollHeight={55}
+        style={{paddingHorizontal: 10}}
+        enableOnAndroid={true}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={'handled'}
+        scrollEnabled={true}>
+        <SVGIcon icon="app_text_logo_colored" height={55} width={180} />
+        <StyledText style={styles.titleText}>
+          Please update your profile
+        </StyledText>
+        <StyledText style={styles.subTitleText}>
+          Please update your profile info to continue on Rawcaster
+        </StyledText>
+        <TouchableOpacity
+          style={styles.profileImageContainer}
+          activeOpacity={0.7}
           onPress={() => {
-            isValidateEmail.current = true;
+            onSelectProfilePhoto();
+          }}>
+          <Image
+            source={{
+              uri: selectedProfileImage
+                ? selectedProfileImage.path
+                : profile.profile_image,
+            }}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+        <StyledText style={styles.uploadImageText}>Upload Image</StyledText>
+        <TextBox
+          title="First Name"
+          errorText={touched.firstName && errors.firstName}
+          value={values.firstName}
+          onChangeText={handleChange('firstName')}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your first name'}
+        />
+        <TextBox
+          title="Last Name"
+          errorText={touched.lastName && errors.lastName}
+          value={values.lastName}
+          onChangeText={handleChange('lastName')}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your last name'}
+        />
+        <TextBox
+          title="Display Name"
+          errorText={touched.displayName && errors.displayName}
+          value={values.displayName}
+          onChangeText={handleChange('displayName')}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your display name'}
+        />
+        <DropDownPicker
+          dataList={GENDER_LIST}
+          title={'Gender'}
+          errorText={touched.gender && errors.gender}
+          value={values.gender}
+          fieldName="name"
+          onSelectItem={item => {
+            setFieldValue('gender', item);
+          }}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolderText={'Select gender'}
+        />
+        <CustomDateMonthYearPicker
+          titlePaddingVertical={3}
+          value={values.dob}
+          errorText={errors.dob && touched.dob ? errors.dob : ''}
+          onSelect={handleChange('dob')}
+          onSelectDateMonthYearError={() => {
+            setFieldValue('dob', '');
+          }}
+          inputContainerMarginVertical={0}
+          mainContainerMarginVertical={2}
+        />
+
+        <DropDownPicker
+          title={'Location'}
+          isInsideList={false}
+          errorText={touched.location && errors.location}
+          dropDownIcon="gps"
+          isDropDownIconAsButton={true}
+          dropDownIconSize={20}
+          value={values.location}
+          isLoadingIcon={isFetchingLocation}
+          onPress={() => {
+            setisOpenGooglePlacesListModal(true);
+          }}
+          onPressIcon={() => {
+            handleGetCurrentLocationAddress();
+          }}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolderText={'Select Location'}
+        />
+        <TextBox
+          title="Phone Number"
+          value={values.mobileNumber}
+          onChangeText={handleChange('mobileNumber')}
+          errorText={touched.mobileNumber && errors.mobileNumber}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your phone number'}
+        />
+        <TextBox
+          title="Email"
+          value={values.email}
+          onChangeText={handleChange('email')}
+          errorText={touched.email && errors.email}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your email'}
+        />
+
+        <SubmitButton
+          buttonText="Update Info"
+          onPress={() => {
+            isValidateEmail.current = false;
             handleSubmit();
           }}
-          borderColor={COLORS.primary}
-          bgColor={COLORS.primary}
         />
-      )}
-      <PoliciesFooter />
+        {profile.acc_verify_status === 0 && (
+          <SubmitButton
+            buttonText="Next"
+            marginTop={10}
+            onPress={() => {
+              isValidateEmail.current = true;
+              handleSubmit();
+            }}
+            borderColor={COLORS.primary}
+            bgColor={COLORS.primary}
+          />
+        )}
+        <PoliciesFooter />
+      </KeyboardAwareScrollView>
       <Modal
         onRequestClose={() => {
           setisOpenGooglePlacesListModal(false);
@@ -428,7 +451,7 @@ const EditProfile = ({route}) => {
       <Modal onRequestClose={() => {}} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
-    </HOCView>
+    </View>
   );
 };
 

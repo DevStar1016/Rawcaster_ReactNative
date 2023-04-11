@@ -8,7 +8,7 @@ import {
 import appleAuth from '@invertase/react-native-apple-authentication';
 // import {TwitterLogin} from 'react-native-login-twitter';
 import {useDispatch} from 'react-redux';
-import AuthScreenHOC from '../../../Components/AuthScreenComponents.js/AuthScreenHOC';
+import SloganLogo from '../../../Assets/Svg/slogan_logo.svg';
 import SubmitButton from '../../../Components/SubmitButton';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
@@ -26,11 +26,18 @@ import {
   storeToken,
 } from '../../../Utilities/Methods';
 import {useLocationDetails} from '../../../Utilities/StoreData';
-import {setLocationDetails} from '../../../Store/Slices/UtilitySlice';
+import {
+  setIsVisibleInfluencers,
+  setLocationDetails,
+} from '../../../Store/Slices/UtilitySlice';
 import {socialMediaLoginService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import jwt_decode from 'jwt-decode';
 import Loader from '../../../Components/Loader';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
+import PoliciesFooter from '../../../Components/PoliciesFooter';
 
 const Signup = ({route}) => {
   const navigation = useNavigation();
@@ -45,6 +52,10 @@ const Signup = ({route}) => {
         dispatch(setLocationDetails(res));
       })
       .catch(e => {});
+  }, []);
+
+  useEffect(() => {
+    AvoidSoftInput.setAdjustResize();
   }, []);
 
   const handleSocialSignupAPICall = (values, signin_type) => {
@@ -65,12 +76,17 @@ const Signup = ({route}) => {
     socialMediaLoginService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data.first_time, 'FIRSTTIME');
+          if (parseInt(res.data.first_time) === 1) {
+            dispatch(setIsVisibleInfluencers(true));
+          }
           const userData = {
             name: res.data.name,
             user_id: res.data.user_id,
             profile_image: res.data.profile_image,
             acc_verify_status: res.data.acc_verify_status,
           };
+
           storeToken(res.data.token, userData, dispatch);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -91,8 +107,6 @@ const Signup = ({route}) => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      // console.log(userInfo.user.id, 'REPONSE GOOGLE');
-
       const values = {
         login_id: userInfo.user.email,
         name: userInfo.user.name,
@@ -115,7 +129,6 @@ const Signup = ({route}) => {
           break;
         default:
           Toast.fail('Something went wrong');
-          console.log('Something went wrong', typedError.toString());
       }
     }
   };
@@ -196,53 +209,116 @@ const Signup = ({route}) => {
   };
 
   return (
-    <AuthScreenHOC
-      title="Join Rawcaster Family"
-      subTitle="Join now to access the latest insights, experience for your social media performance."
-      isEnableSubmitButton={false}
-      buttonBottomLeftText="Already Registered? "
-      buttonBottomRightText="Login"
-      onPressButtonBottomText={() => {
-        navigation.goBack();
-      }}>
-      <SubmitButton
-        buttonText="Signup with phone number or email"
-        buttonTextStyle={{fontSize: 17}}
-        onPress={() => {
-          navigation.navigate('SignupWithPhone', {pushId: pushId});
-        }}
-      />
-      <View style={styles.dividerContainer}>
-        <Divider />
-        <View style={styles.orTextContainer}>
-          <StyledText style={{fontSize: 17, paddingVertical: 5}}>OR</StyledText>
+    <View style={styles.mainContainer}>
+      <ReplaceStatusBar />
+
+      <KeyboardAwareScrollView
+        extraScrollHeight={55}
+        enableOnAndroid={true}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={'handled'}
+        scrollEnabled={true}>
+        <View style={styles.headerContainer}>
+          <View style={styles.logoContainer}>
+            <SloganLogo />
+          </View>
         </View>
-        <Divider />
-      </View>
-      {SOCIAL_SIGN_IN_LIST.filter(item =>
-        item.deviceType.includes(DEVICE_TYPE),
-      ).map(item => {
-        return (
-          <SignupTypeButton
-            key={item.id.toString()}
-            buttonText={`Signup with ${item.platformName}`}
-            icon={item.iconName}
+        <View style={styles.contentContainer}>
+          <View style={styles.titleContainer}>
+            <StyledText style={styles.title}>Join Rawcaster Family</StyledText>
+            <StyledText style={{paddingVertical: 5, textAlign: 'center'}}>
+              Join now to access the latest insights, experience for your social
+              media performance.
+            </StyledText>
+          </View>
+
+          <SubmitButton
+            buttonText="Signup with phone number or email"
+            buttonTextStyle={{fontSize: 17}}
             onPress={() => {
-              onPressSocialSignup(item.id);
+              navigation.navigate('SignupWithPhone', {pushId: pushId});
             }}
           />
-        );
-      })}
+          <View style={styles.dividerContainer}>
+            <Divider />
+            <View style={styles.orTextContainer}>
+              <StyledText style={{fontSize: 17, paddingVertical: 5}}>
+                OR
+              </StyledText>
+            </View>
+            <Divider />
+          </View>
+          {SOCIAL_SIGN_IN_LIST.filter(item =>
+            item.deviceType.includes(DEVICE_TYPE),
+          ).map(item => {
+            return (
+              <SignupTypeButton
+                key={item.id.toString()}
+                buttonText={`Signup with ${item.platformName}`}
+                icon={item.iconName}
+                onPress={() => {
+                  onPressSocialSignup(item.id);
+                }}
+              />
+            );
+          })}
+          <View style={styles.signUpContainer}>
+            <StyledText style={styles.signUpText}>
+              Already Registered?
+            </StyledText>
+            <StyledText
+              onPress={() => {
+                navigation.goBack();
+              }}
+              style={{...styles.signUpText, color: COLORS.secondary}}>
+              Login
+            </StyledText>
+          </View>
+          <PoliciesFooter />
+        </View>
+      </KeyboardAwareScrollView>
       <Modal onRequestClose={() => {}} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
-    </AuthScreenHOC>
+    </View>
   );
 };
 
 export default Signup;
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  headerContainer: {
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 30,
+  },
+  logoContainer: {
+    width: '60%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentContainer: {
+    paddingVertical: 15,
+    paddingTop: 20,
+    paddingHorizontal: 15,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: FONTS.Gilroy.bold,
+    paddingVertical: 5,
+    textAlign: 'center',
+  },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -257,5 +333,17 @@ const styles = StyleSheet.create({
   orTextContainer: {
     width: '10%',
     alignItems: 'center',
+  },
+  signUpContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  signUpText: {
+    color: COLORS.dimColor,
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 17,
+    paddingVertical: 5,
   },
 });

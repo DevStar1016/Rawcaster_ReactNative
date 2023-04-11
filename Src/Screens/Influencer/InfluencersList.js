@@ -61,13 +61,16 @@ const InfluencersList = () => {
   }, []);
 
   useEffect(() => {
+    currentPage = 1;
+    totalPages = 1;
     if (isMount) {
       setisLoading(true);
     }
+
     influencerListAPICall(1);
   }, [selectedCategoryId, searchText]);
 
-  const influencerListAPICall = (pageNumber = 1) => {
+  function influencerListAPICall(pageNumber = 1) {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
@@ -78,7 +81,6 @@ const InfluencersList = () => {
     if (selectedCategoryId) {
       formData.append('category', selectedCategoryId);
     }
-
     influencerListService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -94,6 +96,7 @@ const InfluencersList = () => {
         } else if (res.data.status === 0) {
           if (isMount) {
             seterrorText(res.data.msg);
+            setinfluencersList([]);
           }
         }
       })
@@ -101,6 +104,7 @@ const InfluencersList = () => {
         Toast.fail(e.message);
         if (isMount) {
           seterrorText(e.message);
+          setinfluencersList([]);
         }
       })
       .finally(() => {
@@ -110,9 +114,9 @@ const InfluencersList = () => {
           setisLoading(false);
         }
       });
-  };
+  }
 
-  const handleFilterInfluencerList = (ids = [...selectedInfluencersRefIds]) => {
+  function handleFilterInfluencerList(ids = [...selectedInfluencersRefIds]) {
     let tempInfluencersList = [...influencersList];
     tempInfluencersList = tempInfluencersList.filter(item => {
       let selectedId = ids.find(subItem => subItem === item.user_ref_id);
@@ -123,9 +127,9 @@ const InfluencersList = () => {
     });
     setinfluencersList(tempInfluencersList);
     setselectedInfluencersRefIds([]);
-  };
+  }
 
-  const handleSelectInfluencer = id => {
+  function handleSelectInfluencer(id) {
     let tempSelectedInfluencersIds = [...selectedInfluencersRefIds];
     if (tempSelectedInfluencersIds.find(refId => refId === id)) {
       tempSelectedInfluencersIds = tempSelectedInfluencersIds.filter(
@@ -135,16 +139,16 @@ const InfluencersList = () => {
       tempSelectedInfluencersIds.push(id);
     }
     setselectedInfluencersRefIds(tempSelectedInfluencersIds);
-  };
+  }
 
-  const getIsSelectedInfluencer = id => {
+  function getIsSelectedInfluencer(id) {
     return [...selectedInfluencersRefIds].find(refId => refId === id);
-  };
+  }
 
-  const handleInfluencerFollow = (
+  function handleInfluencerFollow(
     ids = [...selectedInfluencersRefIds],
     isSkipScreen = false,
-  ) => {
+  ) {
     if (isMount) {
       setisActionLoading(true);
     }
@@ -174,18 +178,18 @@ const InfluencersList = () => {
           setisActionLoading(false);
         }
       });
-  };
+  }
 
-  const onRefresh = () => {
+  function onRefresh() {
     currentPage = 1;
     totalPages = 1;
     if (isMount) {
       setrefreshing(true);
     }
     influencerListAPICall(1);
-  };
+  }
 
-  const onEndReached = () => {
+  function onEndReached() {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
       if (isMount) {
@@ -193,9 +197,9 @@ const InfluencersList = () => {
         influencerListAPICall(currentPage);
       }
     }
-  };
+  }
 
-  const renderItem = ({item}) => {
+  function renderItem({item}) {
     return (
       <InfluencerItem
         item={item}
@@ -208,9 +212,9 @@ const InfluencersList = () => {
         }}
       />
     );
-  };
+  }
 
-  const emptyComponent = () => {
+  function emptyComponent() {
     return errorText ? (
       <View
         style={{
@@ -221,13 +225,13 @@ const InfluencersList = () => {
         <StyledText style={{paddingVertical: 5}}>{errorText}</StyledText>
       </View>
     ) : null;
-  };
+  }
 
-  const renderFooter = () => {
+  function renderFooter() {
     return isLoadMore ? (
       <ActivityIndicator size={'small'} color={COLORS.primary} />
     ) : null;
-  };
+  }
 
   return (
     <HOCView
@@ -249,7 +253,7 @@ const InfluencersList = () => {
         <View style={styles.searchContainer}>
           <View style={{flex: 1, paddingRight: 10}}>
             <SearchInput
-              onPressSearch={setsearchText}
+              onSearch={setsearchText}
               placeHolderText={'Search Influencer by name'}
             />
           </View>

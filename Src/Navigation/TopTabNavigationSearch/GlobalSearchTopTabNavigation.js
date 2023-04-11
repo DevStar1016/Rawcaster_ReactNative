@@ -21,16 +21,16 @@ function GlobalSearchTopTabNavigation() {
       screenListeners={{
         focus: e => {
           if (e.target.includes('ProfileSearch')) {
-            dispatch(setIsBottomTabBarAbsolute(false));
+            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('Profile');
           } else if (e.target.includes('NuggetsSearch')) {
-            dispatch(setIsBottomTabBarAbsolute(true));
+            // dispatch(setIsBottomTabBarAbsolute(true));
             setFocusedTab('Nuggets');
           } else if (e.target.includes('EventsSearch')) {
-            dispatch(setIsBottomTabBarAbsolute(false));
+            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('Events');
           } else if (e.target.includes('TagsSearch')) {
-            dispatch(setIsBottomTabBarAbsolute(false));
+            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('#Tags');
           }
         },

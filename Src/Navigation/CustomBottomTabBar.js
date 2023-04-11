@@ -51,7 +51,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           Icon = EventsIcon;
         } else if (route.name === 'TalkshowStack') {
           Icon = TalkShowIcon;
-        } else if (route.name === 'User') {
+        } else if (route.name === 'UsersStack') {
           Icon = UserIcon;
         }
 
@@ -105,6 +105,20 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                     user_name: htmlDecodeText(item.user_name),
                   };
                 });
+                // if (tempNuggetType === 1) {
+                //   decodedNuggetList = [...decodedNuggetList].filter(item => {
+                //     if (item.media_list?.length > 1) {
+                //       let tempMediaList = [...item.media_list].filter(
+                //         subItem => subItem.media_type === 'video',
+                //       );
+                //       if (tempMediaList.length === item.media_list?.length) {
+                //         return true;
+                //       }
+                //       return false;
+                //     }
+                //     return true;
+                //   });
+                // }
 
                 dispatch(setNuggetsList(decodedNuggetList));
                 dispatch(setNuggetType(tempNuggetType));

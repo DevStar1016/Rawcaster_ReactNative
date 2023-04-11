@@ -25,8 +25,14 @@ export const getAuthCode = (value = '') => {
 export const storeToken = async (token, user, dispatch) => {
   try {
     await EncryptedStorage.setItem(ISLOGIN, token);
-    await EncryptedStorage.setItem(USER_DATA, JSON.stringify(user));
+    await storeUserData(user, dispatch);
     dispatch(setToken(token));
+  } catch (error) {}
+};
+
+export const storeUserData = async (user, dispatch) => {
+  try {
+    await EncryptedStorage.setItem(USER_DATA, JSON.stringify(user));
     dispatch(setUserData(user));
   } catch (error) {}
 };
@@ -323,14 +329,6 @@ export const utcToUserTimezone = (time, zonename) => {
 
 export const {utcOffsetStr} = getTimezone(moment.tz.guess());
 
-export const utctoUserTimezone = (time, zonename) => {
-  let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
-  let displayCutoff = momentTZ(utcCutoff)
-    .tz(getTimezoneName(zonename))
-    .format('YYYY-MM-DD HH:mm:ss');
-  return moment(displayCutoff);
-};
-
 export const getDisplayEventTime = time => {
   if (time) {
     return moment(time, 'YYYY-MM-DD hh:mm:ss').format('hh:mm A');
@@ -345,7 +343,7 @@ export const getDisplayEventDate = (
   if (receivedDate) {
     let todaysDate;
     if (utcOffsetStr) {
-      todaysDate = utctoUserTimezone(
+      todaysDate = utcToUserTimezone(
         receivedDate,
         moment.tz.guess() + ' (+' + utcOffsetStr + ')',
       ).format(dateFormat);
@@ -353,4 +351,24 @@ export const getDisplayEventDate = (
     return utcOffsetStr ? todaysDate : '';
   }
   return '';
+};
+
+export const getDefaultRawcasterPage = val => {
+  switch (val) {
+    case 1:
+      return 'Nugget';
+    case 2:
+      return 'Event';
+    case 3:
+      return 'Chat';
+    default:
+      return 'Nugget';
+  }
+};
+
+export const calcualteAge = dob => {
+  var diff_ms = Date.now() - dob;
+  var age_dt = new Date(diff_ms);
+
+  return Math.abs(age_dt.getUTCFullYear() - 1970);
 };

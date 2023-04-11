@@ -73,7 +73,7 @@ const App = () => {
     if (!IS_IOS) {
       SplashScreen.hide();
     }
-    const getIsIntroSeen = async () => {
+    async function getIsIntroSeen() {
       try {
         const intro = await EncryptedStorage.getItem(INTRO_SCREEN_SEEN);
         if (intro) {
@@ -81,33 +81,35 @@ const App = () => {
         }
         const token = await EncryptedStorage.getItem(ISLOGIN);
         const userData = await EncryptedStorage.getItem(USER_DATA);
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          dispatch(setUserData(parsedUserData));
+        }
         if (token) {
           dispatch(setToken(token));
         }
-        if (userData) {
-          dispatch(setUserData(JSON.parse(userData)));
-        }
+
         setTokenFetched();
       } catch (e) {
         setTokenFetched();
       }
-    };
+    }
     getIsIntroSeen();
   }, []);
 
-  const setTokenFetched = () => {
+  function setTokenFetched() {
     tokenFetchingTimer = setTimeout(() => {
       setisFetchingToken(false);
       clearTimeout(tokenFetchingTimer);
     }, 1000);
-  };
+  }
 
-  const onSkipIntro = async () => {
+  async function onSkipIntro() {
     setisIntroSeen(true);
     try {
       await EncryptedStorage.setItem(INTRO_SCREEN_SEEN, 'true');
     } catch (error) {}
-  };
+  }
 
   axios.interceptors.response.use(
     async response => {

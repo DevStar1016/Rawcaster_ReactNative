@@ -7,6 +7,7 @@ import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import GradientButton from '../../Components/GradientButton';
 import SubmitButton from '../../Components/SubmitButton';
+import {htmlDecodeText} from '../../Utilities/Methods';
 
 type Props = {
   isSelected?: boolean;
@@ -40,7 +41,7 @@ const InfluencerItem = ({
         </TouchableOpacity>
         <View style={styles.nameContainer}>
           <StyledText style={{fontFamily: FONTS.DMSans.medium, fontSize: 17}}>
-            {item.display_name}
+            {htmlDecodeText(item.display_name)}
           </StyledText>
           <View style={styles.dot} />
           <StyledText style={{opacity: 0.7}}>

@@ -28,6 +28,7 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import {LineChart} from 'react-native-chart-kit';
+import DefaultBackground from '../../../Components/DefaultBackground';
 // import {LineChart} from 'react-native-charts-wrapper';
 
 var isMount = true;
@@ -97,7 +98,6 @@ const TagsSearch = () => {
       .then(res => {
         if (isMount) {
           if (res.data.status === 1) {
-            console.log(res.data, 'TAGGGG');
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               settagsList([...res.data.tags]);
@@ -339,10 +339,23 @@ const TagsSearch = () => {
   const renderSeperator = () => {
     return <View style={styles.divider} />;
   };
+  function renderEmptyComponent() {
+    return (
+      <View style={[styles.emptyComponent, {height: listContainerHeight}]}>
+        <DefaultBackground />
+        <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
+          We didn't find any results!
+        </StyledText>
+      </View>
+    );
+  }
 
   return (
     <View
-      style={styles.mainContainer}
+      style={[
+        styles.mainContainer,
+        tagsList.length > 0 && {paddingVertical: 5, paddingHorizontal: 15},
+      ]}
       onLayout={e => {
         setlistContainerHeight(e.nativeEvent.layout.height);
       }}>
@@ -350,21 +363,10 @@ const TagsSearch = () => {
         <Loader indicatorColor={COLORS.primary} />
       ) : (
         <FlatList
-          // data={getFilteredDuplicatesList(tagsList, 'user_ref_id')}
           data={tagsList}
-          // data={testObj}
-          // scrollEnabled={tagsList.length > 0 ? true : false}
           renderItem={renderItem}
-          ListEmptyComponent={() => {
-            return (
-              <View
-                style={[styles.emptyComponent, {height: listContainerHeight}]}>
-                <StyledText style={{paddingVertical: 5}}>
-                  We didn't find any results!
-                </StyledText>
-              </View>
-            );
-          }}
+          ListEmptyComponent={renderEmptyComponent}
+          keyExtractor={(item, index) => index.toString()}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -374,7 +376,6 @@ const TagsSearch = () => {
           }
           onEndReachedThreshold={0.2}
           onEndReached={onEndReached}
-          // keyExtractor={(item, _) => item.user_ref_id.toString()}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={renderSeperator}
           ListFooterComponent={renderFooter}
@@ -390,8 +391,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
   },
   itemContainer: {
     padding: 10,

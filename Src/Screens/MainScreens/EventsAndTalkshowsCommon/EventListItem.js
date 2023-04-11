@@ -7,8 +7,17 @@ import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
 import moment from 'moment';
 import {EVENT_TYPE} from '../../../Utilities/Constants';
+import {getSlicedText, htmlDecodeText} from '../../../Utilities/Methods';
+import {useProfile} from '../../../Utilities/StoreData';
 
-const EventListItem = ({item, isDarkTheme = false, onPressEdit}) => {
+const EventListItem = ({
+  item,
+  isDarkTheme = false,
+  onPressEdit,
+  onPressDelete,
+  isEnableBorder = false,
+}) => {
+  const profile = useProfile();
   const getBgColor = () => {
     if (isDarkTheme) {
       return COLORS.whiteTransparent;
@@ -34,12 +43,24 @@ const EventListItem = ({item, isDarkTheme = false, onPressEdit}) => {
     return '';
   };
 
+  const isOwner = () => {
+    return item.original_user_id === profile.user_id;
+  };
+
   return (
-    <View style={[styles.mainContainer, {backgroundColor: getBgColor()}]}>
+    <View
+      style={[
+        styles.mainContainer,
+        {backgroundColor: getBgColor()},
+        isEnableBorder && {borderWidth: 1, borderColor: COLORS.borderColor},
+      ]}>
       <Image
         source={{uri: item.banner_image}}
         resizeMode="cover"
-        style={{height: 140, borderRadius: 10}}
+        style={{
+          height: 140,
+          borderRadius: 10,
+        }}
       />
       {item.type !== 1 && (
         <View style={styles.eventTypeBadgeContainer}>
@@ -50,29 +71,34 @@ const EventListItem = ({item, isDarkTheme = false, onPressEdit}) => {
 
       <View style={styles.contentContainer}>
         <View style={styles.titleButtonsContainer}>
-          <View>
+          <View style={{flex: 1}}>
             <StyledText style={[styles.titleText, {color: getTextColor()}]}>
-              {item.event_name}
+              {getSlicedText(htmlDecodeText(item.event_name), 150)}
             </StyledText>
             <StyledText style={{color: getTextColor()}}>
-              Hosted by {item.original_user_name}
+              Hosted by {htmlDecodeText(item.original_user_name)}
             </StyledText>
           </View>
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              activeOpacity={0.7}
-              onPress={onPressEdit}>
-              <SVGIcon icon="edit_black" height={20} width={20} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} activeOpacity={0.7}>
-              <SVGIcon icon="delete_black" height={22} width={22} />
-            </TouchableOpacity>
-          </View>
+          {isOwner() && (
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                activeOpacity={0.7}
+                onPress={onPressEdit}>
+                <SVGIcon icon="edit_black" height={20} width={20} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                activeOpacity={0.7}
+                onPress={onPressDelete}>
+                <SVGIcon icon="delete_black" height={22} width={22} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         {item.message ? (
           <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
-            {item.message}
+            {htmlDecodeText(item.message)}
           </StyledText>
         ) : null}
         <View style={styles.dateTimeContainer}>
@@ -102,7 +128,7 @@ const EventListItem = ({item, isDarkTheme = false, onPressEdit}) => {
         <View style={styles.startButtonContainer}>
           <TouchableOpacity style={styles.startButton} activeOpacity={0.7}>
             <StyledText style={[styles.startText, {color: getTextColor()}]}>
-              {`Join ${getEventTypeText()}`}
+              {`${isOwner() ? 'Start' : 'Join'} ${getEventTypeText()}`}
             </StyledText>
             <SVGIcon
               icon={isDarkTheme ? 'right_arrow_white' : 'right_arrow'}

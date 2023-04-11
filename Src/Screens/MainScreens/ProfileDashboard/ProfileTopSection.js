@@ -15,9 +15,8 @@ import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 
 const BANNER_IMAGE_HEIGHT = 140;
 const PROFILE_SIZE = 100;
-const ProfileTopSection = () => {
+const ProfileTopSection = ({userId, profile, paddingHorizontal}) => {
   const dispatch = useDispatch();
-  const profile = useProfile();
   const token = useToken();
   const [profileImage, setprofileImage] = useState(null);
   const [coverImage, setcoverImage] = useState(null);
@@ -50,9 +49,9 @@ const ProfileTopSection = () => {
           Toast.success(res.data.msg);
 
           if (type === 1) {
-            dispatch(setMyProfile({...profile, cover_image: imageData.uri}));
-          } else if (type === 2) {
             dispatch(setMyProfile({...profile, profile_image: imageData.uri}));
+          } else if (type === 2) {
+            dispatch(setMyProfile({...profile, cover_image: imageData.uri}));
           }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -84,23 +83,25 @@ const ProfileTopSection = () => {
           resizeMode="cover"
           style={{width: '100%', height: '100%'}}
         />
-        <RoundedIconButton
-          icon="camera_black"
-          iconSize={18}
-          onPress={() => {
-            ImageVideoPicker({mediaType: 'photo', height: 150, width: 500})
-              .then(res => {
-                setcoverImage(res);
-                setActionLoader(true, 'Updating Cover Image');
-                profileUpdateAPICall(2, {...res});
-              })
-              .catch(e => {});
-          }}
-          buttonStyle={styles.cameraIconContainer}
-        />
+        {!userId && (
+          <RoundedIconButton
+            icon="camera_black"
+            iconSize={18}
+            onPress={() => {
+              ImageVideoPicker({mediaType: 'photo', height: 150, width: 500})
+                .then(res => {
+                  setcoverImage(res);
+                  setActionLoader(true, 'Updating Cover Image');
+                  profileUpdateAPICall(2, {...res});
+                })
+                .catch(e => {});
+            }}
+            buttonStyle={styles.cameraIconContainer}
+          />
+        )}
       </View>
 
-      <View style={styles.profileDataContainer}>
+      <View style={[styles.profileDataContainer, {paddingHorizontal}]}>
         <ProfileWithBadge
           profileImage={profileImage ? profileImage.uri : profile.profile_image}
           profileSize={PROFILE_SIZE}
@@ -108,14 +109,19 @@ const ProfileTopSection = () => {
           containerStyle={{
             marginRight: 10,
           }}
-          isEnableImagePicker
+          isEnableImagePicker={!userId}
           onSelectImage={selectedImage => {
-            setprofileImage(selectedImage);
-            setActionLoader(true, 'Updating Profile Image');
-            profileUpdateAPICall(1, {...selectedImage});
+            if (!userId) {
+              setprofileImage(selectedImage);
+              setActionLoader(true, 'Updating Profile Image');
+              profileUpdateAPICall(1, {...selectedImage});
+            }
           }}
         />
-        <FansProfilesContainer profileSize={PROFILE_SIZE / 2 - 5} />
+        <FansProfilesContainer
+          userId={userId}
+          profileSize={PROFILE_SIZE / 2 - 5}
+        />
       </View>
       <Modal transparent visible={actionLoadingData.isLoading}>
         <Loader

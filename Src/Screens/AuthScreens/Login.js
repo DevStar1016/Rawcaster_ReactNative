@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../Utilities/Colors';
 import StyledText from '../../Components/StyledText';
 import TextBox from '../../Components/TextBox';
-import AuthScreenHOC from '../../Components/AuthScreenComponents.js/AuthScreenHOC';
+import SloganLogo from '../../Assets/Svg/slogan_logo.svg';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import {useFormik} from 'formik';
@@ -16,6 +16,11 @@ import {IS_IOS} from '../../Utilities/Constants';
 import Toast from '../../Components/Toast';
 import {FONTS} from '../../Utilities/Fonts';
 import Loader from '../../Components/Loader';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import ReplaceStatusBar from '../../Components/ReplaceStatusBar';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import SubmitButton from '../../Components/SubmitButton';
+import PoliciesFooter from '../../Components/PoliciesFooter';
 
 const validationSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -42,8 +47,11 @@ const Login = () => {
   });
 
   useEffect(() => {
-    isMount = true;
+    AvoidSoftInput.setAdjustResize();
+  }, []);
 
+  useEffect(() => {
+    isMount = true;
     return () => {
       isMount = false;
       Keyboard.dismiss();
@@ -59,7 +67,7 @@ const Login = () => {
       .catch(e => {});
   }, []);
 
-  const handleLogin = data => {
+  function handleLogin(data) {
     let formData = new FormData();
     formData.append('auth_code', getAuthCode(data.login_id));
     formData.append('username', data.login_id?.trim());
@@ -95,63 +103,140 @@ const Login = () => {
       .finally(() => {
         setisLoading(false);
       });
-  };
+  }
 
   return (
-    <AuthScreenHOC
-      title="Welcome to Rawcaster"
-      subTitle="Log in now to access the latest insights, experience for your social
-    media performance."
-      submitButtonText="Login"
-      buttonBottomLeftText="Don’t have an account?  "
-      buttonBottomRightText="Sign up"
-      onPressButtonBottomText={() => {
-        navigation.navigate('Signup', {pushId: pushId});
-      }}
-      onPressSubmitButton={() => {
-        handleSubmit();
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: COLORS.white,
       }}>
-      <TextBox
-        iconColor={COLORS.placeHolderColor}
-        placeHolder="Phone number or Email address"
-        title="Login ID"
-        onChangeText={handleChange('login_id')}
-        errorText={errors.login_id && touched.login_id ? errors.login_id : ''}
-        value={values.login_id}
-      />
-      <TextBox
-        iconColor={COLORS.placeHolderColor}
-        placeHolder="Enter your password"
-        title="Password"
-        onChangeText={handleChange('password')}
-        errorText={errors.password && touched.password ? errors.password : ''}
-        value={values.password}
-        isSecure
-      />
-      <View style={styles.forgotPasswordContainer}>
-        <StyledText
-          onPress={() => {
-            navigation.navigate('ForgotPassword');
-          }}
-          style={styles.forgotPasswordText}>
-          Forgot Password?
-        </StyledText>
-      </View>
+      <ReplaceStatusBar />
+
+      <KeyboardAwareScrollView
+        extraScrollHeight={55}
+        enableOnAndroid={true}
+        bounces={false}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps={'handled'}
+        scrollEnabled={true}>
+        <View style={styles.headerContainer}>
+          <View style={styles.logoContainer}>
+            <SloganLogo />
+          </View>
+        </View>
+        <View style={styles.contentContainer}>
+          <View style={styles.titleContainer}>
+            <StyledText style={styles.title}>Welcome to Rawcaster</StyledText>
+            <StyledText style={{paddingVertical: 5, textAlign: 'center'}}>
+              Log in now to access the latest insights, experience for your
+              social media performance.
+            </StyledText>
+          </View>
+
+          <TextBox
+            iconColor={COLORS.placeHolderColor}
+            placeHolder="Phone number or Email address"
+            title="Login ID"
+            onChangeText={handleChange('login_id')}
+            errorText={
+              errors.login_id && touched.login_id ? errors.login_id : ''
+            }
+            value={values.login_id}
+          />
+          <TextBox
+            iconColor={COLORS.placeHolderColor}
+            placeHolder="Enter your password"
+            title="Password"
+            onChangeText={handleChange('password')}
+            errorText={
+              errors.password && touched.password ? errors.password : ''
+            }
+            value={values.password}
+            isSecure
+          />
+          <View style={styles.forgotPasswordContainer}>
+            <StyledText
+              onPress={() => {
+                navigation.navigate('ForgotPassword');
+              }}
+              style={styles.forgotPasswordText}>
+              Forgot Password?
+            </StyledText>
+          </View>
+
+          <SubmitButton buttonText={'Login'} onPress={handleSubmit} />
+
+          <View style={styles.signUpContainer}>
+            <StyledText style={styles.signUpText}>
+              Don’t have an account?
+            </StyledText>
+            <StyledText
+              onPress={() => {
+                navigation.navigate('Signup', {pushId: pushId});
+              }}
+              style={{...styles.signUpText, color: COLORS.secondary}}>
+              Sign up
+            </StyledText>
+          </View>
+
+          <PoliciesFooter />
+        </View>
+      </KeyboardAwareScrollView>
       <Modal onRequestClose={() => {}} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
-    </AuthScreenHOC>
+    </View>
   );
 };
 
 export default Login;
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 30,
+  },
+  contentContainer: {
+    paddingVertical: 15,
+    paddingTop: 20,
+    paddingHorizontal: 15,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: FONTS.Gilroy.bold,
+    paddingVertical: 5,
+    textAlign: 'center',
+  },
+  logoContainer: {
+    width: '60%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   forgotPasswordContainer: {
     alignItems: 'flex-end',
   },
   forgotPasswordText: {
     color: COLORS.secondary,
     fontFamily: FONTS.DMSans.medium,
+  },
+  signUpContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  signUpText: {
+    color: COLORS.dimColor,
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 17,
+    paddingVertical: 5,
   },
 });

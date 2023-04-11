@@ -39,6 +39,25 @@ export const useNuggetsList = () => {
   return useSelector(state => state.home.nuggetsList);
 };
 
+export const useSearchedNuggetsList = () => {
+  return useSelector(state => state.home.searchedNuggetsList);
+};
+
+export const useConnectionsList = () => {
+  return useSelector(state => state.home.connectionsList);
+};
+export const useGroupsList = () => {
+  return useSelector(state => state.home.groupsList);
+};
+export const usePendingFriendRequests = () => {
+  return useSelector(state => state.home.pendingFriendRequests);
+};
+export const useLikedNuggetsIds = () => {
+  return useSelector(state => state.nugget_actions.likedNuggetsIds);
+};
+export const useSavedNuggetsIds = () => {
+  return useSelector(state => state.nugget_actions.savedNuggetsIds);
+};
 export const useIsAppForeground = () => {
   return useSelector(state => state.utility.isAppForeground);
 };

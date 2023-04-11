@@ -1,51 +1,95 @@
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from '../Components/SVGIcon';
 import {DIMENSIONS} from '../Utilities/Constants';
 import {FONTS} from '../Utilities/Fonts';
 import ProfileWithBadge from '../Components/ProfileWithBadge';
-import {useProfile} from '../Utilities/StoreData';
+import {usePendingFriendRequests, useToken} from '../Utilities/StoreData';
+import SubmitButton from '../Components/SubmitButton';
+import {respondToFriendRequestsService} from '../Services/ApiService';
+import Toast from '../Components/Toast';
+import {useDispatch} from 'react-redux';
+import {setPendingFriendRequests} from '../Store/Slices/HomeSlice';
 
-const ConectionRequestModal = ({onClose}) => {
-  const conectionRef = useRef();
-  const profile = useProfile();
+var timer = undefined;
+const ConectionRequestModal = ({onClose, socketData}) => {
+  const dispatch = useDispatch();
+  const token = useToken();
+  const conectionsListRef = useRef();
   const [index, setindex] = useState(0);
-  const [connectionData, setconnectionData] = useState([
-    {
-      id: 1,
-      name: 'Josephine Kim',
-      profile_image: profile.profile_image,
-      badge: 'macro',
-    },
-    {
-      id: 2,
-      name: 'Josephine ',
-      profile_image: profile.profile_image,
-      badge: 'macro',
-    },
-    {
-      id: 3,
-      name: ' Kim',
-      profile_image: profile.profile_image,
-      badge: 'macro',
-    },
-    {
-      id: 4,
-      name: 'Jose',
-      profile_image: profile.profile_image,
-      badge: 'macro',
-    },
-    {
-      id: 5,
-      name: 'Josim',
-      profile_image: profile.profile_image,
-      badge: 'macro',
-    },
+  const pendingRequestsListGlobal = usePendingFriendRequests();
+  const [requestsList, setrequestsList] = useState([
+    ...pendingRequestsListGlobal,
   ]);
+  const [responseList, setresponseList] = useState([]);
+
+  useEffect(() => {
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socketData) {
+      const tempPendingRequestsGlobal = [...pendingRequestsListGlobal];
+
+      if (
+        tempPendingRequestsGlobal.findIndex(
+          item => item.user_id === socketData.user_id,
+        ) === -1
+      ) {
+        dispatch(
+          setPendingFriendRequests([
+            {...socketData},
+            ...pendingRequestsListGlobal,
+          ]),
+        );
+      }
+      {
+        const tempRequestList = [...requestsList];
+        if (
+          tempRequestList.findIndex(
+            item => item.user_id === socketData.user_id,
+          ) === -1
+        ) {
+          setrequestsList(preList => [{...socketData}, ...preList]);
+        } else {
+          setresponseList(preList =>
+            [...preList].filter(item => item.id !== socketData.user_id),
+          );
+          setrequestsList(preList => {
+            let tempList = [...preList];
+            let ind = [...tempList].findIndex(
+              item => item.user_id === socketData.user_id,
+            );
+            tempList[ind] = {...tempList[ind], ...socketData};
+            return tempList;
+          });
+        }
+      }
+    }
+  }, [socketData]);
+
+  useEffect(() => {
+    if (responseList.length > 0) {
+      let tempList = [...requestsList].filter(
+        (_, index) =>
+          ![...responseList].find(subItem => subItem.id === getUserId(index)),
+      );
+      dispatch(setPendingFriendRequests([...tempList]));
+    }
+  }, [responseList]);
+
+  const getUserId = selectedIndex => {
+    return [...requestsList].find((_, index) => index === selectedIndex)
+      ?.user_id;
+  };
 
   const scrollToIndex = index => {
-    conectionRef.current?.scrollToIndex({
+    conectionsListRef.current?.scrollToIndex({
       index,
       animated: true,
       viewPosition: 0.5,
@@ -53,16 +97,78 @@ const ConectionRequestModal = ({onClose}) => {
     setindex(index);
   };
 
-  return (
+  const handleResponseFriendRequest = (responseType, selectedIndex) => {
+    // 1-accept, 2 - reject, 3 - block
+    setresponseList(preList => [
+      ...preList,
+      {id: getUserId(selectedIndex), type: responseType},
+    ]);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append(
+      'friend_request_id',
+      requestsList[selectedIndex].friend_request_id,
+    );
+    formData.append('response', responseType);
+    respondToFriendRequestsService(formData)
+      .then(res => {
+        console.log(res.data, 'RESPONSE');
+        if (res.data.status === 0) {
+          setresponseList(preList => {
+            return [...preList].filter(
+              item => item.id !== getUserId(selectedIndex),
+            );
+          });
+        }
+      })
+      .catch(e => {
+        setresponseList(preList => {
+          return [...preList].filter(
+            item => item.id !== getUserId(selectedIndex),
+          );
+        });
+      })
+      .finally(() => {});
+  };
+
+  const getPendingRequestsCount = () => {
+    if (requestsList.length > 99) {
+      return '99+';
+    }
+    return requestsList.length;
+  };
+
+  const getCompletedAction = () => {
+    const ind = [...responseList].findIndex(
+      item => item.id === getUserId(index),
+    );
+    if (ind !== -1) {
+      return responseList[ind].type;
+    }
+    return 0;
+  };
+
+  const renderItem = ({item}) => (
     <View
-      style={styles.screen}
-      activeOpacity={1}
-      //   onPress={() => onClose()}
-    >
+      style={{
+        width: DIMENSIONS.window.width - 130,
+        alignItems: 'center',
+      }}>
+      <ProfileWithBadge
+        profileImage={item.profile_img}
+        padding={0}
+        isEnableImagePicker={false}
+      />
+      <Text style={styles.name}>{item.display_name}</Text>
+    </View>
+  );
+
+  return (
+    <View style={styles.screen} activeOpacity={1}>
       <View style={styles.subContainer} activeOpacity={1}>
         <View style={styles.titleContainer}>
           <View style={styles.countContainer}>
-            <Text style={styles.count}>{connectionData.length}</Text>
+            <Text style={styles.count}>{getPendingRequestsCount()}</Text>
           </View>
           <Text style={styles.title}>Connection request</Text>
           <SVGIcon
@@ -80,15 +186,23 @@ const ConectionRequestModal = ({onClose}) => {
             onPress={() => scrollToIndex(index - 1)}
           />
           <FlatList
-            ref={conectionRef}
-            data={connectionData}
-            keyExtractor={item => item.id.toString()}
+            ref={conectionsListRef}
+            data={requestsList}
+            keyExtractor={item => item.friend_request_id.toString()}
             horizontal
             pagingEnabled
-            // style={{width: '75%'}}
-            // ItemSeparatorComponent={() => (
-            //   <View style={{width: 10, backgroundColor: 'green'}} />
-            // )}
+            onScrollToIndexFailed={info => {
+              const wait = new Promise(resolve => {
+                timer = setTimeout(() => resolve(true), 500);
+              });
+              wait.then(() => {
+                conectionsListRef.current?.scrollToIndex({
+                  index: info.index,
+                  animated: true,
+                  viewPosition: 0.5,
+                });
+              });
+            }}
             showsHorizontalScrollIndicator={false}
             initialScrollIndex={index}
             onMomentumScrollEnd={event => {
@@ -100,44 +214,56 @@ const ConectionRequestModal = ({onClose}) => {
                 setindex(currentIndex);
               }
             }}
-            renderItem={({item}) => (
-              <View
-                style={{
-                  width: DIMENSIONS.window.width - 130,
-                  //   width: '50%',
-                  // backgroundColor: 'red',
-                  alignItems: 'center',
-                }}>
-                <ProfileWithBadge
-                  profileImage={item.profile_image}
-                  padding={0}
-                  isEnableImagePicker={false}
-                  badge={item.badge}
-                />
-                <Text style={styles.name}>{item.name}</Text>
-              </View>
-            )}
+            renderItem={renderItem}
           />
 
           <SVGIcon
             icon={
-              index === connectionData.length - 1
+              index === requestsList.length - 1
                 ? 'arrow_right_grey'
                 : 'arrow_right'
             }
-            isButton={index === connectionData.length - 1 ? false : true}
+            isButton={index === requestsList.length - 1 ? false : true}
             onPress={() => scrollToIndex(index + 1)}
           />
         </View>
         <View style={styles.btnContainer}>
-          <TouchableOpacity style={styles.rejectBtn}>
-            <Text style={styles.btnText}>Reject</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.proceedBtn}>
-            <Text style={[styles.btnText, {color: COLORS.white}]}>
-              Add Connection
-            </Text>
-          </TouchableOpacity>
+          {getCompletedAction() ? (
+            <SubmitButton
+              buttonText={getCompletedAction() === 1 ? 'Accepted' : 'Rejected'}
+              buttonWidth={'100%'}
+              bgColor={COLORS.primary}
+              borderColor={COLORS.primary}
+              borderRadius={7}
+              rightIconSize={getCompletedAction() === 1 ? 18 : 13}
+              rightIcon={getCompletedAction() === 1 ? 'tick' : 'close_white'}
+              isDisabled
+              textColor={COLORS.white}
+            />
+          ) : (
+            <>
+              <SubmitButton
+                buttonText="Reject"
+                buttonWidth={'48%'}
+                bgColor={COLORS.lightGrey}
+                borderColor={COLORS.lightGrey}
+                borderRadius={7}
+                onPress={() => {
+                  handleResponseFriendRequest(2, index);
+                }}
+                textColor={COLORS.black}
+              />
+              <SubmitButton
+                buttonText="Accept"
+                buttonWidth={'48%'}
+                borderRadius={7}
+                onPress={() => {
+                  handleResponseFriendRequest(1, index);
+                }}
+                textColor={COLORS.white}
+              />
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -157,8 +283,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 10,
     marginHorizontal: 20,
-    // paddingHorizontal: 20,
-    // paddingVertical: 20,
     justifyContent: 'center',
     alignItems: 'center',
     width: DIMENSIONS.window.width - 50,
@@ -168,7 +292,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 10,
-    // paddingVertical: 5,
     height: 40,
     alignItems: 'center',
     width: '100%',
@@ -177,7 +300,6 @@ const styles = StyleSheet.create({
   },
   countContainer: {
     paddingHorizontal: 10,
-    // paddingVertical: 5,
     backgroundColor: COLORS.white,
     borderRadius: 10,
   },
@@ -210,26 +332,5 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 15,
     marginVertical: 15,
-  },
-  rejectBtn: {
-    width: '48%',
-    height: 45,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.lightGrey,
-    borderRadius: 7,
-  },
-  proceedBtn: {
-    width: '48%',
-    height: 45,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.secondary,
-    borderRadius: 7,
-  },
-  btnText: {
-    fontSize: 16,
-    fontFamily: FONTS.DMSans.medium,
-    color: COLORS.black,
   },
 });

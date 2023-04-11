@@ -14,6 +14,7 @@ import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
 import {globalSearchEventsService} from '../../../Services/ApiService';
 import {useToken} from '../../../Utilities/StoreData';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 var isMount = true;
 var currentPage = 1;
@@ -105,9 +106,23 @@ const EventsSearch = () => {
     return <View style={styles.divider} />;
   };
 
+  function renderEmptyComponent() {
+    return (
+      <View style={[styles.emptyComponent, {height: listContainerHeight}]}>
+        <DefaultBackground />
+        <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
+          We didn't find any results!
+        </StyledText>
+      </View>
+    );
+  }
+
   return (
     <View
-      style={styles.mainContainer}
+      style={[
+        styles.mainContainer,
+        eventsList.length > 0 && {paddingVertical: 5, paddingHorizontal: 15},
+      ]}
       onLayout={e => {
         setlistContainerHeight(e.nativeEvent.layout.height);
       }}>
@@ -119,18 +134,9 @@ const EventsSearch = () => {
           data={eventsList}
           scrollEnabled={eventsList.length > 0 ? true : false}
           renderItem={({item}) => {
-            return <EventListItem item={item} />;
+            return <EventListItem isEnableBorder item={item} />;
           }}
-          ListEmptyComponent={() => {
-            return (
-              <View
-                style={[styles.emptyComponent, {height: listContainerHeight}]}>
-                <StyledText style={{paddingVertical: 5}}>
-                  We didn't find any results!
-                </StyledText>
-              </View>
-            );
-          }}
+          ListEmptyComponent={renderEmptyComponent}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -156,8 +162,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
+    // paddingVertical: 5,
+    // paddingHorizontal: 15,
   },
   divider: {
     backgroundColor: COLORS.borderColor,

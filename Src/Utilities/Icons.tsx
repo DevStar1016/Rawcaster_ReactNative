@@ -71,7 +71,6 @@ import CloseRoundedWhiteIcon from '../Assets/Svg/close_rounded_white.svg';
 import CloseRoundedPinkIcon from '../Assets/Svg/close_rounded_pink.svg';
 import SearchBlackIcon from '../Assets/Svg/search_black.svg';
 import ImagePlaceholderIcon from '../Assets/Svg/image_placeholder.svg';
-
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
 import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
 import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
@@ -89,6 +88,15 @@ import ArrowLeftIcon from '../Assets/Svg/arrow_left.svg';
 import ArrowRightIcon from '../Assets/Svg/arrow_right.svg';
 import ArrowLeftGreyIcon from '../Assets/Svg/arrow_left_grey.svg';
 import ArrowRightGreyIcon from '../Assets/Svg/arrow_right_grey.svg';
+import MenuHorizontalWhiteIcon from '../Assets/Svg/menu_horizontal_white.svg';
+import SettingsWhiteIcon from '../Assets/Svg/settings_white.svg';
+import MessagePrimaryIcon from '../Assets/Svg/message_primary.svg';
+import ShieldSecondaryIcon from '../Assets/Svg/shield_secondary.svg';
+import LockWithDotWhiteIcon from '../Assets/Svg/lock_with_dot_white.svg';
+import UserListPlaceholderIcon from '../Assets/Svg/user_list_placeholder.svg';
+import AudioCallWhiteIcon from '../Assets/Svg/audio_call_white.svg';
+import VideoCallWhiteIcon from '../Assets/Svg/video_call_white.svg';
+import ChatWhiteIcon from '../Assets/Svg/chat_white.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -194,7 +202,16 @@ export type IconType =
   | 'arrow_left'
   | 'arrow_right'
   | 'arrow_left_grey'
-  | 'arrow_right_grey';
+  | 'arrow_right_grey'
+  | 'menu_horizontal_white'
+  | 'settings_white'
+  | 'message_primary'
+  | 'shield_secondary'
+  | 'lock_with_dot_white'
+  | 'user_list_placeholder'
+  | 'audio_call_white'
+  | 'video_call_white'
+  | 'chat_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -293,4 +310,13 @@ export const ICONS = {
   arrow_right: ArrowRightIcon,
   arrow_left_grey: ArrowLeftGreyIcon,
   arrow_right_grey: ArrowRightGreyIcon,
+  menu_horizontal_white: MenuHorizontalWhiteIcon,
+  settings_white: SettingsWhiteIcon,
+  message_primary: MessagePrimaryIcon,
+  shield_secondary: ShieldSecondaryIcon,
+  lock_with_dot_white: LockWithDotWhiteIcon,
+  user_list_placeholder: UserListPlaceholderIcon,
+  audio_call_white: AudioCallWhiteIcon,
+  video_call_white: VideoCallWhiteIcon,
+  chat_white: ChatWhiteIcon,
 };

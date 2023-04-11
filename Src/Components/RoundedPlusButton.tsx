@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {StyleSheet, TouchableOpacity, ViewStyle} from 'react-native';
 import React from 'react';
 import SVGIcon from './SVGIcon';
 import {COLORS} from '../Utilities/Colors';
@@ -17,12 +11,12 @@ type Props = {
   iconSize?: number;
 };
 
-const RoundedPlusButton = ({
+function RoundedPlusButton({
   onPress,
-  style = {},
+  style,
   icon = 'plus',
   iconSize = 28,
-}: Props) => {
+}: Props) {
   return (
     <TouchableOpacity
       style={[styles.nuggetPostButton, {...style}]}
@@ -31,7 +25,7 @@ const RoundedPlusButton = ({
       <SVGIcon icon={icon} height={iconSize} width={iconSize} />
     </TouchableOpacity>
   );
-};
+}
 
 export default RoundedPlusButton;
 
