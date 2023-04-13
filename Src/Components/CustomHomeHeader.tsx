@@ -2,7 +2,6 @@ import {StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
-import {removeToken} from '../Utilities/Methods';
 import {useDispatch} from 'react-redux';
 import {useInsets, useToken} from '../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
@@ -82,15 +81,7 @@ const CustomHomeHeader = ({
             onPress={onPressBack}
           />
         ) : (
-          <SVGIcon
-            icon="app_logo_white"
-            isButton
-            height={30}
-            width={30}
-            onPress={() => {
-              removeToken(dispatch);
-            }}
-          />
+          <SVGIcon icon="app_logo_white" height={30} width={30} />
         )}
       </View>
       <View
@@ -166,7 +157,9 @@ const CustomHomeHeader = ({
             marginLeft={5}
             height={26}
             width={26}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('SettingsStack');
+            }}
             isButton
           />
         )}

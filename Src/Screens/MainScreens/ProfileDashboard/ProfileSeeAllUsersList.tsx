@@ -52,7 +52,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     isMount = true;
     currentPage = 1;
     totalPages = 1;
-    if (userId || initialList.length <= 0) {
+    if (token && (userId || initialList.length <= 0)) {
       if (listType) {
         if (isMount) {
           setisLoading(true);

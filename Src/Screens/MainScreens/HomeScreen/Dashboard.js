@@ -123,6 +123,7 @@ const Dashboard = () => {
     formData.append('page_number', pageNumber);
     formData.append('nugget_type', nuggetType);
     formData.append('filter_type', selectedFilterTab);
+    console.log(formData, 'FORMDATA');
     listNuggetsService(formData, controller.signal)
       .then(res => {
         if (res.data.status === 1) {

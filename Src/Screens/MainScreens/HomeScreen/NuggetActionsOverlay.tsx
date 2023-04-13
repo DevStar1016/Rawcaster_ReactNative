@@ -534,9 +534,9 @@ function NuggetActionsOverlay({
                       if (isLogin()) {
                         const pushAction = StackActions.push('ProfileStack', {
                           userId:
-                            nugget.user_id === profile.user_id
+                            nugget.original_user_id === profile.user_id
                               ? null
-                              : nugget.user_id,
+                              : nugget.original_user_id,
                         });
                         navigation.dispatch(pushAction);
                       }

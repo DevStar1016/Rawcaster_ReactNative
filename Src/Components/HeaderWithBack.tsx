@@ -1,4 +1,11 @@
-import {StatusBar, StyleSheet, View} from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
@@ -16,9 +23,13 @@ export type BackHeaderProps = {
   isTitleCenter?: boolean;
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
+  rightButtonType?: 'icon' | 'text';
+  rightButtonText?: string;
   isEnableSafeArea?: boolean;
   onPressRightIcon?: () => void;
   rightIconSize?: number;
+  rightTextButtonStyle?: ViewStyle;
+  rightButtonTextStyle?: TextStyle;
   isEnableBackButton?: boolean;
   bgColor?: string;
 };
@@ -35,7 +46,11 @@ const HeaderWithBack = ({
   onPressRightIcon,
   isEnableBackButton = true,
   rightIconSize = 15,
+  rightButtonType = 'icon',
+  rightButtonText = '',
   bgColor = COLORS.primary,
+  rightTextButtonStyle,
+  rightButtonTextStyle,
 }: BackHeaderProps) => {
   const navigation = useNavigation();
   const insets = useInsets();
@@ -51,7 +66,7 @@ const HeaderWithBack = ({
       style={[
         styles.mainContainer,
         {
-          justifyContent: isTitleCenter ? 'space-between' : 'flex-start',
+          justifyContent: 'space-between',
           backgroundColor: bgColor,
           paddingTop: isEnableSafeArea
             ? insets.top
@@ -62,48 +77,77 @@ const HeaderWithBack = ({
             : 12,
         },
       ]}>
-      <View
-        style={[
-          styles.iconContainer,
-          {width: isTitleCenter ? '10%' : undefined},
-        ]}>
-        {isEnableBackButton && (
-          <SVGIcon
-            icon={backIcon}
-            height={17}
-            width={17}
-            isButton
-            onPress={() => {
-              if (isModal && setModal) {
-                setModal(false);
-              } else {
-                navigation.goBack();
-              }
-            }}
-          />
+      <View style={{flexDirection: 'row'}}>
+        <View
+          style={[
+            styles.iconContainer,
+            {width: isTitleCenter ? '10%' : undefined},
+          ]}>
+          {isEnableBackButton && (
+            <SVGIcon
+              icon={backIcon}
+              height={17}
+              width={17}
+              isButton
+              onPress={() => {
+                if (isModal && setModal) {
+                  setModal(false);
+                } else {
+                  navigation.goBack();
+                }
+              }}
+            />
+          )}
+        </View>
+        {!isTitleCenter && (
+          <View
+            style={[
+              styles.titleContainer,
+              {
+                alignItems: 'flex-start',
+                paddingHorizontal: 15,
+              },
+            ]}>
+            <StyledText style={styles.title}>{title}</StyledText>
+          </View>
         )}
       </View>
-      <View
-        style={[
-          styles.titleContainer,
-          {
-            alignItems: isTitleCenter ? 'center' : 'flex-start',
-            paddingHorizontal: isTitleCenter ? 0 : 15,
-          },
-        ]}>
-        <StyledText style={styles.title}>{title}</StyledText>
-      </View>
-      <View style={[styles.iconContainer, {alignItems: 'flex-end'}]}>
-        {isEnableRightIcon && (
-          <SVGIcon
-            icon={rightIcon}
-            height={rightIconSize}
-            width={rightIconSize}
-            isButton
-            onPress={onPressRightIcon}
-          />
-        )}
-      </View>
+      {isTitleCenter && (
+        <View
+          style={[
+            styles.titleContainer,
+            {
+              alignItems: isTitleCenter ? 'center' : 'flex-start',
+              paddingHorizontal: isTitleCenter ? 0 : 15,
+            },
+          ]}>
+          <StyledText style={styles.title}>{title}</StyledText>
+        </View>
+      )}
+      {rightButtonType === 'icon' ? (
+        <View style={[styles.iconContainer, {alignItems: 'flex-end'}]}>
+          {isEnableRightIcon && (
+            <SVGIcon
+              icon={rightIcon}
+              height={rightIconSize}
+              width={rightIconSize}
+              isButton
+              onPress={onPressRightIcon}
+            />
+          )}
+        </View>
+      ) : isEnableRightIcon && rightButtonType === 'text' ? (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[styles.rightTextButton, rightTextButtonStyle]}
+          onPress={onPressRightIcon}>
+          <StyledText style={[styles.rightButtonText, rightButtonTextStyle]}>
+            {rightButtonText}
+          </StyledText>
+        </TouchableOpacity>
+      ) : (
+        <View style={[styles.iconContainer, {height: 25}]} />
+      )}
     </View>
   );
 };
@@ -131,5 +175,17 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontFamily: FONTS.DMSans.bold,
     fontSize: 16,
+  },
+  rightTextButton: {
+    borderRadius: 5,
+    backgroundColor: COLORS.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+  },
+  rightButtonText: {
+    color: COLORS.white,
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 13,
   },
 });

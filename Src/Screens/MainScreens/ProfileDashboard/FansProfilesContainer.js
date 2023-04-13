@@ -6,7 +6,6 @@ import StyledText from '../../../Components/StyledText';
 import {COLORS} from '../../../Utilities/Colors';
 import {FONTS} from '../../../Utilities/Fonts';
 import {getFollowListService} from '../../../Services/ApiService';
-import {getAuthCode} from '../../../Utilities/Methods';
 import FansProfilesLoader from '../../../Components/Skelotons/FansProfilesLoader';
 
 const FansProfilesContainer = ({profileSize = 40, userId}) => {
@@ -20,7 +19,9 @@ const FansProfilesContainer = ({profileSize = 40, userId}) => {
 
   useEffect(() => {
     isMount = true;
-    getFollowListAPICall();
+    if (token) {
+      getFollowListAPICall();
+    }
 
     return () => (isMount = false);
   }, []);

@@ -22,6 +22,7 @@ export type SubmitButtonProps = {
   buttonWidth?: string | number;
   onPress?: () => void;
   icon?: IconType;
+  borderWidth?: number;
   marginTop?: number;
   disabledColor?: string;
   loaderColor?: string;
@@ -49,6 +50,7 @@ const SubmitButton = ({
   textColor = COLORS.white,
   buttonTextStyle = {},
   icon,
+  borderWidth = 2,
   iconSize = 25,
   isDisabled = false,
   rightIcon,
@@ -73,6 +75,7 @@ const SubmitButton = ({
       style={[
         styles.mainContainer,
         {
+          borderWidth,
           width: buttonWidth,
           backgroundColor:
             isDisabled && disabledColor ? disabledColor : bgColor,

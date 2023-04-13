@@ -2,8 +2,10 @@ import {
   ListRenderItem,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import React, {useState} from 'react';
 import HeaderWithBack from '../Components/HeaderWithBack';
@@ -23,11 +25,16 @@ type Props = {
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
   list?: any[];
+  rightButtonType?: 'icon' | 'text';
+  rightButtonText?: string;
   isEnableSelection?: boolean;
   displayFieldName?: string;
   idFieldName?: string;
   imageFieldName?: string;
+  isTitleCenter?: boolean;
   isEnableLocalSearch?: boolean;
+  rightButtonTextStyle?: TextStyle;
+  rightTextButtonStyle?: ViewStyle;
 };
 
 type RenderProps = {
@@ -45,9 +52,14 @@ const MultiItemsSelectList = ({
   list = [],
   isEnableSelection = true,
   isEnableLocalSearch = true,
+  rightButtonType = 'icon',
+  rightButtonText = '',
   displayFieldName,
   imageFieldName,
   idFieldName,
+  isTitleCenter = true,
+  rightButtonTextStyle,
+  rightTextButtonStyle,
 }: Props) => {
   const [selectedIdsList, setselectedIdsList] = useState<any[]>(
     preSelectedIds ?? [],
@@ -145,8 +157,12 @@ const MultiItemsSelectList = ({
         }
         rightIcon={rightIcon}
         title={title}
-        isTitleCenter
+        isTitleCenter={isTitleCenter}
         rightIconSize={20}
+        rightButtonTextStyle={rightButtonTextStyle}
+        rightTextButtonStyle={rightTextButtonStyle}
+        rightButtonText={rightButtonText}
+        rightButtonType={rightButtonType}
         isEnableSafeArea
         isModal={true}
         onPressRightIcon={() => {

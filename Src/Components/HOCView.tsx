@@ -132,7 +132,7 @@ const HOCView = ({
           )}
           {isEnableKeyboardAware ? (
             <KeyboardAwareScrollView
-              extraScrollHeight={55}
+              extraScrollHeight={10}
               style={{paddingHorizontal}}
               enableOnAndroid={true}
               bounces={false}
@@ -201,7 +201,7 @@ const HOCView = ({
           )}
           {isEnableKeyboardAware ? (
             <KeyboardAwareScrollView
-              extraScrollHeight={55}
+              extraScrollHeight={10}
               style={{paddingHorizontal}}
               enableOnAndroid={true}
               bounces={false}

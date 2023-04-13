@@ -7,12 +7,23 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import {getSlicedText} from '../../../Utilities/Methods';
 import SVGIcon from '../../../Components/SVGIcon';
+import {useMyConnections} from '../../../Utilities/Contexts';
 
 const ConnectionsList = () => {
   const connectionsList = useConnectionsList();
+  const {searchText} = useMyConnections();
 
-  function keyExtractor(_, index) {
-    return index.toString();
+  function getList() {
+    if (searchText && searchText.trim()) {
+      return [...connectionsList].filter(item =>
+        item.display_name.toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
+    return [...connectionsList];
+  }
+
+  function keyExtractor(item) {
+    return item.user_ref_id.toString();
   }
 
   function renderItem({item, index}) {
@@ -22,6 +33,12 @@ const ConnectionsList = () => {
           <ProfileWithBadge
             profileImage={item.profile_img}
             padding={0}
+            isEnableOnlineOfflineStatus
+            isOnline={parseInt(item.online) === 1}
+            topRightIconContainerStyle={{
+              top: 2,
+              right: 0,
+            }}
             profileSize={50}
             extraMargin={0}
           />
@@ -56,12 +73,19 @@ const ConnectionsList = () => {
 
   return (
     <View style={styles.mainContainer}>
-      <FlatList
-        data={connectionsList}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={keyExtractor}
-      />
+      {getList().length > 0 ? (
+        <FlatList
+          data={getList()}
+          renderItem={renderItem}
+          contentContainerStyle={{paddingBottom: 20}}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={keyExtractor}
+        />
+      ) : (
+        <View style={styles.emptyListContainer}>
+          <StyledText style={styles.emptyListText}>No data found</StyledText>
+        </View>
+      )}
     </View>
   );
 };
@@ -100,5 +124,14 @@ const styles = StyleSheet.create({
   },
   actionIconsContainer: {
     flexDirection: 'row',
+  },
+  emptyListContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyListText: {
+    color: COLORS.white,
+    fontFamily: FONTS.DMSans.medium,
   },
 });

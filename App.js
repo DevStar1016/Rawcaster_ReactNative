@@ -115,6 +115,7 @@ const App = () => {
     async response => {
       if (response.data.status === -1) {
         removeToken(dispatch);
+        console.log(response, 'HEADER');
         Toast.fail(response.data.msg);
       }
       return response;

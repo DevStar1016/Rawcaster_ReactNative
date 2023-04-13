@@ -59,7 +59,7 @@ const ProfilesListContainerWithSeeAll = ({
 
   useEffect(() => {
     isMount = true;
-    if (userId || list.length <= 0) {
+    if (token && (userId || list.length <= 0)) {
       if (listType) {
         switch (listType) {
           case 'connections':

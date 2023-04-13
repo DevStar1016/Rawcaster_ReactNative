@@ -45,6 +45,83 @@ export const INTRO_DATA = [
   },
 ];
 
+export const DEFAULT_PAGES_LIST = [
+  {id: 1, type: 'Nugget'},
+  {id: 2, type: 'Event'},
+  {id: 3, type: 'Chat'},
+];
+
+export const DEFAULT_DATE_FORMAT_LIST = [
+  {id: 1, type: 'MM/DD/YYYY'},
+  {id: 2, type: 'DD/MM/YYYY'},
+  {id: 3, type: 'DD-MM-YYYY'},
+];
+
+export const VISIBLE_CHOICES_LIST = [
+  {
+    id: 0,
+    name: "Don't Show",
+  },
+  {
+    id: 1,
+    name: 'Public',
+  },
+  {
+    id: 2,
+    name: 'Connections Only',
+  },
+  {
+    id: 3,
+    name: 'Specific Group',
+  },
+];
+
+export const DISPLAY_CHOICES_LIST = [
+  {
+    id: 0,
+    name: 'Rawcaster',
+  },
+  {
+    id: 1,
+    name: 'Public',
+  },
+  {
+    id: 2,
+    name: 'All Connections',
+  },
+  {
+    id: 3,
+    name: 'Specific Connections',
+  },
+  {
+    id: 4,
+    name: 'All Groups',
+  },
+  {
+    id: 5,
+    name: 'Specific Group',
+  },
+  {
+    id: 6,
+    name: 'My Influencers',
+  },
+  {
+    id: 7,
+    name: 'Mine Only',
+  },
+];
+
+export const ACCOUNT_ACTIVE_STATUS_LIST = [
+  {
+    id: 0,
+    name: 'Inactive',
+  },
+  {
+    id: 1,
+    name: 'Active',
+  },
+];
+
 export const SIGNUP_TYPE = {
   email_phone: 1,
   apple: 2,
@@ -97,15 +174,15 @@ export const GENDER_LIST = [
 
 export const EVENT_VISIBILITY_TYPE_LIST = [
   {
-    id: 3,
+    id: 1,
     name: 'Public',
   },
   {
-    id: 1,
+    id: 2,
     name: 'Private',
   },
   {
-    id: 2,
+    id: 3,
     name: 'Fans',
   },
 ];

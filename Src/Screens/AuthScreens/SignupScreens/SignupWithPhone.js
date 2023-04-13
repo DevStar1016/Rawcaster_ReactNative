@@ -143,7 +143,7 @@ const SignupWithPhone = ({route}) => {
       <ReplaceStatusBar />
 
       <KeyboardAwareScrollView
-        extraScrollHeight={55}
+        extraScrollHeight={10}
         enableOnAndroid={true}
         bounces={false}
         showsVerticalScrollIndicator={false}

@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,6 +19,9 @@ import ItemSelectionMiniList from './ItemSelectionMiniList';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {IconType} from '../Utilities/Icons';
 import moment from 'moment';
+import ItemSelectionBigList, {
+  ItemSelectionBigListProps,
+} from './ItemSelectionBigList';
 
 type Props = {
   title?: string;
@@ -40,13 +44,19 @@ type Props = {
   errorText?: string;
   datePickerProps?: ReactNativeModalDateTimePickerProps;
   dropDownIcon?: IconType;
+  titleStyle?: TextStyle;
   isDropDownIconAsButton?: boolean;
   onPressIcon?: () => void;
   isLoadingIcon?: boolean;
+  listType?: 'mini' | 'large';
   fontSize?: number;
   backgroundColor?: string;
   borderColor?: string;
   valueTextColor?: string;
+  bigListProps?: Omit<
+    ItemSelectionBigListProps,
+    'fieldName' | 'onSelectItem' | 'listData' | 'title' | 'onCloseList'
+  >;
   additionalDisplayText?: string;
 };
 
@@ -59,6 +69,7 @@ const DropDownPicker = ({
   mainContainerWidth = '100%',
   placeHolderText = 'Select Data',
   dataList = [],
+  listType = 'mini',
   isInsideList = true,
   onPress,
   isDisabled = false,
@@ -74,11 +85,13 @@ const DropDownPicker = ({
   onPressIcon,
   isLoadingIcon,
   fontSize = 14,
+  titleStyle,
   valueTextColor = COLORS.black,
   backgroundColor = COLORS.white,
   borderColor = COLORS.borderColor,
   additionalDisplayText = '',
   datePickerProps,
+  bigListProps,
 }: Props) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
   const [isOpenDatePicker, setisOpenDatePicker] = useState(false);
@@ -103,7 +116,8 @@ const DropDownPicker = ({
         },
       ]}>
       {title && (
-        <StyledText style={{paddingVertical: titlePaddingVertical}}>
+        <StyledText
+          style={[{paddingVertical: titlePaddingVertical}, titleStyle]}>
           {title}
         </StyledText>
       )}
@@ -160,31 +174,60 @@ const DropDownPicker = ({
       {errorText ? (
         <StyledText style={styles.errorText}>{errorText}</StyledText>
       ) : null}
-      <Modal
-        visible={isOpenDataListModal}
-        onRequestClose={() => {
-          setisOpenDataListModal(false);
-        }}
-        transparent
-        style={{backgroundColor: COLORS.transparentDimColor}}>
-        <SafeAreaView
-          style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
-          <ItemSelectionMiniList
-            onClose={() => {
-              setisOpenDataListModal(false);
-            }}
-            fieldName={fieldName}
-            title={listTitle}
-            listData={dataList}
-            onSelectItem={(item: any) => {
-              setisOpenDataListModal(false);
-              if (onSelectItem) {
-                onSelectItem(item);
-              }
-            }}
-          />
-        </SafeAreaView>
-      </Modal>
+      {listType === 'mini' && (
+        <Modal
+          visible={isOpenDataListModal}
+          onRequestClose={() => {
+            setisOpenDataListModal(false);
+          }}
+          transparent
+          style={{backgroundColor: COLORS.transparentDimColor}}>
+          <SafeAreaView
+            style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
+            <ItemSelectionMiniList
+              onClose={() => {
+                setisOpenDataListModal(false);
+              }}
+              fieldName={fieldName}
+              title={listTitle}
+              listData={dataList}
+              onSelectItem={(item: any) => {
+                setisOpenDataListModal(false);
+                if (onSelectItem) {
+                  onSelectItem(item);
+                }
+              }}
+            />
+          </SafeAreaView>
+        </Modal>
+      )}
+
+      {listType === 'large' && (
+        <Modal
+          visible={isOpenDataListModal}
+          animationType="slide"
+          onRequestClose={() => {
+            setisOpenDataListModal(false);
+          }}>
+          <SafeAreaView style={{flex: 1}}>
+            <ItemSelectionBigList
+              fieldName={fieldName}
+              onSelectItem={(item: any) => {
+                setisOpenDataListModal(false);
+                if (onSelectItem) {
+                  onSelectItem(item);
+                }
+              }}
+              listData={dataList}
+              title={listTitle}
+              onCloseList={() => {
+                setisOpenDataListModal(false);
+              }}
+              {...bigListProps}
+            />
+          </SafeAreaView>
+        </Modal>
+      )}
 
       {isOpenDatePicker && (
         <DateTimePickerModal

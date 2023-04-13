@@ -1,0 +1,448 @@
+import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import HeaderWithBack from '../../../Components/HeaderWithBack';
+import StyledText from '../../../Components/StyledText';
+import {FONTS} from '../../../Utilities/Fonts';
+import {
+  useConnectionsList,
+  useGroupsList,
+  useProfile,
+  useSettings,
+  useToken,
+} from '../../../Utilities/StoreData';
+import DropDownPicker from '../../../Components/DropDownPicker';
+import {
+  ACCOUNT_ACTIVE_STATUS_LIST,
+  DEFAULT_DATE_FORMAT_LIST,
+  DEFAULT_PAGES_LIST,
+  DISPLAY_CHOICES_LIST,
+  VISIBLE_CHOICES_LIST,
+} from '../../../Utilities/Constants';
+import {COLORS} from '../../../Utilities/Colors';
+import RadioButton from '../../../Components/RadioButton';
+import {
+  getLanguageListService,
+  getTimeZoneService,
+} from '../../../Services/ApiService';
+import Loader from '../../../Components/Loader';
+import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
+
+var isMount = true;
+const CHOICE_CONTAINERS_LIST = [
+  {
+    fieldName: 'phone_display_status',
+    listFieldName: 'phone_group_list',
+    title: 'Phone',
+    listType: 1,
+  },
+  {
+    fieldName: 'location_display_status',
+    listFieldName: 'location_group_list',
+    title: 'Location',
+    listType: 1,
+  },
+  {
+    fieldName: 'dob_display_status',
+    listFieldName: 'dob_group_list',
+    title: 'DOB',
+    listType: 1,
+  },
+  {
+    fieldName: 'bio_display_status',
+    listFieldName: 'bio_group_list',
+    title: 'Bio Data',
+    listType: 1,
+  },
+  {
+    fieldName: 'online_status',
+    listFieldName: 'online_group_list',
+    title: 'Online Status',
+    listType: 1,
+  },
+  {
+    fieldName: 'public_nugget_display',
+    listFieldName: 'nugget_display_list',
+    title: 'Nugget Display Option',
+    listType: 2,
+  },
+  {
+    fieldName: 'public_event_display',
+    listFieldName: 'event_display_list',
+    title: 'Event Display Option',
+    listType: 2,
+  },
+];
+const GeneralSettings = () => {
+  const token = useToken();
+  const settings = useSettings();
+  const groupsList = useGroupsList();
+  const connectionsList = useConnectionsList();
+  const profile = useProfile();
+  const [specificUsersModalData, setspecificUsersModalData] = useState({
+    isOpenModal: false,
+    selectedId: null,
+    fieldName: '',
+    listFieldName: '',
+    specificListType: null, // 1 - connections, 2 - group
+  });
+
+  const [isLoading, setisLoading] = useState(true);
+  const [languagesList, setlanguagesList] = useState([]);
+  const [timeZonesList, settimeZonesList] = useState([]);
+  const [selectedChoices, setselectedChoices] = useState({
+    phone_display_status: settings.phone_display_status,
+    location_display_status: settings.location_display_status,
+    dob_display_status: settings.dob_display_status,
+    bio_display_status: settings.bio_display_status,
+    online_status: settings.online_status,
+    public_nugget_display: settings.public_nugget_display,
+    public_event_display: settings.public_event_display,
+    account_active_inactive: settings.account_active_inactive,
+  });
+
+  const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
+    useState({
+      phone_group_list: settings.phone_group_list ?? [],
+      location_group_list: settings.location_group_list ?? [],
+      dob_group_list: settings.dob_group_list ?? [],
+      bio_group_list: settings.bio_group_list ?? [],
+      online_group_list: settings.online_group_list ?? [],
+      nugget_display_list: settings.nugget_display_list ?? [],
+      event_display_list: settings.event_display_list ?? [],
+    });
+
+  const [selectedData, setselectedData] = useState({
+    defaultPageType: [...DEFAULT_PAGES_LIST].find(
+      item => item.id === settings.mobile_default_page,
+    ),
+    language: [...languagesList].find(item => item.id === settings.language_id),
+    timeZone: null,
+    defaultDateFormat: [...DEFAULT_DATE_FORMAT_LIST].find(
+      item => item.type === settings.default_date_format,
+    ),
+  });
+
+  useEffect(() => {
+    isMount = true;
+    initialAPICalls();
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  function closeSpecificUsersModal() {
+    if (isMount) {
+      setspecificUsersModalData({
+        isOpenModal: false,
+        selectedId: null,
+        fieldName: '',
+        listFieldName: '',
+        specificListType: null, // 1 - connections, 2 - group
+      });
+    }
+  }
+
+  function initialAPICalls() {
+    const formData = new FormData();
+    formData.append('token', token);
+    Promise.all([
+      getLanguageListService(formData),
+      getTimeZoneService(formData),
+    ])
+      .then(res => {
+        if (res[0].data.status === 1) {
+          if (isMount) {
+            setselectedData(preData => {
+              return {
+                ...preData,
+                language: [...res[0].data.language_list].find(
+                  item => item.id === settings.language_id,
+                ),
+              };
+            });
+            setlanguagesList(res[0].data.language_list);
+          }
+        }
+        return res;
+      })
+      .then(res => {
+        if (res[1].data.status === 1) {
+          if (isMount) {
+            settimeZonesList(res[1].data.timezone_list);
+          }
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
+  function RowContainer({leftText = '', rightText = ''}) {
+    return (
+      <View style={styles.rowContainer}>
+        <StyledText style={styles.titleText}>{leftText}: </StyledText>
+        <StyledText>{rightText}</StyledText>
+      </View>
+    );
+  }
+  function ChoiceContainer({
+    title = '',
+    selectedId,
+    choiceList = [...VISIBLE_CHOICES_LIST],
+    onSelectRadioOption,
+  }) {
+    return (
+      <View style={styles.choiceContainer}>
+        <StyledText style={styles.titleText}>{title}</StyledText>
+        <View style={styles.optionsContainer}>
+          {choiceList.map(item => {
+            return (
+              <RadioButton
+                key={item.id.toString()}
+                isSelected={selectedId === item.id}
+                text={item.name}
+                onPress={() => {
+                  onSelectRadioOption(item.id);
+                }}
+              />
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.mainContainer}>
+      <HeaderWithBack title="General Settings" isEnableSafeArea />
+      <View style={styles.contentContainer}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{flex: 1}}
+          bounces={false}>
+          <RowContainer
+            leftText="User Status"
+            rightText={profile.user_status}
+          />
+          <RowContainer leftText="User Type" rightText={profile.user_type} />
+          <DropDownPicker
+            title="Default Rawcaster page"
+            value={selectedData.defaultPageType}
+            listTitle=""
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={DEFAULT_PAGES_LIST}
+            fieldName="type"
+            onSelectItem={selectedItem => {
+              setselectedData(preData => ({
+                ...preData,
+                defaultPageType: selectedItem,
+              }));
+            }}
+          />
+          {CHOICE_CONTAINERS_LIST.map(item => {
+            const list =
+              item.listType === 2
+                ? [...DISPLAY_CHOICES_LIST]
+                : [...VISIBLE_CHOICES_LIST];
+            return (
+              <ChoiceContainer
+                key={item.fieldName.toString()}
+                title={item.title}
+                selectedId={selectedChoices[item.fieldName]}
+                choiceList={list}
+                onSelectRadioOption={selectedId => {
+                  if (isMount) {
+                    if (item.listType === 1 && selectedId === 3) {
+                      setspecificUsersModalData({
+                        isOpenModal: true,
+                        fieldName: item.fieldName,
+                        listFieldName: item.listFieldName,
+                        selectedId,
+                        specificListType: 2,
+                      });
+                    } else if (
+                      item.listType === 2 &&
+                      [3, 5].includes(selectedId)
+                    ) {
+                      setspecificUsersModalData({
+                        isOpenModal: true,
+                        fieldName: item.fieldName,
+                        listFieldName: item.listFieldName,
+                        selectedId,
+                        specificListType: selectedId === 3 ? 1 : 2,
+                      });
+                    } else {
+                      setselectedChoices(preData => ({
+                        ...preData,
+                        [item.fieldName]: selectedId,
+                      }));
+                    }
+                  }
+                }}
+              />
+            );
+          })}
+          <DropDownPicker
+            title="Preference Language"
+            value={selectedData.language}
+            listTitle=""
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={languagesList}
+            fieldName="name"
+            onSelectItem={selectedItem => {
+              setselectedData(preData => ({
+                ...preData,
+                language: selectedItem,
+              }));
+            }}
+          />
+          <DropDownPicker
+            title="Timezone"
+            value={selectedData.timeZone ?? {name: settings.time_zone}}
+            listTitle="Timezone Selection"
+            listType="large"
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={timeZonesList}
+            fieldName="name"
+            onSelectItem={selectedItem => {
+              setselectedData(preData => ({
+                ...preData,
+                timeZone: selectedItem,
+              }));
+            }}
+          />
+          <DropDownPicker
+            title="Date Format"
+            value={selectedData.defaultDateFormat}
+            listTitle=""
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={DEFAULT_DATE_FORMAT_LIST}
+            fieldName="type"
+            onSelectItem={selectedItem => {
+              setselectedData(preData => ({
+                ...preData,
+                defaultDateFormat: selectedItem,
+              }));
+            }}
+          />
+
+          <ChoiceContainer
+            title="Rawcaster Account"
+            selectedId={selectedChoices.accountActiveStatus}
+            choiceList={[...ACCOUNT_ACTIVE_STATUS_LIST]}
+            onSelectRadioOption={selectedId => {
+              setselectedChoices(preData => ({
+                ...preData,
+                accountActiveStatus: selectedId,
+              }));
+            }}
+          />
+        </ScrollView>
+      </View>
+
+      <Modal
+        visible={specificUsersModalData.isOpenModal}
+        statusBarTranslucent
+        onRequestClose={() => {
+          closeSpecificUsersModal();
+        }}>
+        <MultiItemsSelectList
+          title={
+            specificUsersModalData.specificListType === 2
+              ? 'Specific Group'
+              : 'Specific Connection'
+          }
+          preSelectedIds={
+            selectedChoices[specificUsersModalData.fieldName] ===
+            specificUsersModalData.selectedId
+              ? selectedChoiceUserGroupListData[
+                  specificUsersModalData.listFieldName
+                ]
+              : []
+          }
+          imageFieldName={
+            specificUsersModalData.specificListType === 2
+              ? 'group_icon'
+              : 'profile_img'
+          }
+          onCloseModal={() => {
+            closeSpecificUsersModal();
+          }}
+          displayFieldName={
+            specificUsersModalData.specificListType === 2
+              ? 'group_name'
+              : 'display_name'
+          }
+          idFieldName={
+            specificUsersModalData.specificListType === 2
+              ? 'group_id'
+              : 'user_id'
+          }
+          list={
+            specificUsersModalData.specificListType === 2
+              ? groupsList
+              : connectionsList
+          }
+          onSelectItems={list => {
+            closeSpecificUsersModal();
+            if (isMount) {
+              console.log(selectedChoiceUserGroupListData, 'GFIELD');
+              setselectedChoiceUserGroupListData(preData => ({
+                ...preData,
+                [specificUsersModalData.listFieldName]: [...list],
+              }));
+              setselectedChoices(preData => ({
+                ...preData,
+                [specificUsersModalData.fieldName]:
+                  specificUsersModalData.selectedId,
+              }));
+              // setshareConnectionsGroupsIdsList(list);
+            }
+          }}
+        />
+      </Modal>
+      <Modal visible={isLoading} transparent>
+        <Loader
+          bgColor={COLORS.transparentDimColor}
+          loaderText={'Fetching Languages and Timezones'}
+        />
+      </Modal>
+    </View>
+  );
+};
+
+export default GeneralSettings;
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+
+  titleText: {
+    fontFamily: FONTS.DMSans.bold,
+  },
+  choiceContainer: {
+    paddingVertical: 10,
+  },
+  optionsContainer: {
+    paddingHorizontal: 10,
+  },
+});

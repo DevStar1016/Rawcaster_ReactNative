@@ -32,6 +32,7 @@ import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
 import ConectionRequestModal from '../Modals/ConectionRequestModal';
 import {SocketEvents} from '../Services/Socket/SocketEvents';
 import GlobalSearchStack from './GlobalSearchStack';
+import SettingsStack from './SettingsStack';
 
 const Stack = createStackNavigator();
 
@@ -175,6 +176,7 @@ const MainStack = () => {
             />
             <Stack.Screen name="PostEditNugget" component={PostEditNugget} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
+            <Stack.Screen name="SettingsStack" component={SettingsStack} />
             <Stack.Screen name="OTPVerification" component={OTPVerification} />
             <Stack.Screen
               name="GlobalSearchStack"

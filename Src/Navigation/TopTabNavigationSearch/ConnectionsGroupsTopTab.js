@@ -41,9 +41,11 @@ function ConnectionsGroupsTopTab({state, descriptors, navigation, position}) {
         const inputRange = state.routes.map((_, i) => i);
         const opacity = position.interpolate({
           inputRange,
-          outputRange: inputRange.map(i =>
-            i === index ? 'rgb(255, 0, 0)' : 'rgb(0, 255, 0)',
-          ),
+          outputRange: inputRange.map(i => (i === index ? 1 : 0)),
+        });
+        const alteropacity = position.interpolate({
+          inputRange,
+          outputRange: inputRange.map(i => (i === index ? 0 : 1)),
         });
 
         return (
@@ -56,21 +58,51 @@ function ConnectionsGroupsTopTab({state, descriptors, navigation, position}) {
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={[
-              styles.tabButton,
-              {
-                backgroundColor: isFocused ? COLORS.white : COLORS.transparent,
-              },
-            ]}>
-            <Animated.Text
+            style={[styles.tabButton]}>
+            <Animated.View
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                left: 0,
+                bottom: 0,
+                opacity: opacity,
+                backgroundColor: COLORS.white,
+              }}
+            />
+            <Animated.View style={styles.textContainer}>
+              <Animated.Text
+                style={[
+                  styles.label,
+                  {
+                    color: COLORS.black,
+                  },
+                ]}>
+                {label}
+              </Animated.Text>
+            </Animated.View>
+            <Animated.View
               style={[
-                styles.label,
+                styles.textContainer,
                 {
-                  color: isFocused ? COLORS.black : COLORS.white,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
                 },
               ]}>
-              {label}
-            </Animated.Text>
+              <Animated.Text
+                style={[
+                  styles.label,
+                  {
+                    opacity: alteropacity,
+                    color: COLORS.white,
+                  },
+                ]}>
+                {label}
+              </Animated.Text>
+            </Animated.View>
           </AnimatedTouchable>
         );
       })}
@@ -95,9 +127,16 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     borderRadius: 10,
+    // paddingVertical: 10,
+    // alignItems: 'center',
+    marginHorizontal: 5,
+    overflow: 'hidden',
+    // justifyContent: 'center',
+  },
+  textContainer: {
+    flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    marginHorizontal: 5,
     justifyContent: 'center',
   },
   label: {

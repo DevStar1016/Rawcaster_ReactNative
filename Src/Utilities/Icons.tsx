@@ -97,6 +97,8 @@ import UserListPlaceholderIcon from '../Assets/Svg/user_list_placeholder.svg';
 import AudioCallWhiteIcon from '../Assets/Svg/audio_call_white.svg';
 import VideoCallWhiteIcon from '../Assets/Svg/video_call_white.svg';
 import ChatWhiteIcon from '../Assets/Svg/chat_white.svg';
+import TalkshowWhiteIcon from '../Assets/Svg/talkshow_white.svg';
+import EventWhiteIcon from '../Assets/Svg/event_white.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -211,7 +213,9 @@ export type IconType =
   | 'user_list_placeholder'
   | 'audio_call_white'
   | 'video_call_white'
-  | 'chat_white';
+  | 'chat_white'
+  | 'talkshow_white'
+  | 'event_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -319,4 +323,6 @@ export const ICONS = {
   audio_call_white: AudioCallWhiteIcon,
   video_call_white: VideoCallWhiteIcon,
   chat_white: ChatWhiteIcon,
+  talkshow_white: TalkshowWhiteIcon,
+  event_white: EventWhiteIcon,
 };

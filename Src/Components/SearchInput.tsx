@@ -3,8 +3,10 @@ import {
   LayoutChangeEvent,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
@@ -13,12 +15,20 @@ import {TextInput} from 'react-native-gesture-handler';
 import {FONTS} from '../Utilities/Fonts';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 
-type Props = {
+export type SearchInputProps = {
   placeHolderText?: string;
   onSearch: (value: string) => void;
   marginVertical?: number;
   marginTop?: number;
   marginBottom?: number;
+  searchIconSize?: number;
+  editable?: boolean;
+  containerStyle?: Omit<
+    ViewStyle,
+    'marginVertical' | 'marginHorizontal' | 'marginTop' | 'marginBottom'
+  >;
+  searchButtonStyle?: ViewStyle;
+  inputContainerStyle?: TextStyle;
   searchButtonColor?: string;
   marginHorizontal?: number;
   searchWhenClickedButton?: boolean;
@@ -32,16 +42,22 @@ const SearchInput = ({
   marginTop,
   marginBottom,
   marginHorizontal,
+  searchIconSize = 25,
   onLayoutHeight,
+  searchButtonStyle,
+  editable = true,
+  containerStyle,
+  inputContainerStyle,
   searchWhenClickedButton = true,
   searchButtonColor = COLORS.primary,
-}: Props) => {
+}: SearchInputProps) => {
   const [searchValue, setsearchValue] = useState('');
   return (
     <View
       style={[
         styles.mainContainer,
         {marginVertical, marginHorizontal, marginTop, marginBottom},
+        containerStyle,
       ]}
       onLayout={event => {
         if (onLayoutHeight) {
@@ -57,7 +73,8 @@ const SearchInput = ({
               onSearch(text);
             }
           }}
-          style={styles.inputField}
+          editable={editable}
+          style={[styles.inputField, inputContainerStyle]}
           placeholder={placeHolderText}
           placeholderTextColor={COLORS.placeHolderColor}
         />
@@ -68,6 +85,7 @@ const SearchInput = ({
           {
             backgroundColor: searchButtonColor,
           },
+          searchButtonStyle,
         ]}
         disabled={!searchWhenClickedButton}
         activeOpacity={0.7}
@@ -75,7 +93,7 @@ const SearchInput = ({
           Keyboard.dismiss();
           onSearch(searchValue);
         }}>
-        <SVGIcon icon="search" />
+        <SVGIcon icon="search" height={searchIconSize} width={searchIconSize} />
       </TouchableOpacity>
     </View>
   );

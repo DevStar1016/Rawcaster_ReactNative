@@ -279,7 +279,7 @@ const EditProfile = ({route}) => {
       <ReplaceStatusBar />
       <HeaderWithBack title={'Update Profile'} />
       <KeyboardAwareScrollView
-        extraScrollHeight={55}
+        extraScrollHeight={10}
         style={{paddingHorizontal: 10}}
         enableOnAndroid={true}
         bounces={false}

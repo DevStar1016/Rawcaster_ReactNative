@@ -228,6 +228,7 @@ const ProfileWithBadge = ({
                 width: 13,
                 borderRadius: 13 / 2,
                 backgroundColor: isOnline ? COLORS.lightGreen : 'red',
+                ...topRightIconContainerStyle,
               },
             ]}
           />
