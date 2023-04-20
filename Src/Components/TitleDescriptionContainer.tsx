@@ -1,8 +1,8 @@
 import React from 'react';
 import {StyleSheet, TextStyle, View, ViewStyle} from 'react-native';
-import CheckBox from '../../../Components/CheckBox';
-import StyledText from '../../../Components/StyledText';
-import {FONTS} from '../../../Utilities/Fonts';
+import {FONTS} from '../Utilities/Fonts';
+import CheckBox from './CheckBox';
+import StyledText from './StyledText';
 
 export type TitleDescriptionContainerProps = {
   title?: string;
@@ -38,9 +38,13 @@ function TitleDescriptionContainer({
         <StyledText style={[styles.titleText, titleStyle]}>{title}</StyledText>
       )}
 
-      <StyledText style={[styles.description, descriptionStyle]}>
-        {description}
-      </StyledText>
+      {description ? (
+        <StyledText style={[styles.description, descriptionStyle]}>
+          {description}
+        </StyledText>
+      ) : (
+        false
+      )}
     </View>
   );
 }

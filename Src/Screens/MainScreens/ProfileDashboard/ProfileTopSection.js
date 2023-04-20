@@ -15,7 +15,7 @@ import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 
 const BANNER_IMAGE_HEIGHT = 140;
 const PROFILE_SIZE = 100;
-const ProfileTopSection = ({userId, profile, paddingHorizontal}) => {
+const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
   const dispatch = useDispatch();
   const token = useToken();
   const [profileImage, setprofileImage] = useState(null);
@@ -76,7 +76,7 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal}) => {
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <View onLayout={onLayout} style={styles.mainContainer}>
       <View style={styles.bannerContainer}>
         <Image
           source={{uri: coverImage ? coverImage.uri : profile.cover_image}}

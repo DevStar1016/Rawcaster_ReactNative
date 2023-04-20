@@ -15,7 +15,7 @@ import {getAuthCode} from '../../../Utilities/Methods';
 import {changePasswordService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
-import TitleDescriptionContainer from './TitleDescriptionContainer';
+import TitleDescriptionContainer from '../../../Components/TitleDescriptionContainer';
 
 const resetPasswordSchema = Yup.object({
   currentPassword: Yup.string().required('Current password is required'),

@@ -30,7 +30,7 @@ import {useDispatch} from 'react-redux';
 import {getSlicedText} from '../../../Utilities/Methods';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import SubmitButton from '../../../Components/SubmitButton';
-import TitleDescriptionContainer from './TitleDescriptionContainer';
+import TitleDescriptionContainer from '../../../Components/TitleDescriptionContainer';
 var currentPage = 1;
 var totalPages = 1;
 var isMount = true;

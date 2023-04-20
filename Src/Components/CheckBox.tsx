@@ -4,6 +4,7 @@ import {
   TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
@@ -13,6 +14,7 @@ import SVGIcon from './SVGIcon';
 type Props = {
   text?: string;
   textStyle?: TextStyle;
+  mainContainerStyle?: ViewStyle;
   onPress?: () => void;
   isSelected?: boolean;
 };
@@ -21,11 +23,12 @@ const CheckBox = ({
   isSelected = false,
   text = 'Test',
   textStyle,
+  mainContainerStyle,
   onPress,
 }: Props) => {
   return (
     <TouchableOpacity
-      style={styles.mainContainer}
+      style={[styles.mainContainer, mainContainerStyle]}
       activeOpacity={0.8}
       onPress={onPress}>
       <View

@@ -4,9 +4,9 @@ import Switch from 'react-native-switches';
 import TitleDescriptionContainer, {
   TitleDescriptionContainerProps,
 } from './TitleDescriptionContainer';
-import StyledText from '../../../Components/StyledText';
-import {FONTS} from '../../../Utilities/Fonts';
-import {COLORS} from '../../../Utilities/Colors';
+import StyledText from './StyledText';
+import {FONTS} from '../Utilities/Fonts';
+import {COLORS} from '../Utilities/Colors';
 
 type SwitchItem = {
   id: number | string;

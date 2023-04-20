@@ -5,7 +5,11 @@ import SVGIcon from './SVGIcon';
 import LinearGradient from 'react-native-linear-gradient';
 import StyledText from './StyledText';
 
-const DefaultBackground = ({centerText = '', isEnableLoading = false}) => {
+const DefaultBackground = ({
+  centerText = '',
+  isEnableLoading = false,
+  isEnableRLogo = true,
+}) => {
   return (
     <View style={styles.mainContainer}>
       <View
@@ -24,7 +28,23 @@ const DefaultBackground = ({centerText = '', isEnableLoading = false}) => {
           style={styles.linearGradient}
         />
       </View>
-      <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 170,
+        }}>
+        <LinearGradient
+          colors={[COLORS.transparent, 'rgba(0,0,0,0.5)']}
+          // colors={['red', 'blue']}
+          start={{x: 1, y: 0}}
+          end={{x: 1, y: 1}}
+          style={[styles.linearGradient]}
+        />
+      </View>
+      {isEnableRLogo && <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />}
       {centerText.trim() || isEnableLoading ? (
         <View
           style={{

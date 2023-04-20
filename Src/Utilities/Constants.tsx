@@ -187,6 +187,17 @@ export const EVENT_VISIBILITY_TYPE_LIST = [
   },
 ];
 
+export const EVENT_LAYOUT_LIST = [
+  {
+    id: 1,
+    name: 'Default',
+  },
+  {
+    id: 2,
+    name: 'Class Room',
+  },
+];
+
 export const NUGGET_ACTIONS = [
   {id: 1, buttonName: 'Edit'},
   {id: 2, buttonName: 'Delete'},

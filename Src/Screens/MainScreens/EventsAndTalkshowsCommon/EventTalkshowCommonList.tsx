@@ -182,8 +182,10 @@ const EventTalkshowCommonScreen = ({
     <HOCView
       headerType="home_header"
       isEnableTopSafeAreaHomeHeader
-      headerProps={{bgColor: COLORS.transparent}}
+      headerProps={{bgColor: COLORS.transparent, isEnableSearch: false}}
       isEnableDefaultBackground
+      isEnableRLogo={getEventsList().length <= 0}
+      paddingBottom={50}
       backgroundColor={COLORS.primary}>
       <SearchInput
         placeHolderText={getSearchPlaceHolderText()}
@@ -199,7 +201,7 @@ const EventTalkshowCommonScreen = ({
       <FlatList
         data={getEventsList()}
         contentContainerStyle={{
-          paddingBottom: 25,
+          paddingBottom: 30,
         }}
         ItemSeparatorComponent={() => {
           return <View style={{height: 15}} />;
@@ -263,7 +265,7 @@ const styles = StyleSheet.create({
   },
   createEventPluButton: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 40,
     right: 30,
     height: 50,
     width: 50,

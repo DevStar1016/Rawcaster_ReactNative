@@ -45,7 +45,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
         let Icon;
         if (route.name === 'EventsStack') {
           Icon = EventsIcon;
-        } else if (route.name === 'Notifications') {
+        } else if (route.name === 'NotificationsStack') {
           Icon = NotificationsIcon;
         } else if (route.name === 'HomeStack') {
           Icon = EventsIcon;

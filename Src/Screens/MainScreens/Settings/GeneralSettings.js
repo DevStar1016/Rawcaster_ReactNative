@@ -1,4 +1,4 @@
-import {Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert, Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
 import StyledText from '../../../Components/StyledText';
@@ -23,9 +23,14 @@ import RadioButton from '../../../Components/RadioButton';
 import {
   getLanguageListService,
   getTimeZoneService,
+  updateUserSettingsService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
+import {setSettings} from '../../../Store/Slices/AuthSlice';
+import Toast from '../../../Components/Toast';
+import {useDispatch} from 'react-redux';
+import {removeToken} from '../../../Utilities/Methods';
 
 var isMount = true;
 const CHOICE_CONTAINERS_LIST = [
@@ -73,6 +78,7 @@ const CHOICE_CONTAINERS_LIST = [
   },
 ];
 const GeneralSettings = () => {
+  const dispatch = useDispatch();
   const token = useToken();
   const settings = useSettings();
   const groupsList = useGroupsList();
@@ -86,10 +92,13 @@ const GeneralSettings = () => {
     specificListType: null, // 1 - connections, 2 - group
   });
 
+  const [loaderText, setloaderText] = useState(
+    'Fetching Languages and Timezones',
+  );
   const [isLoading, setisLoading] = useState(true);
   const [languagesList, setlanguagesList] = useState([]);
   const [timeZonesList, settimeZonesList] = useState([]);
-  const [selectedChoices, setselectedChoices] = useState({
+  const [settingsData, setsettingsData] = useState({
     phone_display_status: settings.phone_display_status,
     location_display_status: settings.location_display_status,
     dob_display_status: settings.dob_display_status,
@@ -98,6 +107,10 @@ const GeneralSettings = () => {
     public_nugget_display: settings.public_nugget_display,
     public_event_display: settings.public_event_display,
     account_active_inactive: settings.account_active_inactive,
+    mobile_default_page: settings.mobile_default_page,
+    language_id: settings.language_id,
+    default_date_format: settings.default_date_format,
+    time_zone: settings.time_zone,
   });
 
   const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
@@ -110,17 +123,6 @@ const GeneralSettings = () => {
       nugget_display_list: settings.nugget_display_list ?? [],
       event_display_list: settings.event_display_list ?? [],
     });
-
-  const [selectedData, setselectedData] = useState({
-    defaultPageType: [...DEFAULT_PAGES_LIST].find(
-      item => item.id === settings.mobile_default_page,
-    ),
-    language: [...languagesList].find(item => item.id === settings.language_id),
-    timeZone: null,
-    defaultDateFormat: [...DEFAULT_DATE_FORMAT_LIST].find(
-      item => item.type === settings.default_date_format,
-    ),
-  });
 
   useEffect(() => {
     isMount = true;
@@ -153,14 +155,6 @@ const GeneralSettings = () => {
       .then(res => {
         if (res[0].data.status === 1) {
           if (isMount) {
-            setselectedData(preData => {
-              return {
-                ...preData,
-                language: [...res[0].data.language_list].find(
-                  item => item.id === settings.language_id,
-                ),
-              };
-            });
             setlanguagesList(res[0].data.language_list);
           }
         }
@@ -179,6 +173,107 @@ const GeneralSettings = () => {
           setisLoading(false);
         }
       });
+  }
+
+  function updateUsersSettingsAPICall(
+    keyText,
+    valueText,
+    reduxData = undefined,
+    otherKeyText,
+    isLogout = false,
+  ) {
+    if (isMount) {
+      setloaderText('Settings Updating');
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append(otherKeyText ?? keyText, valueText);
+    updateUserSettingsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(
+            setSettings({...settings, [keyText]: reduxData ?? valueText}),
+          );
+          if (isLogout) {
+            removeToken(dispatch);
+          }
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          setsettingsData(preData => {
+            return {...preData, [keyText]: settings[keyText]};
+          });
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        setsettingsData(preData => {
+          return {...preData, [keyText]: settings[keyText]};
+        });
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
+  function getDefaultPage() {
+    return [...DEFAULT_PAGES_LIST].find(
+      item => item.id === settingsData.mobile_default_page,
+    );
+  }
+
+  function getSelectedLanguage() {
+    return [...languagesList].find(
+      item => item.id === settingsData.language_id,
+    );
+  }
+
+  function getSelectedTimeZone() {
+    return {name: settingsData.time_zone};
+  }
+
+  function getDefaultDateFormate() {
+    return [...DEFAULT_DATE_FORMAT_LIST].find(
+      item => item.type === settingsData.default_date_format,
+    );
+  }
+
+  function onPressInActiveAccount() {
+    Alert.alert(
+      'Inactive Account!',
+      'Are you sure you want to inactivate your Rawcaster Account?',
+      [
+        {
+          text: 'No',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            if (isMount) {
+              setsettingsData(preData => {
+                updateUsersSettingsAPICall(
+                  'account_active_inactive',
+                  0,
+                  undefined,
+                  undefined,
+                  true,
+                );
+                return {
+                  ...preData,
+                  account_active_inactive: 0,
+                };
+              });
+            }
+          },
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   function RowContainer({leftText = '', rightText = ''}) {
@@ -231,17 +326,23 @@ const GeneralSettings = () => {
           <RowContainer leftText="User Type" rightText={profile.user_type} />
           <DropDownPicker
             title="Default Rawcaster page"
-            value={selectedData.defaultPageType}
+            value={getDefaultPage()}
             listTitle=""
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={DEFAULT_PAGES_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              setselectedData(preData => ({
-                ...preData,
-                defaultPageType: selectedItem,
-              }));
+              setsettingsData(preData => {
+                updateUsersSettingsAPICall(
+                  'mobile_default_page',
+                  selectedItem.id,
+                );
+                return {
+                  ...preData,
+                  mobile_default_page: selectedItem.id,
+                };
+              });
             }}
           />
           {CHOICE_CONTAINERS_LIST.map(item => {
@@ -253,7 +354,7 @@ const GeneralSettings = () => {
               <ChoiceContainer
                 key={item.fieldName.toString()}
                 title={item.title}
-                selectedId={selectedChoices[item.fieldName]}
+                selectedId={settingsData[item.fieldName]}
                 choiceList={list}
                 onSelectRadioOption={selectedId => {
                   if (isMount) {
@@ -277,10 +378,13 @@ const GeneralSettings = () => {
                         specificListType: selectedId === 3 ? 1 : 2,
                       });
                     } else {
-                      setselectedChoices(preData => ({
-                        ...preData,
-                        [item.fieldName]: selectedId,
-                      }));
+                      setsettingsData(preData => {
+                        updateUsersSettingsAPICall(item.fieldName, selectedId);
+                        return {
+                          ...preData,
+                          [item.fieldName]: selectedId,
+                        };
+                      });
                     }
                   }
                 }}
@@ -289,22 +393,25 @@ const GeneralSettings = () => {
           })}
           <DropDownPicker
             title="Preference Language"
-            value={selectedData.language}
+            value={getSelectedLanguage()}
             listTitle=""
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={languagesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              setselectedData(preData => ({
-                ...preData,
-                language: selectedItem,
-              }));
+              setsettingsData(preData => {
+                updateUsersSettingsAPICall('language_id', selectedItem.id);
+                return {
+                  ...preData,
+                  language_id: selectedItem.id,
+                };
+              });
             }}
           />
           <DropDownPicker
             title="Timezone"
-            value={selectedData.timeZone ?? {name: settings.time_zone}}
+            value={getSelectedTimeZone()}
             listTitle="Timezone Selection"
             listType="large"
             titleStyle={styles.titleText}
@@ -312,37 +419,60 @@ const GeneralSettings = () => {
             dataList={timeZonesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              setselectedData(preData => ({
-                ...preData,
-                timeZone: selectedItem,
-              }));
+              setsettingsData(preData => {
+                updateUsersSettingsAPICall('time_zone', selectedItem.name);
+                return {
+                  ...preData,
+                  time_zone: selectedItem.name,
+                };
+              });
             }}
           />
           <DropDownPicker
             title="Date Format"
-            value={selectedData.defaultDateFormat}
+            value={getDefaultDateFormate()}
             listTitle=""
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={DEFAULT_DATE_FORMAT_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              setselectedData(preData => ({
-                ...preData,
-                defaultDateFormat: selectedItem,
-              }));
+              setsettingsData(preData => {
+                updateUsersSettingsAPICall(
+                  'default_date_format',
+                  selectedItem.type,
+                  undefined,
+                  'date_format',
+                );
+                return {
+                  ...preData,
+                  default_date_format: selectedItem.type,
+                };
+              });
             }}
           />
 
           <ChoiceContainer
             title="Rawcaster Account"
-            selectedId={selectedChoices.accountActiveStatus}
+            selectedId={settingsData.account_active_inactive}
             choiceList={[...ACCOUNT_ACTIVE_STATUS_LIST]}
             onSelectRadioOption={selectedId => {
-              setselectedChoices(preData => ({
-                ...preData,
-                accountActiveStatus: selectedId,
-              }));
+              if (selectedId === 0) {
+                onPressInActiveAccount();
+              } else {
+                setsettingsData(preData => {
+                  if (preData.account_active_inactive !== selectedId) {
+                    updateUsersSettingsAPICall(
+                      'account_active_inactive',
+                      selectedId,
+                    );
+                  }
+                  return {
+                    ...preData,
+                    account_active_inactive: selectedId,
+                  };
+                });
+              }
             }}
           />
         </ScrollView>
@@ -361,7 +491,7 @@ const GeneralSettings = () => {
               : 'Specific Connection'
           }
           preSelectedIds={
-            selectedChoices[specificUsersModalData.fieldName] ===
+            settingsData[specificUsersModalData.fieldName] ===
             specificUsersModalData.selectedId
               ? selectedChoiceUserGroupListData[
                   specificUsersModalData.listFieldName
@@ -399,7 +529,7 @@ const GeneralSettings = () => {
                 ...preData,
                 [specificUsersModalData.listFieldName]: [...list],
               }));
-              setselectedChoices(preData => ({
+              setsettingsData(preData => ({
                 ...preData,
                 [specificUsersModalData.fieldName]:
                   specificUsersModalData.selectedId,
@@ -410,10 +540,7 @@ const GeneralSettings = () => {
         />
       </Modal>
       <Modal visible={isLoading} transparent>
-        <Loader
-          bgColor={COLORS.transparentDimColor}
-          loaderText={'Fetching Languages and Timezones'}
-        />
+        <Loader bgColor={COLORS.transparentDimColor} loaderText={loaderText} />
       </Modal>
     </View>
   );

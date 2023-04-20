@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import SearchInput from '../../../Components/SearchInput';
 import {GlobalSearchContext} from '../../../Utilities/Contexts';
-import GlobalSearchTopTabNavigation from '../../../Navigation/TopTabNavigationSearch/GlobalSearchTopTabNavigation';
+import GlobalSearchTopTabNavigation from '../../../Navigation/TopTabNavigation/GlobalSearchTopTabNavigation';
 import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
 

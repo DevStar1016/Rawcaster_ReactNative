@@ -8,7 +8,12 @@ import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import TitleRowContainer from './TitleRowContainer';
 
-const ProfileIntroContainer = ({userId, profile, paddingHorizontal}) => {
+const ProfileIntroContainer = ({
+  userId,
+  profile,
+  paddingHorizontal,
+  onLayout,
+}) => {
   const navigation = useNavigation();
   const RowContainer = ({icon, text = '', iconSize = 25}) => {
     return text ? (
@@ -27,7 +32,9 @@ const ProfileIntroContainer = ({userId, profile, paddingHorizontal}) => {
   };
 
   return (
-    <View style={[styles.mainContainer, {paddingHorizontal}]}>
+    <View
+      style={[styles.mainContainer, {paddingHorizontal}]}
+      onLayout={onLayout}>
       <TitleRowContainer
         title="Intro"
         onPressButton={() => {

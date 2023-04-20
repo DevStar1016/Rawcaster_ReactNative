@@ -8,7 +8,7 @@ import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {useProfile} from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigationSearch/ConnectionsGroupsTopTabNavigation';
+import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroupsTopTabNavigation';
 import {MyConnectionsContext} from '../../../Utilities/Contexts';
 
 const UsersGroupsListHome = () => {

@@ -2,7 +2,6 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useDispatch} from 'react-redux';
 import {Modal} from 'react-native';
 import HomeStack from '../Stacks/HomeStack';
-import Notifications from '../Screens/MainScreens/Notifications';
 import CustomBottomTabBar from './CustomBottomTabBar';
 import {
   useIsOpenLoginAlert,
@@ -24,6 +23,7 @@ import {
 import TalkshowStack from '../Stacks/TalkshowStack';
 import EventsStack from '../Stacks/EventsStack';
 import UsersStack from '../Stacks/UsersStack';
+import NotificationsStack from '../Stacks/NotificationsStack';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -82,10 +82,10 @@ export default function BottomTabNavigation() {
         tabBar={props => <CustomBottomTabBar {...props} />}
         screenListeners={{
           focus: e => {
-            if (e.target.includes('HomeStack')) {
-              dispatch(setIsBottomTabBarAbsolute(true));
-            } else {
+            if (e.target.includes('UsersStack')) {
               dispatch(setIsBottomTabBarAbsolute(false));
+            } else {
+              dispatch(setIsBottomTabBarAbsolute(true));
             }
           },
         }}
@@ -95,7 +95,7 @@ export default function BottomTabNavigation() {
           tabBarShowLabel: false,
         })}>
         <Tab.Screen name="EventsStack" component={EventsStack} />
-        <Tab.Screen name="Notifications" component={Notifications} />
+        <Tab.Screen name="NotificationsStack" component={NotificationsStack} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
         <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
         <Tab.Screen name="UsersStack" component={UsersStack} />

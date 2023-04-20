@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -11,9 +12,9 @@ import Video from 'react-native-video';
 import DocumentPicker from 'react-native-document-picker';
 import {COLORS} from '../../../Utilities/Colors';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
-import TitleDescriptionContainer from './TitleDescriptionContainer';
-import SwtchesContainer from './SwtchesContainer';
-import {useProfile, useSettings} from '../../../Utilities/StoreData';
+import TitleDescriptionContainer from '../../../Components/TitleDescriptionContainer';
+import SwtchesContainer from '../../../Components/SwtchesContainer';
+import {useProfile, useSettings, useToken} from '../../../Utilities/StoreData';
 import DropDownPicker from '../../../Components/DropDownPicker';
 import {
   DIMENSIONS,
@@ -26,73 +27,157 @@ import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useIsFocused} from '@react-navigation/native';
 import {createThumbnail} from 'react-native-create-thumbnail';
-import moment from 'moment';
+import {updateUserSettingsService} from '../../../Services/ApiService';
+import {useDispatch} from 'react-redux';
+import {setSettings} from '../../../Store/Slices/AuthSlice';
+import Toast from '../../../Components/Toast';
+import Loader from '../../../Components/Loader';
 
+var isMount = true;
 const EventSettings = () => {
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const settings = useSettings();
+  const token = useToken();
   const videoAudioPlayer = useRef(null);
+  const [isUpdating, setisUpdating] = useState(false);
+  const [settingsData, setsettingsData] = useState({
+    waiting_room: parseInt(settings.waiting_room),
+    join_before_host: parseInt(settings.join_before_host),
+    participant_join_sound: parseInt(settings.participant_join_sound),
+    screen_share_status: parseInt(settings.screen_share_status),
+    default_melody: settings.default_melody,
+    meeting_header_image: settings.meeting_header_image,
+    host_audio: parseInt(settings.host_audio),
+    participant_audio: parseInt(settings.participant_audio),
+    host_video: parseInt(settings.host_video),
+    participant_video: parseInt(settings.participant_video),
+    event_type: parseInt(settings.event_type),
+  });
   const [isVideoLoaded, setisVideoLoaded] = useState(false);
   const [isVideoLoading, setisVideoLoading] = useState(true);
   const [paused, setpaused] = useState(true);
-  const [selectedEventType, setselectedEventType] = useState(
-    [...EVENT_VISIBILITY_TYPE_LIST].find(
-      item => item.id === parseInt(settings.event_type),
-    ),
-  );
-  const [melody, setmelody] = useState(settings.default_melody);
 
-  const [audioSettingsList, setaudioSettingsList] = useState([
-    {
-      id: 1,
-      name: 'Host',
-      status: parseInt(settings.host_audio) === 1,
-    },
-    {
-      id: 2,
-      name: 'Guest',
-      status: parseInt(settings.participant_audio) === 1,
-    },
-  ]);
+  useEffect(() => {
+    isMount = true;
 
-  const [videoSettingsList, setvideoSettingsList] = useState([
-    {
-      id: 1,
-      name: 'Host',
-      status: parseInt(settings.host_video) === 1,
-    },
-    {
-      id: 2,
-      name: 'Guest',
-      status: parseInt(settings.participant_video) === 1,
-    },
-  ]);
+    return () => {
+      isMount = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isFocused) {
-      setpaused(true);
+      if (isMount) {
+        setpaused(true);
+      }
     }
   }, [isFocused]);
 
   useEffect(() => {
-    if (melody && melody.path && melody.type === 2) {
+    if (
+      settingsData.default_melody &&
+      settingsData.default_melody.path &&
+      settingsData.default_melody.type === 2
+    ) {
       createMelodyVideoThumbnail();
     }
-  }, []);
+  }, [settingsData.default_melody.path]);
 
   useEffect(() => {
-    if (melody && melody.type === 2 && melody.thumbnail && isVideoLoaded) {
-      setisVideoLoading(false);
+    if (
+      settingsData.default_melody &&
+      settingsData.default_melody.type === 2 &&
+      settingsData.default_melody.thumbnail &&
+      isVideoLoaded
+    ) {
+      if (isMount) {
+        setisVideoLoading(false);
+      }
     }
-  }, [melody, isVideoLoaded]);
+  }, [settingsData.default_melody, isVideoLoaded]);
+
+  function updateUsersSettingsAPICall(
+    keyText,
+    valueText,
+    reduxData = undefined,
+  ) {
+    if (isMount) {
+      setisUpdating(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append(keyText, valueText);
+    console.log(formData, 'FORMDATA');
+
+    updateUserSettingsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(
+            setSettings({...settings, [keyText]: reduxData ?? valueText}),
+          );
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          setsettingsData(preData => {
+            return {...preData, [keyText]: settings[keyText]};
+          });
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        setsettingsData(preData => {
+          return {...preData, [keyText]: settings[keyText]};
+        });
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisUpdating(false);
+        }
+      });
+  }
+
+  function getAudioVideoSettingsList(type = 1) {
+    //1 - audio , 2 - video
+    return [
+      {
+        id: 1,
+        name: 'Host',
+        status: settingsData[type === 1 ? 'host_audio' : 'host_video'] === 1,
+      },
+      {
+        id: 2,
+        name: 'Guest',
+        status:
+          settingsData[
+            type === 1 ? 'participant_audio' : 'participant_video'
+          ] === 1,
+      },
+    ];
+  }
+
+  function onChangeCheckStatus(keyName) {
+    setsettingsData(preData => {
+      let tempData = {...preData};
+      const changedStatus = Boolean(tempData[keyName]) ? 0 : 1;
+      updateUsersSettingsAPICall(keyName, changedStatus);
+      tempData[keyName] = changedStatus;
+      return {...tempData};
+    });
+  }
 
   async function createMelodyVideoThumbnail() {
     createThumbnail({
-      url: melody.path,
+      url: settingsData.default_melody.path,
       timeStamp: 10000,
     })
       .then(res => {
-        setmelody(preData => ({...preData, thumbnail: res.path}));
+        if (isMount) {
+          setsettingsData(preData => {
+            let tempMelody = {...preData.default_melody, thumbnail: res.path};
+            return {...preData, default_melody: tempMelody};
+          });
+        }
       })
       .catch(e => {});
   }
@@ -101,19 +186,22 @@ const EventSettings = () => {
     return list.filter(item => item.status).map(item => item.id);
   }
 
-  function getChangedStatus(list, id) {
-    return list.map(item => {
-      if (item.id === id) {
-        return {...item, status: !item.status};
-      }
-      return {...item};
-    });
-  }
-
   function handleSelectMeetingHeaderImage() {
-    ImageVideoPicker({height: 300, width: 500})
+    ImageVideoPicker({height: 300, width: 500, mediaType: 'photo'})
       .then(res => {
-        console.log(res, 'IMAGEEE');
+        if (isMount) {
+          setsettingsData(preData => {
+            updateUsersSettingsAPICall(
+              'meeting_header_image',
+              JSON.stringify(res),
+              res.uri,
+            );
+            return {
+              ...preData,
+              meeting_header_image: res.uri,
+            };
+          });
+        }
       })
       .catch(e => {});
   }
@@ -129,7 +217,7 @@ const EventSettings = () => {
     return 0;
   }
 
-  function onPressUploadMelody() {
+  function handleUploadMelody() {
     DocumentPicker.pick({
       type: [
         DocumentPicker.types.images,
@@ -138,38 +226,74 @@ const EventSettings = () => {
       ],
     })
       .then(res => {
-        setmelody({
-          path: res[0].uri,
-          type: getFileType(res[0].type),
-          title: res[0].name,
-        });
-        console.log(res, 'FILE');
+        const isVideo = getFileType(res[0].type) === 2;
+        const isSamePath =
+          settingsData.default_melody &&
+          settingsData.default_melody.path.includes(res[0].uri);
+        if (isVideo && !isSamePath) {
+          if (isMount) {
+            setisVideoLoading(true);
+          }
+        }
+        if (!isSamePath) {
+          const tempMelody = {
+            path: res[0].uri,
+            type: getFileType(res[0].type),
+            title: res[0].name,
+          };
+          if (isMount) {
+            setsettingsData(preData => {
+              return {...preData, default_melody: tempMelody};
+            });
+          }
+          updateUsersSettingsAPICall(
+            'default_melody',
+            JSON.stringify({
+              uri: tempMelody.path,
+              type: tempMelody.type,
+              name: tempMelody.title.trim().replace(/ /g, '_'),
+            }),
+            tempMelody,
+          );
+        }
       })
       .catch(e => {});
   }
 
+  function getEventTypeData() {
+    return [...EVENT_VISIBILITY_TYPE_LIST].find(
+      item => item.id === settingsData.event_type,
+    );
+  }
+
   function getMelodyFile() {
-    if (melody.type === 1) {
+    if (settingsData.default_melody.type === 1) {
       return (
         <Image
-          source={{uri: melody.path}}
+          source={{uri: settingsData.default_melody.path}}
           style={{width: '100%', height: '100%'}}
           resizeMode={'contain'}
         />
       );
-    } else if (melody.type === 2 || melody.type === 3) {
+    } else if (
+      settingsData.default_melody.type === 2 ||
+      settingsData.default_melody.type === 3
+    ) {
       return (
         <View style={{flex: 1}}>
           <Video
             ref={videoAudioPlayer}
             source={{
-              uri: melody.path,
+              uri: settingsData.default_melody.path,
             }}
             ignoreSilentSwitch={'ignore'}
             // style={VideoDimensions}
             style={{
-              width: melody.type === 2 ? DIMENSIONS.window.width - 32 : 0,
-              height: melody.type === 2 ? 178 : 0,
+              width:
+                settingsData.default_melody.type === 2
+                  ? DIMENSIONS.window.width - 32
+                  : 0,
+              height: settingsData.default_melody.type === 2 ? 178 : 0,
             }}
             resizeMode="contain"
             onError={() => {}}
@@ -182,18 +306,22 @@ const EventSettings = () => {
             repeat={false}
             onBuffer={() => {}}
             onLoad={() => {
-              setisVideoLoaded(true);
+              if (isMount) {
+                setisVideoLoaded(true);
+              }
             }}
             // onProgress={PlayBackStatusUpdate}
             onEnd={() => {
-              setpaused(true);
+              if (isMount) {
+                setpaused(true);
+              }
               videoAudioPlayer.current.seek(0);
             }}
           />
 
-          {melody.thumbnail && paused ? (
+          {settingsData.default_melody.thumbnail && paused ? (
             <Image
-              source={{uri: melody.thumbnail}}
+              source={{uri: settingsData.default_melody.thumbnail}}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -273,72 +401,114 @@ const EventSettings = () => {
           bounces={false}>
           <TitleDescriptionContainer
             isEnableTitleCheckButton
-            isChecked
+            isChecked={Boolean(settingsData.waiting_room)}
             title="Waiting Room"
             description="Allow participants to be placed in a waiting room until the host
             admits them individually"
             titleStyle={{fontSize: 15}}
+            onPressTitleCheck={() => {
+              onChangeCheckStatus('waiting_room');
+            }}
           />
           <TitleDescriptionContainer
             isEnableTitleCheckButton
-            isChecked
+            isChecked={Boolean(settingsData.join_before_host)}
             title="Join before host"
             description="Allow participants to join the meeting event before the host
             arrives. This will disable the waiting room feature."
             titleStyle={{fontSize: 15}}
+            onPressTitleCheck={() => {
+              onChangeCheckStatus('join_before_host');
+            }}
           />
 
           <TitleDescriptionContainer
             isEnableTitleCheckButton
-            isChecked
+            isChecked={Boolean(settingsData.participant_join_sound)}
             title="Use sound to notify when a participant joins or exist"
             description="When enabled, host will hear a sound for each participant that
             joins the meeting."
             titleStyle={{fontSize: 15}}
+            onPressTitleCheck={() => {
+              onChangeCheckStatus('participant_join_sound');
+            }}
           />
 
           <TitleDescriptionContainer
             isEnableTitleCheckButton
-            isChecked
+            isChecked={Boolean(settingsData.screen_share_status)}
             title="Allow any participant to share their screen during meeting"
             description=" When enabled, any participant in the event can share their screen
             during meeting."
             titleStyle={{fontSize: 15}}
+            onPressTitleCheck={() => {
+              onChangeCheckStatus('screen_share_status');
+            }}
           />
           <SwtchesContainer
             title="Default Audio Settings"
             description="Start meeting with audio on"
             isSwitchesFlexStart={true}
-            switchesList={audioSettingsList}
-            onStatusSwitchesIdsList={getEnabledSwitchesIds(audioSettingsList)}
+            switchesList={getAudioVideoSettingsList(1)}
+            onStatusSwitchesIdsList={getEnabledSwitchesIds(
+              getAudioVideoSettingsList(1),
+            )}
             onChangeButtonStatus={id => {
-              setaudioSettingsList(preList => {
-                return getChangedStatus(preList, id);
-              });
+              if (isMount) {
+                setsettingsData(preData => {
+                  const keyName = id === 1 ? 'host_audio' : 'participant_audio';
+                  console.log(keyName, 'KLI');
+                  const changedStatus = Boolean(settingsData[keyName]) ? 0 : 1;
+                  updateUsersSettingsAPICall(keyName, changedStatus);
+                  return {
+                    ...preData,
+                    [keyName]: changedStatus,
+                  };
+                });
+              }
             }}
           />
           <SwtchesContainer
             title="Default Video Settings"
             description="Start meeting with video on"
             isSwitchesFlexStart={true}
-            switchesList={videoSettingsList}
-            onStatusSwitchesIdsList={getEnabledSwitchesIds(videoSettingsList)}
+            switchesList={getAudioVideoSettingsList(2)}
+            onStatusSwitchesIdsList={getEnabledSwitchesIds(
+              getAudioVideoSettingsList(2),
+            )}
             onChangeButtonStatus={id => {
-              setvideoSettingsList(preList => {
-                return getChangedStatus(preList, id);
-              });
+              if (isMount) {
+                console.log(id, 'ID');
+                setsettingsData(preData => {
+                  const keyName = id === 1 ? 'host_video' : 'participant_video';
+                  const changedStatus = Boolean(settingsData[keyName]) ? 0 : 1;
+                  updateUsersSettingsAPICall(keyName, changedStatus);
+                  return {
+                    ...preData,
+                    [keyName]: changedStatus,
+                  };
+                });
+              }
             }}
           />
           <DropDownPicker
             title="Event Type"
-            value={selectedEventType}
+            value={getEventTypeData()}
             listTitle=""
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={EVENT_VISIBILITY_TYPE_LIST}
             fieldName="name"
             onSelectItem={selectedItem => {
-              setselectedEventType(selectedItem);
+              if (isMount) {
+                setsettingsData(preData => {
+                  updateUsersSettingsAPICall('event_type', selectedItem.id);
+                  return {
+                    ...preData,
+                    event_type: selectedItem.id,
+                  };
+                });
+              }
             }}
           />
           <TitleDescriptionContainer
@@ -359,14 +529,15 @@ const EventSettings = () => {
               borderWidth={1}
               textColor={COLORS.black}
               onPress={() => {
-                onPressUploadMelody();
+                handleUploadMelody();
               }}
             />
-            {melody && melody.path && (
-              <View style={[styles.imageSelectorContainer, {marginTop: 10}]}>
-                {getMelodyFile()}
-              </View>
-            )}
+            {settingsData.default_melody &&
+              settingsData.default_melody.path && (
+                <View style={[styles.imageSelectorContainer, {marginTop: 10}]}>
+                  {getMelodyFile()}
+                </View>
+              )}
           </View>
           <TitleDescriptionContainer
             title="Meeting Header Image"
@@ -376,13 +547,13 @@ const EventSettings = () => {
           <TouchableOpacity
             style={[
               styles.imageSelectorContainer,
-              {borderWidth: settings.meeting_header_image ? 0 : 1},
+              {borderWidth: settingsData.meeting_header_image ? 0 : 1},
             ]}
             activeOpacity={0.8}
             onPress={handleSelectMeetingHeaderImage}>
-            {settings.meeting_header_image ? (
+            {settingsData.meeting_header_image ? (
               <Image
-                source={{uri: settings.meeting_header_image}}
+                source={{uri: settingsData.meeting_header_image}}
                 style={{height: '100%', width: '100%'}}
                 resizeMode="cover"
               />
@@ -394,6 +565,12 @@ const EventSettings = () => {
           </TouchableOpacity>
         </ScrollView>
       </View>
+      <Modal visible={isUpdating} transparent>
+        <Loader
+          bgColor={COLORS.transparentDimColor}
+          loaderText={'Settings Updating'}
+        />
+      </Modal>
     </View>
   );
 };

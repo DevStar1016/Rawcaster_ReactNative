@@ -52,6 +52,7 @@ interface TextBoxProps {
   outerRightIconProps: SVGIconProps;
   multiline?: boolean;
   isVisible?: boolean;
+  mainContainerWidth?: number | string;
   inputContainerHeight?: number;
   isEnableListAppend?: boolean;
   appendedListProps?: AppendedListProps;
@@ -86,6 +87,7 @@ const TextBox = ({
   keyboardType,
   maxLength,
   onChangeText,
+  mainContainerWidth,
   passwordConditionTextStyle = {},
   mainContainerMarginVertical = 5,
   inputContainerMarginVertical = 5,
@@ -119,6 +121,7 @@ const TextBox = ({
       style={[
         styles.mainContainer,
         {
+          width: mainContainerWidth,
           marginVertical: mainContainerMarginVertical,
           marginTop: mainContainerMarginTop,
           display: isVisible ? 'flex' : 'none',

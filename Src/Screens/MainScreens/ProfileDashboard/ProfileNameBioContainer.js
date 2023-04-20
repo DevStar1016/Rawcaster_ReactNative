@@ -15,7 +15,12 @@ import {
 import moment from 'moment';
 import GradientButton from '../../../Components/GradientButton';
 
-const ProfileNameBioContainer = ({userId, profile, paddingHorizontal}) => {
+const ProfileNameBioContainer = ({
+  userId,
+  profile,
+  paddingHorizontal,
+  onLayout,
+}) => {
   const settings = useSettings();
   const getBioData = () => {
     if (profile.bio_data && profile.bio_data.trim()) {
@@ -76,7 +81,9 @@ const ProfileNameBioContainer = ({userId, profile, paddingHorizontal}) => {
   };
 
   return (
-    <View style={[styles.mainContainer, {paddingHorizontal}]}>
+    <View
+      onLayout={onLayout}
+      style={[styles.mainContainer, {paddingHorizontal}]}>
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
           <StyledText style={styles.nameText}>

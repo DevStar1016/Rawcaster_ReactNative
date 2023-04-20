@@ -28,6 +28,7 @@ interface Props {
   headerType?: 'header_with_back' | 'home_header';
   headerProps?: CustomHomeHeaderProps;
   isLoading?: boolean;
+  isEnableRLogo?: boolean;
   isEnableSafeArea?: boolean;
   isEnableDefaultBackground?: boolean;
   backHeaderProps?: BackHeaderProps;
@@ -48,6 +49,7 @@ const HOCView = ({
   paddingHorizontal = 10,
   headerType = 'header_with_back',
   headerProps = {},
+  isEnableRLogo = true,
   isEnableSafeArea = true,
   paddingBottom,
   isEnableDefaultBackground = false,
@@ -74,7 +76,9 @@ const HOCView = ({
     //   style={{flex: 1}}
     //   resizeMode="stretch">
     <>
-      {isEnableDefaultBackground && <DefaultBackground />}
+      {isEnableDefaultBackground && (
+        <DefaultBackground isEnableRLogo={isEnableRLogo} />
+      )}
       {isEnablePrimaryColorStatusBar && !isEnableDefaultBackground && (
         <View
           style={{
