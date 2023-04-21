@@ -19,6 +19,7 @@ export const COLORS = {
   radioSelectedColor: '#F4C117',
   radioBorderColor: '#0E425A',
   switchOffColor: '#4D4D4D',
+  dividerColor: '#A9A9AA',
   transparent: 'transparent',
   gradientColorsPrimary: ['#D86886', '#844670'],
   gradientColorsSecondary: ['#F99F46', '#F3738B'],

@@ -9,6 +9,7 @@ import {
 import {useDispatch} from 'react-redux';
 import GlobalSearchStack from './GlobalSearchStack';
 import ProfileStack from './ProfileStack';
+import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 
 const Stack = createStackNavigator();
 
@@ -30,7 +31,7 @@ const HomeStack = () => {
         },
       }}>
       <Stack.Screen name="Dashboard" component={Dashboard} />
-      {/* <Stack.Screen name="GlobalSearchStack" component={GlobalSearchStack} /> */}
+      <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
       <Stack.Screen name="ProfileStack" component={ProfileStack} />
     </Stack.Navigator>
   );

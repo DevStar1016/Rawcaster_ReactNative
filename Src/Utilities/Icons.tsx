@@ -69,6 +69,7 @@ import DeleteWhiteIcon from '../Assets/Svg/delete_white.svg';
 import DownArrowWhiteIcon from '../Assets/Svg/down_arrow_white.svg';
 import CloseRoundedWhiteIcon from '../Assets/Svg/close_rounded_white.svg';
 import CloseRoundedPinkIcon from '../Assets/Svg/close_rounded_pink.svg';
+import TickRoundedFillPinkIcon from '../Assets/Svg/tick_rounded_fill_pink.svg';
 import SearchBlackIcon from '../Assets/Svg/search_black.svg';
 import ImagePlaceholderIcon from '../Assets/Svg/image_placeholder.svg';
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
@@ -199,6 +200,7 @@ export type IconType =
   | 'clock_white'
   | 'record_white'
   | 'close_rounded_pink'
+  | 'tick_rounded_fill_pink'
   | 'search_black'
   | 'image_placeholder'
   | 'arrow_left'
@@ -308,6 +310,7 @@ export const ICONS = {
   record_white: RecordWhiteIcon,
   clock_white: ClockWhiteIcon,
   close_rounded_pink: CloseRoundedPinkIcon,
+  tick_rounded_fill_pink: TickRoundedFillPinkIcon,
   search_black: SearchBlackIcon,
   image_placeholder: ImagePlaceholderIcon,
   arrow_left: ArrowLeftIcon,
