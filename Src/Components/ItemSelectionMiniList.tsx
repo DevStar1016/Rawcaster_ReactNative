@@ -3,6 +3,7 @@ import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
 import SVGIcon from './SVGIcon';
+import {FONTS} from '../Utilities/Fonts';
 
 type Props = {
   title?: string;
@@ -65,7 +66,14 @@ const ItemSelectionMiniList = ({
             <View style={styles.titleContainer}>
               <View style={{width: '15%'}} />
               <View style={{width: '50%', alignItems: 'center'}}>
-                <StyledText style={{paddingVertical: 5}}>{title}</StyledText>
+                <StyledText
+                  style={{
+                    paddingVertical: 5,
+                    fontFamily: FONTS.DMSans.bold,
+                    fontSize: 15,
+                  }}>
+                  {title}
+                </StyledText>
               </View>
               <View style={{width: '15%', alignItems: 'flex-end'}}>
                 {isEnableCloseIcon && (

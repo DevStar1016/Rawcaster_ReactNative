@@ -1,8 +1,16 @@
-import {Keyboard, Modal, StyleSheet, Text, View} from 'react-native';
+import {
+  Keyboard,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import moment from 'moment';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
+import DocumentPicker from 'react-native-document-picker';
 import {useProfile, useSettings, useToken} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
@@ -13,9 +21,11 @@ import DropDownPicker from '../../../Components/DropDownPicker';
 import {
   getDisplayEventDate,
   getDisplayEventTime,
+  getSlicedText,
   htmlDecodeText,
 } from '../../../Utilities/Methods';
 import {
+  getEventMelodyService,
   getEventTypeService,
   viewEventService,
 } from '../../../Services/ApiService';
@@ -26,6 +36,9 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {useNavigation} from '@react-navigation/native';
 import Loader from '../../../Components/Loader';
 import {EVENT_LAYOUT_LIST} from '../../../Utilities/Constants';
+import SVGIcon from '../../../Components/SVGIcon';
+import {FONTS} from '../../../Utilities/Fonts';
+import StyledText from '../../../Components/StyledText';
 
 var isMount = true;
 
@@ -63,17 +76,18 @@ const CreateEditEvent = ({route}) => {
   const [eventDetails, seteventDetails] = useState(null);
   const [eventTypesList, seteventTypesList] = useState([]);
   const [liveEventDate, setliveEventDate] = useState(new Date());
-  const [loaderText, setloaderText] = useState('Fetching Event Types');
-  const [isLoading, setisLoading] = useState(true);
-  const [invitedUsersList, setinvitedUsersList] = useState([]);
-  const [selectedConnectionsIdsList, setselectedConnectionsIdsList] = useState(
-    [],
+  const [loaderText, setloaderText] = useState(
+    'Fetching Event Types and Melodies',
   );
-  const [selectedGroupsIdsList, setselectedGroupsIdsList] = useState([]);
+  const [isLoading, setisLoading] = useState(true);
+  const [eventMelodies, seteventMelodies] = useState([]);
+  const [selectedMelodyFile, setselectedMelodyFile] = useState(null);
+  const [melodyFileError, setmelodyFileError] = useState('');
+
   const [selectedValues, setselectedValues] = useState({
     eventVisibilityTypeId: settings.event_type,
     event_layout_id: 1,
-    melody: null,
+    melody: 1,
     eventDuration: new Date(
       moment(
         '2021-01-05 ' +
@@ -87,6 +101,10 @@ const CreateEditEvent = ({route}) => {
     join_before_host: parseInt(settings.join_before_host),
     sound_notify: parseInt(settings.participant_join_sound),
     user_screenshare: parseInt(settings.screen_share_status),
+    host_audio: parseInt(settings.host_audio),
+    participant_audio: parseInt(settings.participant_audio),
+    host_video: parseInt(settings.host_video),
+    participant_video: parseInt(settings.participant_video),
   });
 
   const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
@@ -99,28 +117,53 @@ const CreateEditEvent = ({route}) => {
       },
       validationSchema: validationSchema,
       onSubmit: values => {
-        // Keyboard.dismiss();
-        // if (eventVisibilityTypeError()) {
-        //   Toast.fail(
-        //     'Event type is Private, you must select the participants.',
-        //   );
-        // } else {
-        //   if (isMount) {
-        //     setloaderText(`${eventId ? 'Editing' : 'Creating'} Event...`);
-        //     setisLoading(true);
-        //   }
-        //   if (eventId) {
-        //     editTalkshowAPICall();
-        //   } else {
-        //     createEventAPICall();
-        //   }
-        // }
+        Keyboard.dismiss();
+        if (selectedValues.durationError) {
+          Toast.fail('Duration - ' + selectedValues.durationError);
+        } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
+          Toast.fail('Upload Melody');
+          setmelodyFileError('Melody required');
+        } else {
+          const data = {
+            event_title: values.eventTitle,
+            event_type: selectedValues.eventVisibilityTypeId,
+            event_start_date: moment(values.eventDate)
+              .utc()
+              .format('YYYY-MM-DD'),
+            event_start_time: moment(values.eventTime).utc().format('HH:mm'),
+            event_participants: values.maxParticipants,
+            event_duration: getDisplayDuration(),
+            event_layout: selectedValues.event_layout_id,
+            event_melody_id: selectedValues.melody,
+            event_host_audio: selectedValues.host_audio,
+            event_host_video: selectedValues.host_video,
+            event_guest_audio: selectedValues.participant_audio,
+            event_guest_video: selectedValues.participant_video,
+            waiting_room: selectedValues.waiting_room,
+            join_before_host: selectedValues.join_before_host,
+            sound_notify: selectedValues.sound_notify,
+            user_screenshare: selectedValues.user_screenshare,
+          };
+
+          navigation.navigate('CreateEditEventSecond', {
+            submitedData: data,
+          });
+          // if (isMount) {
+          //   setloaderText(`${eventId ? 'Editing' : 'Creating'} Event...`);
+          //   setisLoading(true);
+          // }
+          // if (eventId) {
+          //   editTalkshowAPICall();
+          // } else {
+          //   createEventAPICall();
+          // }
+        }
       },
     });
 
   useEffect(() => {
     isMount = true;
-    getEventVisibilityTypesAPICall();
+    initialAPICalls();
     // if (eventId) {
     //   getEventDetailsAPICall();
     // }
@@ -129,73 +172,45 @@ const CreateEditEvent = ({route}) => {
     };
   }, []);
 
-  function getEventDetailsAPICall() {
-    if (isMount) {
-      setisLoading(true);
-    }
+  function initialAPICalls() {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('event_id', eventId);
-    viewEventService(formData)
+    Promise.all([
+      getEventTypeService(formData),
+      getEventMelodyService(formData),
+    ])
       .then(res => {
-        if (res.data.status === 1) {
-          // seteventDetails({
-          //   ...res.data.event_detail,
-          //   event_name: htmlDecodeText(res.data.event_detail.event_name),
-          // });
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
+        if (res[0].data.status === 1 || res[1].data.status === 1) {
+          let tempSelectedData = {...selectedValues};
+          if (res[0].data.status === 1) {
+            seteventTypesList(res[0].data.event_types);
+            tempSelectedData = {
+              ...tempSelectedData,
+              eventVisibilityTypeId:
+                settings.event_type ?? res[0].data.event_types[0].id,
+            };
+          }
+          if (res[1].data.status === 1) {
+            seteventMelodies([
+              ...res[1].data.melody,
+              {id: 2, title: 'Customize'},
+            ]);
+            tempSelectedData = {
+              ...tempSelectedData,
+              eventVisibilityTypeId:
+                tempSelectedData.melody ?? res[1].data.melody[0].id,
+            };
+          }
+          setselectedValues(tempSelectedData);
         }
       })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
+      .catch(e => {})
       .finally(() => {
         if (isMount) {
           setisLoading(false);
         }
       });
   }
-
-  const eventVisibilityTypeError = () => {
-    return (
-      selectedValues.eventVisibilityTypeId === 2 &&
-      selectedConnectionsIdsList.length <= 0 &&
-      selectedGroupsIdsList.length <= 0 &&
-      invitedUsersList.length <= 0
-    );
-  };
-
-  const getEventVisibilityTypesAPICall = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    getEventTypeService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          console.log(res.data.event_types, 'TPEEE');
-          seteventTypesList(res.data.event_types);
-          setselectedValues(preData => ({
-            ...preData,
-            eventVisibilityTypeId:
-              settings.event_type ?? res.data.event_types[0].id,
-          }));
-        }
-      })
-      .catch(e => {})
-      .finally(() => {
-        // if (eventId) {
-        //   setloaderText('Fetching Event Details');
-        //   getEventDetailsAPICall();
-        // } else {
-        //   if (isMount) {
-        //     setisLoading(false);
-        //   }
-        // }
-        if (isMount) {
-          setisLoading(false);
-        }
-      });
-  };
 
   const onSelectDuration = date => {
     let actualDurationallowed = settings.max_event_duration;
@@ -291,6 +306,58 @@ const CreateEditEvent = ({route}) => {
       item => item.id === selectedValues.event_layout_id,
     );
   };
+
+  function getAudioVideoSettingsList(type = 1) {
+    //1 - audio , 2 - video
+    return [
+      {
+        id: 1,
+        name: 'Host',
+        status: selectedValues[type === 1 ? 'host_audio' : 'host_video'] === 1,
+      },
+      {
+        id: 2,
+        name: 'Guest',
+        status:
+          selectedValues[
+            type === 1 ? 'participant_audio' : 'participant_video'
+          ] === 1,
+      },
+    ];
+  }
+
+  function getEnabledSwitchesIds(list) {
+    return list.filter(item => item.status).map(item => item.id);
+  }
+
+  function getMelody() {
+    return [...eventMelodies].find(item => item.id === selectedValues.melody);
+  }
+
+  function handleSelectMelodyFile() {
+    DocumentPicker.pick({
+      type: [
+        DocumentPicker.types.images,
+        DocumentPicker.types.audio,
+        DocumentPicker.types.video,
+      ],
+    })
+      .then(res => {
+        if (isMount) {
+          setselectedMelodyFile({
+            uri: res[0].uri,
+            type: res[0].type,
+            name: res[0].name,
+          });
+          setmelodyFileError('');
+        }
+      })
+      .catch(e => {
+        if (!e.message.includes('canceled')) {
+          Toast.fail(e.message);
+        }
+      });
+  }
 
   return (
     <View style={{flex: 1, backgroundColor: COLORS.white}}>
@@ -400,6 +467,7 @@ const CreateEditEvent = ({route}) => {
             onSelectItem={onSelectDuration}
           />
         </View>
+
         <View style={styles.horizontalBoxesContainer}>
           <DropDownPicker
             title="Layout"
@@ -417,19 +485,66 @@ const CreateEditEvent = ({route}) => {
           />
           <DropDownPicker
             title="Melody"
-            dataList={[...eventTypesList]}
+            dataList={[...eventMelodies]}
             mainContainerWidth={'48%'}
-            value={getEventVisibilityType()}
-            fieldName="type"
+            value={getMelody()}
+            fieldName="title"
             placeHolderText="Melody"
             onSelectItem={item => {
               setselectedValues(preData => ({
                 ...preData,
-                eventVisibilityTypeId: item.id,
+                melody: item.id,
               }));
             }}
           />
         </View>
+        {selectedValues.melody === 2 && (
+          <View style={styles.uploadButtonContainer}>
+            <View>
+              <SubmitButton
+                buttonText={
+                  selectedMelodyFile
+                    ? getSlicedText(selectedMelodyFile.name, 20)
+                    : 'Upload'
+                }
+                marginTop={10}
+                bgColor={COLORS.white}
+                textColor={COLORS.black}
+                borderWidth={1}
+                buttonTextStyle={{fontSize: 15}}
+                borderColor={melodyFileError ? COLORS.red : COLORS.black}
+                paddingHorizontal={25}
+                marginBottom={10}
+                padding={5}
+                onPress={() => {
+                  handleSelectMelodyFile();
+                }}
+              />
+              {melodyFileError ? (
+                <StyledText style={styles.errorText}>
+                  {melodyFileError}
+                </StyledText>
+              ) : (
+                false
+              )}
+            </View>
+            {selectedMelodyFile && (
+              <SVGIcon
+                isButton
+                icon="close_rounded_black"
+                marginLeft={10}
+                height={22}
+                width={22}
+                onPress={() => {
+                  if (isMount) {
+                    setselectedMelodyFile(null);
+                    setmelodyFileError('Melody required');
+                  }
+                }}
+              />
+            )}
+          </View>
+        )}
         <CheckBox
           text="Waiting Room"
           mainContainerStyle={{marginVertical: 10}}
@@ -474,27 +589,58 @@ const CreateEditEvent = ({route}) => {
             }));
           }}
         />
+
         <SwtchesContainer
           title="Default Audio Settings"
-          switchesList={[...SWITCHES_LIST]}
-          isSwitchesFlexStart
-          onStatusSwitchesIdsList={[...SWITCHES_LIST].map(item => item.id)}
+          isSwitchesFlexStart={true}
+          switchesList={getAudioVideoSettingsList(1)}
+          onStatusSwitchesIdsList={getEnabledSwitchesIds(
+            getAudioVideoSettingsList(1),
+          )}
+          titleDescriptionContainerProps={{
+            titleStyle: {
+              fontFamily: FONTS.DMSans.regular,
+              fontSize: 15,
+            },
+          }}
           onChangeButtonStatus={id => {
-            // setconnectionRequestSwitchStatus(preStatus => {
-            //   return getChangedStatus(preStatus, id);
-            // });
+            if (isMount) {
+              setselectedValues(preData => {
+                const keyName = id === 1 ? 'host_audio' : 'participant_audio';
+                const changedStatus = Boolean(preData[keyName]) ? 0 : 1;
+                return {
+                  ...preData,
+                  [keyName]: changedStatus,
+                };
+              });
+            }
           }}
         />
 
         <SwtchesContainer
           title="Default Video Settings"
-          switchesList={[...SWITCHES_LIST]}
-          isSwitchesFlexStart
-          onStatusSwitchesIdsList={[...SWITCHES_LIST].map(item => item.id)}
+          isSwitchesFlexStart={true}
+          switchesList={getAudioVideoSettingsList(2)}
+          onStatusSwitchesIdsList={getEnabledSwitchesIds(
+            getAudioVideoSettingsList(2),
+          )}
+          titleDescriptionContainerProps={{
+            titleStyle: {
+              fontFamily: FONTS.DMSans.regular,
+              fontSize: 15,
+            },
+          }}
           onChangeButtonStatus={id => {
-            // setconnectionRequestSwitchStatus(preStatus => {
-            //   return getChangedStatus(preStatus, id);
-            // });
+            if (isMount) {
+              setselectedValues(preData => {
+                const keyName = id === 1 ? 'host_video' : 'participant_video';
+                const changedStatus = Boolean(preData[keyName]) ? 0 : 1;
+                return {
+                  ...preData,
+                  [keyName]: changedStatus,
+                };
+              });
+            }
           }}
         />
         <View style={styles.buttonContainer}>
@@ -508,7 +654,9 @@ const CreateEditEvent = ({route}) => {
             paddingVertical={5}
             paddingHorizontal={25}
             marginHorizontal={10}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.goBack();
+            }}
           />
           <SubmitButton
             buttonText="Next"
@@ -520,9 +668,7 @@ const CreateEditEvent = ({route}) => {
             paddingVertical={5}
             paddingHorizontal={35}
             marginHorizontal={10}
-            onPress={() => {
-              navigation.navigate('CreateEditEventSecond');
-            }}
+            onPress={handleSubmit}
           />
         </View>
       </KeyboardAwareScrollView>
@@ -547,5 +693,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     paddingVertical: 10,
+  },
+  uploadButtonContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  errorText: {
+    color: COLORS.red,
   },
 });

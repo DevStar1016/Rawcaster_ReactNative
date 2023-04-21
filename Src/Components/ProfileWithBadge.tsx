@@ -21,7 +21,7 @@ type ProfileImageProps = {
   type: string;
 };
 
-type Props = {
+export type ProfileWithBadgeProps = {
   alternateProfileImageComponent?: React.FC<any> | undefined;
   profileSize?: number;
   profileImage?: any;
@@ -73,7 +73,7 @@ const ProfileWithBadge = ({
   padding = 2,
   onSelectImage,
   alternateProfileImageComponent,
-}: Props) => {
+}: ProfileWithBadgeProps) => {
   const onSelectProfilePhoto = () => {
     ImagePicker.openPicker({
       width: 512,

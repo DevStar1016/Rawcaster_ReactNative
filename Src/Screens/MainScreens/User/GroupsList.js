@@ -16,14 +16,14 @@ const GroupsList = () => {
   function getList() {
     if (searchText && searchText.trim()) {
       return [...groupsList].filter(item =>
-        item.group_name.toLowerCase().includes(searchText.toLowerCase()),
+        item?.group_name?.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
     return [...groupsList];
   }
 
   function keyExtractor(item) {
-    return item.group_id.toString();
+    return item?.group_id?.toString();
   }
 
   function renderItem({item, index}) {

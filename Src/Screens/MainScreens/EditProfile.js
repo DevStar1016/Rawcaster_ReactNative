@@ -106,6 +106,8 @@ const EditProfile = ({route}) => {
           : true;
       }),
     location: yup.string().min(2, 'Enter Valid location').required('Required'),
+    workAt: yup.string(),
+    studyAt: yup.string(),
   });
 
   const {
@@ -126,12 +128,15 @@ const EditProfile = ({route}) => {
       mobileNumber: profile.mobile ?? '',
       email: profile.email_id ?? '',
       location: profile.geo_location ?? '',
+      workAt: profile.work_at ?? '',
+      studyAt: profile.studied_at ?? '',
     },
     validationSchema: validationSchema,
     onSubmit: values => {
+      console.log(values, 'VALUESS');
       if (isMount) {
         setisLoading(true);
-        handleUpdateProfile(values);
+        handleUpdateProfile();
       }
     },
   });
@@ -156,11 +161,13 @@ const EditProfile = ({route}) => {
     formData.append('first_name', values.firstName.trim());
     formData.append('last_name', values.lastName.trim());
     formData.append('name', values.displayName.trim());
-    formData.append('mobile_no', values.mobileNumber.trim());
+    formData.append('mobile_no', values.mobileNumber.toString().trim());
     formData.append('email_id', values.email.trim());
     formData.append('gender', values.gender.id);
     formData.append('dob', values.dob);
     formData.append('geo_location', values.location);
+    formData.append('work_at', values.workAt);
+    formData.append('studied_at', values.studyAt);
 
     if (selectedProfileImage) {
       formData.append('profile_image', {
@@ -169,6 +176,7 @@ const EditProfile = ({route}) => {
         name: getFileName(selectedProfileImage.path),
       });
     }
+    console.log(formData, 'FORMDATA');
     updateMyProfileService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -349,6 +357,25 @@ const EditProfile = ({route}) => {
           inputContainerMarginVertical={0}
           placeHolderText={'Select gender'}
         />
+        <TextBox
+          title="Study"
+          errorText={touched.studyAt && errors.studyAt}
+          value={values.studyAt}
+          onChangeText={handleChange('studyAt')}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your Study'}
+        />
+        <TextBox
+          title="Work"
+          errorText={touched.workAt && errors.workAt}
+          value={values.workAt}
+          onChangeText={handleChange('workAt')}
+          titlePaddingVertical={3}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your Work'}
+        />
+
         <CustomDateMonthYearPicker
           titlePaddingVertical={3}
           value={values.dob}

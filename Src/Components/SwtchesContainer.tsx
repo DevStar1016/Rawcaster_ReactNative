@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, ViewStyle} from 'react-native';
 import React, {useState} from 'react';
 import Switch from 'react-native-switches';
 import TitleDescriptionContainer, {
@@ -20,6 +20,7 @@ type Props = {
     TitleDescriptionContainerProps,
     'title' | 'description'
   >;
+  switchItemContainerStyle?: ViewStyle;
   onStatusSwitchesIdsList?: (number | string)[];
   switchesList?: SwitchItem[];
   isSwitchesFlexStart?: boolean;
@@ -34,10 +35,11 @@ const SwtchesContainer = ({
   isSwitchesFlexStart = false,
   titleDescriptionContainerProps,
   onChangeButtonStatus,
+  switchItemContainerStyle,
 }: Props) => {
   function SwitchItem({name = '', id}: SwitchItem) {
     return (
-      <View style={styles.switchItemContainer}>
+      <View style={[styles.switchItemContainer, switchItemContainerStyle]}>
         <Switch
           shape={'pill'}
           colorTextOff={COLORS.white}
@@ -104,6 +106,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   switchesContainer: {
+    flex: 1,
+    flexWrap: 'wrap',
     flexDirection: 'row',
     marginTop: 13,
     alignItems: 'center',

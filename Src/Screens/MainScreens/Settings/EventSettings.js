@@ -249,15 +249,19 @@ const EventSettings = () => {
           updateUsersSettingsAPICall(
             'default_melody',
             JSON.stringify({
-              uri: tempMelody.path,
-              type: tempMelody.type,
-              name: tempMelody.title.trim().replace(/ /g, '_'),
+              uri: res[0].uri,
+              type: res[0].type,
+              name: res[0].name,
             }),
             tempMelody,
           );
         }
       })
-      .catch(e => {});
+      .catch(e => {
+        if (!e.message.includes('canceled')) {
+          Toast.fail(e.message);
+        }
+      });
   }
 
   function getEventTypeData() {

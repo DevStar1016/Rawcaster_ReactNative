@@ -138,15 +138,25 @@ const Profile = ({route}) => {
         <Divider />
         <ProfilesListContainerWithSeeAll
           userId={userId}
-          isLock={false}
+          isLock={
+            userId
+              ? Boolean(parseInt(getProfileData().lock_my_influencer))
+              : false
+          }
           listType="influencers"
           title={'Influencers'}
           paddingHorizontal={PADDING_HORIZONTAL}
+          ProfileItemProps={{
+            topRightIcon: 'message_primary',
+            topRightIconContainerBackgroundColor: COLORS.white,
+          }}
         />
         <Divider />
         <ProfilesListContainerWithSeeAll
           userId={userId}
-          isLock={false}
+          isLock={
+            userId ? Boolean(parseInt(getProfileData().lock_fans)) : false
+          }
           listType="fans"
           title={'Fans'}
           paddingHorizontal={PADDING_HORIZONTAL}
@@ -154,7 +164,11 @@ const Profile = ({route}) => {
         <Divider />
         <ProfilesListContainerWithSeeAll
           userId={userId}
-          isLock={false}
+          isLock={
+            userId
+              ? Boolean(parseInt(getProfileData().lock_my_connection))
+              : false
+          }
           list={userId ? [] : [...connections]}
           listType="connections"
           title={'Connections'}

@@ -31,6 +31,7 @@ import {setSettings} from '../../../Store/Slices/AuthSlice';
 import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {removeToken} from '../../../Utilities/Methods';
+import SwtchesContainer from '../../../Components/SwtchesContainer';
 
 var isMount = true;
 const CHOICE_CONTAINERS_LIST = [
@@ -77,6 +78,30 @@ const CHOICE_CONTAINERS_LIST = [
     listType: 2,
   },
 ];
+
+const PRIVACY_SWITCHES_LIST = [
+  {
+    id: 1,
+    name: 'Nugget',
+    fieldName: 'lock_nugget',
+  },
+  {
+    id: 2,
+    name: 'Fans',
+    fieldName: 'lock_fans',
+  },
+  {
+    id: 3,
+    name: 'My Connections',
+    fieldName: 'lock_my_connection',
+  },
+  {
+    id: 4,
+    name: 'My Influencer',
+    fieldName: 'lock_my_influencer',
+  },
+];
+
 const GeneralSettings = () => {
   const dispatch = useDispatch();
   const token = useToken();
@@ -111,6 +136,10 @@ const GeneralSettings = () => {
     language_id: settings.language_id,
     default_date_format: settings.default_date_format,
     time_zone: settings.time_zone,
+    lock_fans: settings.lock_fans,
+    lock_my_connection: settings.lock_my_connection,
+    lock_my_influencer: settings.lock_my_influencer,
+    lock_nugget: settings.lock_nugget,
   });
 
   const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
@@ -276,6 +305,12 @@ const GeneralSettings = () => {
     );
   }
 
+  function getEnabledSwitchesIds() {
+    return [...PRIVACY_SWITCHES_LIST]
+      .filter(item => settingsData[item.fieldName] === 1)
+      .map(item => item.id);
+  }
+
   function RowContainer({leftText = '', rightText = ''}) {
     return (
       <View style={styles.rowContainer}>
@@ -391,6 +426,37 @@ const GeneralSettings = () => {
               />
             );
           })}
+
+          <SwtchesContainer
+            title="Profile Privacy"
+            description="Choose if you want to lock your Nuggets, Fans, Connections and Influencers list from other users"
+            switchItemContainerStyle={{width: '48%', marginBottom: 10}}
+            isSwitchesFlexStart={true}
+            switchesList={[...PRIVACY_SWITCHES_LIST]}
+            onStatusSwitchesIdsList={getEnabledSwitchesIds()}
+            onChangeButtonStatus={id => {
+              setsettingsData(preData => {
+                let tempSettingsData = {...preData};
+                let changeSwitchIndex = [...PRIVACY_SWITCHES_LIST].findIndex(
+                  item => item.id === id,
+                );
+                if (changeSwitchIndex !== -1) {
+                  const fieldName =
+                    PRIVACY_SWITCHES_LIST[changeSwitchIndex].fieldName;
+                  const changedStatus = Boolean(tempSettingsData[fieldName])
+                    ? 0
+                    : 1;
+                  tempSettingsData = {
+                    ...tempSettingsData,
+                    [fieldName]: changedStatus,
+                  };
+                  updateUsersSettingsAPICall(fieldName, changedStatus);
+                }
+                return tempSettingsData;
+              });
+            }}
+          />
+
           <DropDownPicker
             title="Preference Language"
             value={getSelectedLanguage()}

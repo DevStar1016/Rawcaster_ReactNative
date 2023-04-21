@@ -5,12 +5,10 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import {COLORS} from '../../../Utilities/Colors';
 import TitleRowContainer from './TitleRowContainer';
-import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import {
-  useConnectionsList,
-  useProfile,
-  useToken,
-} from '../../../Utilities/StoreData';
+import ProfileWithBadge, {
+  ProfileWithBadgeProps,
+} from '../../../Components/ProfileWithBadge';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -29,6 +27,7 @@ type Props = {
   list?: [];
   title?: string;
   listType: 'connections' | 'influencers' | 'fans';
+  ProfileItemProps: ProfileWithBadgeProps;
 };
 
 const EXTRA_MARGIN = 10;
@@ -40,6 +39,7 @@ const ProfilesListContainerWithSeeAll = ({
   list = [],
   title = '',
   listType,
+  ProfileItemProps,
 }: Props) => {
   let isMount = true;
   const navigation = useNavigation();
@@ -180,9 +180,9 @@ const ProfilesListContainerWithSeeAll = ({
                   <ProfileWithBadge
                     extraMargin={0}
                     isEnableGradient={false}
-                    topRightIcon="shield_secondary"
                     profileSize={PROFILE_SIZE}
                     profileImage={item.profile_img}
+                    {...ProfileItemProps}
                   />
                   <View style={{flex: 1, paddingTop: 10}}>
                     <StyledText style={{textAlign: 'center'}}>
