@@ -81,7 +81,12 @@ const CustomHomeHeader = ({
             onPress={onPressBack}
           />
         ) : (
-          <SVGIcon icon="app_logo_white" height={30} width={30} />
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('PlansAndPrice');
+            }}>
+            <SVGIcon icon="app_logo_white" height={30} width={30} />
+          </TouchableOpacity>
         )}
       </View>
       <View
