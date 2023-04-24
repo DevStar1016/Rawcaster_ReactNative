@@ -50,13 +50,13 @@ const EventTalkshowCommonScreen = ({
     if (isMount) {
       setisLoading(true);
     }
-    listTalkshowApiCall(1);
+    listEventsTalkshowApiCall(1);
     return () => {
       isMount = false;
     };
   }, []);
 
-  const listTalkshowApiCall = (pageNumber: number = 1) => {
+  const listEventsTalkshowApiCall = (pageNumber: number = 1) => {
     const formData = new FormData();
     formData.append('token', token);
     // formData.append('event_type', 1);
@@ -156,7 +156,7 @@ const EventTalkshowCommonScreen = ({
     if (isMount) {
       setrefreshing(true);
     }
-    listTalkshowApiCall(1);
+    listEventsTalkshowApiCall(1);
   };
 
   const onEndReached = () => {
@@ -164,7 +164,7 @@ const EventTalkshowCommonScreen = ({
     if (currentPage <= totalPages) {
       if (isMount) {
         setisLoadMore(true);
-        listTalkshowApiCall(currentPage);
+        listEventsTalkshowApiCall(currentPage);
       }
     }
   };

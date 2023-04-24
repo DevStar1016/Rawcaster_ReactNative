@@ -1,44 +1,11 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  Keyboard,
-  StyleSheet,
-  View,
-} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {FlatList, Keyboard, StyleSheet, View} from 'react-native';
+import React from 'react';
 import SmallButton from '../../Components/SmallButton';
 import {COLORS} from '../../Utilities/Colors';
-import {getInfluencerCategoryService} from '../../Services/ApiService';
-import {useToken} from '../../Utilities/StoreData';
-import {getAuthCode} from '../../Utilities/Methods';
+import {useInfluencerCategoryList} from '../../Utilities/StoreData';
 
 const InfluencerCategoriesList = ({selectedCategoryId, onSelectCategory}) => {
-  const token = useToken();
-  const [categoryList, setcategoryList] = useState([]);
-  const [isLoading, setisLoading] = useState(true);
-
-  useEffect(() => {
-    getInfluencerCategoriesAPICall();
-  }, []);
-
-  const getInfluencerCategoriesAPICall = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('auth_code', getAuthCode(token));
-
-    getInfluencerCategoryService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          setcategoryList(res.data.influencer_category);
-        }
-      })
-      .catch(e => {
-        console.log(e, 'getInfluencerCategoryServiceERROR');
-      })
-      .finally(() => {
-        setisLoading(false);
-      });
-  };
+  const categoryList = useInfluencerCategoryList();
 
   const renderCategoryItem = ({item}) => {
     return (
@@ -64,27 +31,19 @@ const InfluencerCategoriesList = ({selectedCategoryId, onSelectCategory}) => {
 
   return (
     <View style={styles.categoriesContainer}>
-      {isLoading ? (
-        <ActivityIndicator
-          color={COLORS.secondary}
-          size="small"
-          style={{alignSelf: 'center'}}
-        />
-      ) : (
-        categoryList.length > 0 && (
-          <View style={{height: 40}}>
-            <FlatList
-              data={categoryList}
-              renderItem={renderCategoryItem}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              ItemSeparatorComponent={() => {
-                return <View style={{height: 10, width: 10}} />;
-              }}
-              keyExtractor={item => item.id.toString()}
-            />
-          </View>
-        )
+      {categoryList.length > 0 && (
+        <View style={{height: 40}}>
+          <FlatList
+            data={categoryList}
+            renderItem={renderCategoryItem}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            ItemSeparatorComponent={() => {
+              return <View style={{height: 10, width: 10}} />;
+            }}
+            keyExtractor={item => item.id.toString()}
+          />
+        </View>
       )}
     </View>
   );

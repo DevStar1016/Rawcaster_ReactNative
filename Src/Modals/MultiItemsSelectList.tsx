@@ -16,6 +16,7 @@ import {COLORS} from '../Utilities/Colors';
 import SVGIcon from '../Components/SVGIcon';
 import ProfileWithBadge from '../Components/ProfileWithBadge';
 import StyledText from '../Components/StyledText';
+import DefaultBackground from '../Components/DefaultBackground';
 
 type Props = {
   title: string;
@@ -25,6 +26,8 @@ type Props = {
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
   list?: any[];
+  isEnableMaxSelection?: boolean;
+  maxSelectedCount?: number;
   rightButtonType?: 'icon' | 'text';
   rightButtonText?: string;
   isEnableSelection?: boolean;
@@ -34,6 +37,7 @@ type Props = {
   isTitleCenter?: boolean;
   isEnableLocalSearch?: boolean;
   rightButtonTextStyle?: TextStyle;
+  itemTextContainerStyle?: ViewStyle;
   rightTextButtonStyle?: ViewStyle;
 };
 
@@ -50,6 +54,9 @@ const MultiItemsSelectList = ({
   isEnableRightIcon = true,
   rightIcon = 'tick',
   list = [],
+  itemTextContainerStyle,
+  isEnableMaxSelection = false,
+  maxSelectedCount = 0,
   isEnableSelection = true,
   isEnableLocalSearch = true,
   rightButtonType = 'icon',
@@ -88,7 +95,12 @@ const MultiItemsSelectList = ({
         [...preList].filter(itemId => itemId !== id),
       );
     } else {
-      setselectedIdsList(preList => [...preList, id]);
+      if (
+        !isEnableMaxSelection ||
+        (isEnableMaxSelection && selectedIdsList.length < maxSelectedCount)
+      ) {
+        setselectedIdsList(preList => [...preList, id]);
+      }
     }
   };
 
@@ -102,11 +114,33 @@ const MultiItemsSelectList = ({
     return false;
   };
 
+  const getIsDisabledItemSelect = (item: any) => {
+    if (isEnableMaxSelection) {
+      if (selectedIdsList.length < maxSelectedCount) {
+        return false;
+      } else {
+        return !selectedIdsList.includes(
+          idFieldName ? item[idFieldName] : item,
+        );
+      }
+    }
+    return !isEnableSelection;
+  };
+
   const renderItem = ({item}: RenderProps) => {
     return (
       <TouchableOpacity
-        style={styles.itemContainer}
-        disabled={!isEnableSelection}
+        style={[
+          styles.itemContainer,
+          {
+            opacity: isEnableMaxSelection
+              ? getIsDisabledItemSelect(item)
+                ? 0.5
+                : 1
+              : 1,
+          },
+        ]}
+        disabled={getIsDisabledItemSelect(item)}
         activeOpacity={0.7}
         onPress={() => {
           if (isEnableSelection) {
@@ -140,7 +174,7 @@ const MultiItemsSelectList = ({
             containerStyle={{marginHorizontal: 10}}
           />
         )}
-        <View style={styles.displayTextContainer}>
+        <View style={[styles.displayTextContainer, itemTextContainerStyle]}>
           <StyledText>
             {displayFieldName ? item[displayFieldName] : item}
           </StyledText>
@@ -175,24 +209,30 @@ const MultiItemsSelectList = ({
           <SearchInput
             onSearch={setsearchText}
             searchWhenClickedButton={false}
+            marginHorizontal={15}
+            marginTop={10}
           />
         )}
-        <View
-          style={[
-            styles.listContainer,
-            {paddingTop: isEnableLocalSearch ? 10 : 0},
-          ]}>
-          <FlatList
-            data={getList()}
-            keyboardShouldPersistTaps={'handled'}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => {
-              return <View style={{height: 10}} />;
-            }}
-          />
-        </View>
+        {getList().length > 0 ? (
+          <View
+            style={[
+              styles.listContainer,
+              {paddingTop: isEnableLocalSearch ? 10 : 0},
+            ]}>
+            <FlatList
+              data={getList()}
+              keyboardShouldPersistTaps={'handled'}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              showsVerticalScrollIndicator={false}
+              ItemSeparatorComponent={() => {
+                return <View style={{height: 10}} />;
+              }}
+            />
+          </View>
+        ) : (
+          <DefaultBackground centerText="No Category found" />
+        )}
       </View>
     </View>
   );
@@ -206,11 +246,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
   },
   listContainer: {
     flex: 1,
+    paddingHorizontal: 15,
+    paddingBottom: 10,
   },
   itemContainer: {
     flexDirection: 'row',

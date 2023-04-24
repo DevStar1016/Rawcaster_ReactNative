@@ -42,16 +42,6 @@ import StyledText from '../../../Components/StyledText';
 
 var isMount = true;
 
-const validationSchema = yup.object({
-  eventTitle: yup
-    .string()
-    .min(1, 'Invalid Event Title.')
-    .max(60, 'Invalid Event Title.')
-    .required('Event Title is required.'),
-  eventTime: yup.string().required('Select valid Time'),
-  maxParticipants: yup.string().required('Enter valid Participants'),
-});
-
 const SWITCHES_LIST = [
   {
     id: 1,
@@ -107,13 +97,32 @@ const CreateEditEvent = ({route}) => {
     participant_video: parseInt(settings.participant_video),
   });
 
+  const validationSchema = yup.object({
+    eventTitle: yup
+      .string()
+      .min(1, 'Invalid Event Title.')
+      .max(60, 'Invalid Event Title.')
+      .required('Event Title is required.'),
+    eventTime: yup.string().required('Select valid Time'),
+    maxParticipants: yup
+      .number()
+      .min(2, 'Enter valid Participants')
+      .max(
+        parseInt(settings.max_event_participants_count),
+        `Maximum ${parseInt(
+          settings.max_event_participants_count,
+        )} participants only allowed`,
+      )
+      .required('Enter valid Participants'),
+  });
+
   const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
     useFormik({
       initialValues: {
         eventTitle: 'Rawcaster Event',
         eventDate: moment().format('YYYY-MM-DD'),
         eventTime: moment().add(15, 'minute'),
-        maxParticipants: '25',
+        maxParticipants: parseInt(settings.max_event_participants_count),
       },
       validationSchema: validationSchema,
       onSubmit: values => {

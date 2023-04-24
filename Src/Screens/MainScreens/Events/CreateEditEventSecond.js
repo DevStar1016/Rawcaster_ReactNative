@@ -86,6 +86,7 @@ const CreateEditEventSecond = ({route}) => {
     console.log(formData, 'FORMDATAAA');
     addEventService(formData)
       .then(res => {
+        console.log(res.data, 'RESPONSE');
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({

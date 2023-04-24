@@ -6,6 +6,7 @@ export const initialState = {
   connectionsList: [],
   groupsList: [],
   pendingFriendRequests: [],
+  influencerCategoryList: [],
 };
 
 const HomeSlice = createSlice({
@@ -27,6 +28,9 @@ const HomeSlice = createSlice({
     setPendingFriendRequests: (state, action) => {
       state.pendingFriendRequests = action.payload;
     },
+    setInfluencerCategoryList: (state, action) => {
+      state.influencerCategoryList = action.payload;
+    },
   },
 });
 export const {
@@ -35,5 +39,6 @@ export const {
   setConnectionsList,
   setGroupsList,
   setPendingFriendRequests,
+  setInfluencerCategoryList,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

@@ -118,7 +118,7 @@ const Profile = ({route}) => {
 
   const renderHeader = () => {
     return (
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: COLORS.white}}>
         <ProfileTopSection
           userId={userId}
           profile={getProfileData()}

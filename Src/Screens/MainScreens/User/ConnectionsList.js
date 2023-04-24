@@ -1,17 +1,64 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import {useConnectionsList} from '../../../Utilities/StoreData';
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {useConnectionsList, useToken} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import {getSlicedText} from '../../../Utilities/Methods';
+import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useMyConnections} from '../../../Utilities/Contexts';
+import {useDispatch} from 'react-redux';
+import {listAllFriendsService} from '../../../Services/ApiService';
+import {setConnectionsList} from '../../../Store/Slices/HomeSlice';
 
+var isMount = true;
 const ConnectionsList = () => {
+  const dispatch = useDispatch();
+  const token = useToken();
   const connectionsList = useConnectionsList();
   const {searchText} = useMyConnections();
+  const [refreshing, setrefreshing] = useState(false);
+
+  useEffect(() => {
+    isMount = true;
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  function connectionsListAPICall() {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    listAllFriendsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(setConnectionsList(res.data.friends_list));
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setrefreshing(false);
+        }
+      });
+  }
+
+  function onRefresh() {
+    if (isMount) {
+      setrefreshing(true);
+      connectionsListAPICall();
+    }
+  }
 
   function getList() {
     if (searchText && searchText.trim()) {
@@ -80,6 +127,13 @@ const ConnectionsList = () => {
           contentContainerStyle={{paddingBottom: 20}}
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
+          refreshControl={
+            <RefreshControl
+              tintColor={COLORS.secondary}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
         />
       ) : (
         <View style={styles.emptyListContainer}>

@@ -12,6 +12,7 @@ import {
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
 import {
+  getInfluencerCategoryService,
   getMyProfileService,
   getUserSettingsService,
   listAllFriendGroupsService,
@@ -26,6 +27,7 @@ import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
   setConnectionsList,
   setGroupsList,
+  setInfluencerCategoryList,
   setPendingFriendRequests,
 } from '../Store/Slices/HomeSlice';
 import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
@@ -111,6 +113,7 @@ const MainStack = () => {
       listAllFriendsService(getFriendsFormData()),
       listAllFriendGroupsService(getCommonFormData()),
       listAllFriendRequestsService(getCommonFormData()),
+      getInfluencerCategoryService(getCommonFormData()),
     ])
       .then(res => {
         if (res[0].data.status === 1) {
@@ -147,6 +150,12 @@ const MainStack = () => {
       .then(res => {
         if (res[4].data.status === 1) {
           dispatch(setPendingFriendRequests(res[4].data.pending_requests));
+        }
+        return res;
+      })
+      .then(res => {
+        if (res[5].data.status === 1) {
+          dispatch(setInfluencerCategoryList(res[5].data.influencer_category));
         }
         return res;
       })

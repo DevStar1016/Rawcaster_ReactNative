@@ -1,10 +1,14 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import {COLORS} from '../../../Utilities/Colors';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
-import {useProfile, useSettings} from '../../../Utilities/StoreData';
+import {
+  useInfluencerCategoryList,
+  useProfile,
+  useSettings,
+} from '../../../Utilities/StoreData';
 import {
   calcualteAge,
   getDefaultRawcasterPage,
@@ -14,6 +18,7 @@ import {
 } from '../../../Utilities/Methods';
 import moment from 'moment';
 import GradientButton from '../../../Components/GradientButton';
+import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 
 const ProfileNameBioContainer = ({
   userId,
@@ -22,6 +27,10 @@ const ProfileNameBioContainer = ({
   onLayout,
 }) => {
   const settings = useSettings();
+  const influencerCategoryList = useInfluencerCategoryList();
+  const [isOpenCategoryListSelection, setisOpenCategoryListSelection] =
+    useState(false);
+
   const getBioData = () => {
     if (profile.bio_data && profile.bio_data.trim()) {
       return htmlDecodeText(profile.bio_data.trim());
@@ -90,8 +99,8 @@ const ProfileNameBioContainer = ({
             {getSlicedText(profile.name, 50)}
           </StyledText>
 
-          {/* <View style={styles.dot} />
-          <StyledText style={styles.nameText}>Entertainer</StyledText> */}
+          <View style={styles.dot} />
+          <StyledText style={styles.nameText}>Entertainer</StyledText>
         </View>
         {!userId && (
           <View style={{marginLeft: 10}}>
@@ -99,6 +108,9 @@ const ProfileNameBioContainer = ({
               buttonSize={30}
               iconSize={16}
               icon="edit_black"
+              onPress={() => {
+                setisOpenCategoryListSelection(true);
+              }}
             />
           </View>
         )}
@@ -114,6 +126,33 @@ const ProfileNameBioContainer = ({
           onPress={() => {}}
         />
       )}
+      <Modal
+        visible={isOpenCategoryListSelection}
+        statusBarTranslucent
+        onRequestClose={() => {
+          setisOpenCategoryListSelection(false);
+        }}>
+        <MultiItemsSelectList
+          title={'Select Category'}
+          onCloseModal={() => {
+            setisOpenCategoryListSelection(false);
+          }}
+          displayFieldName={'name'}
+          idFieldName={'id'}
+          isEnableMaxSelection
+          maxSelectedCount={3}
+          itemTextContainerStyle={{paddingLeft: 10}}
+          list={[...influencerCategoryList]}
+          onSelectItems={list => {
+            setisOpenCategoryListSelection(false);
+
+            // setisOpenViewOnlySelectionModal(false);
+            // if (selectedShareTypeId) {
+            //   handleSharNugget(selectedShareTypeId, list);
+            // }
+          }}
+        />
+      </Modal>
     </View>
   );
 };

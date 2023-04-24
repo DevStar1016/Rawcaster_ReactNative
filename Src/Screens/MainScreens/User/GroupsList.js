@@ -1,17 +1,64 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import {useGroupsList} from '../../../Utilities/StoreData';
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {useGroupsList, useToken} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import {getSlicedText} from '../../../Utilities/Methods';
+import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useMyConnections} from '../../../Utilities/Contexts';
+import {listAllFriendGroupsService} from '../../../Services/ApiService';
+import {useDispatch} from 'react-redux';
+import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 
+var isMount = true;
 const GroupsList = () => {
+  const dispatch = useDispatch();
+  const token = useToken();
   const groupsList = useGroupsList();
   const {searchText} = useMyConnections();
+  const [refreshing, setrefreshing] = useState(false);
+
+  useEffect(() => {
+    isMount = true;
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  function groupsListAPICall() {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    listAllFriendGroupsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(setGroupsList(res.data.friend_group_list));
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setrefreshing(false);
+        }
+      });
+  }
+
+  function onRefresh() {
+    if (isMount) {
+      setrefreshing(true);
+      groupsListAPICall();
+    }
+  }
 
   function getList() {
     if (searchText && searchText.trim()) {
@@ -69,6 +116,13 @@ const GroupsList = () => {
           contentContainerStyle={{paddingBottom: 20}}
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
+          refreshControl={
+            <RefreshControl
+              tintColor={COLORS.secondary}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
         />
       ) : (
         <View style={styles.emptyListContainer}>
