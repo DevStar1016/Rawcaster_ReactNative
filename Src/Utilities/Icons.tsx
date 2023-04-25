@@ -3,8 +3,13 @@ import VisibilityOffIcon from '../Assets/Svg/visibility_off.svg';
 import BackIcon from '../Assets/Svg/back.svg';
 import DownArrowIcon from '../Assets/Svg/down_arrow.svg';
 import GoogleIcon from '../Assets/Svg/google.svg';
+import InfoIcon from '../Assets/Svg/info.svg';
 import FaceBookIcon from '../Assets/Svg/facebook.svg';
+import FaceBookFillIcon from '../Assets/Svg/facebook_fill.svg';
 import InstagramIcon from '../Assets/Svg/instagram.svg';
+import InstagramRoundedFillIcon from '../Assets/Svg/instagram_rounded_fill.svg';
+import ContactRoundedFillOrangeIcon from '../Assets/Svg/contact_rounded_fill_orange.svg';
+import ShareRoundedFillBlueIcon from '../Assets/Svg/share_rounded_fill_blue.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -87,6 +92,7 @@ import CalanderWhiteIcon from '../Assets/Svg/calendar_white.svg';
 import RecordWhiteIcon from '../Assets/Svg/record_white.svg';
 import ArrowLeftIcon from '../Assets/Svg/arrow_left.svg';
 import ArrowRightIcon from '../Assets/Svg/arrow_right.svg';
+import ArrowRightWhiteIcon from '../Assets/Svg/arrow_right_white.svg';
 import ArrowLeftGreyIcon from '../Assets/Svg/arrow_left_grey.svg';
 import ArrowRightGreyIcon from '../Assets/Svg/arrow_right_grey.svg';
 import MenuHorizontalWhiteIcon from '../Assets/Svg/menu_horizontal_white.svg';
@@ -117,11 +123,16 @@ export type IconType =
   | 'down_arrow'
   | 'google'
   | 'facebook'
+  | 'facebook_fill'
+  | 'instagram_rounded_fill'
+  | 'contact_rounded_fill_orange'
+  | 'share_rounded_fill_blue'
   | 'twitter'
   | 'apple'
   | 'instagram'
   | 'close_rounded_black'
   | 'live'
+  | 'info'
   | 'search'
   | 'user'
   | 'user_plus'
@@ -205,6 +216,7 @@ export type IconType =
   | 'image_placeholder'
   | 'arrow_left'
   | 'arrow_right'
+  | 'arrow_right_white'
   | 'arrow_left_grey'
   | 'arrow_right_grey'
   | 'menu_horizontal_white'
@@ -225,6 +237,10 @@ export const ICONS = {
   back: BackIcon,
   google: GoogleIcon,
   facebook: FaceBookIcon,
+  facebook_fill: FaceBookFillIcon,
+  instagram_rounded_fill: InstagramRoundedFillIcon,
+  contact_rounded_fill_orange: ContactRoundedFillOrangeIcon,
+  share_rounded_fill_blue: ShareRoundedFillBlueIcon,
   instagram: InstagramIcon,
   twitter: TwitterIcon,
   apple: AppleIcon,
@@ -242,6 +258,7 @@ export const ICONS = {
   right_arrow: RightArrowIcon,
   tick: TickIcon,
   close: CloseIcon,
+  info: InfoIcon,
   close_white: CloseWhiteIcon,
   valued: ValuedIcon,
   premium: PremiumIcon,
@@ -315,6 +332,7 @@ export const ICONS = {
   image_placeholder: ImagePlaceholderIcon,
   arrow_left: ArrowLeftIcon,
   arrow_right: ArrowRightIcon,
+  arrow_right_white: ArrowRightWhiteIcon,
   arrow_left_grey: ArrowLeftGreyIcon,
   arrow_right_grey: ArrowRightGreyIcon,
   menu_horizontal_white: MenuHorizontalWhiteIcon,

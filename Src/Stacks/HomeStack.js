@@ -10,6 +10,7 @@ import {useDispatch} from 'react-redux';
 import GlobalSearchStack from './GlobalSearchStack';
 import ProfileStack from './ProfileStack';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
+import Referal from '../Screens/MainScreens/Referal';
 
 const Stack = createStackNavigator();
 
@@ -32,6 +33,7 @@ const HomeStack = () => {
       }}>
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
+      <Stack.Screen name="Referal" component={Referal} />
       <Stack.Screen name="ProfileStack" component={ProfileStack} />
     </Stack.Navigator>
   );

@@ -83,7 +83,7 @@ const CustomHomeHeader = ({
         ) : (
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('PlansAndPrice');
+              navigation.navigate('Referal');
             }}>
             <SVGIcon icon="app_logo_white" height={30} width={30} />
           </TouchableOpacity>

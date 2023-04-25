@@ -13,7 +13,8 @@ const PlansAndPrice = () => {
       id: 1,
       name: 'Valued Member',
       price: 'Free',
-      tenure: 'Annually',
+      tenure: 'Monthly',
+      tenure_id: 1,
       badge: 'valued',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
@@ -27,7 +28,8 @@ const PlansAndPrice = () => {
       id: 2,
       name: 'Valued Member',
       price: 'Free',
-      tenure: 'Annually',
+      tenure: 'Monthly',
+      tenure_id: 1,
       badge: 'valued',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
@@ -41,7 +43,53 @@ const PlansAndPrice = () => {
       id: 3,
       name: 'Valued Member',
       price: 'Free',
+      tenure: 'Monthly',
+      tenure_id: 1,
+      badge: 'valued',
+      benefits: [
+        {id: 1, name: 'Full access to Nuggets features'},
+        {id: 2, name: 'Full access to One-on-One chat enabled.'},
+        {id: 3, name: 'Full access to one-on-one Video and audio call'},
+        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
+        {id: 5, name: 'Record events on PC'},
+      ],
+    },
+    {
+      id: 4,
+      name: 'Valued Member',
+      price: 'Free',
       tenure: 'Annually',
+      tenure_id: 2,
+      badge: 'valued',
+      benefits: [
+        {id: 1, name: 'Full access to Nuggets features'},
+        {id: 2, name: 'Full access to One-on-One chat enabled.'},
+        {id: 3, name: 'Full access to one-on-one Video and audio call'},
+        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
+        {id: 5, name: 'Record events on PC'},
+      ],
+    },
+    {
+      id: 5,
+      name: 'Valued Member',
+      price: 'Free',
+      tenure: 'Annually',
+      tenure_id: 2,
+      badge: 'valued',
+      benefits: [
+        {id: 1, name: 'Full access to Nuggets features'},
+        {id: 2, name: 'Full access to One-on-One chat enabled.'},
+        {id: 3, name: 'Full access to one-on-one Video and audio call'},
+        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
+        {id: 5, name: 'Record events on PC'},
+      ],
+    },
+    {
+      id: 6,
+      name: 'Valued Member',
+      price: 'Free',
+      tenure: 'Annually',
+      tenure_id: 2,
       badge: 'valued',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
@@ -89,6 +137,7 @@ const PlansAndPrice = () => {
       headerType="home_header"
       isEnableTopSafeAreaHomeHeader
       headerProps={{bgColor: COLORS.primary, isEnableSearch: true}}
+      isEnablePrimaryColorStatusBar
       //   isEnableDefaultBackground
       isEnableRLogo={false}
       // paddingBottom={50}
@@ -139,7 +188,7 @@ const PlansAndPrice = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={plansList}
+        data={plansList.filter(val => val.tenure_id === selectedTab)}
         renderItem={renderPlan}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => {
