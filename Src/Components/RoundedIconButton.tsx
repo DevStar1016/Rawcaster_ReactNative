@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
-import SVGIcon from './SVGIcon';
+import SVGIcon, {SVGIconProps} from './SVGIcon';
 import {IconType} from '../Utilities/Icons';
 
 export type RoundedIconButtonProps = {
@@ -17,6 +17,7 @@ export type RoundedIconButtonProps = {
   buttonSize?: number;
   bgColor?: string;
   onPress?: () => void;
+  iconProps?: Omit<SVGIconProps, 'icon' | 'height' | 'width'>;
 };
 
 const RoundedIconButton = ({
@@ -26,6 +27,7 @@ const RoundedIconButton = ({
   bgColor = COLORS.lightGrey,
   buttonStyle = {},
   onPress,
+  iconProps,
 }: RoundedIconButtonProps) => {
   return (
     <TouchableOpacity
@@ -41,7 +43,7 @@ const RoundedIconButton = ({
       ]}
       activeOpacity={0.7}
       onPress={onPress}>
-      <SVGIcon icon={icon} height={iconSize} width={iconSize} />
+      <SVGIcon icon={icon} height={iconSize} width={iconSize} {...iconProps} />
     </TouchableOpacity>
   );
 };

@@ -17,6 +17,7 @@ const Talkshow = () => {
           eventId: eventId,
         });
       }}
+      onPressStartJoinEvent={() => {}}
     />
   );
 };

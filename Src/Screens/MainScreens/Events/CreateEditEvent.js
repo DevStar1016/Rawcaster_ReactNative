@@ -1,11 +1,4 @@
-import {
-  Keyboard,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Keyboard, Modal, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import moment from 'moment';
 import {useFormik} from 'formik';
@@ -23,6 +16,7 @@ import {
   getDisplayEventTime,
   getSlicedText,
   htmlDecodeText,
+  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {
   getEventMelodyService,
@@ -39,21 +33,7 @@ import {EVENT_LAYOUT_LIST} from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import StyledText from '../../../Components/StyledText';
-
-var isMount = true;
-
-const SWITCHES_LIST = [
-  {
-    id: 1,
-    name: 'Host',
-    status: true,
-  },
-  {
-    id: 2,
-    name: 'Guest',
-    status: true,
-  },
-];
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
 
 var isMount = true;
 const CreateEditEvent = ({route}) => {
@@ -61,9 +41,7 @@ const CreateEditEvent = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const settings = useSettings();
-  const eventId =
-    route.params && route.params.eventId ? route.params.eventId : null;
-  const [eventDetails, seteventDetails] = useState(null);
+  const {eventId} = route.params ?? {};
   const [eventTypesList, seteventTypesList] = useState([]);
   const [liveEventDate, setliveEventDate] = useState(new Date());
   const [loaderText, setloaderText] = useState(
@@ -95,6 +73,13 @@ const CreateEditEvent = ({route}) => {
     participant_audio: parseInt(settings.participant_audio),
     host_video: parseInt(settings.host_video),
     participant_video: parseInt(settings.participant_video),
+    banner_image: null,
+    selectedGroupsIdsList: [],
+    removedGroupsIdsList: [],
+    selectedConnectionsIdsList: [],
+    removedConnectionsIdsList: [],
+    invitedUsersList: [],
+    removedInvitedUsersList: [],
   });
 
   const validationSchema = yup.object({
@@ -120,7 +105,6 @@ const CreateEditEvent = ({route}) => {
     useFormik({
       initialValues: {
         eventTitle: 'Rawcaster Event',
-        eventDate: moment().format('YYYY-MM-DD'),
         eventTime: moment().add(15, 'minute'),
         maxParticipants: parseInt(settings.max_event_participants_count),
       },
@@ -135,48 +119,30 @@ const CreateEditEvent = ({route}) => {
         } else {
           const data = {
             event_title: values.eventTitle,
-            event_type: selectedValues.eventVisibilityTypeId,
-            event_start_date: moment(values.eventDate)
-              .utc()
-              .format('YYYY-MM-DD'),
+            event_start_date: moment(liveEventDate).utc().format('YYYY-MM-DD'),
             event_start_time: moment(values.eventTime).utc().format('HH:mm'),
             event_participants: values.maxParticipants,
             event_duration: getDisplayDuration(),
-            event_layout: selectedValues.event_layout_id,
-            event_melody_id: selectedValues.melody,
-            event_host_audio: selectedValues.host_audio,
-            event_host_video: selectedValues.host_video,
-            event_guest_audio: selectedValues.participant_audio,
-            event_guest_video: selectedValues.participant_video,
-            waiting_room: selectedValues.waiting_room,
-            join_before_host: selectedValues.join_before_host,
-            sound_notify: selectedValues.sound_notify,
-            user_screenshare: selectedValues.user_screenshare,
+            melodyFile: selectedMelodyFile,
+            ...selectedValues,
           };
 
           navigation.navigate('CreateEditEventSecond', {
             submitedData: data,
+            eventId,
           });
-          // if (isMount) {
-          //   setloaderText(`${eventId ? 'Editing' : 'Creating'} Event...`);
-          //   setisLoading(true);
-          // }
-          // if (eventId) {
-          //   editTalkshowAPICall();
-          // } else {
-          //   createEventAPICall();
-          // }
         }
       },
     });
 
   useEffect(() => {
     isMount = true;
+    AvoidSoftInput.setAdjustResize();
     initialAPICalls();
-    // if (eventId) {
-    //   getEventDetailsAPICall();
-    // }
+
     return () => {
+      AvoidSoftInput.setAdjustPan();
+      Keyboard.dismiss();
       isMount = false;
     };
   }, []);
@@ -216,10 +182,91 @@ const CreateEditEvent = ({route}) => {
       .catch(e => {})
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          if (eventId) {
+            setloaderText('Fetching Event Details');
+            getEventDetailsAPICall();
+          } else {
+            setisLoading(false);
+          }
         }
       });
   }
+
+  const getEventDetailsAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('event_id', eventId);
+    viewEventService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempData = {...selectedValues};
+          if (res.data.event_detail.banner_image) {
+            tempData = {
+              ...tempData,
+              banner_image: {uri: res.data.event_detail.banner_image},
+            };
+          }
+          setValues(preValues => {
+            return {
+              ...preValues,
+              eventTitle: htmlDecodeText(res.data.event_detail.event_name),
+              eventTime: utcToUserTimezone(
+                res.data.event_detail.start_date_time,
+                settings.time_zone,
+              ),
+              maxParticipants: parseInt(
+                res.data.event_detail.no_of_participants,
+              ),
+            };
+          });
+          setliveEventDate(
+            utcToUserTimezone(
+              res.data.event_detail.start_date_time,
+              settings.time_zone,
+            ),
+          );
+          tempData = {
+            ...tempData,
+            sound_notify: parseInt(res.data.event_detail.sound_notify),
+            waiting_room: parseInt(res.data.event_detail.waiting_room),
+            user_screenshare: parseInt(res.data.event_detail.user_screenshare),
+            join_before_host: parseInt(res.data.event_detail.join_before_host),
+            host_audio: parseInt(res.data.event_detail.default_host_audio),
+            host_video: parseInt(res.data.event_detail.default_host_video),
+            participant_audio: parseInt(
+              res.data.event_detail.default_guest_audio,
+            ),
+            participant_video: parseInt(
+              res.data.event_detail.default_guest_video,
+            ),
+            melody: res.data.event_detail.event_melody_id,
+            event_layout_id: res.data.event_detail.event_layout_id,
+            eventDuration: new Date(
+              moment('2021-01-05 ' + res.data.event_detail.duration),
+            ),
+            eventVisibilityTypeId: res.data.event_detail.event_type_id,
+            selectedGroupsIdsList: res.data.event_detail.invite_groups_id,
+            removedGroupsIdsList: res.data.event_detail.invite_groups_id,
+            selectedConnectionsIdsList: res.data.event_detail.invite_friends_id,
+            removedConnectionsIdsList: res.data.event_detail.invite_friends_id,
+            invitedUsersList: res.data.event_detail.invite_mails,
+            removedInvitedUsersList: res.data.event_detail.invite_mails,
+          };
+
+          setselectedValues({...tempData});
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
 
   const onSelectDuration = date => {
     let actualDurationallowed = settings.max_event_duration;
@@ -372,7 +419,7 @@ const CreateEditEvent = ({route}) => {
     <View style={{flex: 1, backgroundColor: COLORS.white}}>
       <ReplaceStatusBar />
       <HeaderWithBack
-        title={'Create virtual meeting event'}
+        title={`${eventId ? 'Edit' : 'Create'} virtual meeting event`}
         //  title={eventId ? 'Edit Event' : 'Create Event'}
       />
       <KeyboardAwareScrollView

@@ -44,11 +44,19 @@ const ProfileIntroContainer = ({
         buttonType="rounded"
       />
 
-      <RowContainer text={`Work at ${profile.work_at}`} icon={'work_grey'} />
-      <RowContainer
-        text={`Studied at ${profile.studied_at}`}
-        icon={'study_grey'}
-      />
+      {profile.work_at ? (
+        <RowContainer text={`Work at ${profile.work_at}`} icon={'work_grey'} />
+      ) : (
+        false
+      )}
+      {profile.studied_at ? (
+        <RowContainer
+          text={`Studied at ${profile.studied_at}`}
+          icon={'study_grey'}
+        />
+      ) : (
+        false
+      )}
       <RowContainer text={profile.geo_location} icon={'location_grey'} />
       <RowContainer
         text={`Date of Birth ${moment(profile.dob, 'YYYY-MM-DD').format(

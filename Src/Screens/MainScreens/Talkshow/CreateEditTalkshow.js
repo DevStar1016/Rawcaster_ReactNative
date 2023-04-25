@@ -71,7 +71,7 @@ const CreateEditTalkshow = ({route}) => {
   const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
     useFormik({
       initialValues: {
-        eventTitle: settings.event_name,
+        eventTitle: 'Rawcaster Talkshow',
         eventTime: moment().add(15, 'minute'),
       },
       validationSchema: validationSchema,
@@ -167,6 +167,7 @@ const CreateEditTalkshow = ({route}) => {
             res.data.event_detail.invite_friends_id,
           );
           setremovedConnectionsIdsList(res.data.event_detail.invite_friends_id);
+          console.log(res.data.event_detail.invite_mails, 'INVITED USERSS');
           setinvitedUsersList(res.data.event_detail.invite_mails);
           setremovedInvitedUsersList(res.data.event_detail.invite_mails);
         } else if (res.data.status === 0) {
