@@ -106,6 +106,10 @@ import VideoCallWhiteIcon from '../Assets/Svg/video_call_white.svg';
 import ChatWhiteIcon from '../Assets/Svg/chat_white.svg';
 import TalkshowWhiteIcon from '../Assets/Svg/talkshow_white.svg';
 import EventWhiteIcon from '../Assets/Svg/event_white.svg';
+import FilterFillWhiteIcon from '../Assets/Svg/filter_fill_white.svg';
+import FilterFillBlackIcon from '../Assets/Svg/filter_fill_black.svg';
+import FilterLineWhiteIcon from '../Assets/Svg/filter_line_white.svg';
+import FilterLineBlackIcon from '../Assets/Svg/filter_line_black.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -229,7 +233,11 @@ export type IconType =
   | 'video_call_white'
   | 'chat_white'
   | 'talkshow_white'
-  | 'event_white';
+  | 'event_white'
+  | 'filter_fill_white'
+  | 'filter_fill_black'
+  | 'filter_line_white'
+  | 'filter_line_black';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -346,4 +354,8 @@ export const ICONS = {
   chat_white: ChatWhiteIcon,
   talkshow_white: TalkshowWhiteIcon,
   event_white: EventWhiteIcon,
+  filter_fill_white: FilterFillWhiteIcon,
+  filter_fill_black: FilterFillBlackIcon,
+  filter_line_white: FilterLineWhiteIcon,
+  filter_line_black: FilterLineBlackIcon,
 };

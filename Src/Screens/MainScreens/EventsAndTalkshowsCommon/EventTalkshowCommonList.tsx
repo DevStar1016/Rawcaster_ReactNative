@@ -2,9 +2,9 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  ListRenderItem,
   Modal,
   RefreshControl,
+  SafeAreaView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -21,12 +21,18 @@ import {
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import Loader from '../../../Components/Loader';
 import Toast from '../../../Components/Toast';
-import DropDownPicker from '../../../Components/DropDownPicker';
+import {
+  DIMENSIONS,
+  EVENTS_LIST_FILTER_TYPES,
+} from '../../../Utilities/Constants';
+import RoundedIconButton from '../../../Components/RoundedIconButton';
+import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
 
 type Props = {
   screenType: 'event_and_live' | 'talkshow';
   onPressAddButton: () => void;
   onEditEvent: (item: any) => void;
+  onPressStartJoinEvent: (item: any) => void;
 };
 var isMount = true;
 var currentPage = 1;
@@ -36,30 +42,42 @@ const EventTalkshowCommonScreen = ({
   screenType,
   onPressAddButton,
   onEditEvent,
+  onPressStartJoinEvent,
 }: Props) => {
   const token = useToken();
   const [isLoading, setisLoading] = useState(false);
   const [searchText, setsearchText] = useState('');
   const [eventsList, seteventsList] = useState<any[]>([]);
+  const [eventFilterType, seteventFilterType] = useState(
+    EVENTS_LIST_FILTER_TYPES[0],
+  );
   const [isActionLoading, setisActionLoading] = useState(false);
   const [refreshing, setrefreshing] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
+  const [isOpenEventFilterList, setisOpenEventFilterList] = useState(false);
 
   useEffect(() => {
     isMount = true;
-    if (isMount) {
-      setisLoading(true);
-    }
-    listEventsTalkshowApiCall(1);
+
     return () => {
       isMount = false;
     };
   }, []);
 
+  useEffect(() => {
+    totalPages = 1;
+    currentPage = 1;
+    if (isMount) {
+      setisLoading(true);
+      seteventsList([]);
+    }
+    listEventsTalkshowApiCall(1);
+  }, [eventFilterType]);
+
   const listEventsTalkshowApiCall = (pageNumber: number = 1) => {
     const formData = new FormData();
     formData.append('token', token);
-    // formData.append('event_type', 1);
+    formData.append('event_type', eventFilterType.id);
     formData.append('type_filter', screenType === 'talkshow' ? '2' : '1,3');
     formData.append('page_number', pageNumber);
 
@@ -141,7 +159,7 @@ const EventTalkshowCommonScreen = ({
   };
 
   const getSearchPlaceHolderText = () => {
-    let placeHolder = 'Search ';
+    let placeHolder = `Search ${eventFilterType.name.split(' ')[0]} `;
     if (screenType === 'talkshow') {
       placeHolder = placeHolder + 'Talkshow';
     } else if (screenType === 'event_and_live') {
@@ -178,6 +196,12 @@ const EventTalkshowCommonScreen = ({
     return [...eventsList];
   };
 
+  const renderFooter = () => {
+    return isLoadMore ? (
+      <ActivityIndicator size={'small'} color={COLORS.primary} />
+    ) : null;
+  };
+
   return (
     <HOCView
       headerType="home_header"
@@ -187,13 +211,38 @@ const EventTalkshowCommonScreen = ({
       isEnableRLogo={getEventsList().length <= 0}
       paddingBottom={50}
       backgroundColor={COLORS.primary}>
-      <SearchInput
-        placeHolderText={getSearchPlaceHolderText()}
-        onSearch={setsearchText}
-        searchWhenClickedButton={false}
-        marginVertical={10}
-        searchButtonColor={COLORS.secondary}
-      />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <RoundedIconButton
+          buttonStyle={{
+            marginRight: 10,
+            backgroundColor: COLORS.secondary,
+            paddingTop: 5,
+            height: 45,
+            width: 45,
+            borderRadius: 45 / 2,
+          }}
+          iconProps={{marginLeft: 2}}
+          iconSize={20}
+          icon="filter_line_white"
+          onPress={() => {
+            if (isMount) {
+              setisOpenEventFilterList(true);
+            }
+          }}
+        />
+        <SearchInput
+          placeHolderText={getSearchPlaceHolderText()}
+          containerStyle={{flex: 1}}
+          onSearch={setsearchText}
+          searchWhenClickedButton={false}
+          marginVertical={10}
+          searchButtonColor={COLORS.secondary}
+        />
+      </View>
       {/* <DropDownPicker
         dataList={['Public Events', 'Invited Events', 'My Events']}
       /> */}
@@ -234,14 +283,43 @@ const EventTalkshowCommonScreen = ({
             onPressDelete={() => {
               onPressDelete(item?.event_id);
             }}
+            onPressStartJoinEvent={() => {
+              onPressStartJoinEvent(item);
+            }}
           />
         )}
+        ListFooterComponent={renderFooter}
       />
 
       <RoundedPlusButton
         onPress={onPressAddButton}
         style={styles.createEventPluButton}
       />
+
+      <Modal
+        visible={isOpenEventFilterList}
+        onRequestClose={() => {
+          setisOpenEventFilterList(false);
+        }}
+        transparent
+        style={{backgroundColor: COLORS.transparentDimColor}}>
+        <SafeAreaView
+          style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
+          <ItemSelectionMiniList
+            maxHeight={DIMENSIONS.screen.height / 2 - 100}
+            onClose={() => {
+              setisOpenEventFilterList(false);
+            }}
+            fieldName={'name'}
+            listData={EVENTS_LIST_FILTER_TYPES}
+            onSelectItem={item => {
+              seteventFilterType(item);
+              setisOpenEventFilterList(false);
+            }}
+          />
+        </SafeAreaView>
+      </Modal>
+
       <Modal visible={isActionLoading} transparent>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>

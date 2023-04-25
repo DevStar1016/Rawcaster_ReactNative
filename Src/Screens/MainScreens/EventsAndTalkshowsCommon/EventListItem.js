@@ -7,8 +7,12 @@ import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
 import moment from 'moment';
 import {EVENT_TYPE} from '../../../Utilities/Constants';
-import {getSlicedText, htmlDecodeText} from '../../../Utilities/Methods';
-import {useProfile} from '../../../Utilities/StoreData';
+import {
+  getSlicedText,
+  htmlDecodeText,
+  utcToUserTimezone,
+} from '../../../Utilities/Methods';
+import {useProfile, useSettings} from '../../../Utilities/StoreData';
 
 const EventListItem = ({
   item,
@@ -16,8 +20,10 @@ const EventListItem = ({
   onPressEdit,
   onPressDelete,
   isEnableBorder = false,
+  onPressStartJoinEvent,
 }) => {
   const profile = useProfile();
+  const settings = useSettings();
   const getBgColor = () => {
     if (isDarkTheme) {
       return COLORS.whiteTransparent;
@@ -110,7 +116,11 @@ const EventListItem = ({
               width={20}
             />
             <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
-              {moment(item.start_date_time).format('DD-MMM-YYYY')}
+              {utcToUserTimezone(
+                item.start_date_time,
+                settings.time_zone,
+              ).format('DD-MMM-YYYY')}
+              {/* { moment(item.start_date_time).format('DD-MMM-YYYY')} */}
             </StyledText>
           </View>
           <View style={styles.dateTime}>
@@ -121,12 +131,19 @@ const EventListItem = ({
               width={20}
             />
             <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
-              {moment(item.start_date_time).format('hh:mm A')}
+              {utcToUserTimezone(
+                item.start_date_time,
+                settings.time_zone,
+              ).format('hh:mm A')}
+              {/* {moment(item.start_date_time).format('hh:mm A')} */}
             </StyledText>
           </View>
         </View>
         <View style={styles.startButtonContainer}>
-          <TouchableOpacity style={styles.startButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.startButton}
+            activeOpacity={0.7}
+            onPress={onPressStartJoinEvent}>
             <StyledText style={[styles.startText, {color: getTextColor()}]}>
               {`${isOwner() ? 'Start' : 'Join'} ${getEventTypeText()}`}
             </StyledText>

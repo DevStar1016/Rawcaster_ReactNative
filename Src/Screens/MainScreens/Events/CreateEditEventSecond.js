@@ -12,25 +12,30 @@ import ConnectionGroupsListContainer from '../EventsAndTalkshowsCommon/Connectio
 import SubmitButton from '../../../Components/SubmitButton';
 import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../../../Utilities/StoreData';
-import {addEventService} from '../../../Services/ApiService';
+import {addEventService, editEventService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 
 var isMount = true;
 const CreateEditEventSecond = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
-  const {submitedData} = route.params ?? {};
+  const {submitedData, eventId} = route.params ?? {};
+  const [loaderText, setloaderText] = useState('');
   const [isLoading, setisLoading] = useState(false);
-  const [bannerImage, setbannerImage] = useState(null);
-
+  const [bannerImage, setbannerImage] = useState(
+    submitedData?.banner_image ? submitedData.banner_image : null,
+  );
   const inviteUserInputRef = useRef(null);
   const [inviteUserText, setinviteUserText] = useState('');
   const [selectedConnectionsIdsList, setselectedConnectionsIdsList] = useState(
-    [],
+    submitedData?.selectedConnectionsIdsList ?? [],
   );
-  const [invitedUsersList, setinvitedUsersList] = useState([]);
-  const [selectedGroupsIdsList, setselectedGroupsIdsList] = useState([]);
-
+  const [invitedUsersList, setinvitedUsersList] = useState(
+    submitedData?.invitedUsersList ?? [],
+  );
+  const [selectedGroupsIdsList, setselectedGroupsIdsList] = useState(
+    submitedData?.selectedGroupsIdsList ?? [],
+  );
   useEffect(() => {
     isMount = true;
 
@@ -43,17 +48,17 @@ const CreateEditEventSecond = ({route}) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_title', submitedData.event_title);
-    formData.append('event_type', submitedData.event_type);
+    formData.append('event_type', submitedData.eventVisibilityTypeId);
     formData.append('event_start_date', submitedData.event_start_date);
     formData.append('event_start_time', submitedData.event_start_time);
     formData.append('event_participants', submitedData.event_participants);
     formData.append('event_duration', submitedData.event_duration);
-    formData.append('event_layout', submitedData.event_layout);
-    formData.append('event_melody_id', submitedData.event_melody_id);
-    formData.append('event_host_audio', submitedData.event_host_audio);
-    formData.append('event_host_video', submitedData.event_host_video);
-    formData.append('event_guest_audio', submitedData.event_guest_audio);
-    formData.append('event_guest_video', submitedData.event_guest_video);
+    formData.append('event_layout', submitedData.event_layout_id);
+    formData.append('event_melody_id', submitedData.melody);
+    formData.append('event_host_audio', submitedData.host_audio);
+    formData.append('event_host_video', submitedData.host_video);
+    formData.append('event_guest_audio', submitedData.participant_audio);
+    formData.append('event_guest_video', submitedData.participant_video);
     formData.append('waiting_room', submitedData.waiting_room);
     formData.append('join_before_host', submitedData.join_before_host);
     formData.append('sound_notify', submitedData.sound_notify);
@@ -79,14 +84,61 @@ const CreateEditEventSecond = ({route}) => {
   };
 
   function handleCreateEvent() {
-    if (isMount) {
-      setisLoading(true);
-    }
     const formData = getDefaultCreateEditFormData();
-    console.log(formData, 'FORMDATAAA');
     addEventService(formData)
       .then(res => {
-        console.log(res.data, 'RESPONSE');
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          navigation.reset({
+            routes: [{name: 'Events'}],
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
+  function handleEditEvent() {
+    const formData = getDefaultCreateEditFormData();
+    formData.append('event_id', eventId);
+    let tempRemovedUsersList = [
+      ...submitedData?.removedInvitedUsersList,
+    ].filter(mailItem => ![...invitedUsersList].includes(mailItem));
+    let tempRemovedGroupsIdsList = [
+      ...submitedData?.removedGroupsIdsList,
+    ].filter(id => ![...selectedGroupsIdsList].includes(id));
+    let tempRemovedConnectionsIdsList = [
+      ...submitedData?.removedConnectionsIdsList,
+    ].filter(id => ![...selectedConnectionsIdsList].includes(id));
+
+    if (tempRemovedUsersList.length > 0) {
+      formData.append(
+        'delete_invite_mails',
+        JSON.stringify(tempRemovedUsersList),
+      );
+    }
+    if (tempRemovedConnectionsIdsList.length > 0) {
+      formData.append(
+        'delete_invite_friends',
+        JSON.stringify(tempRemovedConnectionsIdsList),
+      );
+    }
+    if (tempRemovedGroupsIdsList.length > 0) {
+      formData.append(
+        'delete_invite_groups',
+        JSON.stringify(tempRemovedGroupsIdsList),
+      );
+    }
+    editEventService(formData)
+      .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
@@ -108,7 +160,7 @@ const CreateEditEventSecond = ({route}) => {
 
   const eventVisibilityTypeError = () => {
     return (
-      submitedData?.event_type === 2 &&
+      submitedData?.eventVisibilityTypeId === 2 &&
       selectedConnectionsIdsList.length <= 0 &&
       selectedGroupsIdsList.length <= 0 &&
       invitedUsersList.length <= 0
@@ -198,15 +250,25 @@ const CreateEditEventSecond = ({route}) => {
     Keyboard.dismiss();
     if (eventVisibilityTypeError()) {
       Toast.fail('Event type is Private, you must select the participants.');
-      return;
+    } else {
+      if (isMount) {
+        setloaderText(`${eventId ? 'Editing' : 'Creating'} Event...`);
+        setisLoading(true);
+      }
+      if (eventId) {
+        handleEditEvent();
+      } else {
+        handleCreateEvent();
+      }
     }
-    handleCreateEvent();
   }
 
   return (
     <View style={{flex: 1, backgroundColor: COLORS.white}}>
       <ReplaceStatusBar />
-      <HeaderWithBack title={'Create virtual meeting event'} />
+      <HeaderWithBack
+        title={`${eventId ? 'Edit' : 'Create'} virtual meeting event`}
+      />
       <KeyboardAwareScrollView
         extraScrollHeight={10}
         contentContainerStyle={{paddingBottom: 30}}
@@ -228,7 +290,7 @@ const CreateEditEventSecond = ({route}) => {
         )}
         <TextBox
           innerRef={inviteUserInputRef}
-          isVisible={submitedData?.event_type !== 3}
+          isVisible={submitedData?.eventVisibilityTypeId !== 3}
           title="Invite Users"
           placeHolder="Enter email address to send event invitation"
           value={inviteUserText}
@@ -252,7 +314,7 @@ const CreateEditEventSecond = ({route}) => {
         />
 
         <ConnectionGroupsListContainer
-          isVisible={submitedData?.event_type !== 3}
+          isVisible={submitedData?.eventVisibilityTypeId !== 3}
           displayFieldName="display_name"
           idFieldName="user_id"
           titleText="Connections"
@@ -272,7 +334,7 @@ const CreateEditEventSecond = ({route}) => {
           selectedIdsList={selectedConnectionsIdsList}
         />
         <ConnectionGroupsListContainer
-          isVisible={submitedData?.event_type !== 3}
+          isVisible={submitedData?.eventVisibilityTypeId !== 3}
           displayFieldName="group_name"
           idFieldName="group_id"
           titleText="Groups"
@@ -310,7 +372,7 @@ const CreateEditEventSecond = ({route}) => {
             }}
           />
           <SubmitButton
-            buttonText="Create"
+            buttonText={eventId ? 'Edit' : 'Create'}
             borderRadius={20}
             bgColor={COLORS.radioSelectedColor}
             borderWidth={0}
@@ -327,10 +389,7 @@ const CreateEditEventSecond = ({route}) => {
         </View>
       </KeyboardAwareScrollView>
       <Modal visible={isLoading} transparent>
-        <Loader
-          bgColor={COLORS.transparentDimColor}
-          loaderText={'Creating Event'}
-        />
+        <Loader bgColor={COLORS.transparentDimColor} loaderText={loaderText} />
       </Modal>
     </View>
   );

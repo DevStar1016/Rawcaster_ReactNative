@@ -172,6 +172,29 @@ export const GENDER_LIST = [
   },
 ];
 
+export const EVENTS_LIST_FILTER_TYPES = [
+  {
+    id: 0,
+    name: 'Upcoming Events',
+  },
+  {
+    id: 1,
+    name: 'My Events',
+  },
+  {
+    id: 2,
+    name: 'Invited Events',
+  },
+  {
+    id: 3,
+    name: 'Public Events',
+  },
+  {
+    id: 4,
+    name: 'Past Events',
+  },
+];
+
 export const EVENT_VISIBILITY_TYPE_LIST = [
   {
     id: 1,
