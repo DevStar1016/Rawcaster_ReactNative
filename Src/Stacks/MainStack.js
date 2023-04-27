@@ -21,7 +21,6 @@ import {
 } from '../Services/ApiService';
 import {useDispatch} from 'react-redux';
 import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
-import OTPVerification from '../Screens/AuthScreens/OTPVerification';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
@@ -35,6 +34,7 @@ import ConectionRequestModal from '../Modals/ConectionRequestModal';
 import {SocketEvents} from '../Services/Socket/SocketEvents';
 import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
+import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 
 const Stack = createStackNavigator();
 
@@ -186,7 +186,10 @@ const MainStack = () => {
             <Stack.Screen name="PostEditNugget" component={PostEditNugget} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
             <Stack.Screen name="SettingsStack" component={SettingsStack} />
-            <Stack.Screen name="OTPVerification" component={OTPVerification} />
+            <Stack.Screen
+              name="EmailPhoneVerification"
+              component={EmailPhoneVerification}
+            />
             <Stack.Screen
               name="GlobalSearchStack"
               component={GlobalSearchStack}

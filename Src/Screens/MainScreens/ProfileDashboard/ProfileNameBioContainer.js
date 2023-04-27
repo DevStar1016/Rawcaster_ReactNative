@@ -25,6 +25,7 @@ const ProfileNameBioContainer = ({
   profile,
   paddingHorizontal,
   onLayout,
+  onPressBecomeFan,
 }) => {
   const settings = useSettings();
   const influencerCategoryList = useInfluencerCategoryList();
@@ -123,7 +124,7 @@ const ProfileNameBioContainer = ({
           buttonText={'Become a Fan'}
           rightIcon="right_arrow_white"
           marginTop={15}
-          onPress={() => {}}
+          onPress={onPressBecomeFan}
         />
       )}
       <Modal

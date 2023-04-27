@@ -28,11 +28,13 @@ const otpVerificationSchema = Yup.object({
     .max(6, 'Enter valid OTP'),
 });
 
-const OTPVerification = ({route}) => {
+var isMount = true;
+const EmailPhoneVerification = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
   const user = useUserData();
+  const {otpType, isGoBack} = route.params ?? {};
   const [otpRefId, setotpRefId] = useState(null);
   const [timer, settimer] = useState(0);
   const profile = useProfile();
@@ -48,7 +50,11 @@ const OTPVerification = ({route}) => {
     },
   });
   useEffect(() => {
+    isMount = true;
     AvoidSoftInput.setAdjustResize();
+    return () => {
+      isMount = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -56,19 +62,23 @@ const OTPVerification = ({route}) => {
   }, []);
 
   const resendOTPAPICall = () => {
-    setisLoading(true);
+    if (isMount) {
+      setisLoading(true);
+    }
     const formData = new FormData();
     formData.append('auth_code', getAuthCode('Rawcaster'));
     formData.append('token', token);
-    if (route.params && route.params.otpType) {
-      formData.append('otp_flag', route.params.otpType);
+    if (otpType) {
+      formData.append('otp_flag', otpType);
     }
     resendOTPService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg, 4000);
-          setotpRefId(res.data.otp_ref_id);
-          settimer(parseInt(res.data.remaining_seconds));
+          if (isMount) {
+            setotpRefId(res.data.otp_ref_id);
+            settimer(parseInt(res.data.remaining_seconds));
+          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -77,24 +87,28 @@ const OTPVerification = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setisLoading(false);
+        if (isMount) {
+          setisLoading(false);
+        }
       });
   };
 
   const handleOtpVerification = values => {
-    setisLoading(true);
+    if (isMount) {
+      setisLoading(true);
+    }
     let formData = new FormData();
     formData.append('auth_code', getAuthCode(otpRefId));
     formData.append('otp_ref_id', otpRefId);
     formData.append('otp', values.otp);
-    if (route.params && route.params.otpType) {
-      formData.append('otp_flag', route.params.otpType);
+    if (otpType) {
+      formData.append('otp_flag', otpType);
     }
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (route.params && route.params.otpType) {
-            if (route.params.otpType === 'sms') {
+          if (otpType) {
+            if (otpType === 'sms') {
               dispatch(
                 setMyProfile({
                   ...profile,
@@ -123,12 +137,13 @@ const OTPVerification = ({route}) => {
           const userData = {...user, acc_verify_status: 1};
           Toast.success(res.data.msg);
           storeUserData(userData, dispatch);
-          // navigation.reset({
-          //   routes: [{name: 'HomeStack'}],
-          // });
-          navigation.reset({
-            routes: [{name: 'BottomTabNavigationAfterLogin'}],
-          });
+          if (isGoBack) {
+            navigation.goBack();
+          } else {
+            navigation.reset({
+              routes: [{name: 'BottomTabNavigationAfterLogin'}],
+            });
+          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -137,16 +152,14 @@ const OTPVerification = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        setisLoading(false);
+        if (isMount) {
+          setisLoading(false);
+        }
       });
   };
 
   const getOtpSendedCommunication = () => {
-    if (
-      route.params &&
-      route.params.otpType &&
-      route.params.otpType === 'sms'
-    ) {
+    if (otpType === 'sms') {
       return profile.mobile;
     }
     return profile.email_id;
@@ -170,7 +183,9 @@ const OTPVerification = ({route}) => {
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.titleContainer}>
-            <StyledText style={styles.title}>Validate your email</StyledText>
+            <StyledText style={styles.title}>
+              Validate your {otpType === 'sms' ? 'phone number' : 'email'}
+            </StyledText>
             <StyledText style={{paddingVertical: 5, textAlign: 'left'}}>
               {`Please enter the One Time Password (OTP) sent to ${getOtpSendedCommunication()}`}
             </StyledText>
@@ -180,7 +195,9 @@ const OTPVerification = ({route}) => {
             onCodeChanged={handleChange('otp')}
             seconds={timer}
             onResendOtp={() => {
-              settimer(0);
+              if (isMount) {
+                settimer(0);
+              }
               resendOTPAPICall();
             }}
             errorText={errors.otp && touched.otp ? errors.otp : ''}
@@ -209,7 +226,7 @@ const OTPVerification = ({route}) => {
   );
 };
 
-export default OTPVerification;
+export default EmailPhoneVerification;
 
 const styles = StyleSheet.create({
   mainContainer: {

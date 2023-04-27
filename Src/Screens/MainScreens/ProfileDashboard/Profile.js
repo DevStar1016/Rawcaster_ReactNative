@@ -1,12 +1,12 @@
 import {
   FlatList,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import HOCView from '../../../Components/HOCView';
 import ProfileTopSection from './ProfileTopSection';
 import ProfileNameBioContainer from './ProfileNameBioContainer';
 import ProfileIntroContainer from './ProfileIntroContainer';
@@ -18,14 +18,15 @@ import {
   useToken,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
-import {getOthersProfileService} from '../../../Services/ApiService';
+import {
+  followAndUnfollowService,
+  getOthersProfileService,
+} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import ProfilesListContainerWithSeeAll from './ProfilesListContainerWithSeeAll';
 import DefaultBackground from '../../../Components/DefaultBackground';
-import StyledText from '../../../Components/StyledText';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import Loader from '../../../Components/Loader';
-import BigList from 'react-native-big-list';
 const PADDING_HORIZONTAL = 10;
 const Profile = ({route}) => {
   let isMount = true;
@@ -35,6 +36,7 @@ const Profile = ({route}) => {
   const insets = useInsets();
   const connections = useConnectionsList();
   const [isLoading, setisLoading] = useState(userId ? true : false);
+  const [isActionLoading, setisActionLoading] = useState(false);
   const [othersProfile, setothersProfile] = useState(null);
   const [emptyText, setemptyText] = useState(null);
   const Divider = () => {
@@ -87,6 +89,39 @@ const Profile = ({route}) => {
       });
   };
 
+  function handleBecomeFan() {
+    // 1 - follow, 2 - unfollow
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('follow_userid', othersProfile.user_ref_id);
+    formData.append('type', 1);
+    followAndUnfollowService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setothersProfile(preData => {
+            return {
+              ...preData,
+              follow: true,
+            };
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  }
+
   const isShowProfile = () => {
     if (userId) {
       if (othersProfile) {
@@ -128,6 +163,9 @@ const Profile = ({route}) => {
           userId={userId}
           profile={getProfileData()}
           paddingHorizontal={PADDING_HORIZONTAL}
+          onPressBecomeFan={() => {
+            handleBecomeFan();
+          }}
         />
         <Divider />
         <ProfileIntroContainer
@@ -221,6 +259,10 @@ const Profile = ({route}) => {
           showsVerticalScrollIndicator={false}
           data={[]}
           keyExtractor={keyExtractor}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            backgroundColor: COLORS.white,
+          }}
           getItemLayout={getItemLayout}
           renderItem={() => <View />}
           ListHeaderComponent={renderHeader}
@@ -255,6 +297,9 @@ const Profile = ({route}) => {
           <DefaultBackground centerText={emptyText} />
         </View>
       ) : null}
+      <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </View>
   );
 };
