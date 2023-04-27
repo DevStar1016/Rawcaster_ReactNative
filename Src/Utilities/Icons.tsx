@@ -7,6 +7,10 @@ import InfoIcon from '../Assets/Svg/info.svg';
 import FaceBookIcon from '../Assets/Svg/facebook.svg';
 import FaceBookFillIcon from '../Assets/Svg/facebook_fill.svg';
 import InstagramIcon from '../Assets/Svg/instagram.svg';
+import TelegramIcon from '../Assets/Svg/telegram.svg';
+import LinkedinIcon from '../Assets/Svg/linkedin.svg';
+import WhatsappIcon from '../Assets/Svg/whatsapp.svg';
+import TwitterRoundedFillIcon from '../Assets/Svg/twitter_rounded_fill.svg';
 import InstagramRoundedFillIcon from '../Assets/Svg/instagram_rounded_fill.svg';
 import ContactRoundedFillOrangeIcon from '../Assets/Svg/contact_rounded_fill_orange.svg';
 import ShareRoundedFillBlueIcon from '../Assets/Svg/share_rounded_fill_blue.svg';
@@ -127,6 +131,10 @@ export type IconType =
   | 'down_arrow'
   | 'google'
   | 'facebook'
+  | 'linkedin'
+  | 'whatsapp'
+  | 'telegram'
+  | 'twitter_rounded_fill'
   | 'facebook_fill'
   | 'instagram_rounded_fill'
   | 'contact_rounded_fill_orange'
@@ -245,6 +253,10 @@ export const ICONS = {
   back: BackIcon,
   google: GoogleIcon,
   facebook: FaceBookIcon,
+  linkedin: LinkedinIcon,
+  whatsapp: WhatsappIcon,
+  telegram: TelegramIcon,
+  twitter_rounded_fill: TwitterRoundedFillIcon,
   facebook_fill: FaceBookFillIcon,
   instagram_rounded_fill: InstagramRoundedFillIcon,
   contact_rounded_fill_orange: ContactRoundedFillOrangeIcon,
