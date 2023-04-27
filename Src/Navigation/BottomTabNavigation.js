@@ -59,11 +59,11 @@ export default function BottomTabNavigation() {
       ) {
         setisOpenVerificationOptions(true);
       } else if (profile.email_id) {
-        navigation.navigate('OTPVerification', {
+        navigation.navigate('EmailPhoneVerification', {
           otpType: 'email',
         });
       } else if (profile.mobile) {
-        navigation.navigate('OTPVerification', {
+        navigation.navigate('EmailPhoneVerification', {
           otpType: 'sms',
         });
       } else {
@@ -122,7 +122,7 @@ export default function BottomTabNavigation() {
         <VerificationMethodChoose
           onSubmitOption={selectedOption => {
             setisOpenVerificationOptions(false);
-            navigation.navigate('OTPVerification', {
+            navigation.navigate('EmailPhoneVerification', {
               otpType: selectedOption,
             });
           }}

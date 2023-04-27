@@ -286,6 +286,10 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             renderItem={renderItem}
             keyExtractor={(_, index) => index.toString()}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingTop: 10,
+              paddingBottom: 25,
+            }}
             ItemSeparatorComponent={() => {
               return <View style={{height: 10}} />;
             }}

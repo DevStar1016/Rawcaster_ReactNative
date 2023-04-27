@@ -193,7 +193,7 @@ const EditProfile = ({route}) => {
 
           if (isValidateEmail.current) {
             if (requiredField) {
-              navigation.navigate('OTPVerification', {
+              navigation.navigate('EmailPhoneVerification', {
                 otpType: requiredField,
               });
             } else if (
@@ -203,11 +203,11 @@ const EditProfile = ({route}) => {
             ) {
               setisOpenVerificationOptions(true);
             } else if (tempProfile.email_id) {
-              navigation.navigate('OTPVerification', {
+              navigation.navigate('EmailPhoneVerification', {
                 otpType: 'email',
               });
             } else if (tempProfile.mobile) {
-              navigation.navigate('OTPVerification', {
+              navigation.navigate('EmailPhoneVerification', {
                 otpType: 'sms',
               });
             } else {
@@ -466,7 +466,7 @@ const EditProfile = ({route}) => {
         <VerificationMethodChoose
           onSubmitOption={selectedOption => {
             setisOpenVerificationOptions(false);
-            navigation.navigate('OTPVerification', {
+            navigation.navigate('EmailPhoneVerification', {
               otpType: selectedOption,
             });
           }}
