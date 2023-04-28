@@ -24,7 +24,7 @@ import {
   htmlDecodeText,
 } from '../../../Utilities/Methods';
 import {
-  followAndUnfollowService,
+  influencerFollowService,
   influencerListService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
@@ -174,15 +174,14 @@ const Refer = ({navigation}) => {
   };
 
   const handleBecomeFan = userRefId => {
-    // 1 - follow, 2 - unfollow
     if (isMount) {
       setisActionLoading(true);
     }
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('follow_userid', userRefId);
-    formData.append('type', 1);
-    followAndUnfollowService(formData)
+    formData.append('follow_userid', JSON.stringify([userRefId]));
+    formData.append('auth_code', getAuthCode(token));
+    influencerFollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
