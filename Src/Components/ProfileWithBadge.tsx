@@ -33,6 +33,7 @@ export type ProfileWithBadgeProps = {
   topRightIconContainerBackgroundColor?: string;
   topRightIconContainerStyle?: ViewStyle;
   isEnableGradient?: boolean;
+  isEnableTopRightIcon?: boolean;
   isEnableWhiteBorderArroundGradient?: boolean;
   isEnableImagePicker?: boolean;
   containerStyle?: ViewStyle;
@@ -43,6 +44,7 @@ export type ProfileWithBadgeProps = {
   isEnableOnlineOfflineStatus?: boolean;
   isButton?: boolean;
   onPressProfile?: () => void;
+  onPressTopRightIcon?: () => void;
   badgeContainerStyle?: ViewStyle;
   cameraIconContainerStyle?: ViewStyle;
   onSelectImage?: (value: ProfileImageProps) => void;
@@ -56,6 +58,7 @@ const ProfileWithBadge = ({
   isEnableOnlineOfflineStatus = false,
   isButton = false,
   onPressProfile,
+  onPressTopRightIcon,
   isOnline = false,
   isEnableWhiteBorderArroundGradient = false,
   extraMargin = 10,
@@ -70,6 +73,7 @@ const ProfileWithBadge = ({
   cameraIconSize = 18,
   isEnableImagePicker = false,
   isEnableGradient = true,
+  isEnableTopRightIcon = false,
   padding = 2,
   onSelectImage,
   alternateProfileImageComponent,
@@ -199,7 +203,10 @@ const ProfileWithBadge = ({
       )}
 
       {topRightIcon ? (
-        <View
+        <TouchableOpacity
+          disabled={!isEnableTopRightIcon}
+          activeOpacity={0.7}
+          onPress={onPressTopRightIcon}
           style={[
             styles.topRightIconContainer,
             {
@@ -215,7 +222,7 @@ const ProfileWithBadge = ({
             height={topRightIconSize}
             width={topRightIconSize}
           />
-        </View>
+        </TouchableOpacity>
       ) : (
         isEnableOnlineOfflineStatus && (
           <View

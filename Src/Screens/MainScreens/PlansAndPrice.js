@@ -26,32 +26,42 @@ const PlansAndPrice = () => {
     },
     {
       id: 2,
-      name: 'Valued Member',
-      price: 'Free',
+      name: 'Premium',
+      price: '$3',
       tenure: 'Monthly',
       tenure_id: 1,
-      badge: 'valued',
+      badge: 'premium',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
-        {id: 2, name: 'Full access to One-on-One chat enabled.'},
-        {id: 3, name: 'Full access to one-on-one Video and audio call'},
-        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
-        {id: 5, name: 'Record events on PC'},
+        {id: 2, name: 'Full access to chat features'},
+        {id: 3, name: 'Full access to Events features'},
+        {id: 4, name: 'Host up to 25 participants.'},
+        {id: 5, name: 'Up to 4hrs meeting time per event.'},
+        {id: 6, name: 'All event features enabled'},
+        {id: 7, name: 'Record events on the cloud'},
+        {id: 8, name: 'Talk-show events with interaction with audience'},
+        {id: 9, name: 'Full access to Rawcaster video and audio call'},
+        {id: 10, name: 'Talk-show program without co-hosts'},
       ],
     },
     {
       id: 3,
-      name: 'Valued Member',
-      price: 'Free',
+      name: 'Diamond',
+      price: '$7',
       tenure: 'Monthly',
       tenure_id: 1,
-      badge: 'valued',
+      badge: 'diamond',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
-        {id: 2, name: 'Full access to One-on-One chat enabled.'},
-        {id: 3, name: 'Full access to one-on-one Video and audio call'},
-        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
-        {id: 5, name: 'Record events on PC'},
+        {id: 2, name: 'Full access to chat features'},
+        {id: 3, name: 'Full access to Events features'},
+        {id: 4, name: 'Host up to 150 participants in a meeting event.'},
+        {id: 5, name: 'Unlimited meeting time per event.'},
+        {id: 6, name: 'Talk-Show program with up to 3 co-hosts'},
+        {id: 7, name: 'Full use of Rawcaster Live Events'},
+        {id: 8, name: 'Record events on the cloud'},
+        {id: 9, name: 'Talk-show events with interaction with audience'},
+        {id: 10, name: 'Full access to Rawcaster video and audio call'},
       ],
     },
     {
@@ -71,32 +81,42 @@ const PlansAndPrice = () => {
     },
     {
       id: 5,
-      name: 'Valued Member',
-      price: 'Free',
+      name: 'Premium',
+      price: '$30',
       tenure: 'Annually',
       tenure_id: 2,
-      badge: 'valued',
+      badge: 'premium',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
-        {id: 2, name: 'Full access to One-on-One chat enabled.'},
-        {id: 3, name: 'Full access to one-on-one Video and audio call'},
-        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
-        {id: 5, name: 'Record events on PC'},
+        {id: 2, name: 'Full access to chat features'},
+        {id: 3, name: 'Full access to Events features'},
+        {id: 4, name: 'Host up to 25 participants.'},
+        {id: 5, name: 'Up to 4hrs meeting time per event.'},
+        {id: 6, name: 'All event features enabled'},
+        {id: 7, name: 'Record events on the cloud'},
+        {id: 8, name: 'Talk-show events with interaction with audience'},
+        {id: 9, name: 'Full access to Rawcaster video and audio call'},
+        {id: 10, name: 'Talk-show program without co-hosts'},
       ],
     },
     {
       id: 6,
-      name: 'Valued Member',
-      price: 'Free',
+      name: 'Diamond',
+      price: '$79.99',
       tenure: 'Annually',
       tenure_id: 2,
-      badge: 'valued',
+      badge: 'diamond',
       benefits: [
         {id: 1, name: 'Full access to Nuggets features'},
-        {id: 2, name: 'Full access to One-on-One chat enabled.'},
-        {id: 3, name: 'Full access to one-on-one Video and audio call'},
-        {id: 4, name: 'Host up to 15 participants for up to 2hrs.'},
-        {id: 5, name: 'Record events on PC'},
+        {id: 2, name: 'Full access to chat features'},
+        {id: 3, name: 'Full access to Events features'},
+        {id: 4, name: 'Host up to 150 participants in a meeting event.'},
+        {id: 5, name: 'Unlimited meeting time per event.'},
+        {id: 6, name: 'Talk-Show program with up to 3 co-hosts'},
+        {id: 7, name: 'Full use of Rawcaster Live Events'},
+        {id: 8, name: 'Record events on the cloud'},
+        {id: 9, name: 'Talk-show events with interaction with audience'},
+        {id: 10, name: 'Full access to Rawcaster video and audio call'},
       ],
     },
   ]);
@@ -135,12 +155,13 @@ const PlansAndPrice = () => {
   return (
     <HOCView
       headerType="home_header"
-      isEnableTopSafeAreaHomeHeader
+      // isEnableTopSafeAreaHomeHeader
       headerProps={{bgColor: COLORS.primary, isEnableSearch: true}}
       isEnablePrimaryColorStatusBar
       //   isEnableDefaultBackground
+      isEnableScroll
       isEnableRLogo={false}
-      // paddingBottom={50}
+      paddingBottom={25}
       backgroundColor={COLORS.white}>
       <StyledText style={styles.header}>Plans & Pricing</StyledText>
       <StyledText style={styles.describtion}>
@@ -195,6 +216,7 @@ const PlansAndPrice = () => {
           return <View style={{height: 10, width: 10}} />;
         }}
         keyExtractor={item => item.id.toString()}
+        scrollEnabled={false}
       />
     </HOCView>
   );
@@ -247,8 +269,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   divider: {
-    // height: 1,
-    borderWidth: 0.6,
+    height: 1,
+    borderWidth: 0.5,
     borderStyle: 'dashed',
     borderColor: COLORS.dividerColor,
     marginVertical: 10,
