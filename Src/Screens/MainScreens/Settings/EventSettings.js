@@ -32,6 +32,7 @@ import {useDispatch} from 'react-redux';
 import {setSettings} from '../../../Store/Slices/AuthSlice';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
+import EventImagePicker from '../EventsAndTalkshowsCommon/EventImagePicker';
 
 var isMount = true;
 const EventSettings = () => {
@@ -47,7 +48,9 @@ const EventSettings = () => {
     participant_join_sound: parseInt(settings.participant_join_sound),
     screen_share_status: parseInt(settings.screen_share_status),
     default_melody: settings.default_melody,
-    meeting_header_image: settings.meeting_header_image,
+    meeting_header_image: {uri: settings.meeting_header_image},
+    live_event_banner: {uri: settings.live_event_banner},
+    talkshow_event_banner: {uri: settings.talkshow_event_banner},
     host_audio: parseInt(settings.host_audio),
     participant_audio: parseInt(settings.participant_audio),
     host_video: parseInt(settings.host_video),
@@ -108,7 +111,7 @@ const EventSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append(keyText, valueText);
-    console.log(formData, 'FORMDATA');
+    console.log(formData, valueText, 'FORMDATA');
 
     updateUserSettingsService(formData)
       .then(res => {
@@ -125,6 +128,7 @@ const EventSettings = () => {
         }
       })
       .catch(e => {
+        console.log(e.response.data);
         setsettingsData(preData => {
           return {...preData, [keyText]: settings[keyText]};
         });
@@ -186,24 +190,20 @@ const EventSettings = () => {
     return list.filter(item => item.status).map(item => item.id);
   }
 
-  function handleSelectMeetingHeaderImage() {
-    ImageVideoPicker({height: 300, width: 500, mediaType: 'photo'})
-      .then(res => {
-        if (isMount) {
-          setsettingsData(preData => {
-            updateUsersSettingsAPICall(
-              'meeting_header_image',
-              JSON.stringify(res),
-              res.uri,
-            );
-            return {
-              ...preData,
-              meeting_header_image: res.uri,
-            };
-          });
-        }
-      })
-      .catch(e => {});
+  function handleSelectMeetingHeaderImage(selectedImageData, fieldName) {
+    if (isMount) {
+      setsettingsData(preData => {
+        updateUsersSettingsAPICall(
+          fieldName,
+          JSON.stringify(selectedImageData),
+          selectedImageData,
+        );
+        return {
+          ...preData,
+          [fieldName]: selectedImageData,
+        };
+      });
+    }
   }
 
   function getFileType(mimeType) {
@@ -543,12 +543,42 @@ const EventSettings = () => {
                 </View>
               )}
           </View>
-          <TitleDescriptionContainer
+
+          <EventImagePicker
             title="Meeting Header Image"
             description="Choose or upload an image that depicts this event. Leave blank to
-            use Rawcaster default."
+           use Rawcaster default."
+            selectedImage={settingsData.meeting_header_image}
+            setselectedImage={imageData => {
+              handleSelectMeetingHeaderImage(imageData, 'meeting_header_image');
+            }}
           />
-          <TouchableOpacity
+          <EventImagePicker
+            title="Live Event Banner"
+            description="Choose or upload an image that depicts this event. Leave blank to
+           use Rawcaster default."
+            selectedImage={settingsData.live_event_banner}
+            settingsImageField={'live_event_banner'}
+            setselectedImage={imageData => {
+              handleSelectMeetingHeaderImage(imageData, 'live_event_banner');
+            }}
+            titleDescriptionProps={{containerStyle: {marginTop: 10}}}
+          />
+          <EventImagePicker
+            title="Talkshow Event Banner"
+            description="Choose or upload an image that depicts this event. Leave blank to
+           use Rawcaster default."
+            selectedImage={settingsData.talkshow_event_banner}
+            settingsImageField={'talkshow_event_banner'}
+            setselectedImage={imageData => {
+              handleSelectMeetingHeaderImage(
+                imageData,
+                'talkshow_event_banner',
+              );
+            }}
+            titleDescriptionProps={{containerStyle: {marginTop: 10}}}
+          />
+          {/* <TouchableOpacity
             style={[
               styles.imageSelectorContainer,
               {borderWidth: settingsData.meeting_header_image ? 0 : 1},
@@ -566,7 +596,7 @@ const EventSettings = () => {
                 Recommended size 500x300
               </StyledText>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       </View>
       <Modal visible={isUpdating} transparent>

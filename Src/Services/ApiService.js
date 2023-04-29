@@ -166,6 +166,10 @@ export const getNuggetDetailService = data => {
   return axios.post('getnuggetdetail', data);
 };
 
+export const saveAndUnsaveNuggetService = data => {
+  return axios.post('saveandunsavenugget', data);
+};
+
 // Event services
 
 export const getEventTypeService = data => {
@@ -351,7 +355,10 @@ export const pollVoteService = data => {
 export const tagListService = data => {
   return axios.post('tagslist', data);
 };
+export const addClaimAccountService = data => {
+  return axios.post('addclaimaccount', data);
+};
 
-export const saveAndUnsaveNuggetService = data => {
-  return axios.post('saveandunsavenugget', data);
+export const listUnClaimAccountService = data => {
+  return axios.post('listunclaimaccount', data);
 };

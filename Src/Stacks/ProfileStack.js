@@ -1,5 +1,6 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
+import ClaimAccount from '../Modals/ClaimAccount';
 import Profile from '../Screens/MainScreens/ProfileDashboard/Profile';
 import ProfileSeeAllUsersList from '../Screens/MainScreens/ProfileDashboard/ProfileSeeAllUsersList';
 
@@ -17,6 +18,7 @@ const ProfileStack = ({route}) => {
         name="ProfileSeeAllUsersList"
         component={ProfileSeeAllUsersList}
       />
+      <Stack.Screen name="ClaimAccount" component={ClaimAccount} />
     </Stack.Navigator>
   );
 };

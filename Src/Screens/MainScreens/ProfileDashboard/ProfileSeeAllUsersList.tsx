@@ -69,12 +69,15 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   }, []);
 
   function listApiCalls(pageNumber = 1) {
+    console.log(listType, 'LISTTYPE');
+
     switch (listType) {
       case 'connections':
         connectionsListAPICall(pageNumber);
         return;
       case 'fans':
         fansListAPICall(pageNumber);
+        return;
       case 'influencers':
         fansListAPICall(pageNumber, 2);
         return;
@@ -134,6 +137,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       formData.append('user_id', userId);
     }
     formData.append('page_number', pageNumber);
+    console.log(formData, 'OP');
+
     getFollowListService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -251,6 +256,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           isEnableGradient
           padding={0}
           profileSize={50}
+          onPressTopRightIcon={() => {}}
           containerStyle={{marginHorizontal: 10}}
         />
         <View style={styles.displayTextContainer}>

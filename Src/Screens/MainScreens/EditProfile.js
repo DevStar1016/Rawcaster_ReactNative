@@ -77,20 +77,18 @@ const EditProfile = ({route}) => {
       .required('Required'),
     gender: yup.object().nullable().required('Required'),
     dob: yup.string().required('Date of birth is required'),
-    mobileNumber: yup
-      .string()
-      .matches(PHONE_REGEX, 'Invalid phone number')
-      .test('Required', 'Required', function (value) {
-        return profile.mobile
-          ? value
-            ? true
-            : false
-          : requiredField === 'sms'
-          ? value
-            ? true
-            : false
-          : true;
-      }),
+    mobileNumber: yup.string().matches(PHONE_REGEX, 'Invalid phone number'),
+    // .test('Required', 'Required', function (value) {
+    //   return profile.mobile
+    //     ? value
+    //       ? true
+    //       : false
+    //     : requiredField === 'sms'
+    //     ? value
+    //       ? true
+    //       : false
+    //     : true;
+    // }),
     email: yup
       .string()
       .email('Enter valid Email')

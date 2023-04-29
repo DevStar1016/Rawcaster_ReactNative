@@ -13,6 +13,7 @@ type Props = {
   maxHeight?: number | string;
   onSelectItem?: (item: any) => void;
   onClose: () => void;
+  isEnableClickItem?: boolean;
   isEnableCloseIcon?: boolean;
 };
 
@@ -29,6 +30,7 @@ const ItemSelectionMiniList = ({
   onClose,
   maxHeight = '50%',
   onSelectItem,
+  isEnableClickItem = true,
   isEnableCloseIcon = false,
 }: Props) => {
   const ItemSeperator = () => {
@@ -40,6 +42,7 @@ const ItemSelectionMiniList = ({
       <View>
         <TouchableOpacity
           style={styles.itemContainer}
+          disabled={!isEnableClickItem}
           onPress={() => {
             if (onSelectItem) {
               onSelectItem(item);
