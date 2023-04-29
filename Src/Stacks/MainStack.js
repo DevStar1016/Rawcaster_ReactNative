@@ -35,6 +35,7 @@ import {SocketEvents} from '../Services/Socket/SocketEvents';
 import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
+import ProfileStack from './ProfileStack';
 
 const Stack = createStackNavigator();
 
@@ -194,6 +195,7 @@ const MainStack = () => {
               name="GlobalSearchStack"
               component={GlobalSearchStack}
             />
+            <Stack.Screen name="ProfileStack" component={ProfileStack} />
           </>
         )}
       </Stack.Navigator>

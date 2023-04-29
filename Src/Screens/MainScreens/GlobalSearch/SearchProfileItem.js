@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
@@ -8,9 +8,17 @@ import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {FONTS} from '../../../Utilities/Fonts';
 import {getSlicedText} from '../../../Utilities/Methods';
 
-const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
+const SearchProfileItem = ({
+  item,
+  onBecomeFan,
+  onConnectionRequest,
+  onPressItem,
+}) => {
   return (
-    <View style={styles.mainContainer}>
+    <TouchableOpacity
+      style={styles.mainContainer}
+      activeOpacity={0.8}
+      onPress={onPressItem}>
       <View style={styles.leftContainer}>
         <ProfileWithBadge
           // badge={Badges(profile.user_status_id)}
@@ -58,7 +66,7 @@ const SearchProfileItem = ({item, onBecomeFan, onConnectionRequest}) => {
           tinyurl.com/yckjn828
         </StyledText>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

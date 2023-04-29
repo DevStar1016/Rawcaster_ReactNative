@@ -13,6 +13,9 @@ import StyledText from '../../../Components/StyledText';
 import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 import {useSettings} from '../../../Utilities/StoreData';
 import SVGIcon from '../../../Components/SVGIcon';
+import TitleDescriptionContainer, {
+  TitleDescriptionContainerProps,
+} from '../../../Components/TitleDescriptionContainer';
 
 type ImageItem = {
   uri: string;
@@ -24,20 +27,33 @@ type Props = {
   selectedImage?: ImageItem;
   setselectedImage: (item: any) => void;
   mainContainerStyle?: StyleProp<ViewStyle>;
+  recomendedSizeText?: string;
+  title?: string;
+  settingsImageField?: string;
+  description?: string;
+  titleDescriptionProps?: Omit<
+    TitleDescriptionContainerProps,
+    'title' | 'description'
+  >;
 };
 
 const EventImagePicker = ({
   selectedImage,
   setselectedImage,
   mainContainerStyle,
+  recomendedSizeText = 'Recommended size 500x300',
+  title = '',
+  description = '',
+  settingsImageField = 'meeting_header_image',
+  titleDescriptionProps,
 }: Props) => {
   const settings = useSettings();
 
   const handleImagePicker = () => {
     ImageVideoPicker({
       mediaType: 'photo',
-      height: 200,
-      width: 400,
+      height: 300,
+      width: 500,
     })
       .then(res => {
         setselectedImage(res);
@@ -48,57 +64,68 @@ const EventImagePicker = ({
   const getImage = () => {
     if (selectedImage) {
       return selectedImage.uri;
-    } else if (settings?.meeting_header_image) {
-      return settings.meeting_header_image;
+    } else if (settings && settings[settingsImageField]) {
+      return settings[settingsImageField];
     }
     return null;
   };
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.mainContainer,
-        {borderWidth: getImage() ? 0 : 1, borderRadius: getImage() ? 0 : 10},
-        mainContainerStyle,
-      ]}
-      activeOpacity={0.7}
-      onPress={handleImagePicker}>
-      {getImage() ? (
-        <Image
-          source={{
-            uri: getImage(),
-          }}
-          style={styles.imageContainer}
-          resizeMode="contain"
+    <>
+      {title || description ? (
+        <TitleDescriptionContainer
+          title={title}
+          description={description}
+          {...titleDescriptionProps}
         />
       ) : (
-        <View style={styles.imagePlaceHolderContainer}>
-          <SVGIcon
-            icon="image_placeholder"
-            height={50}
-            width={50}
-            marginRight={15}
-          />
-          <View style={styles.imagePlaceHolderTextContainer}>
-            <StyledText
-              style={{
-                color: COLORS.placeHolderColor,
-                fontSize: 16,
-              }}>
-              Upload Event Banner
-            </StyledText>
-            <StyledText
-              style={{
-                color: COLORS.placeHolderColor,
-                paddingTop: 2,
-                fontSize: 10,
-              }}>
-              Recommended size 134x123
-            </StyledText>
-          </View>
-        </View>
+        false
       )}
-    </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.mainContainer,
+          {borderWidth: getImage() ? 0 : 1, borderRadius: getImage() ? 0 : 10},
+          mainContainerStyle,
+        ]}
+        activeOpacity={0.7}
+        onPress={handleImagePicker}>
+        {getImage() ? (
+          <Image
+            source={{
+              uri: getImage(),
+            }}
+            style={styles.imageContainer}
+            resizeMode="contain"
+          />
+        ) : (
+          <View style={styles.imagePlaceHolderContainer}>
+            <SVGIcon
+              icon="image_placeholder"
+              height={50}
+              width={50}
+              marginRight={15}
+            />
+            <View style={styles.imagePlaceHolderTextContainer}>
+              <StyledText
+                style={{
+                  color: COLORS.placeHolderColor,
+                  fontSize: 16,
+                }}>
+                Upload Event Banner
+              </StyledText>
+              <StyledText
+                style={{
+                  color: COLORS.placeHolderColor,
+                  paddingTop: 2,
+                  fontSize: 10,
+                }}>
+                {recomendedSizeText}
+              </StyledText>
+            </View>
+          </View>
+        )}
+      </TouchableOpacity>
+    </>
   );
 };
 

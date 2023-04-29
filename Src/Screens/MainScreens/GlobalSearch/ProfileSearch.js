@@ -25,11 +25,13 @@ import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const ProfileSearch = () => {
+  const navigation = useNavigation();
   const {searchText, setisActionLoading} = useGlobalSearch();
   const token = useToken();
   const profile = useProfile();
@@ -253,6 +255,11 @@ const ProfileSearch = () => {
                 item={item}
                 onBecomeFan={() => {
                   handleBecomeFan(item.user_ref_id);
+                }}
+                onPressItem={() => {
+                  navigation.navigate('ProfileStack', {
+                    userId: item.user_id,
+                  });
                 }}
                 onConnectionRequest={() => {
                   handleSendFriendRequest(item.user_ref_id, item.user_id);

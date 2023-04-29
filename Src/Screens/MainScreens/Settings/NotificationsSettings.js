@@ -11,6 +11,7 @@ import {updateUserSettingsService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
+import InputPopup from '../../../Modals/InputPopup';
 
 const SWITCHES_LIST = [
   {
@@ -46,6 +47,10 @@ const NotificationsSettings = () => {
   );
   const [eventsSwitchStatus, seteventsSwitchStatus] = useState(settings.events);
   const [confirmationBoxData, setconfirmationBoxData] = useState({
+    isOpen: false,
+    verificationField: '',
+  });
+  const [verificationInputModalData, setverificationInputModalData] = useState({
     isOpen: false,
     verificationField: '',
   });
@@ -115,10 +120,14 @@ const NotificationsSettings = () => {
   }
 
   function isEmailVerified() {
+    console.log(profile, 'PROFILE');
     if (parseInt(profile.is_email_id_verified) === 1) {
       return true;
     }
-    setconfirmationBoxData({isOpen: true, verificationField: 'email'});
+    if (profile.email_id) {
+      setconfirmationBoxData({isOpen: true, verificationField: 'email'});
+    } else {
+    }
     return false;
   }
 
@@ -126,12 +135,26 @@ const NotificationsSettings = () => {
     if (parseInt(profile.is_mobile_no_verified) === 1) {
       return true;
     }
-    setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
+    if (profile.mobile) {
+      setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
+    } else {
+      setverificationInputModalData({
+        isOpen: true,
+        verificationField: 'sms',
+      });
+    }
     return false;
   }
 
   function closeConfirmationBox() {
     setconfirmationBoxData({isOpen: false, verificationField: ''});
+  }
+
+  function closeVerificationInputModal() {
+    setverificationInputModalData({
+      isOpen: false,
+      verificationField: '',
+    });
   }
 
   function updateSwitchStatus(id, fieldName) {
@@ -225,6 +248,20 @@ const NotificationsSettings = () => {
           positiveButtonText="Yes"
           negativeButtonText="No"
           content={`You need to complete your ${getConfirmationBoxFieldText()} verification before you can do this. Do you want to verify your ${getConfirmationBoxFieldText()} now?`}
+        />
+      </Modal>
+
+      <Modal
+        visible={verificationInputModalData.isOpen}
+        transparent
+        onRequestClose={() => {
+          closeVerificationInputModal();
+        }}>
+        <InputPopup
+          closePopup={() => {
+            closeVerificationInputModal();
+          }}
+          title={'Mobile Number'}
         />
       </Modal>
       <Modal visible={isLoading} transparent>

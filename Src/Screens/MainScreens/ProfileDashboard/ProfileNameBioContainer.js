@@ -1,4 +1,11 @@
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
@@ -8,9 +15,11 @@ import {
   useInfluencerCategoryList,
   useProfile,
   useSettings,
+  useToken,
 } from '../../../Utilities/StoreData';
 import {
   calcualteAge,
+  getAuthCode,
   getDefaultRawcasterPage,
   getSlicedText,
   htmlDecodeText,
@@ -18,7 +27,13 @@ import {
 } from '../../../Utilities/Methods';
 import moment from 'moment';
 import GradientButton from '../../../Components/GradientButton';
-import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
+import CategoryBioEditor from '../../../Modals/CategoryBioEditor';
+import {updateMyProfileService} from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
+import {useDispatch} from 'react-redux';
+import {setMyProfile} from '../../../Store/Slices/AuthSlice';
+import Loader from '../../../Components/Loader';
+import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
 
 const ProfileNameBioContainer = ({
   userId,
@@ -27,9 +42,13 @@ const ProfileNameBioContainer = ({
   onLayout,
   onPressBecomeFan,
 }) => {
+  const dispatch = useDispatch();
+  const token = useToken();
   const settings = useSettings();
   const influencerCategoryList = useInfluencerCategoryList();
-  const [isOpenCategoryListSelection, setisOpenCategoryListSelection] =
+  const [isUpdating, setisUpdating] = useState(false);
+  const [isOpenBioCategoryEditor, setisOpenBioCategoryEditor] = useState(false);
+  const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
     useState(false);
 
   const getBioData = () => {
@@ -90,18 +109,114 @@ const ProfileNameBioContainer = ({
     return bioDataText;
   };
 
+  function handleUpdateBioAndCategory(updatedData) {
+    setisOpenBioCategoryEditor(false);
+    setisUpdating(true);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token + profile.name.trim()));
+    formData.append('name', profile.name);
+    formData.append('bio_data', updatedData.bio);
+    formData.append('influencer_category', updatedData.categoryList.toString());
+    updateMyProfileService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempProfile = {...res.data.profile};
+          tempProfile = {
+            ...tempProfile,
+            name: htmlDecodeText(tempProfile.name),
+            first_name: htmlDecodeText(tempProfile.first_name),
+            last_name: htmlDecodeText(tempProfile.last_name),
+            bio_data: htmlDecodeText(tempProfile.bio_data),
+          };
+
+          dispatch(setMyProfile(tempProfile));
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisUpdating(false);
+      });
+  }
+
+  // const updateBioDataHandler = (bio) => {
+  //   if (isMount) {
+  //     setIsUpdating(true);
+  //     setModalVisible(false);
+  //   }
+  //   const postData = new FormData();
+  //   postData.append("token", auth.userToken);
+  //   postData.append("name", auth.userProfile.name);
+  //   postData.append(
+  //     "auth_code",
+  //     sha1(saltKey + auth.userToken + auth.userProfile.name)
+  //   );
+  //   postData.append("bio_data", bio);
+  // postData.append("influencer_category", bio);
+
+  //   UpdateMyProfile(postData)
+  //     .then((response) => {
+  //       dispatch(
+  //         setProfile({
+  //           ...auth.userProfile,
+  //           bio_data: bio,
+  //         })
+  //       );
+  //     })
+  //     .catch((err) => {})
+  //     .finally(() => {
+  //       if (isMount) {
+  //         setIsUpdating(false);
+  //       }
+  //     });
+  // };
+
+  function getSelectedCategoriesList() {
+    return [...influencerCategoryList]
+      .filter(item => [...getInfluencerCategoryIdsList()].includes(item.id))
+      .map(item => item.name);
+  }
+
+  function getInfluencerCategoryIdsList() {
+    if (profile?.influencer_category) {
+      return profile?.influencer_category?.split(',')?.map(id => parseInt(id));
+    }
+    return [];
+  }
+
   return (
     <View
       onLayout={onLayout}
       style={[styles.mainContainer, {paddingHorizontal}]}>
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
-          <StyledText style={styles.nameText}>
+          <StyledText style={styles.nameText} onPress={() => {}}>
             {getSlicedText(profile.name, 50)}
           </StyledText>
 
-          <View style={styles.dot} />
-          <StyledText style={styles.nameText}>Entertainer</StyledText>
+          {getSelectedCategoriesList().toString() ? (
+            <View style={styles.dot} />
+          ) : (
+            false
+          )}
+          {getSelectedCategoriesList().toString() ? (
+            <StyledText
+              style={styles.nameText}
+              onPress={() => {
+                if (getSelectedCategoriesList().toString().length > 15) {
+                  setisOpenCategoriesListModal(true);
+                }
+              }}>
+              {getSlicedText(getSelectedCategoriesList().toString(), 15)}
+            </StyledText>
+          ) : (
+            false
+          )}
         </View>
         {!userId && (
           <View style={{marginLeft: 10}}>
@@ -110,7 +225,8 @@ const ProfileNameBioContainer = ({
               iconSize={16}
               icon="edit_black"
               onPress={() => {
-                setisOpenCategoryListSelection(true);
+                setisOpenBioCategoryEditor(true);
+                // setisOpenCategoryListSelection(true);
               }}
             />
           </View>
@@ -127,31 +243,44 @@ const ProfileNameBioContainer = ({
           onPress={onPressBecomeFan}
         />
       )}
-      <Modal
-        visible={isOpenCategoryListSelection}
-        statusBarTranslucent
-        onRequestClose={() => {
-          setisOpenCategoryListSelection(false);
-        }}>
-        <MultiItemsSelectList
-          title={'Select Category'}
-          onCloseModal={() => {
-            setisOpenCategoryListSelection(false);
-          }}
-          displayFieldName={'name'}
-          idFieldName={'id'}
-          isEnableMaxSelection
-          maxSelectedCount={3}
-          itemTextContainerStyle={{paddingLeft: 10}}
-          list={[...influencerCategoryList]}
-          onSelectItems={list => {
-            setisOpenCategoryListSelection(false);
 
-            // setisOpenViewOnlySelectionModal(false);
-            // if (selectedShareTypeId) {
-            //   handleSharNugget(selectedShareTypeId, list);
-            // }
-          }}
+      <Modal
+        visible={isOpenCategoriesListModal}
+        onRequestClose={() => {
+          setisOpenCategoriesListModal(false);
+        }}
+        transparent
+        style={{backgroundColor: COLORS.transparentDimColor}}>
+        <SafeAreaView
+          style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
+          <ItemSelectionMiniList
+            onClose={() => {
+              setisOpenCategoriesListModal(false);
+            }}
+            isEnableClickItem={false}
+            listData={[...getSelectedCategoriesList()]}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={isOpenBioCategoryEditor}
+        transparent
+        onRequestClose={() => {
+          setisOpenBioCategoryEditor(false);
+        }}>
+        <CategoryBioEditor
+          setModal={setisOpenBioCategoryEditor}
+          preBioText={getBioData()}
+          preSelectedCategoriesIds={getInfluencerCategoryIdsList()}
+          onSubmit={handleUpdateBioAndCategory}
+        />
+      </Modal>
+
+      <Modal visible={isUpdating} transparent>
+        <Loader
+          bgColor={COLORS.transparentDimColor}
+          loaderText={'Profile Updating'}
         />
       </Modal>
     </View>
