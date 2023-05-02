@@ -17,5 +17,7 @@
 	<array>
 		<string>group.com.rawcaster.app</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array/>
 </dict>
 </plist>

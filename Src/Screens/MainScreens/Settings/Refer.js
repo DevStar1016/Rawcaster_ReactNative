@@ -8,8 +8,16 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Share as RNSHARE,
+  NativeModules,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
+import {
+  SendAndroidClientToken,
+  SendIOSClientToken,
+  getContacts,
+  getOtherContacts,
+} from 'react-native-google-contact-api';
 import HOCView from '../../../Components/HOCView';
 import SearchInput from '../../../Components/SearchInput';
 import {COLORS} from '../../../Utilities/Colors';
@@ -32,6 +40,13 @@ import {useProfile, useToken} from '../../../Utilities/StoreData';
 import Toast from '../../../Components/Toast';
 import Share from 'react-native-share';
 import {IS_IOS} from '../../../Utilities/Constants';
+import {
+  FIREBASE_APP_ID,
+  GOOGLE_CONTACTS_SERVER_CLIENT_ID,
+  GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
+  GOOGLE_SIGNIN_IOS_CLIENT_ID,
+} from '../../../Services/ServiceConstants';
+// import {ShareDialog} from 'react-native-fbsdk-next';
 
 var isMount = true;
 var currentPage = 1;
@@ -95,6 +110,7 @@ const TWITTER_REFERAL_MESSAGE =
 
 const Refer = ({navigation}) => {
   const token = useToken();
+  const {CalendarModule} = NativeModules;
   const profile = useProfile();
   const [suggestedAccountsList, setsuggestedAccountsList] = useState([]);
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -201,8 +217,116 @@ const Refer = ({navigation}) => {
       });
   };
 
+  const onShareHandler = async mediaType => {
+    if (mediaType === 'facebook') {
+      // ShareDialog.canShow(IOS_FACEBOOK_SHARE_OBJECT)
+      //   .then(function (canShow) {
+      //     if (canShow) {
+      //       return ShareDialog.show(IOS_FACEBOOK_SHARE_OBJECT);
+      //     } else {
+      //       Linking.openURL(
+      //         `https://www.facebook.com/sharer/sharer.php?u=${IOS_FACEBOOK_SHARE_OBJECT.contentUrl}&quote=${IOS_FACEBOOK_SHARE_OBJECT.contentDescription}`,
+      //       );
+      //     }
+      //   })
+      //   .catch(err => {
+      //     console.log(err);
+      //   });
+      const shareOptionsfb = {
+        ...SHARE_OBJECTS,
+        social: Share.Social?.FACEBOOK,
+      };
+
+      Share.shareSingle(shareOptionsfb)
+        .then(res => {
+          console.log('FACEBOOK res: ', res);
+        })
+        .catch(err => {
+          console.log('Facebook err:', err);
+        });
+    } else if (mediaType === 'instagram') {
+      const shareOptionsIns = {
+        ...SHARE_OBJECTS,
+        social: Share.Social?.INSTAGRAM,
+      };
+
+      Share.shareSingle(shareOptionsIns)
+        .then(res => {
+          console.log('instagram res: ', res);
+        })
+        .catch(err => {
+          console.log('Instagram err:', err);
+        });
+    } else if (mediaType === 'twitter') {
+      // Linking.openURL(
+      //   `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+      //     SHARE_OBJECTS.url,
+      //   )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
+      // );
+      const shareOptionstwitter = {
+        ...SHARE_OBJECTS_TWITTER,
+
+        social: Share.Social?.TWITTER,
+      };
+      Share.shareSingle(shareOptionstwitter)
+        .then(res => {
+          console.log('Twitter Response:', res);
+        })
+        .catch(err => {
+          console.log('Twitter Err:');
+        });
+    } else if (mediaType === 'linkedIn') {
+      Linking.openURL(
+        `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+          SHARE_OBJECTS.url,
+        )}&title=${encodeURIComponent(SHARE_OBJECTS.message)}`,
+      );
+    } else if (mediaType === 'whatsapp') {
+      Linking.openURL(
+        `whatsapp://send?text=${REFERAL_MESSAGE + ' ' + profile.referral_link}`,
+      ).catch(Err => console.log(Err));
+    } else if (mediaType === 'gmail') {
+      openComposer({
+        subject: 'Rawcaster - Invite from ' + profile.name,
+        body: SHARE_OBJECTS.message + ' ' + SHARE_OBJECTS.url,
+      });
+    } else if (mediaType === 'telegram') {
+      Linking.openURL(
+        `tg://msg?text=${SHARE_OBJECTS.message + '\n ' + SHARE_OBJECTS.url}`,
+      ).catch(Err => {
+        console.log(Err), toastService('Telegram App not installed', 3000);
+      });
+    } else {
+      try {
+        const result = await RNSHARE.share(
+          {
+            message: TWITTER_REFERAL_MESSAGE,
+            url: profile.referral_link,
+          },
+          {
+            excludedActivityTypes: [
+              'com.apple.UIKit.activity.PostToFacebook',
+              'com.apple.UIKit.activity.PostToTwitter',
+              'com.apple.UIKit.activity.Mail',
+            ],
+          },
+        );
+        if (result.action === RNSHARE.sharedAction) {
+          if (result.activityType) {
+            // shared with activity type of result.activityType
+          } else {
+            // shared
+          }
+        } else if (result.action === Share.dismissedAction) {
+          // dismissed
+        }
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  };
   const handleSocialShare = appType => {
-    if (IS_IOS && appType !== 'gmail') {
+    if (IS_IOS && appType !== 'contacts') {
       onShareHandler(appType);
       return;
     }
@@ -215,7 +339,7 @@ const Refer = ({navigation}) => {
         )
           .then(res => {})
           .catch(err => {
-            handleAppNotFoundAlert();
+            // handleAppNotFoundAlert();
           });
         break;
 
@@ -248,19 +372,22 @@ const Refer = ({navigation}) => {
           });
 
         break;
-      case 'messenger':
-        const shareOptionsmes = {
-          ...SHARE_OBJECTS,
-          appId: '204958358281864',
-          social: Share.Social?.MESSENGER,
-        };
-        Share.shareSingle(shareOptionsmes)
-          .then(res => {
-            console.log('Mesenger Res:', res);
-          })
-          .catch(err => {
-            console.log('Messenger Error', err);
-          });
+      case 'contacts':
+        // const shareOptionsmes = {
+        //   ...SHARE_OBJECTS,
+        //   appId: '204958358281864',
+        //   social: Share.Social?.MESSENGER,
+        // };
+        // Share.shareSingle(shareOptionsmes)
+        //   .then(res => {
+        //     console.log('Mesenger Res:', res);
+        //   })
+        //   .catch(err => {
+        //     console.log('Messenger Error', err);
+        //   });
+
+        // handleGoogleContacts();
+        navigation.navigate('ReferalContacts');
         break;
       case 'twitter':
         const shareOptionstwitter = {
@@ -307,6 +434,44 @@ const Refer = ({navigation}) => {
 
       default:
         break;
+    }
+  };
+
+  const handleGoogleContacts = () => {
+    if (IS_IOS) {
+      SendIOSClientToken(GOOGLE_SIGNIN_IOS_CLIENT_ID);
+      getContacts(null)
+        .then(response => {
+          //statement
+          console.log(response);
+        })
+        .catch(error => {
+          //Error Response
+          console.log('sdsfsfsdfds', error);
+        });
+    } else {
+      SendAndroidClientToken(
+        GOOGLE_CONTACTS_SERVER_CLIENT_ID,
+        FIREBASE_APP_ID,
+        GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
+      )
+        .then(response => {
+          //statement
+          console.log(response);
+          getContacts(null)
+            .then(response => {
+              //statement
+              console.log(response);
+            })
+            .catch(error => {
+              //Error Response
+              console.log('sdsfsfsdfds', error);
+            });
+        })
+        .catch(error => {
+          //Error Response
+          console.log(error);
+        });
     }
   };
 
@@ -408,6 +573,7 @@ const Refer = ({navigation}) => {
         isEnableBack: true,
         title: 'Invite Fans & Contacts',
         onPressBack: () => navigation.goBack(),
+        bgColor: COLORS.transparent,
       }}>
       <SearchInput
         marginVertical={15}
@@ -535,6 +701,7 @@ const styles = StyleSheet.create({
   },
   BecomeFanBtnText: {
     color: COLORS.white,
+    fontSize: 13,
   },
   divider: {
     height: 10,

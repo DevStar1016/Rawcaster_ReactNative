@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import UsersImage from '../../Assets/Png/IntroImages/background.png';
 import Logo from '../../Assets/Svg/slogan_logo.svg';
 import {INTRO_DATA} from '../../Utilities/Constants';
+import {FONTS} from '../../Utilities/Fonts';
 
 const LoginIntro = ({onSkipIntro}) => {
   const {width: windowWidth} = useWindowDimensions();
@@ -121,7 +122,7 @@ const LoginIntro = ({onSkipIntro}) => {
         <Text
           style={{
             color: '#FFFFFF',
-            // fontFamily: DMSANS[0],
+            fontFamily: FONTS.DMSans.regular,
             fontSize: 15,
           }}>
           {isDone ? 'Done' : 'Skip'}
@@ -178,13 +179,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#fff',
     paddingBottom: 10,
-    // fontFamily: GILROY[1],
+    fontFamily: FONTS.Gilroy.bold,
   },
   content: {
     textAlign: 'center',
     fontSize: 14,
     color: '#fff',
-    // fontFamily: DMSANS[0],
+    fontFamily: FONTS.DMSans.regular,
   },
   indicatorContainer: {
     flexDirection: 'row',

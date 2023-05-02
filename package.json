@@ -51,6 +51,7 @@
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.9.0",
+    "react-native-google-contact-api": "^1.0.7",
     "react-native-google-places-autocomplete": "^2.5.1",
     "react-native-hyperlink": "^0.0.22",
     "react-native-image-crop-picker": "^0.39.0",

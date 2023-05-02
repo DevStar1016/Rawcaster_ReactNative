@@ -55,6 +55,7 @@ target 'Rawcaster' do
   pod 'FirebaseCoreInternal', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
 
+
   # react-native-photo-editor
   pod 'SDWebImage', :modular_headers => true
   pod 'SDWebImageWebPCoder', :modular_headers => true
