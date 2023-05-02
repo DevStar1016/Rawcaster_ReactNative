@@ -14,6 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {COLORS} from '../Utilities/Colors';
 import {getFileName, getUrlWithFilePrefix} from '../Utilities/Methods';
 import {IconType} from '../Utilities/Icons';
+import DeafaultProfile from '../Assets/Png/default_profile.png';
 
 type ProfileImageProps = {
   uri: string;
@@ -35,6 +36,7 @@ export type ProfileWithBadgeProps = {
   isEnableGradient?: boolean;
   isEnableWhiteBorderArroundGradient?: boolean;
   isEnableImagePicker?: boolean;
+  topRightIconAsButton?: boolean;
   containerStyle?: ViewStyle;
   badgeSize?: number;
   cameraIconSize?: number;
@@ -45,6 +47,7 @@ export type ProfileWithBadgeProps = {
   onPressProfile?: () => void;
   badgeContainerStyle?: ViewStyle;
   cameraIconContainerStyle?: ViewStyle;
+  onPressTopRightIcon?: () => void;
   onSelectImage?: (value: ProfileImageProps) => void;
 };
 
@@ -57,6 +60,7 @@ const ProfileWithBadge = ({
   isButton = false,
   onPressProfile,
   isOnline = false,
+  topRightIconAsButton = true,
   isEnableWhiteBorderArroundGradient = false,
   extraMargin = 10,
   topRightIconContainerBackgroundColor,
@@ -73,6 +77,7 @@ const ProfileWithBadge = ({
   padding = 2,
   onSelectImage,
   alternateProfileImageComponent,
+  onPressTopRightIcon,
 }: ProfileWithBadgeProps) => {
   const onSelectProfilePhoto = () => {
     ImagePicker.openPicker({
@@ -157,9 +162,14 @@ const ProfileWithBadge = ({
                 style={styles.profileImage}
                 borderRadius={borderRadius}
               />
-            ) : (
-              alternateProfileImageComponent &&
+            ) : alternateProfileImageComponent ? (
               alternateProfileImageComponent(undefined)
+            ) : (
+              <Image
+                source={DeafaultProfile}
+                style={styles.profileImage}
+                borderRadius={borderRadius}
+              />
             )}
           </LinearGradient>
         </View>
@@ -169,10 +179,17 @@ const ProfileWithBadge = ({
             styles.profileImageContainer,
             {height: profileSize, width: profileSize, borderRadius, padding},
           ]}>
-          {profileImage && (
+          {profileImage ? (
             <Image
               source={{uri: profileImage}}
               style={[styles.profileImage, {borderRadius}]}
+              borderRadius={borderRadius}
+            />
+          ) : (
+            <Image
+              source={DeafaultProfile}
+              style={[styles.profileImage, {borderRadius}]}
+              borderRadius={borderRadius}
             />
           )}
         </View>
@@ -199,7 +216,10 @@ const ProfileWithBadge = ({
       )}
 
       {topRightIcon ? (
-        <View
+        <TouchableOpacity
+          disabled={!topRightIconAsButton}
+          onPress={onPressTopRightIcon}
+          activeOpacity={0.9}
           style={[
             styles.topRightIconContainer,
             {
@@ -215,7 +235,7 @@ const ProfileWithBadge = ({
             height={topRightIconSize}
             width={topRightIconSize}
           />
-        </View>
+        </TouchableOpacity>
       ) : (
         isEnableOnlineOfflineStatus && (
           <View

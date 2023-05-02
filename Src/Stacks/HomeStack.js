@@ -32,7 +32,6 @@ const HomeStack = () => {
       }}>
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
-      <Stack.Screen name="ProfileStack" component={ProfileStack} />
     </Stack.Navigator>
   );
 };

@@ -39,6 +39,7 @@ type Props = {
   rightButtonTextStyle?: TextStyle;
   itemTextContainerStyle?: ViewStyle;
   rightTextButtonStyle?: ViewStyle;
+  listContentContainerStyle?: ViewStyle;
 };
 
 type RenderProps = {
@@ -67,6 +68,7 @@ const MultiItemsSelectList = ({
   isTitleCenter = true,
   rightButtonTextStyle,
   rightTextButtonStyle,
+  listContentContainerStyle,
 }: Props) => {
   const [selectedIdsList, setselectedIdsList] = useState<any[]>(
     preSelectedIds ?? [],
@@ -222,6 +224,7 @@ const MultiItemsSelectList = ({
             <FlatList
               data={getList()}
               keyboardShouldPersistTaps={'handled'}
+              contentContainerStyle={listContentContainerStyle}
               renderItem={renderItem}
               keyExtractor={(item, index) => index.toString()}
               showsVerticalScrollIndicator={false}

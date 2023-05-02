@@ -4,6 +4,7 @@ import {
   ReturnKeyTypeOptions,
   StyleSheet,
   TextInput,
+  TextInputProps,
   TextInputSubmitEditingEventData,
   TextStyle,
   TouchableOpacity,
@@ -56,6 +57,24 @@ interface TextBoxProps {
   inputContainerHeight?: number;
   isEnableListAppend?: boolean;
   appendedListProps?: AppendedListProps;
+  additionalTextInputProps?: Omit<
+    TextInputProps,
+    | 'ref'
+    | 'value'
+    | 'onChangeText'
+    | 'editable'
+    | 'secureTextEntry'
+    | 'style'
+    | 'returnKeyType'
+    | 'placeholder'
+    | 'keyboardType'
+    | 'maxLength'
+    | 'placeholderTextColor'
+    | 'multiline'
+    | 'textAlignVertical'
+    | 'clearButtonMode'
+    | 'onSubmitEditing'
+  >;
 
   clearButtonMode?:
     | 'never'
@@ -106,6 +125,7 @@ const TextBox = ({
   clearButtonMode,
   mainContainerMarginTop,
   isEnableListAppend = false,
+  additionalTextInputProps,
 }: TextBoxProps) => {
   const [isVisiblePassword, setisVisiblePassword] = useState(false);
 
@@ -190,6 +210,7 @@ const TextBox = ({
             textAlignVertical={textAlignVertical}
             clearButtonMode={clearButtonMode}
             onSubmitEditing={onSubmitEditing}
+            {...additionalTextInputProps}
           />
           {isSecure && (
             <View style={styles.iconContainer}>
