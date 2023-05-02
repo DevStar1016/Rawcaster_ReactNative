@@ -7,6 +7,7 @@ import GeneralSettings from '../Screens/MainScreens/Settings/GeneralSettings';
 import NotificationsSettings from '../Screens/MainScreens/Settings/NotificationsSettings';
 import Refer from '../Screens/MainScreens/Settings/Refer';
 import SettingsHome from '../Screens/MainScreens/Settings/SettingsHome';
+import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ const SettingsStack = () => {
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
       <Stack.Screen name="EventSettings" component={EventSettings} />
       <Stack.Screen name="Refer" component={Refer} />
+      <Stack.Screen name="ReferalContacts" component={ReferalContactsList} />
     </Stack.Navigator>
   );
 };
