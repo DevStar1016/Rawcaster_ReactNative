@@ -25,7 +25,7 @@ type AppendedListProps = {
   onRemoveItem?: (item: any) => void;
 };
 
-interface TextBoxProps {
+export type TextBoxProps = {
   placeHolder?: string;
   title?: string;
   returnKeyType?: ReturnKeyTypeOptions;
@@ -50,7 +50,7 @@ interface TextBoxProps {
   titleStyle?: TextStyle;
   textColor?: string;
   isEnableOuterRightIcon?: boolean;
-  outerRightIconProps: SVGIconProps;
+  outerRightIconProps?: SVGIconProps;
   multiline?: boolean;
   isVisible?: boolean;
   mainContainerWidth?: number | string;
@@ -88,7 +88,7 @@ interface TextBoxProps {
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
   ) => void | undefined;
   textAlignVertical?: 'auto' | 'top' | 'bottom' | 'center' | undefined;
-}
+};
 
 const TextBox = ({
   innerRef,

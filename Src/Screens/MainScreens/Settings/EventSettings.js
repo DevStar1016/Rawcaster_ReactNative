@@ -23,7 +23,6 @@ import {
 import {FONTS} from '../../../Utilities/Fonts';
 import SubmitButton from '../../../Components/SubmitButton';
 import StyledText from '../../../Components/StyledText';
-import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useIsFocused} from '@react-navigation/native';
 import {createThumbnail} from 'react-native-create-thumbnail';
@@ -48,9 +47,16 @@ const EventSettings = () => {
     participant_join_sound: parseInt(settings.participant_join_sound),
     screen_share_status: parseInt(settings.screen_share_status),
     default_melody: settings.default_melody,
-    meeting_header_image: {uri: settings.meeting_header_image},
-    live_event_banner: {uri: settings.live_event_banner},
-    talkshow_event_banner: {uri: settings.talkshow_event_banner},
+    meeting_header_image: {
+      uri: settings.meeting_header_image?.uri ?? settings.meeting_header_image,
+    },
+    live_event_banner: {
+      uri: settings?.live_event_banner?.uri ?? settings.live_event_banner,
+    },
+    talkshow_event_banner: {
+      uri:
+        settings.talkshow_event_banner?.uri ?? settings.talkshow_event_banner,
+    },
     host_audio: parseInt(settings.host_audio),
     participant_audio: parseInt(settings.participant_audio),
     host_video: parseInt(settings.host_video),
@@ -111,11 +117,14 @@ const EventSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append(keyText, valueText);
-    console.log(formData, valueText, 'FORMDATA');
 
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(
+            {...settings, [keyText]: reduxData ?? valueText},
+            'UPDATEDDATAAA',
+          );
           dispatch(
             setSettings({...settings, [keyText]: reduxData ?? valueText}),
           );
@@ -193,11 +202,7 @@ const EventSettings = () => {
   function handleSelectMeetingHeaderImage(selectedImageData, fieldName) {
     if (isMount) {
       setsettingsData(preData => {
-        updateUsersSettingsAPICall(
-          fieldName,
-          JSON.stringify(selectedImageData),
-          selectedImageData,
-        );
+        updateUsersSettingsAPICall(fieldName, selectedImageData);
         return {
           ...preData,
           [fieldName]: selectedImageData,
@@ -216,6 +221,8 @@ const EventSettings = () => {
     }
     return 0;
   }
+
+  console.log(settingsData, 'SETTINGSSSS');
 
   function handleUploadMelody() {
     DocumentPicker.pick({

@@ -5,13 +5,17 @@ import {COLORS} from '../../../Utilities/Colors';
 import {useProfile, useSettings, useToken} from '../../../Utilities/StoreData';
 import SwtchesContainer from '../../../Components/SwtchesContainer';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
-import {setSettings} from '../../../Store/Slices/AuthSlice';
+import {setMyProfile, setSettings} from '../../../Store/Slices/AuthSlice';
 import {useDispatch} from 'react-redux';
-import {updateUserSettingsService} from '../../../Services/ApiService';
+import {
+  updateMyProfileService,
+  updateUserSettingsService,
+} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
 import InputPopup from '../../../Modals/InputPopup';
+import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 
 const SWITCHES_LIST = [
   {
@@ -103,6 +107,47 @@ const NotificationsSettings = () => {
       });
   }
 
+  const handleUpdateProfile = (value = '', fieldType = '') => {
+    if (isMount) {
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token + profile.name.trim()));
+    formData.append('first_name', profile.first_name.trim());
+    if (fieldType.includes('sms')) {
+      formData.append('mobile_no', value.trim());
+    } else if (fieldType.includes('email')) {
+      formData.append('email_id', value.trim());
+    }
+
+    updateMyProfileService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempProfile = {...res.data.profile};
+          tempProfile = {
+            ...tempProfile,
+            name: htmlDecodeText(tempProfile.name),
+            first_name: htmlDecodeText(tempProfile.first_name),
+            last_name: htmlDecodeText(tempProfile.last_name),
+            bio_data: htmlDecodeText(tempProfile.bio_data),
+          };
+          dispatch(setMyProfile(tempProfile));
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
+
   function getOnStatusIdsList(dataText) {
     let data = dataText
       .split('')
@@ -120,14 +165,18 @@ const NotificationsSettings = () => {
   }
 
   function isEmailVerified() {
-    console.log(profile, 'PROFILE');
     if (parseInt(profile.is_email_id_verified) === 1) {
       return true;
     }
-    if (profile.email_id) {
-      setconfirmationBoxData({isOpen: true, verificationField: 'email'});
-    } else {
-    }
+    setconfirmationBoxData({isOpen: true, verificationField: 'email'});
+    // if (profile.email_id) {
+    //   setconfirmationBoxData({isOpen: true, verificationField: 'email'});
+    // } else {
+    //   setverificationInputModalData({
+    //     isOpen: true,
+    //     verificationField: 'email',
+    //   });
+    // }
     return false;
   }
 
@@ -135,14 +184,15 @@ const NotificationsSettings = () => {
     if (parseInt(profile.is_mobile_no_verified) === 1) {
       return true;
     }
-    if (profile.mobile) {
-      setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
-    } else {
-      setverificationInputModalData({
-        isOpen: true,
-        verificationField: 'sms',
-      });
-    }
+    setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
+    // if (profile.mobile) {
+    //   setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
+    // } else {
+    //   setverificationInputModalData({
+    //     isOpen: true,
+    //     verificationField: 'sms',
+    //   });
+    // }
     return false;
   }
 
@@ -237,10 +287,20 @@ const NotificationsSettings = () => {
           onPressPositiveButton={() => {
             const otpType = confirmationBoxData.verificationField;
             closeConfirmationBox();
-            navigation.navigate('EmailPhoneVerification', {
-              otpType: otpType,
-              isGoBack: true,
-            });
+            if (
+              (otpType === 'email' && profile.email_id) ||
+              (otpType === 'sms' && profile.mobile)
+            ) {
+              navigation.navigate('EmailPhoneVerification', {
+                otpType: otpType,
+                isGoBack: true,
+              });
+            } else {
+              setverificationInputModalData({
+                isOpen: true,
+                verificationField: otpType,
+              });
+            }
           }}
           onPressNegativeButton={() => {
             closeConfirmationBox();
@@ -261,7 +321,37 @@ const NotificationsSettings = () => {
           closePopup={() => {
             closeVerificationInputModal();
           }}
-          title={'Mobile Number'}
+          title={`Enter your ${
+            verificationInputModalData.verificationField === 'sms'
+              ? 'Phone Number'
+              : 'Email'
+          } to verify`}
+          submitButtonProps={{
+            buttonText: 'Update and Verify',
+          }}
+          textInputProps={{
+            placeHolder:
+              verificationInputModalData.verificationField === 'sms'
+                ? 'Phone Number'
+                : 'Email',
+            keyboardType:
+              verificationInputModalData.verificationField === 'sms'
+                ? 'number-pad'
+                : 'email-address',
+          }}
+          onSubmit={value => {
+            const otpType = verificationInputModalData.verificationField;
+            closeVerificationInputModal();
+            if (otpType === 'sms') {
+              dispatch(setMyProfile({...profile, mobile: value}));
+            } else {
+              dispatch(setMyProfile({...profile, email_id: value}));
+            }
+            navigation.navigate('EmailPhoneVerification', {
+              otpType: otpType,
+              isGoBack: true,
+            });
+          }}
         />
       </Modal>
       <Modal visible={isLoading} transparent>

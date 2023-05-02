@@ -109,14 +109,26 @@ const SignupWithPhone = ({route}) => {
 
     signupService(formData)
       .then(res => {
+        console.log(res.data, 'SIGNUPDATA');
         if (res.data.status === 1) {
-          const userData = {
-            name: res.data.name,
-            user_id: res.data.user_id,
-            profile_image: res.data.profile_image,
-            acc_verify_status: res.data.acc_verify_status,
-          };
-          storeToken(res.data.token, userData, dispatch);
+          if (res.data.acc_verify_status === 1) {
+            const userData = {
+              name: res.data.name,
+              user_id: res.data.user_id,
+              profile_image: res.data.profile_image,
+              acc_verify_status: res.data.acc_verify_status,
+            };
+            storeToken(res.data.token, userData, dispatch);
+          } else if (res.data.acc_verify_status === 0) {
+            navigation.navigate('EmailPhoneVerification', {
+              otpType: parseInt(res.data.signup_type) === 1 ? 'email' : 'sms',
+              emailMobile: res.data.email,
+              isFromSignup: true,
+              otp_ref_id: res.data.otp_ref_id,
+              remaining_seconds: res.data.remaining_seconds,
+            });
+          }
+          Toast.success(res.data.msg);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         } else if (res.data.status === 2) {

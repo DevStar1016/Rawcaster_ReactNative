@@ -1,17 +1,29 @@
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import StyledText from '../Components/StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import SVGIcon from '../Components/SVGIcon';
+import TextBox, {TextBoxProps} from '../Components/TextBox';
+import SubmitButton, {SubmitButtonProps} from '../Components/SubmitButton';
 
 type Props = {
   closePopup: () => void;
   title?: string;
+  textInputProps?: Omit<TextBoxProps, 'value' | 'onChangeText'>;
+  submitButtonProps?: Omit<SubmitButtonProps, 'onPress'>;
+  onSubmit: (value: string) => void;
 };
 
-const InputPopup = ({closePopup, title = ''}: Props) => {
+const InputPopup = ({
+  closePopup,
+  title = '',
+  textInputProps,
+  submitButtonProps,
+  onSubmit,
+}: Props) => {
+  const [value, setvalue] = useState('');
   return (
     <View style={styles.mainContainer}>
       <KeyboardAwareScrollView
@@ -35,6 +47,15 @@ const InputPopup = ({closePopup, title = ''}: Props) => {
               onPress={closePopup}
             />
           </View>
+          <TextBox value={value} onChangeText={setvalue} {...textInputProps} />
+          <SubmitButton
+            buttonText="SUBMIT"
+            marginTop={5}
+            onPress={() => {
+              onSubmit(value);
+            }}
+            {...submitButtonProps}
+          />
         </SafeAreaView>
       </KeyboardAwareScrollView>
     </View>

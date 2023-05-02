@@ -3,7 +3,6 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,12 +10,10 @@ import React, {useEffect, useState} from 'react';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
-import SVGIcon from '../../../Components/SVGIcon';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {useProfile, useToken} from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
-import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {
   getFollowListService,
@@ -69,8 +66,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   }, []);
 
   function listApiCalls(pageNumber = 1) {
-    console.log(listType, 'LISTTYPE');
-
     switch (listType) {
       case 'connections':
         connectionsListAPICall(pageNumber);
@@ -214,6 +209,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   };
 
+  function onPressFilter() {}
+
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -279,7 +276,14 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
   return (
     <View style={styles.mainContainer}>
-      <HeaderWithBack title={title} isEnableSafeArea />
+      <HeaderWithBack
+        title={title}
+        isEnableSafeArea
+        isEnableRightIcon
+        rightIcon="filter_line_white"
+        rightIconSize={18}
+        onPressRightIcon={onPressFilter}
+      />
       {isLoading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator color={COLORS.primary} size="large" />

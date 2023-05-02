@@ -1,6 +1,7 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import BottomTabNavigation from '../Navigation/BottomTabNavigation';
+import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ForgotPassword from '../Screens/AuthScreens/ForgotPassword';
 import Login from '../Screens/AuthScreens/Login';
 import ResetPasswordOTP from '../Screens/AuthScreens/ResetPasswordOTP';
@@ -21,6 +22,10 @@ const RootStack = () => {
       <Stack.Screen name="Signup" component={Signup} />
       <Stack.Screen name="SignupWithPhone" component={SignupWithPhone} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <Stack.Screen
+        name="EmailPhoneVerification"
+        component={EmailPhoneVerification}
+      />
       <Stack.Screen name="ResetPasswordOTP" component={ResetPasswordOTP} />
     </Stack.Navigator>
   );

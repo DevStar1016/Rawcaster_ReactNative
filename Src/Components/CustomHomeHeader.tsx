@@ -18,6 +18,7 @@ export type CustomHomeHeaderProps = {
   isEnableSafeArea?: boolean;
   isEnableSearch?: boolean;
   title?: string;
+  isEnableLive?: boolean;
   isEnableBack?: boolean;
   isEnableNuggetFilterTabs?: boolean;
   selectedTab?: 'first' | 'second';
@@ -36,6 +37,7 @@ const CustomHomeHeader = ({
   paddingTop = 0,
   title = '',
   onPressBack,
+  isEnableLive = true,
   isEnableBack = false,
   isEnableSafeArea = false,
   isEnableNuggetFilterTabs = false,
@@ -169,17 +171,19 @@ const CustomHomeHeader = ({
           />
         )}
 
-        <SVGIcon
-          icon="live"
-          isButton
-          height={28}
-          width={28}
-          marginLeft={5}
-          onPress={() => {
-            if (isLogin()) {
-            }
-          }}
-        />
+        {isEnableLive && (
+          <SVGIcon
+            icon="live"
+            isButton
+            height={28}
+            width={28}
+            marginLeft={5}
+            onPress={() => {
+              if (isLogin()) {
+              }
+            }}
+          />
+        )}
         {isEnableAddUserButton && (
           <SVGIcon
             icon="user_plus"

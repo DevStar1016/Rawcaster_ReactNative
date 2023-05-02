@@ -6,7 +6,7 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useNavigation} from '@react-navigation/native';
 import {resendOTPService, signupVerifyService} from '../../Services/ApiService';
-import {getAuthCode, storeUserData} from '../../Utilities/Methods';
+import {getAuthCode, storeToken, storeUserData} from '../../Utilities/Methods';
 import {useProfile, useToken, useUserData} from '../../Utilities/StoreData';
 import Toast from '../../Components/Toast';
 import {useDispatch} from 'react-redux';
@@ -34,9 +34,18 @@ const EmailPhoneVerification = ({route}) => {
   const dispatch = useDispatch();
   const token = useToken();
   const user = useUserData();
-  const {otpType, isGoBack} = route.params ?? {};
-  const [otpRefId, setotpRefId] = useState(null);
-  const [timer, settimer] = useState(0);
+  const {
+    otpType,
+    emailMobile,
+    isGoBack,
+    isFromSignup,
+    otp_ref_id,
+    remaining_seconds,
+  } = route.params ?? {};
+  const [otpRefId, setotpRefId] = useState(otp_ref_id);
+  const [timer, settimer] = useState(
+    remaining_seconds ? parseInt(remaining_seconds) : 0,
+  );
   const profile = useProfile();
   const [isLoading, setisLoading] = useState(false);
 
@@ -58,7 +67,9 @@ const EmailPhoneVerification = ({route}) => {
   }, []);
 
   useEffect(() => {
-    resendOTPAPICall();
+    if (!isFromSignup) {
+      resendOTPAPICall();
+    }
   }, []);
 
   const resendOTPAPICall = () => {
@@ -107,15 +118,33 @@ const EmailPhoneVerification = ({route}) => {
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (otpType) {
-            if (otpType === 'sms') {
-              dispatch(
-                setMyProfile({
-                  ...profile,
-                  is_mobile_no_verified: 1,
-                  acc_verify_status: 1,
-                }),
-              );
+          if (isFromSignup) {
+            const userData = {
+              name: res.data.name,
+              user_id: res.data.user_id,
+              profile_image: res.data.profile_image,
+              acc_verify_status: res.data.acc_verify_status,
+            };
+            storeToken(res.data.token, userData, dispatch);
+          } else {
+            if (otpType) {
+              if (otpType === 'sms') {
+                dispatch(
+                  setMyProfile({
+                    ...profile,
+                    is_mobile_no_verified: 1,
+                    acc_verify_status: 1,
+                  }),
+                );
+              } else {
+                dispatch(
+                  setMyProfile({
+                    ...profile,
+                    is_email_id_verified: 1,
+                    acc_verify_status: 1,
+                  }),
+                );
+              }
             } else {
               dispatch(
                 setMyProfile({
@@ -125,25 +154,17 @@ const EmailPhoneVerification = ({route}) => {
                 }),
               );
             }
-          } else {
-            dispatch(
-              setMyProfile({
-                ...profile,
-                is_email_id_verified: 1,
-                acc_verify_status: 1,
-              }),
-            );
+            const userData = {...user, acc_verify_status: 1};
+            storeUserData(userData, dispatch);
+            if (isGoBack) {
+              navigation.goBack();
+            } else {
+              navigation.reset({
+                routes: [{name: 'BottomTabNavigationAfterLogin'}],
+              });
+            }
           }
-          const userData = {...user, acc_verify_status: 1};
           Toast.success(res.data.msg);
-          storeUserData(userData, dispatch);
-          if (isGoBack) {
-            navigation.goBack();
-          } else {
-            navigation.reset({
-              routes: [{name: 'BottomTabNavigationAfterLogin'}],
-            });
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -159,6 +180,9 @@ const EmailPhoneVerification = ({route}) => {
   };
 
   const getOtpSendedCommunication = () => {
+    if (isFromSignup) {
+      return emailMobile;
+    }
     if (otpType === 'sms') {
       return profile.mobile;
     }

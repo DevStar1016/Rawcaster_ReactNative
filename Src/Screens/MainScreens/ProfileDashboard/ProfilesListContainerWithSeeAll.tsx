@@ -88,7 +88,10 @@ const ProfilesListContainerWithSeeAll = ({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
-    formData.append('group_ids', JSON.stringify([userId]));
+    formData.append('allfriends', 1);
+    if (userId) {
+      formData.append('user_id', userId);
+    }
     listAllFriendsService(formData)
       .then(res => {
         console.log(res.data, 'JJKKJJ');

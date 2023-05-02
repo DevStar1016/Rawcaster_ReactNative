@@ -5,15 +5,16 @@ import {useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
 import SearchInput from '../../../Components/SearchInput';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import {useProfile} from '../../../Utilities/StoreData';
+import {useConnectionsList, useProfile} from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroupsTopTabNavigation';
 import {MyConnectionsContext} from '../../../Utilities/Contexts';
+import {getSlicedText} from '../../../Utilities/Methods';
 
 const UsersGroupsListHome = () => {
   const navigation = useNavigation();
-  const profile = useProfile();
+  const connectionsList = useConnectionsList();
   const [focusedTab, setfocusedTab] = useState(1); //1 - user, 2- group
   const [searchText, setsearchText] = useState('');
 
@@ -24,16 +25,22 @@ const UsersGroupsListHome = () => {
     // topLayerHeight: topLayerHeight + 50,
   };
 
+  function getList() {
+    return [...connectionsList].filter(item => parseInt(item.online) === 1);
+  }
+
   function renderRecentChatItem({item, index}) {
     return (
       <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
         <ProfileWithBadge
-          profileImage={profile.profile_image}
+          profileImage={item.profile_img}
           padding={0}
           isEnableOnlineOfflineStatus
           isOnline
         />
-        <StyledText style={styles.profileNameText}>Solomon</StyledText>
+        <StyledText style={styles.profileNameText}>
+          {getSlicedText(item.display_name, 20)}
+        </StyledText>
       </TouchableOpacity>
     );
   }
@@ -64,8 +71,9 @@ const UsersGroupsListHome = () => {
           />
           <View style={{paddingBottom: 10}}>
             <FlatList
-              data={[...Array(6)]}
+              data={getList()}
               horizontal
+              keyExtractor={(_, index) => index.toString()}
               contentContainerStyle={{paddingHorizontal: 10}}
               showsHorizontalScrollIndicator={false}
               renderItem={renderRecentChatItem}

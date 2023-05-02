@@ -19,7 +19,7 @@ import {
   listAllFriendRequestsService,
   listAllFriendsService,
 } from '../Services/ApiService';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useStore} from 'react-redux';
 import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
@@ -36,10 +36,12 @@ import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ProfileStack from './ProfileStack';
+import moment from 'moment';
 
 const Stack = createStackNavigator();
 
 const MainStack = () => {
+  const store = useStore();
   const [isLoading, setisLoading] = useState(true);
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
@@ -77,7 +79,7 @@ const MainStack = () => {
             // FriendResponse(message);
             break;
           case SocketEvents.friendStatus:
-            // friendStatusHandler(message);
+            handleSocketFriendOnlineStatus(message);
             break;
         }
       },
@@ -92,6 +94,59 @@ const MainStack = () => {
   function handleSocketFriendRequests(data) {
     setsocketFriendRequestData(data);
     setisShowFriendRequestModal(true);
+  }
+
+  function handleSocketFriendOnlineStatus(message) {
+    let tempFriends = store.getState().home.connectionsList;
+    let newFriendList = [...tempFriends];
+
+    const index = newFriendList.findIndex(
+      ele => parseInt(ele.user_id) === parseInt(message.friendid),
+    );
+    if (
+      index > -1 &&
+      (newFriendList[index].online === 0 || newFriendList[index].online === 1)
+    ) {
+      let login_from_web = newFriendList[index].login_from_web;
+      let login_from_app = newFriendList[index].login_from_app;
+
+      if (message.login_in === 2 && message.status === 1) {
+        login_from_app = 1;
+      } else if (message.login_in === 2 && message.status === 0) {
+        login_from_app = 0;
+      }
+
+      if (message.login_in === 1 && message.status === 1) {
+        login_from_web = 1;
+      } else if (message.login_in === 1 && message.status === 0) {
+        login_from_web = 0;
+      }
+      if (login_from_app === 0 && login_from_web === 0) {
+        newFriendList[index].online = 0;
+        newFriendList[index].last_seen = message.last_seen;
+        newFriendList[index].login_from_app = login_from_app;
+        newFriendList[index].login_from_web = login_from_web;
+      } else {
+        newFriendList[index].online = 1;
+        newFriendList[index].last_seen = message.last_seen;
+        newFriendList[index].login_from_app = login_from_app;
+        newFriendList[index].login_from_web = login_from_web;
+      }
+    }
+    newFriendList.sort((a, b) => {
+      // if (a.online !== b.online) {
+      //   return a.online ? -1 : 1;
+      // }
+      return (
+        moment(b.last_msg_datetime ? b.last_msg_datetime : '1970-01-02').format(
+          'X',
+        ) -
+        moment(a.last_msg_datetime ? a.last_msg_datetime : '1970-01-02').format(
+          'X',
+        )
+      );
+    });
+    dispatch(setConnectionsList(newFriendList));
   }
 
   function getCommonFormData() {
@@ -118,6 +173,7 @@ const MainStack = () => {
     ])
       .then(res => {
         if (res[0].data.status === 1) {
+          console.log(res[0].data.profile, 'PROFILEEEE');
           let profile = {...res[0].data.profile};
           profile = {
             ...profile,

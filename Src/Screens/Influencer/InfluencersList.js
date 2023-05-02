@@ -238,6 +238,11 @@ const InfluencersList = () => {
       isEnableTopSafeAreaHomeHeader={true}
       isEnableScroll={false}
       paddingHorizontal={0}
+      headerProps={{
+        isEnableProfile: false,
+        isEnableSearch: false,
+        isEnableLive: false,
+      }}
       headerType="home_header">
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
@@ -247,7 +252,7 @@ const InfluencersList = () => {
               fontSize: 18,
               paddingVertical: 5,
             }}>
-            {`Welcome ${profile.name} - Select your influencers`}
+            {`Welcome ${profile?.name} - Select your influencers`}
           </StyledText>
         </View>
         <View style={styles.searchContainer}>

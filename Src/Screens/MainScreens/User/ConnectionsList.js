@@ -69,8 +69,9 @@ const ConnectionsList = () => {
     return [...connectionsList];
   }
 
-  function keyExtractor(item) {
-    return item.user_ref_id.toString();
+  function keyExtractor(item, index) {
+    return index.toString();
+    // return item.user_id.toString();
   }
 
   function renderItem({item, index}) {

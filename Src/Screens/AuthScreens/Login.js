@@ -79,6 +79,7 @@ const Login = () => {
     formData.append('app_type', IS_IOS ? 2 : 1);
     loginService(formData)
       .then(res => {
+        console.log(res.data, 'LOGINDATA');
         if (res.data.status === 1) {
           const userData = {
             name: res.data.name,

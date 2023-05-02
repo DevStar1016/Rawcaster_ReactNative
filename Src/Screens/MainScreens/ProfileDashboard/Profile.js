@@ -379,22 +379,19 @@ const Profile = ({route}) => {
           paddingHorizontal={PADDING_HORIZONTAL}
         />
         <Divider />
-        {!userId ? (
-          <ProfilesListContainerWithSeeAll
-            userId={userId}
-            isLock={
-              userId
-                ? Boolean(parseInt(getProfileData().lock_my_connection))
-                : false
-            }
-            list={userId ? [] : [...connections]}
-            listType="connections"
-            title={'Connections'}
-            paddingHorizontal={PADDING_HORIZONTAL}
-          />
-        ) : (
-          false
-        )}
+
+        <ProfilesListContainerWithSeeAll
+          userId={userId}
+          isLock={
+            userId
+              ? Boolean(parseInt(getProfileData().lock_my_connection))
+              : false
+          }
+          list={userId ? [] : [...connections]}
+          listType="connections"
+          title={'Connections'}
+          paddingHorizontal={PADDING_HORIZONTAL}
+        />
       </View>
     );
   }
