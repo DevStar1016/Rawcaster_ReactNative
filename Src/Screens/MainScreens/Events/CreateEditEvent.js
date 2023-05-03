@@ -88,6 +88,10 @@ const CreateEditEvent = ({route}) => {
       .min(1, 'Invalid Event Title.')
       .max(60, 'Invalid Event Title.')
       .required('Event Title is required.'),
+    eventDescription: yup
+      .string()
+      .min(5, 'Invalid Event Description.')
+      .max(120, 'Invalid Event Description.'),
     eventTime: yup.string().required('Select valid Time'),
     maxParticipants: yup
       .number()
@@ -105,6 +109,7 @@ const CreateEditEvent = ({route}) => {
     useFormik({
       initialValues: {
         eventTitle: 'Rawcaster Event',
+        eventDescription: '',
         eventTime: moment().add(15, 'minute'),
         maxParticipants: parseInt(settings.max_event_participants_count),
       },
@@ -119,6 +124,7 @@ const CreateEditEvent = ({route}) => {
         } else {
           const data = {
             event_title: values.eventTitle,
+            event_message: values.eventDescription,
             event_start_date: moment(liveEventDate).utc().format('YYYY-MM-DD'),
             event_start_time: moment(values.eventTime).utc().format('HH:mm'),
             event_participants: values.maxParticipants,
@@ -210,6 +216,7 @@ const CreateEditEvent = ({route}) => {
             return {
               ...preValues,
               eventTitle: htmlDecodeText(res.data.event_detail.event_name),
+              eventDescription: htmlDecodeText(res.data.event_detail.message),
               eventTime: utcToUserTimezone(
                 res.data.event_detail.start_date_time,
                 settings.time_zone,
@@ -440,6 +447,18 @@ const CreateEditEvent = ({route}) => {
           maxLength={60}
           mainContainerMarginVertical={0}
           mainContainerMarginTop={15}
+          inputContainerMarginVertical={5}
+          titlePaddingVertical={5}
+        />
+        <TextBox
+          title="Event Description"
+          value={values.eventDescription}
+          onChangeText={handleChange('eventDescription')}
+          errorText={errors.eventDescription}
+          placeHolder="Enter description here..."
+          maxLength={120}
+          mainContainerMarginVertical={0}
+          mainContainerMarginTop={0}
           inputContainerMarginVertical={5}
           titlePaddingVertical={5}
         />

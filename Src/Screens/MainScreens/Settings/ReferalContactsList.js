@@ -46,7 +46,10 @@ const ReferalContactsList = ({navigation}) => {
   const [isActionLoading, setisActionLoading] = useState(false);
 
   useEffect(() => {
-    handleGoogleContacts(null);
+    console.log('saasaasssaassaasassa');
+    if (isMount) {
+      handleGoogleContacts(null);
+    }
   }, []);
 
   const handleGoogleContacts = (token = null) => {
@@ -56,8 +59,9 @@ const ReferalContactsList = ({navigation}) => {
         .then(response => {
           //statement
           console.log(response);
+          let contact = response.data;
           if (token) {
-            setcontactList(pre => [...pre, response.data]);
+            setcontactList(pre => [...pre, ...contact]);
           } else {
             setcontactList(response.data);
           }
@@ -197,13 +201,13 @@ const ReferalContactsList = ({navigation}) => {
               return <RenderSuggestedProfile item={item} />;
             }}
             ListEmptyComponent={renderEmptyComponent}
-            refreshControl={
-              <RefreshControl
-                tintColor={COLORS.secondary}
-                refreshing={isRefreshing}
-                onRefresh={onRefresh}
-              />
-            }
+            // refreshControl={
+            //   <RefreshControl
+            //     tintColor={COLORS.secondary}
+            //     refreshing={isRefreshing}
+            //     onRefresh={onRefresh}
+            //   />
+            // }
             onEndReachedThreshold={0.2}
             onEndReached={onEndReached}
             keyExtractor={(item, index) => index.toString()}
