@@ -46,6 +46,7 @@ import {
   GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from '../../../Services/ServiceConstants';
+import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 // import {ShareDialog} from 'react-native-fbsdk-next';
 
 var isMount = true;
@@ -258,23 +259,29 @@ const Refer = ({navigation}) => {
           console.log('Instagram err:', err);
         });
     } else if (mediaType === 'twitter') {
-      // Linking.openURL(
-      //   `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-      //     SHARE_OBJECTS.url,
-      //   )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
-      // );
-      const shareOptionstwitter = {
-        ...SHARE_OBJECTS_TWITTER,
+      Linking.openURL(
+        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          SHARE_OBJECTS.url,
+        )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
+      );
+      console.log(
+        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          SHARE_OBJECTS.url,
+        )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
+        'SSSSSS',
+      );
+      // const shareOptionstwitter = {
+      //   ...SHARE_OBJECTS_TWITTER,
 
-        social: Share.Social?.TWITTER,
-      };
-      Share.shareSingle(shareOptionstwitter)
-        .then(res => {
-          console.log('Twitter Response:', res);
-        })
-        .catch(err => {
-          console.log('Twitter Err:');
-        });
+      //   social: Share.Social?.TWITTER,
+      // };
+      // Share.shareSingle(shareOptionstwitter)
+      //   .then(res => {
+      //     console.log('Twitter Response:', res);
+      //   })
+      //   .catch(err => {
+      //     console.log('Twitter Err:');
+      //   });
     } else if (mediaType === 'linkedIn') {
       Linking.openURL(
         `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
@@ -330,6 +337,12 @@ const Refer = ({navigation}) => {
       onShareHandler(appType);
       return;
     }
+    console.log(
+      `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+        SHARE_OBJECTS.url,
+      )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
+      'SSSSSS',
+    );
     switch (appType) {
       case 'whatsapp':
         Linking.openURL(
@@ -492,13 +505,18 @@ const Refer = ({navigation}) => {
   const RenderSuggestedProfile = ({item}) => {
     return (
       <View style={styles.profileContainer}>
-        <View style={styles.profileImageContainer}>
+        {/* <View style={styles.profileImageContainer}>
           <Image
-            source={{uri: item.profile_img}}
+            source={{uri: }}
             style={styles.profileImage}
             resizeMode="contain"
           />
-        </View>
+        </View> */}
+        <ProfileWithBadge
+          profileImage={item.profile_img}
+          profileSize={35}
+          padding={0}
+        />
         <View style={styles.profileTextContainer}>
           <StyledText style={styles.profileNameText}>
             {getSlicedText(item.display_name, 18)}

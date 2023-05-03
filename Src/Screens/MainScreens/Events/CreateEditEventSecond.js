@@ -48,6 +48,7 @@ const CreateEditEventSecond = ({route}) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_title', submitedData.event_title);
+    formData.append('event_message', submitedData.event_message);
     formData.append('event_type', submitedData.eventVisibilityTypeId);
     formData.append('event_start_date', submitedData.event_start_date);
     formData.append('event_start_time', submitedData.event_start_time);

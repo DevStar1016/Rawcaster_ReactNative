@@ -78,11 +78,12 @@ const EventTalkshowCommonScreen = ({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_type', eventFilterType.id);
-    formData.append('type_filter', screenType === 'talkshow' ? '2' : '1,3');
+    formData.append('type_filter', screenType === 'talkshow' ? '2' : 1);
     formData.append('page_number', pageNumber);
 
     listEventsService(formData)
       .then(res => {
+        console.log(res.data, 'event res');
         if (isMount) {
           if (res.data.status === 1) {
             if (pageNumber === 1) {
@@ -96,7 +97,9 @@ const EventTalkshowCommonScreen = ({
           }
         }
       })
-      .catch(e => {})
+      .catch(e => {
+        console.log(e, 'event err');
+      })
       .finally(() => {
         if (isMount) {
           setisLoading(false);
