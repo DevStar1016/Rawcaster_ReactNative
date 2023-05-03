@@ -123,9 +123,10 @@ const SignupWithPhone = ({route}) => {
             navigation.navigate('EmailPhoneVerification', {
               otpType: parseInt(res.data.signup_type) === 1 ? 'email' : 'sms',
               emailMobile: res.data.email,
-              isFromSignup: true,
+              isFromLoginSignup: true,
               otp_ref_id: res.data.otp_ref_id,
               remaining_seconds: res.data.remaining_seconds,
+              alt_token_id: res.data.alt_token_id,
             });
           }
           Toast.success(res.data.msg);

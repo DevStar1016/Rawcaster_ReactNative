@@ -112,6 +112,7 @@ const Profile = ({route}) => {
     ) {
       if (isMount) {
         setisListLoading(true);
+        setnuggetsList([]);
       }
       listNuggetsAPICall(1);
     }
@@ -121,12 +122,9 @@ const Profile = ({route}) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
-
     formData.append('user_id', userId);
-    console.log(formData, 'FORMADATA');
     getOthersProfileService(formData)
       .then(res => {
-        console.log(res.data, 'DATAA');
         if (res.data.status === 1) {
           setothersProfile({
             ...res.data.profile,
@@ -181,12 +179,14 @@ const Profile = ({route}) => {
       });
   }
 
+  console.log(profile, 'PROFILE');
+
   const listNuggetsAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('page_number', pageNumber);
-    if (userId) {
-      formData.append('user_id', userId);
+    if (userId || profile?.user_id) {
+      formData.append('user_id', userId ?? profile?.user_id);
     }
     listNuggetsService(formData)
       .then(res => {
@@ -283,10 +283,8 @@ const Profile = ({route}) => {
   };
 
   const onEndReached = () => {
-    console.log('OPPPP');
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
-      console.log('IOKJKJK');
       if (isMount) {
         setisLoadMore(true);
         listNuggetsAPICall(currentPage);

@@ -38,8 +38,9 @@ const EmailPhoneVerification = ({route}) => {
     otpType,
     emailMobile,
     isGoBack,
-    isFromSignup,
+    isFromLoginSignup,
     otp_ref_id,
+    alt_token_id,
     remaining_seconds,
   } = route.params ?? {};
   const [otpRefId, setotpRefId] = useState(otp_ref_id);
@@ -67,7 +68,7 @@ const EmailPhoneVerification = ({route}) => {
   }, []);
 
   useEffect(() => {
-    if (!isFromSignup) {
+    if (!isFromLoginSignup) {
       resendOTPAPICall();
     }
   }, []);
@@ -77,8 +78,11 @@ const EmailPhoneVerification = ({route}) => {
       setisLoading(true);
     }
     const formData = new FormData();
-    formData.append('auth_code', getAuthCode('Rawcaster'));
-    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(otpRefId ?? 'Rawcaster'));
+    if (token) {
+      formData.append('token', token);
+    }
+    formData.append('otp_ref_id', otpRefId ?? 'Rawcaster');
     if (otpType) {
       formData.append('otp_flag', otpType);
     }
@@ -115,10 +119,14 @@ const EmailPhoneVerification = ({route}) => {
     if (otpType) {
       formData.append('otp_flag', otpType);
     }
+    if (alt_token_id) {
+      formData.append('alt_token_id', alt_token_id);
+    }
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isFromSignup) {
+          if (isFromLoginSignup) {
+            console.log(res.data, 'DATA VERIFIED');
             const userData = {
               name: res.data.name,
               user_id: res.data.user_id,
@@ -180,7 +188,7 @@ const EmailPhoneVerification = ({route}) => {
   };
 
   const getOtpSendedCommunication = () => {
-    if (isFromSignup) {
+    if (isFromLoginSignup) {
       return emailMobile;
     }
     if (otpType === 'sms') {
