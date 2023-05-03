@@ -143,18 +143,18 @@ export const SOCIAL_SIGN_IN_LIST = [
     iconName: 'google',
     deviceType: ['ios', 'android'],
   },
-  {
-    id: SIGNUP_TYPE.instagram,
-    platformName: 'Instagram',
-    iconName: 'instagram',
-    deviceType: ['ios', 'android'],
-  },
-  {
-    id: SIGNUP_TYPE.twitter,
-    platformName: 'Twitter',
-    iconName: 'twitter',
-    deviceType: ['ios', 'android'],
-  },
+  // {
+  //   id: SIGNUP_TYPE.instagram,
+  //   platformName: 'Instagram',
+  //   iconName: 'instagram',
+  //   deviceType: ['ios', 'android'],
+  // },
+  // {
+  //   id: SIGNUP_TYPE.twitter,
+  //   platformName: 'Twitter',
+  //   iconName: 'twitter',
+  //   deviceType: ['ios', 'android'],
+  // },
 ];
 
 export const GENDER_LIST = [
