@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../../../Utilities/StoreData';
 import {addEventService, editEventService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
+import {log} from 'react-native-reanimated';
 
 var isMount = true;
 const CreateEditEventSecond = ({route}) => {
@@ -138,6 +139,7 @@ const CreateEditEventSecond = ({route}) => {
         JSON.stringify(tempRemovedGroupsIdsList),
       );
     }
+    console.log(formData, 'dsdfsdfsdfsdfsf');
     editEventService(formData)
       .then(res => {
         if (res.data.status === 1) {

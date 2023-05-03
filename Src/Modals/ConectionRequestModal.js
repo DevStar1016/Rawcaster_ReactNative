@@ -11,6 +11,7 @@ import {respondToFriendRequestsService} from '../Services/ApiService';
 import Toast from '../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setPendingFriendRequests} from '../Store/Slices/HomeSlice';
+import StyledText from '../Components/StyledText';
 
 var timer = undefined;
 const ConectionRequestModal = ({onClose, socketData}) => {
@@ -159,7 +160,7 @@ const ConectionRequestModal = ({onClose, socketData}) => {
         padding={0}
         isEnableImagePicker={false}
       />
-      <Text style={styles.name}>{item.display_name}</Text>
+      <StyledText style={styles.name}>{item.display_name}</StyledText>
     </View>
   );
 
@@ -168,9 +169,11 @@ const ConectionRequestModal = ({onClose, socketData}) => {
       <View style={styles.subContainer} activeOpacity={1}>
         <View style={styles.titleContainer}>
           <View style={styles.countContainer}>
-            <Text style={styles.count}>{getPendingRequestsCount()}</Text>
+            <StyledText style={styles.count}>
+              {getPendingRequestsCount()}
+            </StyledText>
           </View>
-          <Text style={styles.title}>Connection request</Text>
+          <StyledText style={styles.title}>Connection request</StyledText>
           <SVGIcon
             icon="close_white"
             height={15}
