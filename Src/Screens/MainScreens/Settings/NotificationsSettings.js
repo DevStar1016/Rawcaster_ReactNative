@@ -114,6 +114,7 @@ const NotificationsSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token + profile.name.trim()));
+    formData.append('name', profile.name.trim());
     formData.append('first_name', profile.first_name.trim());
     if (fieldType.includes('sms')) {
       formData.append('mobile_no', value.trim());
@@ -133,6 +134,10 @@ const NotificationsSettings = () => {
             bio_data: htmlDecodeText(tempProfile.bio_data),
           };
           dispatch(setMyProfile(tempProfile));
+          navigation.navigate('EmailPhoneVerification', {
+            otpType: fieldType,
+            isGoBack: true,
+          });
           Toast.success(res.data.msg);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -342,22 +347,15 @@ const NotificationsSettings = () => {
           onSubmit={value => {
             const otpType = verificationInputModalData.verificationField;
             closeVerificationInputModal();
-            if (otpType === 'sms') {
-              dispatch(setMyProfile({...profile, mobile: value}));
-            } else {
-              dispatch(setMyProfile({...profile, email_id: value}));
-            }
-            navigation.navigate('EmailPhoneVerification', {
-              otpType: otpType,
-              isGoBack: true,
-            });
+
+            handleUpdateProfile(value, otpType);
           }}
         />
       </Modal>
       <Modal visible={isLoading} transparent>
         <Loader
           bgColor={COLORS.transparentDimColor}
-          loaderText={'Settings Updating'}
+          loaderText={'Profile Updating'}
         />
       </Modal>
     </View>

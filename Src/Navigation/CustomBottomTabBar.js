@@ -94,6 +94,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           formData.append('token', token ?? 'RAWCAST');
           formData.append('page_number', 1);
           formData.append('nugget_type', tempNuggetType);
+          console.log(formData, 'IOPDATA');
           listNuggetsService(formData)
             .then(res => {
               if (res.data.status === 1) {
@@ -105,6 +106,10 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                     user_name: htmlDecodeText(item.user_name),
                   };
                 });
+                console.log(
+                  JSON.stringify(decodedNuggetList),
+                  'IOPDATAAAANUGGETS',
+                );
                 // if (tempNuggetType === 1) {
                 //   decodedNuggetList = [...decodedNuggetList].filter(item => {
                 //     if (item.media_list?.length > 1) {

@@ -69,7 +69,6 @@ const SignupWithPhone = ({route}) => {
       },
       validationSchema: validationSchema,
       onSubmit: values => {
-        dispatch(setIsVisibleInfluencers(true));
         setisLoading(true);
 
         handleSignupWithPhone(values);
@@ -112,6 +111,9 @@ const SignupWithPhone = ({route}) => {
         console.log(res.data, 'SIGNUPDATA');
         if (res.data.status === 1) {
           if (res.data.acc_verify_status === 1) {
+            if (parseInt(res.data.first_time) === 1) {
+              dispatch(setIsVisibleInfluencers(true));
+            }
             const userData = {
               name: res.data.name,
               user_id: res.data.user_id,
@@ -122,7 +124,7 @@ const SignupWithPhone = ({route}) => {
           } else if (res.data.acc_verify_status === 0) {
             navigation.navigate('EmailPhoneVerification', {
               otpType: parseInt(res.data.signup_type) === 1 ? 'email' : 'sms',
-              emailMobile: res.data.email,
+              emailMobile: res.data.email_id,
               isFromLoginSignup: true,
               otp_ref_id: res.data.otp_ref_id,
               remaining_seconds: res.data.remaining_seconds,

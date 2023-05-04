@@ -92,7 +92,7 @@ const Login = () => {
           } else {
             navigation.navigate('EmailPhoneVerification', {
               otpType: parseInt(res.data.signup_type) === 1 ? 'email' : 'sms',
-              emailMobile: res.data.email,
+              emailMobile: res.data.email_id,
               isFromLoginSignup: true,
               otp_ref_id: res.data.otp_ref_id,
               remaining_seconds: res.data.remaining_seconds,

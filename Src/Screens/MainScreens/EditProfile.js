@@ -39,6 +39,7 @@ import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import HeaderWithBack from '../../Components/HeaderWithBack';
 import ReplaceStatusBar from '../../Components/ReplaceStatusBar';
+import DefaultProfile from '../../Assets/Png/default_profile.png';
 
 var isMount = true;
 const EditProfile = ({route}) => {
@@ -308,11 +309,15 @@ const EditProfile = ({route}) => {
             onSelectProfilePhoto();
           }}>
           <Image
-            source={{
-              uri: selectedProfileImage
-                ? selectedProfileImage.path
-                : profile.profile_image,
-            }}
+            source={
+              selectedProfileImage || profile?.profile_image
+                ? {
+                    uri: selectedProfileImage
+                      ? selectedProfileImage.path
+                      : profile.profile_image,
+                  }
+                : DefaultProfile
+            }
             style={styles.profileImage}
           />
         </TouchableOpacity>
@@ -415,6 +420,16 @@ const EditProfile = ({route}) => {
           titlePaddingVertical={3}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your phone number'}
+          isEditable={profile?.is_mobile_no_verified !== 1}
+          textColor={
+            profile?.is_mobile_no_verified === 1 ? COLORS.grey : COLORS.black
+          }
+          isEnableAlternateIconOfSecureIcon={
+            profile?.is_mobile_no_verified === 1
+          }
+          alternateIconProps={{
+            icon: 'verified_sign',
+          }}
         />
         <TextBox
           title="Email"
@@ -424,6 +439,16 @@ const EditProfile = ({route}) => {
           titlePaddingVertical={3}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your email'}
+          isEditable={profile?.is_email_id_verified !== 1}
+          textColor={
+            profile?.is_email_id_verified === 1 ? COLORS.grey : COLORS.black
+          }
+          isEnableAlternateIconOfSecureIcon={
+            profile?.is_email_id_verified === 1
+          }
+          alternateIconProps={{
+            icon: 'verified_sign',
+          }}
         />
 
         <SubmitButton

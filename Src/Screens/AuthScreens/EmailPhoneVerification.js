@@ -82,7 +82,9 @@ const EmailPhoneVerification = ({route}) => {
     if (token) {
       formData.append('token', token);
     }
-    formData.append('otp_ref_id', otpRefId ?? 'Rawcaster');
+    if (otpRefId) {
+      formData.append('otp_ref_id', otpRefId);
+    }
     if (otpType) {
       formData.append('otp_flag', otpType);
     }
@@ -122,6 +124,7 @@ const EmailPhoneVerification = ({route}) => {
     if (alt_token_id) {
       formData.append('alt_token_id', alt_token_id);
     }
+    console.log(formData, 'FORMDATA');
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {

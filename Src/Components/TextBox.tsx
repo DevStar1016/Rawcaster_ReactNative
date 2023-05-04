@@ -49,8 +49,10 @@ export type TextBoxProps = {
   borderColor?: string;
   titleStyle?: TextStyle;
   textColor?: string;
+  isEnableAlternateIconOfSecureIcon?: boolean;
   isEnableOuterRightIcon?: boolean;
   outerRightIconProps?: SVGIconProps;
+  alternateIconProps?: SVGIconProps;
   multiline?: boolean;
   isVisible?: boolean;
   mainContainerWidth?: number | string;
@@ -123,6 +125,8 @@ const TextBox = ({
   appendedListProps,
   onSubmitEditing,
   clearButtonMode,
+  isEnableAlternateIconOfSecureIcon = false,
+  alternateIconProps,
   mainContainerMarginTop,
   isEnableListAppend = false,
   additionalTextInputProps,
@@ -212,20 +216,28 @@ const TextBox = ({
             onSubmitEditing={onSubmitEditing}
             {...additionalTextInputProps}
           />
-          {isSecure && (
+          {(isSecure || isEnableAlternateIconOfSecureIcon) && (
             <View style={styles.iconContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                disabled={!isEditable}
-                onPress={() => {
-                  setisVisiblePassword(pre => !pre);
-                }}>
-                <SVGIcon
-                  icon={isVisiblePassword ? 'visibility_on' : 'visibility_off'}
-                  height={iconHeight}
-                  width={iconWidth}
-                />
-              </TouchableOpacity>
+              {isEnableAlternateIconOfSecureIcon ? (
+                <View style={styles.button}>
+                  <SVGIcon {...alternateIconProps} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.button}
+                  disabled={!isEditable}
+                  onPress={() => {
+                    setisVisiblePassword(pre => !pre);
+                  }}>
+                  <SVGIcon
+                    icon={
+                      isVisiblePassword ? 'visibility_on' : 'visibility_off'
+                    }
+                    height={iconHeight}
+                    width={iconWidth}
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
