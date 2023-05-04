@@ -1,16 +1,18 @@
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import HeaderWithBack from './HeaderWithBack';
 import {BackHeaderProps} from './HeaderWithBack';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
 import SearchInput, {SearchInputProps} from './SearchInput';
+import {getCountylistService} from '../Services/ApiService';
 
 export type ItemSelectionBigListProps = {
   title?: string;
@@ -19,11 +21,13 @@ export type ItemSelectionBigListProps = {
   headerProps?: Omit<BackHeaderProps, 'setModal' | 'isModal' | 'title'>;
   listData?: any[];
   isEnableSearchBar?: boolean;
+  isAPICall?: boolean;
+  apiName?: 'country';
   itemContainerStyle?: ViewStyle;
   searchInputProps?: Omit<SearchInputProps, 'onSearch'>;
   onSelectItem: (item: any) => void;
 };
-
+var isMount = true;
 const ItemSelectionBigList = ({
   title = 'Select Data',
   headerProps,
@@ -32,10 +36,55 @@ const ItemSelectionBigList = ({
   listData = [],
   searchInputProps,
   onSelectItem,
+  isAPICall = false,
+  apiName,
   isEnableSearchBar = true,
   itemContainerStyle,
 }: ItemSelectionBigListProps) => {
   const [searchText, setsearchText] = useState('');
+  const [dataList, setdataList] = useState([...listData]);
+  const [isLoading, setisLoading] = useState(
+    isAPICall && apiName ? true : false,
+  );
+
+  useEffect(() => {
+    isMount = true;
+    if (isAPICall && apiName) {
+      initialAPICall();
+    }
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  function initialAPICall() {
+    switch (apiName) {
+      case 'country':
+        countryAPICall();
+    }
+  }
+
+  function countryAPICall() {
+    getCountylistService()
+      .then(res => {
+        if (isMount) {
+          if (res.data.status === 1) {
+            setdataList(res.data.country_list);
+          } else if (res.data.status === 0) {
+            setdataList([]);
+          }
+        }
+      })
+      .catch(e => {
+        setdataList([]);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
 
   function getItemText(item: any) {
     if (fieldName) {
@@ -67,17 +116,17 @@ const ItemSelectionBigList = ({
   function getList() {
     if (searchText && searchText.trim()) {
       if (fieldName) {
-        return [...listData].filter(item =>
+        return [...dataList].filter(item =>
           item[fieldName]
             .toLowerCase()
             .includes(searchText.toLowerCase().trim()),
         );
       }
-      return [...listData].filter(item =>
+      return [...dataList].filter(item =>
         item.toLowerCase().includes(searchText.toLowerCase().trim()),
       );
     }
-    return [...listData];
+    return [...dataList];
   }
 
   return (
@@ -116,7 +165,11 @@ const ItemSelectionBigList = ({
           />
         ) : (
           <View style={styles.emptyDataContainer}>
-            <StyledText>No data found</StyledText>
+            {isLoading ? (
+              <ActivityIndicator color={COLORS.primary} size="large" />
+            ) : (
+              <StyledText>No data found</StyledText>
+            )}
           </View>
         )}
       </View>

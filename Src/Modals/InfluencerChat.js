@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -15,14 +15,64 @@ import ProfileWithBadge from '../Components/ProfileWithBadge';
 import Badges from '../Utilities/Badges';
 import {DIMENSIONS} from '../Utilities/Constants';
 import {FONTS} from '../Utilities/Fonts';
+import {useNavigation} from '@react-navigation/native';
+import {useToken} from '../Utilities/StoreData';
+import {influencerChatService} from '../Services/ApiService';
+import Toast from '../Components/Toast';
 
-const InfluencerChat = ({navigation, route}) => {
+var isMount = true;
+const InfluencerChat = ({route}) => {
+  const navigation = useNavigation();
+  const token = useToken();
   const {influencerId, influencerName} = route.params ?? {};
+  const [message, setmessage] = useState('');
+  const [isLoading, setisLoading] = useState(false);
+
+  useEffect(() => {
+    isMount = true;
+
+    return () => {
+      isMount = false;
+    };
+  }, []);
+
+  function handleSendChat() {
+    if (isMount) {
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('user_id', influencerId);
+    formData.append('message', message.trim());
+    console.log(formData, 'FORM');
+    influencerChatService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          navigation.goBack();
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
   return (
     <HOCView
       //   isLoading={isLoading}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
       paddingHorizontal={5}
+      loaderProps={{
+        loaderText: 'Sending Message',
+      }}
+      isLoading={isLoading}
       backHeaderProps={{
         bgColor: COLORS.transparent,
         title: `Send message to ${influencerName}`,
@@ -44,59 +94,6 @@ const InfluencerChat = ({navigation, route}) => {
         }}>
         <View>
           <View style={styles.topContainer}>
-            {/* <View style={styles.subContainer}>
-              <ProfileWithBadge
-                badge={Badges(profile.user_status_id)}
-                isEnableGradient={false}
-                profileImage={profile.profile_image}
-                padding={0}
-                profileSize={38}
-                badgeSize={16}
-              />
-              <View style={styles.nameContainer}>
-                <StyledText style={styles.nameText}>
-                  {getSlicedText(profile.name, 10)}
-                </StyledText>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <SubmitButton
-                    buttonText={getSlicedText(selectedShareType.name, 10)}
-                    marginTop={2}
-                    iconSize={9}
-                    textMarginLeftWhenIcon={2}
-                    textMarginRightWhenIcon={2}
-                    buttonTextStyle={{fontSize: 10}}
-                    paddingHorizontal={3}
-                    paddingVertical={0}
-                    marginBottom={0}
-                    rightIcon={'down_fill_white'}
-                    rightIconSize={7}
-                    icon="lock_fill_white"
-                    marginHorizontal={0}
-                    padding={0}
-                    bgColor={COLORS.orange}
-                    borderColor={COLORS.orange}
-                    onPress={() => {
-                      if (isMount) {
-                        setisOpenSharTypeList(true);
-                      }
-                    }}
-                  />
-                  {(selectedShareType.id === 3 ||
-                    selectedShareType.id === 4) && (
-                    <SVGIcon
-                      icon="edit"
-                      height={13}
-                      width={13}
-                      marginLeft={10}
-                      isButton
-                      onPress={() => {
-                        setisOpenSelectionModal(true);
-                      }}
-                    />
-                  )}
-                </View>
-              </View>
-            </View> */}
             <View style={styles.inputContainer}>
               <TextInput
                 placeholder={`What’s on your mind for ${influencerName}!`}
@@ -106,8 +103,8 @@ const InfluencerChat = ({navigation, route}) => {
                 // onFocus={() => {
                 //   openCloseEmojiPicker(false);
                 // }}
-                // value={typedText}
-                // onChangeText={settypedText}
+                value={message}
+                onChangeText={setmessage}
                 numberOfLines={5}
                 textAlignVertical={'top'}
                 placeholderTextColor={COLORS.placeHolderColor}
@@ -125,11 +122,7 @@ const InfluencerChat = ({navigation, route}) => {
                 />
               </View> */}
             </View>
-            <View
-              style={[
-                styles.subContainer,
-                {justifyContent: 'flex-end', paddingLeft: 15},
-              ]}>
+            <View style={styles.buttonsContainer}>
               <SVGIcon
                 icon="mic_fill_white"
                 height={21}
@@ -152,9 +145,9 @@ const InfluencerChat = ({navigation, route}) => {
               />
               <SVGIcon
                 icon="video_fill_white"
-                height={22}
+                height={20}
                 width={22}
-                marginLeft={8}
+                marginLeft={10}
                 isButton
                 // onPress={() => {
                 //   pickMedia('video');
@@ -169,28 +162,31 @@ const InfluencerChat = ({navigation, route}) => {
               buttonText="Send"
               // isDisabled={isDisabledPostButton()}
               disabledColor={COLORS.dimColor}
-              // onPress={() => {
-              //   if (!isDisabledPostButton()) {
-              //     if (
-              //       (selectedShareType.id === 3 ||
-              //         selectedShareType.id === 4) &&
-              //       shareConnectionsGroupsIdsList.length <= 0
-              //     ) {
-              //       Toast.fail(
-              //         selectedShareType.id === 3
-              //           ? 'Select groups'
-              //           : 'Select connections',
-              //       );
-              //       setisOpenSelectionModal(true);
-              //       return;
-              //     }
-              //     if (nugget) {
-              //       handleEditNugget();
-              //     } else {
-              //       handlePostNuggets();
-              //     }
-              //   }
-              // }}
+              onPress={() => {
+                if (message.trim()) {
+                  handleSendChat();
+                }
+                // if (!isDisabledPostButton()) {
+                //   if (
+                //     (selectedShareType.id === 3 ||
+                //       selectedShareType.id === 4) &&
+                //     shareConnectionsGroupsIdsList.length <= 0
+                //   ) {
+                //     Toast.fail(
+                //       selectedShareType.id === 3
+                //         ? 'Select groups'
+                //         : 'Select connections',
+                //     );
+                //     setisOpenSelectionModal(true);
+                //     return;
+                //   }
+                //   if (nugget) {
+                //     handleEditNugget();
+                //   } else {
+                //     handlePostNuggets();
+                //   }
+                // }
+              }}
             />
           </View>
         </View>
@@ -203,12 +199,14 @@ const styles = StyleSheet.create({
   topContainer: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  subContainer: {
-    flex: 1,
+  buttonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingLeft: 8,
+    paddingTop: 15,
   },
   mainContainer: {
     flexGrow: 1,
@@ -217,29 +215,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     justifyContent: 'space-between',
   },
-  nameContainer: {
-    paddingLeft: 5,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  nameText: {
-    fontSize: 15,
-    color: COLORS.white,
-    fontFamily: FONTS.DMSans.medium,
-  },
+
   inputContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // paddingVertical: 10,
     maxHeight: 200,
     minHeight: 70,
     alignItems: 'flex-start',
+    flex: 1,
   },
   textInput: {
+    flex: 1,
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.white,
     fontSize: 17,
-    width: '88%',
     height: '100%',
   },
   emojiIconContainer: {

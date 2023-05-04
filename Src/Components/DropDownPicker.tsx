@@ -28,7 +28,7 @@ type Props = {
   value?: any;
   dateValue?: string;
   dropDownIconSize?: number;
-  dataList?: number[] | string[];
+  dataList?: any[];
   placeHolderText?: string;
   isInsideList?: boolean;
   isDisabled?: boolean;

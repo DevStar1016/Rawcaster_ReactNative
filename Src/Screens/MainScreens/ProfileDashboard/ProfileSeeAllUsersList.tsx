@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   RefreshControl,
   StyleSheet,
   TouchableOpacity,
@@ -21,6 +22,7 @@ import {
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
+import FilterProfileSeeAllUsers from '../../../Modals/FilterProfileSeeAllUsers';
 
 type Props = {
   initialList: [];
@@ -35,6 +37,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   let totalPages = 1;
   const {initialList, userId, listType, title}: Props = route.params ?? {};
   const [isActionLoading, setisActionLoading] = useState(false);
+  const [filterData, setfilterData] = useState(null);
+  const [isOpenFilterModal, setisOpenFilterModal] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const token = useToken();
@@ -65,16 +69,16 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     };
   }, []);
 
-  function listApiCalls(pageNumber = 1) {
+  function listApiCalls(pageNumber = 1, dataToFilter?: any) {
     switch (listType) {
       case 'connections':
-        connectionsListAPICall(pageNumber);
+        connectionsListAPICall(pageNumber, dataToFilter);
         return;
       case 'fans':
-        fansListAPICall(pageNumber);
+        fansListAPICall(pageNumber, 1, dataToFilter);
         return;
       case 'influencers':
-        fansListAPICall(pageNumber, 2);
+        fansListAPICall(pageNumber, 2, dataToFilter);
         return;
     }
   }
@@ -87,7 +91,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     }
   }
 
-  function connectionsListAPICall(pageNumber = 1) {
+  function connectionsListAPICall(pageNumber = 1, dataToFilter: any) {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
@@ -97,6 +101,20 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       formData.append('allfriends', 1);
     }
     formData.append('page_number', pageNumber);
+
+    if (dataToFilter) {
+      if (dataToFilter?.country) {
+        formData.append('Location', dataToFilter?.country?.name);
+      }
+      if (dataToFilter?.gender) {
+        formData.append('gender', dataToFilter?.gender?.id);
+      }
+      if (dataToFilter?.age) {
+        formData.append('age', dataToFilter?.age);
+      }
+    }
+    console.log(formData, 'FORMDATA');
+
     listAllFriendsService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -124,7 +142,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   }
 
-  function fansListAPICall(pageNumber = 1, type = 1) {
+  function fansListAPICall(pageNumber = 1, type = 1, dataToFilter: any) {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('type', type);
@@ -209,14 +227,18 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   };
 
-  function onPressFilter() {}
+  function onPressFilter() {
+    if (isMount) {
+      setisOpenFilterModal(true);
+    }
+  }
 
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
     if (isMount) {
       setisRefreshing(true);
-      listApiCalls(1);
+      listApiCalls(1, filterData);
     }
   };
 
@@ -225,10 +247,21 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     if (currentPage <= totalPages) {
       if (isMount) {
         setisLoadMore(true);
-        listApiCalls(currentPage);
+        listApiCalls(currentPage, filterData);
       }
     }
   };
+
+  function onApplyFilter(filteredData: any) {
+    currentPage = 1;
+    totalPages = 1;
+    if (isMount) {
+      setisOpenFilterModal(false);
+      setfilterData(filteredData);
+      setisLoading(true);
+      listApiCalls(1, filteredData);
+    }
+  }
 
   const renderFooter = () => {
     return isLoadMore ? (
@@ -253,7 +286,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           isEnableGradient
           padding={0}
           profileSize={50}
-          onPressTopRightIcon={() => {}}
           containerStyle={{marginHorizontal: 10}}
         />
         <View style={styles.displayTextContainer}>
@@ -317,6 +349,20 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           />
         </View>
       )}
+
+      <Modal
+        visible={isOpenFilterModal}
+        transparent
+        onRequestClose={() => {
+          setisOpenFilterModal(false);
+        }}>
+        <FilterProfileSeeAllUsers
+          onSubmit={onApplyFilter}
+          setModal={setisOpenFilterModal}
+          preFilterData={filterData}
+          listType={listType}
+        />
+      </Modal>
     </View>
   );
 };

@@ -106,10 +106,6 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                     user_name: htmlDecodeText(item.user_name),
                   };
                 });
-                console.log(
-                  JSON.stringify(decodedNuggetList),
-                  'IOPDATAAAANUGGETS',
-                );
                 // if (tempNuggetType === 1) {
                 //   decodedNuggetList = [...decodedNuggetList].filter(item => {
                 //     if (item.media_list?.length > 1) {

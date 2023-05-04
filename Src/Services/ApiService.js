@@ -362,3 +362,7 @@ export const addClaimAccountService = data => {
 export const listUnClaimAccountService = data => {
   return axios.post('listunclaimaccount', data);
 };
+
+export const influencerChatService = data => {
+  return axios.post('influencerchat', data);
+};

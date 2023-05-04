@@ -35,7 +35,7 @@ export type TextBoxProps = {
   icon?: IconType;
   iconHeight?: number;
   iconWidth?: number;
-  value?: string;
+  value?: string | null;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
   mainContainerMarginTop?: number;
