@@ -12,6 +12,7 @@ import {getUrlWithFilePrefix} from '../../Utilities/Methods';
 import {DIMENSIONS} from '../../Utilities/Constants';
 import SVGIcon from '../../Components/SVGIcon';
 import {useInsets} from '../../Utilities/StoreData';
+import StyledText from '../../Components/StyledText';
 
 const CropImage = ({setModal, uri, onCropImage}) => {
   const cropViewRef = useRef(null);
@@ -45,7 +46,7 @@ const CropImage = ({setModal, uri, onCropImage}) => {
           onPress={() => {
             setModal(false);
           }}>
-          <Text style={styles.buttonText}>CANCEL</Text>
+          <StyledText style={styles.buttonText}>CANCEL</StyledText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -58,7 +59,7 @@ const CropImage = ({setModal, uri, onCropImage}) => {
           onPress={() => {
             cropViewRef.current.saveImage(true, 90);
           }}>
-          <Text style={styles.buttonText}>DONE</Text>
+          <StyledText style={styles.buttonText}>DONE</StyledText>
         </TouchableOpacity>
       </View>
     </View>

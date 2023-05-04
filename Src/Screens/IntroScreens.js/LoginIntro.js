@@ -16,6 +16,7 @@ import UsersImage from '../../Assets/Png/IntroImages/background.png';
 import Logo from '../../Assets/Svg/slogan_logo.svg';
 import {INTRO_DATA} from '../../Utilities/Constants';
 import {FONTS} from '../../Utilities/Fonts';
+import StyledText from '../../Components/StyledText';
 
 const LoginIntro = ({onSkipIntro}) => {
   const {width: windowWidth} = useWindowDimensions();
@@ -39,8 +40,8 @@ const LoginIntro = ({onSkipIntro}) => {
           />
         </View>
         <View style={styles.footerContainer}>
-          <Text style={styles.heading}>{item.heading}</Text>
-          <Text style={styles.content}>{item.description}</Text>
+          <StyledText style={styles.heading}>{item.heading}</StyledText>
+          <StyledText style={styles.content}>{item.description}</StyledText>
         </View>
       </View>
     );
@@ -119,14 +120,14 @@ const LoginIntro = ({onSkipIntro}) => {
           paddingVertical: 5,
         }}
         onPress={onSkipIntro}>
-        <Text
+        <StyledText
           style={{
             color: '#FFFFFF',
             fontFamily: FONTS.DMSans.regular,
             fontSize: 15,
           }}>
           {isDone ? 'Done' : 'Skip'}
-        </Text>
+        </StyledText>
       </TouchableOpacity>
     </LinearGradient>
   );

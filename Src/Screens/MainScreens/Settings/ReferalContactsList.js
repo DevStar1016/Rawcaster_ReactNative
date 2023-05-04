@@ -116,9 +116,12 @@ const ReferalContactsList = ({navigation}) => {
             />
           </View>
           <View style={styles.profileTextContainer}>
-            <StyledText style={styles.profileNameText}>
+            <Text
+              style={styles.profileNameText}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               {getSlicedText(item.name, 18)}
-            </StyledText>
+            </Text>
             <Text
               style={styles.profileDescriptionText}
               numberOfLines={1}

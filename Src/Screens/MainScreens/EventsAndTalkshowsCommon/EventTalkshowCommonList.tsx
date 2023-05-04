@@ -83,7 +83,7 @@ const EventTalkshowCommonScreen = ({
 
     listEventsService(formData)
       .then(res => {
-        console.log(res.data, 'event res');
+        // console.log(res.data, 'event res');
         if (isMount) {
           if (res.data.status === 1) {
             if (pageNumber === 1) {

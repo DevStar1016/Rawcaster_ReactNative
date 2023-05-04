@@ -249,6 +249,11 @@ const ProfilesListContainerWithSeeAll = ({
                             navigation.navigate('ClaimAccount', {
                               influencerId: item.user_id,
                             });
+                          } else if (listType === 'influencers') {
+                            navigation.navigate('InfluencerChat', {
+                              influencerId: item.user_id,
+                              influencerName: item.display_name,
+                            });
                           }
                         }}
                         {...ProfileItemProps}
