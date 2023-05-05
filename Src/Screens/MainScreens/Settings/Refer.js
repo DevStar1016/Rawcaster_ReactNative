@@ -399,8 +399,8 @@ const Refer = ({navigation}) => {
         //     console.log('Messenger Error', err);
         //   });
 
-        // handleGoogleContacts();
-        navigation.navigate('ReferalContacts');
+        handleGoogleContacts();
+        // navigation.navigate('ReferalContacts');
         break;
       case 'twitter':
         const shareOptionstwitter = {
@@ -471,7 +471,7 @@ const Refer = ({navigation}) => {
         .then(response => {
           //statement
           console.log(response);
-          getContacts(null)
+          getOtherContacts(null)
             .then(response => {
               //statement
               console.log(response);

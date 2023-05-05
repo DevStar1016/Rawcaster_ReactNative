@@ -106,7 +106,7 @@ const SettingsHome = () => {
         navigation.navigate('EventSettings');
         return;
       case 6:
-        navigation.navigate('Refer');
+        navigation.navigate('ReferalContacts');
         return;
       case 7:
         Alert.alert(
