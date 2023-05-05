@@ -14,6 +14,7 @@ import TwitterRoundedFillIcon from '../Assets/Svg/twitter_rounded_fill.svg';
 import InstagramRoundedFillIcon from '../Assets/Svg/instagram_rounded_fill.svg';
 import ContactRoundedFillOrangeIcon from '../Assets/Svg/contact_rounded_fill_orange.svg';
 import ShareRoundedFillBlueIcon from '../Assets/Svg/share_rounded_fill_blue.svg';
+import GmailRoundedIcon from '../Assets/Svg/gmail_rounded.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -140,6 +141,7 @@ export type IconType =
   | 'instagram_rounded_fill'
   | 'contact_rounded_fill_orange'
   | 'share_rounded_fill_blue'
+  | 'gmail_rounded'
   | 'twitter'
   | 'apple'
   | 'instagram'
@@ -263,6 +265,7 @@ export const ICONS = {
   instagram_rounded_fill: InstagramRoundedFillIcon,
   contact_rounded_fill_orange: ContactRoundedFillOrangeIcon,
   share_rounded_fill_blue: ShareRoundedFillBlueIcon,
+  gmail_rounded: GmailRoundedIcon,
   instagram: InstagramIcon,
   twitter: TwitterIcon,
   apple: AppleIcon,
