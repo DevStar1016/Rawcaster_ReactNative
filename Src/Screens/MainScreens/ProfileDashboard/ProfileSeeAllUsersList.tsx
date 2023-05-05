@@ -113,7 +113,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         formData.append('age', dataToFilter?.age);
       }
     }
-    console.log(formData, 'FORMDATA');
 
     listAllFriendsService(formData)
       .then(res => {
@@ -150,8 +149,17 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       formData.append('user_id', userId);
     }
     formData.append('page_number', pageNumber);
-    console.log(formData, 'OP');
-
+    if (dataToFilter) {
+      if (dataToFilter?.country) {
+        formData.append('Location', dataToFilter?.country?.name);
+      }
+      if (dataToFilter?.gender) {
+        formData.append('gender', dataToFilter?.gender?.id);
+      }
+      if (dataToFilter?.age) {
+        formData.append('age', dataToFilter?.age);
+      }
+    }
     getFollowListService(formData)
       .then(res => {
         if (res.data.status === 1) {

@@ -5,7 +5,6 @@ import BOX_SHADOW from '../../../Utilities/BoxShadow';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
-import moment from 'moment';
 import {EVENT_TYPE} from '../../../Utilities/Constants';
 import {
   getSlicedText,
