@@ -232,6 +232,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
     shareNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data.nugget_detail, 'SHARED DETAILS');
           dispatch(setNuggetsList([res.data.nugget_detail, ...nuggetsList]));
           scrollNuggetsListToTop && scrollNuggetsListToTop();
         }

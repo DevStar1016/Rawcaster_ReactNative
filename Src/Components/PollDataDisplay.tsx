@@ -110,16 +110,6 @@ const PollDataDisplay = ({
       if (pollVotedData.votedOptionID === item.option_id) {
         votes = parseInt(item.votes) + 1;
       }
-      // console.log(
-      //   votes,
-      //   getTotalVotes(),
-      //   parseFloat(
-      //     ((parseInt(votes) / getTotalVotes()) * 100).toString(),
-      //   ).toFixed(2),
-      //   'PERCENT',
-      // );
-      console.log(0 / 0, 'NUMBER');
-
       return {
         ...item,
         votes,

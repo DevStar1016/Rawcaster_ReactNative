@@ -45,6 +45,21 @@ const UtilitySlice = createSlice({
     setIsOpenVerifyPopup: (state, action) => {
       state.isOpenVerifyPopup = action.payload;
     },
+    clearUtilityReduxData: (state, action) => {
+      state.insets = {
+        bottom: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+      };
+      state.locationDetails = null;
+      state.isBottomTabBarAbsolute = false;
+      state.nugget_type = 1;
+      state.isVisibleInfluencers = false;
+      state.isAppForeground = true;
+      state.isOpenLoginAlert = false;
+      state.isOpenVerifyPopup = false;
+    },
   },
 });
 export const {
@@ -56,5 +71,6 @@ export const {
   setIsAppForeground,
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
+  clearUtilityReduxData,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

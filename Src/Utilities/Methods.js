@@ -7,9 +7,14 @@ import Geocode from 'react-geocode';
 import sha1 from 'sha1';
 import Compressor from 'react-native-compressor';
 import {SALT_KEY} from '../Services/ServiceConstants';
-import {setToken, setUserData} from '../Store/Slices/AuthSlice';
+import {
+  clearAuthReduxData,
+  setToken,
+  setUserData,
+} from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
 import {
+  clearUtilityReduxData,
   setGlobalLoading,
   setLocationDetails,
 } from '../Store/Slices/UtilitySlice';
@@ -17,6 +22,7 @@ import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {getTimezone} from 'countries-and-timezones';
+import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
 
 export const getAuthCode = (value = '') => {
   return sha1(SALT_KEY + value);
@@ -39,6 +45,10 @@ export const storeUserData = async (user, dispatch) => {
 
 export const removeToken = async dispatch => {
   dispatch(setToken(null));
+  dispatch(clearAuthReduxData());
+  dispatch(clearHomeReduxData());
+  dispatch(clearUtilityReduxData());
+
   try {
     await EncryptedStorage.removeItem(ISLOGIN);
     await EncryptedStorage.removeItem(USER_DATA);
@@ -320,6 +330,13 @@ export const getTimezoneName = str => {
   } catch (error) {}
   if (index > -1) return str.substr(0, index - 1).trim();
   else return str;
+};
+
+export const utctoUserTimezonewithAbbr = (time, zonename) => {
+  let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
+  let displayCutoff = momentTZ(utcCutoff).tz(getTimezoneName(zonename));
+  let timezoneabbrs = displayCutoff.tz(getTimezoneName(zonename)).format('z');
+  return timezoneabbrs; // this return time zone i.e IST or GMT
 };
 
 export const utcToUserTimezone = (time, zonename) => {

@@ -9,12 +9,13 @@ import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
 import {useDispatch} from 'react-redux';
-import {useInsets, useToken} from '../Utilities/StoreData';
+import {useInsets, useProfile, useToken} from '../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import {setIsOpenLoginAlert} from '../Store/Slices/UtilitySlice';
 import StyledText from './StyledText';
 import {FONTS} from '../Utilities/Fonts';
 import LiveGif from '../Assets/Gif/live.gif';
+import ProfileWithBadge from './ProfileWithBadge';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -57,6 +58,7 @@ const CustomHomeHeader = ({
   const dispatch = useDispatch();
   const token = useToken();
   const insets = useInsets();
+  const profile = useProfile();
 
   const isLogin = () => {
     if (token) {
@@ -210,17 +212,18 @@ const CustomHomeHeader = ({
         )}
 
         {isEnableProfile && (
-          <SVGIcon
-            icon="user"
-            marginLeft={5}
-            height={28}
-            width={28}
-            onPress={() => {
+          <ProfileWithBadge
+            profileImage={profile?.profile_image}
+            profileSize={28}
+            extraMargin={0}
+            padding={0}
+            containerStyle={{marginLeft: 5, marginRight: 0}}
+            isButton
+            onPressProfile={() => {
               if (isLogin()) {
                 navigation.navigate('ProfileStack');
               }
             }}
-            isButton
           />
         )}
       </View>
