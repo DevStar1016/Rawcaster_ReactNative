@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Linking,
   Modal,
   PermissionsAndroid,
   RefreshControl,
@@ -28,15 +29,17 @@ import {
   GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from '../../../Services/ServiceConstants';
-import {getSlicedText} from '../../../Utilities/Methods';
+import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import ProfileIcon from '../../../Assets/Png/user.png';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import StyledText from '../../../Components/StyledText';
 import Loader from '../../../Components/Loader';
 import SVGIcon from '../../../Components/SVGIcon';
-import {useProfile} from '../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 import InviteFanModal from '../../../Modals/InviteFanModal';
+import {inviteToRawcasterService} from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
 
 var isMount = true;
 var currentPage = 1;
@@ -106,6 +109,7 @@ const TWITTER_REFERAL_MESSAGE =
 
 const ReferalContactsList = ({navigation}) => {
   const profile = useProfile();
+  const token = useToken();
   const [contactList, setcontactList] = useState([]);
   const [contactToken, setcontactToken] = useState(null);
   const [isEmail, setisEmail] = useState(false);
@@ -115,6 +119,49 @@ const ReferalContactsList = ({navigation}) => {
   const [isListLoading, setisListLoading] = useState(false);
   const [isActionLoading, setisActionLoading] = useState(false);
   const [openInviteFans, setopenInviteFans] = useState(false);
+
+  const SHARE_OBJECTS = {
+    url: profile.referral_link,
+    message: REFERAL_MESSAGE,
+  };
+  const IOS_FACEBOOK_SHARE_OBJECT = {
+    contentType: 'link',
+    contentUrl: profile.referral_link,
+    contentDescription: REFERAL_MESSAGE,
+  };
+  const SHARE_OBJECTS_TWITTER = {
+    url: profile.referral_link,
+    message: TWITTER_REFERAL_MESSAGE,
+  };
+
+  const inviteToRawcasterApiCall = (email = null) => {
+    if (email) {
+      if (isMount) {
+        setisActionLoading(true);
+      }
+      const formData = new FormData();
+      formData.append('token', token);
+      formData.append('email_id', JSON.stringify([email]));
+      formData.append('auth_code', getAuthCode(token));
+      inviteToRawcasterService(formData)
+        .then(response => {
+          if (response.data.status === 1) {
+            Toast.success(response.data.msg);
+          } else {
+            Toast.fail(response.data.msg);
+          }
+        })
+        .catch(err => {
+          Toast.fail(err.message);
+          console.log(err);
+        })
+        .finally(e => {
+          if (isMount) {
+            setisActionLoading(false);
+          }
+        });
+    }
+  };
 
   const onShareHandler = async mediaType => {
     if (mediaType === 'instagram') {
@@ -146,7 +193,8 @@ const ReferalContactsList = ({navigation}) => {
       Linking.openURL(
         `tg://msg?text=${SHARE_OBJECTS.message + '\n ' + SHARE_OBJECTS.url}`,
       ).catch(Err => {
-        console.log(Err), toastService('Telegram App not installed', 3000);
+        console.log(Err),
+          inviteToRawcasterService('Telegram App not installed', 3000);
       });
     } else {
       try {
@@ -333,14 +381,15 @@ const ReferalContactsList = ({navigation}) => {
       .then(response => {
         //statement
         let contact = response.data;
-        let sortedContacts = lodash.orderBy(
-          [...contactList, ...contact],
-          'name',
-          ['asc'],
-        );
         if (token) {
+          let sortedContacts = lodash.orderBy(
+            [...contactList, ...contact],
+            'name',
+            ['asc'],
+          );
           setcontactList(sortedContacts);
         } else {
+          let sortedContacts = lodash.orderBy([...contact], 'name', ['asc']);
           setcontactList(sortedContacts);
         }
         setcontactToken(response.nextPageToken);
@@ -401,6 +450,15 @@ const ReferalContactsList = ({navigation}) => {
               mobile: item.phoneNumbers[0]?.number || '',
             };
           });
+
+          // for section list data
+          const result = lodash(contactList)
+            .groupBy(item => item.name.toUpperCase().charAt(0))
+            .map((value, key) => ({date: key, transactions: value}))
+            .value();
+
+          console.log(result);
+          // console.log(contactsList, 'CCCCCC');
           setcontactList(contactsList);
         }
       })
@@ -417,7 +475,12 @@ const ReferalContactsList = ({navigation}) => {
         }
       });
   };
-
+  const openSms = phoneNumber => {
+    const separator = IS_IOS ? '&' : '?';
+    const message = REFERAL_MESSAGE + ' ' + profile.referral_link;
+    const url = `sms:${phoneNumber}${separator}body=${message}`;
+    Linking.openURL(url).catch(e => {});
+  };
   const onRefresh = () => {
     if (isMount) {
       setisRefreshing(true);
@@ -467,8 +530,13 @@ const ReferalContactsList = ({navigation}) => {
         </View>
         <TouchableOpacity
           style={styles.BecomeFanBtn}
-          //   onPress={() => handleBecomeFan(item.user_ref_id)}
-        >
+          onPress={() => {
+            if (isEmail) {
+              inviteToRawcasterApiCall(item.email);
+            } else {
+              openSms(item.mobile);
+            }
+          }}>
           <StyledText style={styles.BecomeFanBtnText}>Invite</StyledText>
         </TouchableOpacity>
         {/* <TouchableOpacity>
@@ -540,6 +608,7 @@ const ReferalContactsList = ({navigation}) => {
           return <RederReferalOptions item={item} />;
         }}
         keyExtractor={(item, index) => index.toString()}
+        showsHorizontalScrollIndicator={false}
       />
       <RenderDivider />
       {isListLoading ? (
