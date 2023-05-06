@@ -90,7 +90,7 @@ const NotificationItem = ({item}: Props) => {
                 <StyledText style={styles.subText}>
                   {utcToUserTimezone(
                     item.event_start_time,
-                    settings.time_zone,
+                    settings?.time_zone,
                   ).format('DD MMM YYYY')}
                 </StyledText>
               </View>
@@ -104,10 +104,10 @@ const NotificationItem = ({item}: Props) => {
                 <StyledText style={styles.subText}>
                   {`${utcToUserTimezone(
                     item.event_start_time,
-                    settings.time_zone,
+                    settings?.time_zone,
                   ).format('hh:mm A')} ${utctoUserTimezonewithAbbr(
                     item.event_start_time,
-                    settings.time_zone,
+                    settings?.time_zone,
                   )}`}
                 </StyledText>
               </View>

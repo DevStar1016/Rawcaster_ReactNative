@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  SectionList,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -14,6 +15,8 @@ import {COLORS} from '../../../Utilities/Colors';
 import {useToken} from '../../../Utilities/StoreData';
 import {listNotificationsService} from '../../../Services/ApiService';
 import StyledText from '../../../Components/StyledText';
+import moment from 'moment';
+import {FONTS} from '../../../Utilities/Fonts';
 
 type Props = {
   notificationListType?: number;
@@ -107,6 +110,48 @@ const NotificationsList = ({
     }
   }
 
+  function getListSections() {
+    const tempNotificationsList = [...notificationsList];
+    const todayStart = moment().startOf('day');
+    const todayEnd = moment().endOf('day');
+    const yesterdayStart = moment().subtract(1, 'days').startOf('day');
+    const yesterdayEnd = moment().subtract(1, 'days').endOf('day');
+    let todayNotificationsList: any[] = [];
+    let yesterdayNotificationsList: any[] = [];
+    let olderNotificationsList: any[] = [];
+    tempNotificationsList.forEach(item => {
+      let createdDateTime = moment(item.created_datetime);
+      if (createdDateTime.isBetween(todayStart, todayEnd)) {
+        todayNotificationsList.push(item);
+      } else if (createdDateTime.isBetween(yesterdayStart, yesterdayEnd)) {
+        yesterdayNotificationsList.push(item);
+      } else {
+        olderNotificationsList.push(item);
+      }
+    });
+
+    const resultSections: any[] = [];
+    if (todayNotificationsList.length > 0) {
+      resultSections.push({
+        title: 'Today',
+        data: todayNotificationsList,
+      });
+    }
+    if (yesterdayNotificationsList.length > 0) {
+      resultSections.push({
+        title: 'Yesterday',
+        data: yesterdayNotificationsList,
+      });
+    }
+    if (olderNotificationsList.length > 0) {
+      resultSections.push({
+        title: 'Older',
+        data: olderNotificationsList,
+      });
+    }
+    return resultSections;
+  }
+
   function keyExtractor(item: any, index: number) {
     return item[
       notificationListType === 6 ? 'nugget_id' : 'notification_id'
@@ -126,6 +171,15 @@ const NotificationsList = ({
   function renderItem({item, index}: any) {
     return <NotificationItem item={item} />;
   }
+  const renderSectionHeader = ({section}: any) => {
+    return (
+      <View style={{paddingVertical: 10}}>
+        <StyledText style={styles.listSectionTitleText}>
+          {section.title}
+        </StyledText>
+      </View>
+    );
+  };
   return (
     <View style={styles.mainContainer}>
       {isLoading ? (
@@ -133,12 +187,19 @@ const NotificationsList = ({
           <ActivityIndicator size={'large'} color={COLORS.white} />
         </View>
       ) : (
-        <FlatList
-          data={notificationsList}
+        <SectionList
+          sections={getListSections()}
           contentContainerStyle={{
             paddingTop: 15,
             paddingBottom: 30,
           }}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          keyExtractor={keyExtractor}
+          ItemSeparatorComponent={renderSeperator}
+          ListFooterComponent={renderFooter}
+          onEndReached={onEndReached}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -146,13 +207,27 @@ const NotificationsList = ({
               onRefresh={onRefresh}
             />
           }
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          showsVerticalScrollIndicator={false}
-          onEndReached={onEndReached}
-          ItemSeparatorComponent={renderSeperator}
-          ListFooterComponent={renderFooter}
         />
+        // <FlatList
+        //   data={notificationsList}
+        //   contentContainerStyle={{
+        //     paddingTop: 15,
+        //     paddingBottom: 30,
+        //   }}
+        //   refreshControl={
+        //     <RefreshControl
+        //       tintColor={COLORS.secondary}
+        //       refreshing={refreshing}
+        //       onRefresh={onRefresh}
+        //     />
+        //   }
+        //   renderItem={renderItem}
+        //   keyExtractor={keyExtractor}
+        //   showsVerticalScrollIndicator={false}
+        //   onEndReached={onEndReached}
+        //   ItemSeparatorComponent={renderSeperator}
+        //   ListFooterComponent={renderFooter}
+        // />
       )}
       {notificationsList.length <= 0 && (
         <View style={styles.emptyListErrorContainer}>
@@ -200,5 +275,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.placeHolderColor,
     height: 0.3,
     marginVertical: 5,
+  },
+  listSectionTitleText: {
+    color: COLORS.white,
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 17,
   },
 });
