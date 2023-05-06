@@ -177,7 +177,7 @@ const PostEditNugget = ({route}) => {
     } else {
       if (selectedMediaList.length > 0) {
         selectedMediaList.map(item => {
-          formData.append('nuggets_media[]', item);
+          formData.append('nuggets_media', item);
         });
       }
     }
@@ -230,7 +230,7 @@ const PostEditNugget = ({route}) => {
       );
       if (tempSelectdeMediaList.length > 0) {
         tempSelectdeMediaList.map(item => {
-          formData.append('nuggets_media[]', item);
+          formData.append('nuggets_media', item);
         });
       }
       const tempRemovedMediaList = [...nugget.media_list].filter(

@@ -1,8 +1,15 @@
 import React from 'react';
 import NotificationsList from './NotificationsList';
-
+var currentPage = 1;
+var totalPages = 1;
 const ConnectionsNotifications = () => {
-  return <NotificationsList />;
+  return (
+    <NotificationsList
+      currentPage={currentPage}
+      totalPages={totalPages}
+      notificationListType={3}
+    />
+  );
 };
 
 export default ConnectionsNotifications;

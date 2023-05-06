@@ -22,6 +22,7 @@ import {
   dateToShortDate,
   getSlicedText,
   htmlDecodeText,
+  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {
   DIMENSIONS,
@@ -56,6 +57,7 @@ import {
   useNuggetItemActions,
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
+import PollDataDisplay from '../../../Components/PollDataDisplay';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -375,7 +377,16 @@ function NuggetActionsOverlay({
 
   const PollData = useCallback(() => {
     return (
-      <View style={{paddingRight: 20}}>
+      <>
+        <PollDataDisplay
+          createdDate={nugget.created_date}
+          isVoted={nugget.voted ? parseInt(nugget.voted) === 1 : false}
+          onVotePoll={pollVotingAPICall}
+          pollDuration={nugget.poll_duration}
+          pollOptions={nugget.poll_option}
+          totalVotes={parseInt(nugget.total_vote)}
+        />
+        {/* <View style={{paddingRight: 20}}>
         {getPollOptions().map((item: PollOptionsItemProp) => {
           return pollVotedData.isVoted ||
             getRemainingTimeOfPoll(nugget.poll_duration) === '' ? (
@@ -411,7 +422,8 @@ function NuggetActionsOverlay({
             nugget.poll_duration,
           )}`}
         </StyledText>
-      </View>
+      </View> */}
+      </>
     );
   }, [pollVotedData, getPollOptions(), nugget]);
 

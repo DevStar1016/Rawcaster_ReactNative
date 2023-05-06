@@ -1,8 +1,15 @@
 import React from 'react';
 import NotificationsList from './NotificationsList';
-
+var currentPage = 1;
+var totalPages = 1;
 const NuggetsNotifications = () => {
-  return <NotificationsList />;
+  return (
+    <NotificationsList
+      currentPage={currentPage}
+      totalPages={totalPages}
+      notificationListType={1}
+    />
+  );
 };
 
 export default NuggetsNotifications;

@@ -221,7 +221,10 @@ export const getDoubleDigit = value => {
 
 export const dateToShortDate = dateTime => {
   var localTime = moment.utc(dateTime).toDate();
-  return moment(moment(localTime).format('YYYY-MM-DD HH:mm:ss')).fromNow();
+  return (
+    moment(moment(localTime).format('YYYY-MM-DD HH:mm:ss')).fromNow(true) +
+    ' ago'
+  );
 };
 
 export const bigNumberFormater = num => {
@@ -363,6 +366,44 @@ export const getDefaultRawcasterPage = val => {
       return 'Chat';
     default:
       return 'Nugget';
+  }
+};
+
+export const getNotificationMessage = type => {
+  switch (parseInt(type)) {
+    case 1:
+      return 'Posted a new Nugget';
+    case 2:
+      return 'Edited the Nugget';
+    case 3:
+      return 'Commented on your Nugget';
+    case 4:
+      return 'Replied on your comment';
+    case 5:
+      return 'Agreed your Nugget';
+    case 6:
+      return 'Agreed your Comment';
+    case 7:
+      return 'Agreed your reply';
+    case 8:
+      return 'Shared your Nugget';
+    case 9:
+      return 'Posted a new Event';
+    case 10:
+      return 'Updated the Event';
+    case 11:
+      return 'Sent a connection request';
+    case 12:
+      return 'Accepted your connection request';
+    case 13:
+      return 'Posted a talkshow';
+    case 14:
+      return 'Live now';
+    case 16:
+      return 'Poll Results';
+
+    default:
+      return '';
   }
 };
 
