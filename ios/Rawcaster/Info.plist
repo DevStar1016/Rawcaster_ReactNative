@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key/>
-	<string/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -36,7 +34,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationCategoryType</key>
-	<string/>
+	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -58,6 +56,8 @@
 	<string>To Download media</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Rawcaster needs this access so that you can host or participate in a live video event such as Video Calls, Talk Show, Virtual Meeting Or Live Streaming of an event you need to share.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Rawcaster needs your contacts for proper functionality of some features. You can always change this in your phone’s settings later.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Rawcaster needs your location for proper functionality of some features. You can always change this in your phone’s settings later.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
