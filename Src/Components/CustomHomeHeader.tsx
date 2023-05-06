@@ -1,4 +1,10 @@
-import {StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Image,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from './SVGIcon';
@@ -8,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {setIsOpenLoginAlert} from '../Store/Slices/UtilitySlice';
 import StyledText from './StyledText';
 import {FONTS} from '../Utilities/Fonts';
+import LiveGif from '../Assets/Gif/live.gif';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -172,7 +179,12 @@ const CustomHomeHeader = ({
         )}
 
         {isEnableLive && (
-          <SVGIcon
+          <TouchableOpacity
+            onPress={() => {
+              if (isLogin()) {
+              }
+            }}>
+            {/* <SVGIcon
             icon="live"
             isButton
             height={28}
@@ -182,7 +194,9 @@ const CustomHomeHeader = ({
               if (isLogin()) {
               }
             }}
-          />
+          /> */}
+            <Image source={LiveGif} style={styles.gif} />
+          </TouchableOpacity>
         )}
         {isEnableAddUserButton && (
           <SVGIcon
@@ -243,5 +257,11 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.DMSans.bold,
     fontSize: 16,
     paddingLeft: 30,
+  },
+  gif: {
+    height: 28,
+    width: 28,
+    marginLeft: 5,
+    borderRadius: 14,
   },
 });

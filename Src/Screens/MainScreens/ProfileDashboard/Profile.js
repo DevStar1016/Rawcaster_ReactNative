@@ -361,10 +361,10 @@ const Profile = ({route}) => {
           listType="influencers"
           title={'Influencers'}
           paddingHorizontal={PADDING_HORIZONTAL}
-          ProfileItemProps={{
-            topRightIcon: 'message_primary',
-            topRightIconContainerBackgroundColor: COLORS.white,
-          }}
+          // ProfileItemProps={{
+          //   topRightIcon: 'message_primary',
+          //   topRightIconContainerBackgroundColor: COLORS.white,
+          // }}
         />
         <Divider />
         <ProfilesListContainerWithSeeAll
@@ -375,6 +375,11 @@ const Profile = ({route}) => {
           listType="fans"
           title={'Fans'}
           paddingHorizontal={PADDING_HORIZONTAL}
+          isDisplayChat
+          isDisplayEvent
+          onPressChat={() => {
+            navigation.navigate('InfluencerChat');
+          }}
         />
         <Divider />
 

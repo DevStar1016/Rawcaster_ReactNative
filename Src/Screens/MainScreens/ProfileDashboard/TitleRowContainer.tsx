@@ -13,12 +13,17 @@ import RoundedIconButton, {
   RoundedIconButtonProps,
 } from '../../../Components/RoundedIconButton';
 import {IconType} from '../../../Utilities/Icons';
+import SVGIcon from '../../../Components/SVGIcon';
 
 type Props = {
   title: string;
   buttonType: 'rounded' | 'text';
   isDisplayButton?: boolean;
   onPressButton?: () => void;
+  isDisplayChat?: boolean;
+  onPressChat?: () => void;
+  isDisplayEvent?: boolean;
+  onPressEvent?: () => void;
   buttonText?: string;
   buttonTextStyle?: TextStyle;
   roundedButtonIcon?: IconType;
@@ -30,14 +35,48 @@ const TitleRowContainer = ({
   buttonType = 'text',
   isDisplayButton = true,
   onPressButton,
+  isDisplayChat = false,
+  onPressChat,
+  isDisplayEvent = false,
+  onPressEvent,
   buttonTextStyle,
   buttonText = 'See All',
   roundedButtonIconProps,
 }: Props) => {
   return (
     <View style={styles.rowContainer}>
-      <View style={{flex: 1, paddingVertical: 5}}>
+      <View
+        style={{
+          flex: 1,
+          paddingVertical: 5,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
         <StyledText style={styles.titleText}>{title}</StyledText>
+        {isDisplayChat && (
+          <SVGIcon
+            icon="message_primary"
+            isButton
+            onPress={() => {
+              if (onPressChat) {
+                onPressChat();
+              }
+            }}
+            marginLeft={10}
+          />
+        )}
+        {isDisplayEvent && (
+          <SVGIcon
+            icon="talkshow_secondary"
+            isButton
+            onPress={() => {
+              if (onPressEvent) {
+                onPressEvent();
+              }
+            }}
+            marginLeft={10}
+          />
+        )}
       </View>
       {isDisplayButton && (
         <>

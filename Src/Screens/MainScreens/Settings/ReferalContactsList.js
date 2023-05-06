@@ -32,6 +32,7 @@ import {
 import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import ProfileIcon from '../../../Assets/Png/user.png';
+import Share from 'react-native-share';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import StyledText from '../../../Components/StyledText';
 import Loader from '../../../Components/Loader';
@@ -40,6 +41,7 @@ import {useProfile, useToken} from '../../../Utilities/StoreData';
 import InviteFanModal from '../../../Modals/InviteFanModal';
 import {inviteToRawcasterService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
+import RNShare from 'react-native-share';
 
 var isMount = true;
 var currentPage = 1;
@@ -80,7 +82,7 @@ const referalOptionsList = [
     id: 6,
     icon: 'twitter_rounded_fill',
     name: 'Twitter',
-    name: 'twitter',
+    key: 'twitter',
   },
   {
     id: 7,
@@ -198,7 +200,7 @@ const ReferalContactsList = ({navigation}) => {
       });
     } else {
       try {
-        const result = await RNSHARE.share(
+        const result = await RNShare.share(
           {
             message: TWITTER_REFERAL_MESSAGE,
             url: profile.referral_link,
