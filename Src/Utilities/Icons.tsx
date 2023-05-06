@@ -110,6 +110,7 @@ import AudioCallWhiteIcon from '../Assets/Svg/audio_call_white.svg';
 import VideoCallWhiteIcon from '../Assets/Svg/video_call_white.svg';
 import ChatWhiteIcon from '../Assets/Svg/chat_white.svg';
 import TalkshowWhiteIcon from '../Assets/Svg/talkshow_white.svg';
+import TalkshowSecondaryIcon from '../Assets/Svg/talkshow_secondary.svg';
 import EventWhiteIcon from '../Assets/Svg/event_white.svg';
 import FilterFillWhiteIcon from '../Assets/Svg/filter_fill_white.svg';
 import FilterFillBlackIcon from '../Assets/Svg/filter_fill_black.svg';
@@ -245,6 +246,7 @@ export type IconType =
   | 'video_call_white'
   | 'chat_white'
   | 'talkshow_white'
+  | 'talkshow_secondary'
   | 'event_white'
   | 'filter_fill_white'
   | 'filter_fill_black'
@@ -372,6 +374,7 @@ export const ICONS = {
   video_call_white: VideoCallWhiteIcon,
   chat_white: ChatWhiteIcon,
   talkshow_white: TalkshowWhiteIcon,
+  talkshow_secondary: TalkshowSecondaryIcon,
   event_white: EventWhiteIcon,
   filter_fill_white: FilterFillWhiteIcon,
   filter_fill_black: FilterFillBlackIcon,

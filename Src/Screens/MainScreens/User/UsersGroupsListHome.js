@@ -52,10 +52,11 @@ const UsersGroupsListHome = () => {
           title="My Connections"
           isEnableSafeArea
           isEnableSearch={false}
-          isEnableBack
-          onPressBack={() => {
-            navigation.goBack();
-          }}
+          // isEnableBack
+          // onPressBack={() => {
+          //   navigation.goBack();
+          // }}
+          isEnableLive={false}
         />
         <View style={styles.contentContainer}>
           <SearchInput
@@ -100,6 +101,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     backgroundColor: COLORS.primaryDark,
+    paddingBottom: 50,
   },
 
   itemContainer: {

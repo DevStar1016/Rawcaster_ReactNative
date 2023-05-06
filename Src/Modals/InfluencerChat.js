@@ -5,12 +5,18 @@ import {
   Keyboard,
   TouchableOpacity,
   TextInput,
+  Modal,
 } from 'react-native';
 import HOCView from '../Components/HOCView';
 import {COLORS} from '../Utilities/Colors';
 import SubmitButton from '../Components/SubmitButton';
 import SVGIcon from '../Components/SVGIcon';
-import {getSlicedText} from '../Utilities/Methods';
+import {
+  compressMedia,
+  getFileName,
+  getSlicedText,
+  getUrlWithFilePrefix,
+} from '../Utilities/Methods';
 import ProfileWithBadge from '../Components/ProfileWithBadge';
 import Badges from '../Utilities/Badges';
 import {DIMENSIONS} from '../Utilities/Constants';
@@ -19,13 +25,18 @@ import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../Utilities/StoreData';
 import {influencerChatService} from '../Services/ApiService';
 import Toast from '../Components/Toast';
+import {Camera} from 'react-native-vision-camera';
+import CustomCameraView from './CameraModals/CustomCameraView';
+import AudioRecorder from './AudioRecorder';
 
 var isMount = true;
 const InfluencerChat = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
-  const {influencerId, influencerName} = route.params ?? {};
   const [message, setmessage] = useState('');
+  const [type, settype] = useState(1);
+  const [isOpenCamera, setisOpenCamera] = useState(false);
+  const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [isLoading, setisLoading] = useState(false);
 
   useEffect(() => {
@@ -42,7 +53,7 @@ const InfluencerChat = ({route}) => {
     }
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('user_id', influencerId);
+    formData.append('type', type);
     formData.append('message', message.trim());
     console.log(formData, 'FORM');
     influencerChatService(formData)
@@ -64,6 +75,143 @@ const InfluencerChat = ({route}) => {
       });
   }
 
+  function pickMedia(type) {
+    openCloseEmojiPicker(false);
+    ImageCropPicker.openPicker({
+      multiple: true,
+      mediaType: type,
+      smartAlbums: [
+        'PhotoStream',
+        'Generic',
+        'Panoramas',
+        'Videos',
+        'Favorites',
+        'Timelapses',
+        'AllHidden',
+        'RecentlyAdded',
+        'Bursts',
+        'SlomoVideos',
+        'UserLibrary',
+        'SelfPortraits',
+        'Screenshots',
+        'DepthEffect',
+        'LivePhotos',
+        'Animated',
+        'LongExposure',
+      ],
+    })
+      .then(async mediaList => {
+        if (isMount) {
+          setisLoading(true);
+        }
+        let mediaType = type === 'photo' ? 1 : 2;
+        Promise.all(
+          mediaList.map(async item => {
+            let mediaPath = await compressMedia(mediaType, item.path);
+            return {
+              uri: getUrlWithFilePrefix(mediaPath),
+              name: getFileName(mediaPath),
+              type: item.mime,
+            };
+          }),
+        )
+          .then(resMediaList => {
+            if (isMount) {
+              setselectedMediaList(pre => [...pre, ...resMediaList]);
+            }
+          })
+          .catch(e => {
+            Toast.fail(e.message);
+          })
+          .finally(() => {
+            if (isMount) {
+              setisLoading(false);
+            }
+          });
+      })
+      .catch(e => {
+        console.log(e, 'ERRORRR');
+      });
+  }
+
+  function handleRemoveSelectedMediaItem(selectedIndex) {
+    const filteredSelectedMediaList = [...selectedMediaList].filter(
+      (_, index) => index !== selectedIndex,
+    );
+    if (isMount) {
+      setselectedMediaList(filteredSelectedMediaList);
+    }
+  }
+
+  async function handleOpenCamera() {
+    try {
+      // const cameraPermission = await Camera.getCameraPermissionStatus();
+      // const microphonePermission = await Camera.getMicrophonePermissionStatus();
+
+      const newCameraPermission = await Camera.requestCameraPermission();
+      const newMicrophonePermission =
+        await Camera.requestMicrophonePermission();
+      if (
+        newCameraPermission === 'authorized' &&
+        newMicrophonePermission === 'authorized'
+      ) {
+        if (isMount) {
+          setisLoading(false);
+          setisOpenCamera(true);
+        }
+      } else {
+        if (isMount) {
+          setisLoading(false);
+        }
+        if (newCameraPermission === 'denied') {
+          Toast.fail('Camera Permission Denied');
+        } else if (newMicrophonePermission === 'denied') {
+          Toast.fail('Microphone Permission Denied');
+        } else {
+          Toast.fail('Permissions Denied');
+        }
+      }
+    } catch (e) {
+      if (isMount) {
+        setisLoading(false);
+      }
+      Toast.fail(e.message);
+    }
+  }
+
+  async function handleOpenAudioRecorder() {
+    const newMicrophonePermission = await Camera.requestMicrophonePermission();
+    if (newMicrophonePermission === 'authorized') {
+      if (isMount) {
+        setisOpenAudioRecorder(true);
+      }
+    } else {
+      Toast.fail('Microphone Permission Denied');
+    }
+  }
+
+  async function onSelectMediaFromCamera(mediaItem) {
+    let mediaType = mediaItem.type.includes('image') ? 1 : 2;
+    let mediaPath = await compressMedia(mediaType, mediaItem.uri);
+    setselectedMediaList(pre => [
+      ...pre,
+      {
+        name: getFileName(mediaPath),
+        type: mediaItem.type,
+        uri: mediaPath,
+      },
+    ]);
+  }
+
+  function handleSubmitAudio(audioFile) {
+    setselectedMediaList(pre => [
+      ...pre,
+      {
+        ...audioFile,
+      },
+    ]);
+  }
+
   return (
     <HOCView
       //   isLoading={isLoading}
@@ -75,7 +223,7 @@ const InfluencerChat = ({route}) => {
       isLoading={isLoading}
       backHeaderProps={{
         bgColor: COLORS.transparent,
-        title: `Send message to ${influencerName}`,
+        title: `Send message to My Fans`,
         isEnableBackButton: false,
         isTitleCenter: true,
         isEnableRightIcon: true,
@@ -96,7 +244,7 @@ const InfluencerChat = ({route}) => {
           <View style={styles.topContainer}>
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder={`What’s on your mind for ${influencerName}!`}
+                placeholder={`What’s on your mind for My Fans!`}
                 style={styles.textInput}
                 multiline
                 maxLength={500}
@@ -191,6 +339,36 @@ const InfluencerChat = ({route}) => {
           </View>
         </View>
       </TouchableOpacity>
+      <Modal
+        visible={isOpenCamera}
+        statusBarTranslucent
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          if (isMount) {
+            setisOpenCamera(false);
+          }
+        }}>
+        <CustomCameraView
+          setModal={setisOpenCamera}
+          onSendMedia={onSelectMediaFromCamera}
+        />
+      </Modal>
+
+      <Modal
+        visible={isOpenAudioRecorder}
+        statusBarTranslucent
+        transparent
+        onRequestClose={() => {
+          if (isMount) {
+            setisOpenAudioRecorder(false);
+          }
+        }}>
+        <AudioRecorder
+          setModal={setisOpenAudioRecorder}
+          onSubmitAudio={handleSubmitAudio}
+        />
+      </Modal>
     </HOCView>
   );
 };

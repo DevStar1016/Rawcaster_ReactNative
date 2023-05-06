@@ -28,6 +28,10 @@ type Props = {
   title?: string;
   listType: 'connections' | 'influencers' | 'fans' | 'unclaimed_influencers';
   ProfileItemProps: ProfileWithBadgeProps;
+  isDisplayChat?: boolean;
+  onPressChat?: () => void;
+  isDisplayEvent?: boolean;
+  onPressEvent?: () => void;
 };
 
 const EXTRA_MARGIN = 10;
@@ -40,6 +44,10 @@ const ProfilesListContainerWithSeeAll = ({
   title = '',
   listType,
   ProfileItemProps,
+  isDisplayChat = false,
+  onPressChat,
+  isDisplayEvent = false,
+  onPressEvent,
 }: Props) => {
   let isMount = true;
   const navigation = useNavigation();
@@ -178,6 +186,10 @@ const ProfilesListContainerWithSeeAll = ({
           });
         }}
         buttonType="text"
+        isDisplayChat={isDisplayChat}
+        onPressChat={onPressChat}
+        isDisplayEvent={isDisplayEvent}
+        onPressEvent={onPressEvent}
       />
 
       {isLoading ? (

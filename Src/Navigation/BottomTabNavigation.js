@@ -82,11 +82,11 @@ export default function BottomTabNavigation() {
         tabBar={props => <CustomBottomTabBar {...props} />}
         screenListeners={{
           focus: e => {
-            if (e.target.includes('UsersStack')) {
-              dispatch(setIsBottomTabBarAbsolute(false));
-            } else {
-              dispatch(setIsBottomTabBarAbsolute(true));
-            }
+            // if (e.target.includes('UsersStack')) {
+            //   dispatch(setIsBottomTabBarAbsolute(false));
+            // } else {
+            dispatch(setIsBottomTabBarAbsolute(true));
+            // }
           },
         }}
         screenOptions={({route}) => ({

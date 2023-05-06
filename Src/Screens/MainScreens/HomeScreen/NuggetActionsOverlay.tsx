@@ -672,6 +672,7 @@ function NuggetActionsOverlay({
             }}
           />
           {parseInt(nugget.share_type) === 1 &&
+            parseInt(nugget.type) === 1 &&
             !(nugget.poll_option && nugget.poll_option.length > 0) && (
               <ActionIconContainer icon="share" onPress={onPressShare} />
             )}
