@@ -35,9 +35,9 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
   const profileUpdateAPICall = (type = 1, imageData) => {
     // 1 - profile image, 2 - cover image
     const formData = new FormData();
-    formData.append('auth_code', getAuthCode(token + profile.name));
+    formData.append('auth_code', getAuthCode(token + profile?.name));
     formData.append('token', token);
-    formData.append('name', profile.name);
+    formData.append('name', profile?.name);
     if (type === 1) {
       formData.append('profile_image', imageData);
     } else {
@@ -79,7 +79,7 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
     <View onLayout={onLayout} style={styles.mainContainer}>
       <View style={styles.bannerContainer}>
         <Image
-          source={{uri: coverImage ? coverImage.uri : profile.cover_image}}
+          source={{uri: coverImage ? coverImage.uri : profile?.cover_image}}
           resizeMode="cover"
           style={{width: '100%', height: '100%'}}
         />
@@ -103,7 +103,9 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
 
       <View style={[styles.profileDataContainer, {paddingHorizontal}]}>
         <ProfileWithBadge
-          profileImage={profileImage ? profileImage.uri : profile.profile_image}
+          profileImage={
+            profileImage ? profileImage.uri : profile?.profile_image
+          }
           profileSize={PROFILE_SIZE}
           extraMargin={0}
           containerStyle={{

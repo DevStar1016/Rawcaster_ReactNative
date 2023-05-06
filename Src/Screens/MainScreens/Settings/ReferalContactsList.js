@@ -121,16 +121,16 @@ const ReferalContactsList = ({navigation}) => {
   const [openInviteFans, setopenInviteFans] = useState(false);
 
   const SHARE_OBJECTS = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: REFERAL_MESSAGE,
   };
   const IOS_FACEBOOK_SHARE_OBJECT = {
     contentType: 'link',
-    contentUrl: profile.referral_link,
+    contentUrl: profile?.referral_link,
     contentDescription: REFERAL_MESSAGE,
   };
   const SHARE_OBJECTS_TWITTER = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: TWITTER_REFERAL_MESSAGE,
   };
 
@@ -201,7 +201,7 @@ const ReferalContactsList = ({navigation}) => {
         const result = await RNSHARE.share(
           {
             message: TWITTER_REFERAL_MESSAGE,
-            url: profile.referral_link,
+            url: profile?.referral_link,
           },
           {
             excludedActivityTypes: [
@@ -242,7 +242,7 @@ const ReferalContactsList = ({navigation}) => {
       case 'whatsapp':
         Linking.openURL(
           `whatsapp://send?text=${
-            REFERAL_MESSAGE + ' ' + profile.referral_link
+            REFERAL_MESSAGE + ' ' + profile?.referral_link
           }`,
         )
           .then(res => {})
@@ -323,7 +323,7 @@ const ReferalContactsList = ({navigation}) => {
         const shareOptionstelegram = {
           ...SHARE_OBJECTS,
           social: Share.Social.TELEGRAM,
-          subject: 'Rawcaster - Invite from ' + profile.name,
+          subject: 'Rawcaster - Invite from ' + profile?.name,
         };
         Share.shareSingle(shareOptionstelegram)
           .then(res => {
@@ -477,7 +477,7 @@ const ReferalContactsList = ({navigation}) => {
   };
   const openSms = phoneNumber => {
     const separator = IS_IOS ? '&' : '?';
-    const message = REFERAL_MESSAGE + ' ' + profile.referral_link;
+    const message = REFERAL_MESSAGE + ' ' + profile?.referral_link;
     const url = `sms:${phoneNumber}${separator}body=${message}`;
     Linking.openURL(url).catch(e => {});
   };

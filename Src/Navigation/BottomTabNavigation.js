@@ -51,18 +51,18 @@ export default function BottomTabNavigation() {
 
   const handleAccountVerification = () => {
     dispatch(setIsOpenVerifyPopup(false));
-    if (user.acc_verify_status === 0 && profile.is_profile_updated === 1) {
+    if (user.acc_verify_status === 0 && profile?.is_profile_updated === 1) {
       if (
-        profile.two_type_verification === 1 &&
-        profile.mobile &&
-        profile.email_id
+        profile?.two_type_verification === 1 &&
+        profile?.mobile &&
+        profile?.email_id
       ) {
         setisOpenVerificationOptions(true);
-      } else if (profile.email_id) {
+      } else if (profile?.email_id) {
         navigation.navigate('EmailPhoneVerification', {
           otpType: 'email',
         });
-      } else if (profile.mobile) {
+      } else if (profile?.mobile) {
         navigation.navigate('EmailPhoneVerification', {
           otpType: 'sms',
         });

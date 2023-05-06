@@ -13,14 +13,8 @@ import {
   setUserData,
 } from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
-import {
-  clearUtilityReduxData,
-  setGlobalLoading,
-  setLocationDetails,
-} from '../Store/Slices/UtilitySlice';
 import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
-import ImageCropPicker from 'react-native-image-crop-picker';
 import {getTimezone} from 'countries-and-timezones';
 import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
 
@@ -47,7 +41,6 @@ export const removeToken = async dispatch => {
   dispatch(setToken(null));
   dispatch(clearAuthReduxData());
   dispatch(clearHomeReduxData());
-  dispatch(clearUtilityReduxData());
 
   try {
     await EncryptedStorage.removeItem(ISLOGIN);
@@ -335,7 +328,7 @@ export const getTimezoneName = str => {
 export const utctoUserTimezonewithAbbr = (time, zonename) => {
   let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
   let displayCutoff = momentTZ(utcCutoff).tz(getTimezoneName(zonename));
-  let timezoneabbrs = displayCutoff.tz(getTimezoneName(zonename)).format('z');
+  let timezoneabbrs = displayCutoff?.tz(getTimezoneName(zonename))?.format('z');
   return timezoneabbrs; // this return time zone i.e IST or GMT
 };
 
@@ -343,7 +336,7 @@ export const utcToUserTimezone = (time, zonename) => {
   let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
   let displayCutoff = momentTZ(utcCutoff)
     .tz(getTimezoneName(zonename))
-    .format('YYYY-MM-DD HH:mm:ss');
+    ?.format('YYYY-MM-DD HH:mm:ss');
   return moment(displayCutoff);
 };
 

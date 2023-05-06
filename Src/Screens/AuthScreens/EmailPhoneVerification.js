@@ -195,9 +195,9 @@ const EmailPhoneVerification = ({route}) => {
       return emailMobile;
     }
     if (otpType === 'sms') {
-      return profile.mobile;
+      return profile?.mobile;
     }
-    return profile.email_id;
+    return profile?.email_id;
   };
 
   return (

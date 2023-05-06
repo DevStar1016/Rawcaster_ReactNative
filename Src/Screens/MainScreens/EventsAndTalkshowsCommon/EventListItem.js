@@ -49,7 +49,7 @@ const EventListItem = ({
   };
 
   const isOwner = () => {
-    return item.original_user_id === profile.user_id;
+    return item?.original_user_id === profile?.user_id;
   };
 
   return (
@@ -117,7 +117,7 @@ const EventListItem = ({
             <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
               {utcToUserTimezone(
                 item.start_date_time,
-                settings.time_zone,
+                settings?.time_zone,
               ).format('DD-MMM-YYYY')}
               {/* { moment(item.start_date_time).format('DD-MMM-YYYY')} */}
             </StyledText>
@@ -132,7 +132,7 @@ const EventListItem = ({
             <StyledText style={{paddingVertical: 5, color: getTextColor()}}>
               {utcToUserTimezone(
                 item.start_date_time,
-                settings.time_zone,
+                settings?.time_zone,
               ).format('hh:mm A')}
               {/* {moment(item.start_date_time).format('hh:mm A')} */}
             </StyledText>

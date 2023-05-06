@@ -569,16 +569,16 @@ const PostEditNugget = ({route}) => {
           <View style={styles.topContainer}>
             <View style={styles.subContainer}>
               <ProfileWithBadge
-                badge={Badges(profile.user_status_id)}
+                badge={Badges(profile?.user_status_id)}
                 isEnableGradient={false}
-                profileImage={profile.profile_image}
+                profileImage={profile?.profile_image}
                 padding={0}
                 profileSize={38}
                 badgeSize={16}
               />
               <View style={styles.nameContainer}>
                 <StyledText style={styles.nameText}>
-                  {getSlicedText(profile.name, 10)}
+                  {getSlicedText(profile?.name, 10)}
                 </StyledText>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <SubmitButton
@@ -710,7 +710,7 @@ const PostEditNugget = ({route}) => {
           ) : (
             <View style={styles.inputContainer}>
               <TextInput
-                placeholder={`What’s on your mind, ${profile.name}!`}
+                placeholder={`What’s on your mind, ${profile?.name}!`}
                 style={styles.textInput}
                 multiline
                 maxLength={500}

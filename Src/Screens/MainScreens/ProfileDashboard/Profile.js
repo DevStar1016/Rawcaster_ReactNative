@@ -128,9 +128,9 @@ const Profile = ({route}) => {
         if (res.data.status === 1) {
           setothersProfile({
             ...res.data.profile,
-            first_name: htmlDecodeText(res.data.profile.first_name),
-            name: htmlDecodeText(res.data.profile.name),
-            last_name: htmlDecodeText(res.data.profile.last_name),
+            first_name: htmlDecodeText(res.data.profile?.first_name),
+            name: htmlDecodeText(res.data.profile?.name),
+            last_name: htmlDecodeText(res.data.profile?.last_name),
           });
         } else if (res.data.status === 0) {
           setemptyText(res.data.msg);

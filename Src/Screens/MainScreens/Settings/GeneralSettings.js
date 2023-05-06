@@ -124,33 +124,33 @@ const GeneralSettings = () => {
   const [languagesList, setlanguagesList] = useState([]);
   const [timeZonesList, settimeZonesList] = useState([]);
   const [settingsData, setsettingsData] = useState({
-    phone_display_status: settings.phone_display_status,
-    location_display_status: settings.location_display_status,
-    dob_display_status: settings.dob_display_status,
-    bio_display_status: settings.bio_display_status,
-    online_status: settings.online_status,
-    public_nugget_display: settings.public_nugget_display,
-    public_event_display: settings.public_event_display,
-    account_active_inactive: settings.account_active_inactive,
-    mobile_default_page: settings.mobile_default_page,
-    language_id: settings.language_id,
-    default_date_format: settings.default_date_format,
-    time_zone: settings.time_zone,
-    lock_fans: settings.lock_fans,
-    lock_my_connection: settings.lock_my_connection,
-    lock_my_influencer: settings.lock_my_influencer,
-    lock_nugget: settings.lock_nugget,
+    phone_display_status: settings?.phone_display_status,
+    location_display_status: settings?.location_display_status,
+    dob_display_status: settings?.dob_display_status,
+    bio_display_status: settings?.bio_display_status,
+    online_status: settings?.online_status,
+    public_nugget_display: settings?.public_nugget_display,
+    public_event_display: settings?.public_event_display,
+    account_active_inactive: settings?.account_active_inactive,
+    mobile_default_page: settings?.mobile_default_page,
+    language_id: settings?.language_id,
+    default_date_format: settings?.default_date_format,
+    time_zone: settings?.time_zone,
+    lock_fans: settings?.lock_fans,
+    lock_my_connection: settings?.lock_my_connection,
+    lock_my_influencer: settings?.lock_my_influencer,
+    lock_nugget: settings?.lock_nugget,
   });
 
   const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
     useState({
-      phone_group_list: settings.phone_group_list ?? [],
-      location_group_list: settings.location_group_list ?? [],
-      dob_group_list: settings.dob_group_list ?? [],
-      bio_group_list: settings.bio_group_list ?? [],
-      online_group_list: settings.online_group_list ?? [],
-      nugget_display_list: settings.nugget_display_list ?? [],
-      event_display_list: settings.event_display_list ?? [],
+      phone_group_list: settings?.phone_group_list ?? [],
+      location_group_list: settings?.location_group_list ?? [],
+      dob_group_list: settings?.dob_group_list ?? [],
+      bio_group_list: settings?.bio_group_list ?? [],
+      online_group_list: settings?.online_group_list ?? [],
+      nugget_display_list: settings?.nugget_display_list ?? [],
+      event_display_list: settings?.event_display_list ?? [],
     });
 
   useEffect(() => {
@@ -356,9 +356,9 @@ const GeneralSettings = () => {
           bounces={false}>
           <RowContainer
             leftText="User Status"
-            rightText={profile.user_status}
+            rightText={profile?.user_status}
           />
-          <RowContainer leftText="User Type" rightText={profile.user_type} />
+          <RowContainer leftText="User Type" rightText={profile?.user_type} />
           <DropDownPicker
             title="Default Rawcaster page"
             value={getDefaultPage()}

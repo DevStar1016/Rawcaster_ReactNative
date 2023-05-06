@@ -53,26 +53,26 @@ const CreateEditEvent = ({route}) => {
   const [melodyFileError, setmelodyFileError] = useState('');
 
   const [selectedValues, setselectedValues] = useState({
-    eventVisibilityTypeId: settings.event_type,
+    eventVisibilityTypeId: settings?.event_type,
     event_layout_id: 1,
     melody: 1,
     eventDuration: new Date(
       moment(
         '2021-01-05 ' +
-          `${settings.max_event_duration <= 9 ? '0' : ''}${parseInt(
-            settings.max_event_duration,
+          `${settings?.max_event_duration <= 9 ? '0' : ''}${parseInt(
+            settings?.max_event_duration,
           )}:00:00`,
       ),
     ),
     durationError: '',
-    waiting_room: parseInt(settings.waiting_room),
-    join_before_host: parseInt(settings.join_before_host),
-    sound_notify: parseInt(settings.participant_join_sound),
-    user_screenshare: parseInt(settings.screen_share_status),
-    host_audio: parseInt(settings.host_audio),
-    participant_audio: parseInt(settings.participant_audio),
-    host_video: parseInt(settings.host_video),
-    participant_video: parseInt(settings.participant_video),
+    waiting_room: parseInt(settings?.waiting_room),
+    join_before_host: parseInt(settings?.join_before_host),
+    sound_notify: parseInt(settings?.participant_join_sound),
+    user_screenshare: parseInt(settings?.screen_share_status),
+    host_audio: parseInt(settings?.host_audio),
+    participant_audio: parseInt(settings?.participant_audio),
+    host_video: parseInt(settings?.host_video),
+    participant_video: parseInt(settings?.participant_video),
     banner_image: null,
     selectedGroupsIdsList: [],
     removedGroupsIdsList: [],
@@ -97,9 +97,9 @@ const CreateEditEvent = ({route}) => {
       .number()
       .min(2, 'Enter valid Participants')
       .max(
-        parseInt(settings.max_event_participants_count),
+        parseInt(settings?.max_event_participants_count),
         `Maximum ${parseInt(
-          settings.max_event_participants_count,
+          settings?.max_event_participants_count,
         )} participants only allowed`,
       )
       .required('Enter valid Participants'),
@@ -111,7 +111,7 @@ const CreateEditEvent = ({route}) => {
         eventTitle: 'Rawcaster Event',
         eventDescription: '',
         eventTime: moment().add(15, 'minute'),
-        maxParticipants: parseInt(settings.max_event_participants_count),
+        maxParticipants: parseInt(settings?.max_event_participants_count),
       },
       validationSchema: validationSchema,
       onSubmit: values => {
@@ -168,7 +168,7 @@ const CreateEditEvent = ({route}) => {
             tempSelectedData = {
               ...tempSelectedData,
               eventVisibilityTypeId:
-                settings.event_type ?? res[0].data.event_types[0].id,
+                settings?.event_type ?? res[0].data.event_types[0].id,
             };
           }
           if (res[1].data.status === 1) {
@@ -219,7 +219,7 @@ const CreateEditEvent = ({route}) => {
               eventDescription: htmlDecodeText(res.data.event_detail.message),
               eventTime: utcToUserTimezone(
                 res.data.event_detail.start_date_time,
-                settings.time_zone,
+                settings?.time_zone,
               ),
               maxParticipants: parseInt(
                 res.data.event_detail.no_of_participants,
@@ -229,7 +229,7 @@ const CreateEditEvent = ({route}) => {
           setliveEventDate(
             utcToUserTimezone(
               res.data.event_detail.start_date_time,
-              settings.time_zone,
+              settings?.time_zone,
             ),
           );
           tempData = {
@@ -276,7 +276,7 @@ const CreateEditEvent = ({route}) => {
   };
 
   const onSelectDuration = date => {
-    let actualDurationallowed = settings.max_event_duration;
+    let actualDurationallowed = settings?.max_event_duration;
     let selectedDuration = moment(date).format('HH:mm');
     let durationSelected = selectedDuration.replace(/[':]+/g, '.');
     if (
@@ -290,11 +290,11 @@ const CreateEditEvent = ({route}) => {
       }));
       return;
     }
-    if (parseFloat(durationSelected) > settings.max_event_duration) {
+    if (parseFloat(durationSelected) > settings?.max_event_duration) {
       setselectedValues(preData => ({
         ...preData,
         eventDuration: '',
-        durationError: `Max Allowed hours is ${settings.max_event_duration}`,
+        durationError: `Max Allowed hours is ${settings?.max_event_duration}`,
       }));
       return;
     }
@@ -303,7 +303,7 @@ const CreateEditEvent = ({route}) => {
       .toString();
     allowedDuration = parseFloat(allowedDuration.replace(':', '.'));
     selectedDuration = parseFloat(selectedDuration.replace(':', '.'));
-    if (selectedDuration > allowedDuration && profile.user_status_id === 1) {
+    if (selectedDuration > allowedDuration && profile?.user_status_id === 1) {
       // setTimeout(() => {
       //   setaccUpgradePopup(true);
       // }, 500);
@@ -480,7 +480,7 @@ const CreateEditEvent = ({route}) => {
           isDateTime
           value={getDisplayEventDate(
             liveEventDate,
-            settings.default_date_format,
+            settings?.default_date_format,
           )}
           dateValue={liveEventDate}
           dropDownIcon="calendar_black"

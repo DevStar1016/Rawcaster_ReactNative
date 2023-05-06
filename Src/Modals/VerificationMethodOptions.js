@@ -10,7 +10,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
   const profile = useProfile();
 
   const getPartialHiddenEmail = () => {
-    let emailSplitedList = profile.email_id.toString().split('@');
+    let emailSplitedList = profile?.email_id.toString().split('@');
     let emailNameText = '';
     emailSplitedList[0]
       .toString()
@@ -27,7 +27,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
   };
 
   const getPartialHiddenMobileNumber = () => {
-    let splitedNumbersList = profile.mobile.toString().split('');
+    let splitedNumbersList = profile?.mobile.toString().split('');
     let phoneNumber = '';
     splitedNumbersList.map((num, index) => {
       if (index < 2 || index > splitedNumbersList.length - 3) {
@@ -53,7 +53,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
           </StyledText>
         </View>
         <View>
-          {profile.email_id.toString() ? (
+          {profile?.email_id.toString() ? (
             <>
               <TouchableOpacity
                 style={styles.choiceContainer}
@@ -75,7 +75,7 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
               <Divider />
             </>
           ) : null}
-          {profile.mobile.toString() ? (
+          {profile?.mobile.toString() ? (
             <>
               <TouchableOpacity
                 style={styles.choiceContainer}

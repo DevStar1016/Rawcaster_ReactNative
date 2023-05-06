@@ -273,8 +273,9 @@ const styles = StyleSheet.create({
   },
   divider: {
     backgroundColor: COLORS.placeHolderColor,
-    height: 0.3,
+    height: 1,
     marginVertical: 5,
+    opacity: 0.3,
   },
   listSectionTitleText: {
     color: COLORS.white,

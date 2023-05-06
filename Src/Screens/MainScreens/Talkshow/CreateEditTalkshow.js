@@ -148,14 +148,14 @@ const CreateEditTalkshow = ({route}) => {
               eventTitle: htmlDecodeText(res.data.event_detail.event_name),
               eventTime: utcToUserTimezone(
                 res.data.event_detail.start_date_time,
-                settings.time_zone,
+                settings?.time_zone,
               ),
             };
           });
           setliveEventDate(
             utcToUserTimezone(
               res.data.event_detail.start_date_time,
-              settings.time_zone,
+              settings?.time_zone,
             ),
           );
 
@@ -455,7 +455,7 @@ const CreateEditTalkshow = ({route}) => {
           isDateTime
           value={getDisplayEventDate(
             liveEventDate,
-            settings.default_date_format,
+            settings?.default_date_format,
           )}
           dateValue={liveEventDate}
           dropDownIcon="calendar_black"

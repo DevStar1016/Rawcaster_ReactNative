@@ -97,8 +97,8 @@ const SignupWithPhone = ({route}) => {
     formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
-    if (locationDetails && locationDetails.geoLocation) {
-      formData.append('geo_location', locationDetails.geoLocation);
+    if (locationDetails && locationDetails?.geoLocation) {
+      formData.append('geo_location', locationDetails?.geoLocation);
     }
     formData.append('ref_id', '');
     formData.append('device_id', DEVICE_ID);

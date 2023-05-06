@@ -177,10 +177,10 @@ const MainStack = () => {
           let profile = {...res[0].data.profile};
           profile = {
             ...profile,
-            name: htmlDecodeText(profile.name),
-            first_name: htmlDecodeText(profile.first_name),
-            last_name: htmlDecodeText(profile.last_name),
-            bio_data: htmlDecodeText(profile.bio_data),
+            name: htmlDecodeText(profile?.name),
+            first_name: htmlDecodeText(profile?.first_name),
+            last_name: htmlDecodeText(profile?.last_name),
+            bio_data: htmlDecodeText(profile?.bio_data),
           };
           dispatch(setMyProfile(profile));
         }

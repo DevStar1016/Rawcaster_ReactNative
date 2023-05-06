@@ -59,12 +59,12 @@ const ClaimAccount = ({route}) => {
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
     useFormik({
       initialValues: {
-        firstName: profile.first_name ?? '',
-        lastName: profile.last_name ?? '',
-        dob: profile.dob ?? '',
-        mobileNumber: profile.mobile ?? '',
-        email: profile.email_id ?? '',
-        location: profile.geo_location ?? '',
+        firstName: profile?.first_name ?? '',
+        lastName: profile?.last_name ?? '',
+        dob: profile?.dob ?? '',
+        mobileNumber: profile?.mobile ?? '',
+        email: profile?.email_id ?? '',
+        location: profile?.geo_location ?? '',
       },
       validationSchema: validationSchema,
       onSubmit: values => {
