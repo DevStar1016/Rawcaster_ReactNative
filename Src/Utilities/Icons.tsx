@@ -116,6 +116,7 @@ import FilterFillBlackIcon from '../Assets/Svg/filter_fill_black.svg';
 import FilterLineWhiteIcon from '../Assets/Svg/filter_line_white.svg';
 import FilterLineBlackIcon from '../Assets/Svg/filter_line_black.svg';
 import VerifiedSignIcon from '../Assets/Svg/verified_sign.svg';
+import CloseBlackIcon from '../Assets/Svg/close_black.svg';
 
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -249,7 +250,8 @@ export type IconType =
   | 'filter_fill_black'
   | 'filter_line_white'
   | 'filter_line_black'
-  | 'verified_sign';
+  | 'verified_sign'
+  | 'close_black';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -376,4 +378,5 @@ export const ICONS = {
   filter_line_white: FilterLineWhiteIcon,
   filter_line_black: FilterLineBlackIcon,
   verified_sign: VerifiedSignIcon,
+  close_black: CloseBlackIcon,
 };

@@ -179,8 +179,6 @@ const Profile = ({route}) => {
       });
   }
 
-  console.log(profile, 'PROFILE');
-
   const listNuggetsAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -264,7 +262,7 @@ const Profile = ({route}) => {
     headerContainerHeight: 0,
     isMuted: isMuted,
     setisMuted: setisMuted,
-    isAutoPlay: true,
+    isAutoPlay: false,
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
     viewableNuggetItem: viewableItem?.nugget_id,

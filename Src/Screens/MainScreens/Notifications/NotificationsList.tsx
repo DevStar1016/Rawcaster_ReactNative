@@ -46,10 +46,13 @@ const NotificationsList = ({
     formData.append('token', token);
     formData.append('notification_type', notificationListType);
     formData.append('page_number', pageNumber);
+    if (notificationListType === 2) {
+      console.log(formData, 'FORM');
+    }
     listNotificationsService(formData)
       .then(res => {
-        if (notificationListType === 6) {
-          console.log(JSON.stringify(res.data.notification_list), 'DATAA');
+        if (notificationListType === 2) {
+          console.log(res.data, 'DATAA');
         }
         if (isMount) {
           if (res.data.status === 1) {
@@ -194,6 +197,8 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   divider: {
-    height: 5,
+    backgroundColor: COLORS.placeHolderColor,
+    height: 0.3,
+    marginVertical: 5,
   },
 });

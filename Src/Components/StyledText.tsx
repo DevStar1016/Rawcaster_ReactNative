@@ -12,6 +12,7 @@ import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import Hyperlink from 'react-native-hyperlink';
 import {IS_IOS} from '../Utilities/Constants';
+import {TextProps} from 'react-native';
 
 type Props = {
   children?: JSX.Element | JSX.Element[] | string;
@@ -19,6 +20,7 @@ type Props = {
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
   readMoreButtonTextStyle?: TextStyle;
+  normalTextModeTextProps?: Omit<TextProps, 'onPress' | 'style'>;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
 };
@@ -31,6 +33,7 @@ const StyledText = ({
   onPressUrl,
   readMoreButtonTextStyle = {},
   style,
+  normalTextModeTextProps,
 }: Props) => {
   const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
@@ -51,7 +54,7 @@ const StyledText = ({
 
   const renderText = () => {
     return (
-      <Text style={getStyle()} onPress={onPress}>
+      <Text style={getStyle()} onPress={onPress} {...normalTextModeTextProps}>
         {children}
       </Text>
     );

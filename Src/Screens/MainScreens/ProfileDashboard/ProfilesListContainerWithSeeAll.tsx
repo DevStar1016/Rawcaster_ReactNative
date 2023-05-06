@@ -94,8 +94,6 @@ const ProfilesListContainerWithSeeAll = ({
     }
     listAllFriendsService(formData)
       .then(res => {
-        console.log(res.data, 'JJKKJJ');
-
         if (res.data.status === 1) {
           setusersList(res.data.friends_list);
         }
