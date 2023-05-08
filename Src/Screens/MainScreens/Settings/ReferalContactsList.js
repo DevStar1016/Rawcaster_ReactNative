@@ -12,11 +12,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   SendAndroidClientToken,
   SendIOSClientToken,
-  getContacts,
   getOtherContacts,
 } from 'react-native-google-contact-api';
 import Contacts from 'react-native-contacts';
@@ -35,7 +34,7 @@ import {
   GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from '../../../Services/ServiceConstants';
-import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
+import {getAuthCode} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import ProfileIcon from '../../../Assets/Png/user.png';
 import Share from 'react-native-share';
@@ -47,7 +46,6 @@ import {useProfile, useToken} from '../../../Utilities/StoreData';
 import InviteFanModal from '../../../Modals/InviteFanModal';
 import {inviteToRawcasterService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
-import RNShare from 'react-native-share';
 
 var isMount = true;
 var currentPage = 1;
@@ -114,20 +112,6 @@ const ReferalContactsList = ({navigation}) => {
   const [isActionLoading, setisActionLoading] = useState(false);
   const [openInviteFans, setopenInviteFans] = useState(false);
 
-  const SHARE_OBJECTS = {
-    url: profile?.referral_link,
-    message: REFERAL_MESSAGE,
-  };
-  const IOS_FACEBOOK_SHARE_OBJECT = {
-    contentType: 'link',
-    contentUrl: profile?.referral_link,
-    contentDescription: REFERAL_MESSAGE,
-  };
-  const SHARE_OBJECTS_TWITTER = {
-    url: profile?.referral_link,
-    message: TWITTER_REFERAL_MESSAGE,
-  };
-
   const inviteToRawcasterApiCall = (email = null) => {
     if (email) {
       if (isMount) {
@@ -154,69 +138,6 @@ const ReferalContactsList = ({navigation}) => {
             setisActionLoading(false);
           }
         });
-    }
-  };
-
-  const onShareHandler = async mediaType => {
-    if (mediaType === 'instagram') {
-      const shareOptionsIns = {
-        ...SHARE_OBJECTS,
-        social: Share.Social?.INSTAGRAM,
-      };
-
-      Share.shareSingle(shareOptionsIns)
-        .then(res => {
-          console.log('instagram res: ', res);
-        })
-        .catch(err => {
-          console.log('Instagram err:', err);
-        });
-    } else if (mediaType === 'twitter') {
-      Linking.openURL(
-        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-          SHARE_OBJECTS.url,
-        )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
-      );
-    } else if (mediaType === 'linkedIn') {
-      Linking.openURL(
-        `http://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-          SHARE_OBJECTS.url,
-        )}&title=${encodeURIComponent(SHARE_OBJECTS.message)}`,
-      );
-    } else if (mediaType === 'telegram') {
-      Linking.openURL(
-        `tg://msg?text=${SHARE_OBJECTS.message + '\n ' + SHARE_OBJECTS.url}`,
-      ).catch(Err => {
-        console.log(Err),
-          inviteToRawcasterService('Telegram App not installed', 3000);
-      });
-    } else {
-      try {
-        const result = await RNShare.share(
-          {
-            message: TWITTER_REFERAL_MESSAGE,
-            url: profile?.referral_link,
-          },
-          {
-            excludedActivityTypes: [
-              'com.apple.UIKit.activity.PostToFacebook',
-              'com.apple.UIKit.activity.PostToTwitter',
-              'com.apple.UIKit.activity.Mail',
-            ],
-          },
-        );
-        if (result.action === RNSHARE.sharedAction) {
-          if (result.activityType) {
-            // shared with activity type of result.activityType
-          } else {
-            // shared
-          }
-        } else if (result.action === Share.dismissedAction) {
-          // dismissed
-        }
-      } catch (error) {
-        alert(error.message);
-      }
     }
   };
 
@@ -307,7 +228,6 @@ const ReferalContactsList = ({navigation}) => {
   };
 
   const handleGoogleContacts = (token = null) => {
-    console.log(token, 'DDDDDDDDDDDDD');
     if (!token) {
       setisListLoading(true);
     }
@@ -470,22 +390,20 @@ const ReferalContactsList = ({navigation}) => {
   };
 
   function getContactsListSections() {
-    console.log(contactList, 'LIST');
+    // const sortedList = [...contactList].sort((a, b) => {
+    //   const nameA = a.name.toLowerCase();
+    //   const nameB = b.name.toLowerCase();
+    //   if (nameA < nameB) {
+    //     return -1;
+    //   }
+    //   if (nameA > nameB) {
+    //     return 1;
+    //   }
+    //   return 0;
+    // });
 
-    //     const sortedData = [...contactList].sort((a, b) => {
-    //       const nameA = a.name.toLowerCase();
-    //       const nameB = b.name.toLowerCase();
-    //       if (nameA < nameB) {
-    //         return -1;
-    //       }
-    //       if (nameA > nameB) {
-    //         return 1;
-    //       }
-    //       return 0;
-    //     });
-
-    //     const groupedData = {};
-    //     [...contactList].forEach((item) => {
+    // const groupedData = {};
+    // [...contactList].forEach(item => {
     //   const firstLetter = item.name[0].toUpperCase();
     //   if (!groupedData[firstLetter]) {
     //     groupedData[firstLetter] = [];
