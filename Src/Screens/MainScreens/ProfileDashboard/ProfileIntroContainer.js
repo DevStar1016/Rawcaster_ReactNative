@@ -44,28 +44,28 @@ const ProfileIntroContainer = ({
         buttonType="rounded"
       />
 
-      {profile.work_at ? (
-        <RowContainer text={`Work at ${profile.work_at}`} icon={'work_grey'} />
+      {profile?.work_at ? (
+        <RowContainer text={`Work at ${profile?.work_at}`} icon={'work_grey'} />
       ) : (
         false
       )}
-      {profile.studied_at ? (
+      {profile?.studied_at ? (
         <RowContainer
-          text={`Studied at ${profile.studied_at}`}
+          text={`Studied at ${profile?.studied_at}`}
           icon={'study_grey'}
         />
       ) : (
         false
       )}
-      <RowContainer text={profile.geo_location} icon={'location_grey'} />
+      <RowContainer text={profile?.geo_location} icon={'location_grey'} />
       <RowContainer
-        text={`Date of Birth ${moment(profile.dob, 'YYYY-MM-DD').format(
+        text={`Date of Birth ${moment(profile?.dob, 'YYYY-MM-DD').format(
           'DD/MM/YYYY',
         )}`}
         icon={'cake_grey'}
       />
       <RowContainer
-        text={`Joined RAWCASTER on ${moment(profile.date_of_join).format(
+        text={`Joined RAWCASTER on ${moment(profile?.date_of_join).format(
           'DD MMM YYYY',
         )}`}
         icon={'calander_grey'}

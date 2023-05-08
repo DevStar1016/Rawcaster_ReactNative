@@ -37,6 +37,7 @@ import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ProfileStack from './ProfileStack';
 import moment from 'moment';
+import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 
 const Stack = createStackNavigator();
 
@@ -177,10 +178,10 @@ const MainStack = () => {
           let profile = {...res[0].data.profile};
           profile = {
             ...profile,
-            name: htmlDecodeText(profile.name),
-            first_name: htmlDecodeText(profile.first_name),
-            last_name: htmlDecodeText(profile.last_name),
-            bio_data: htmlDecodeText(profile.bio_data),
+            name: htmlDecodeText(profile?.name),
+            first_name: htmlDecodeText(profile?.first_name),
+            last_name: htmlDecodeText(profile?.last_name),
+            bio_data: htmlDecodeText(profile?.bio_data),
           };
           dispatch(setMyProfile(profile));
         }
@@ -252,6 +253,10 @@ const MainStack = () => {
               component={GlobalSearchStack}
             />
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
+            <Stack.Screen
+              name="ReferalContacts"
+              component={ReferalContactsList}
+            />
           </>
         )}
       </Stack.Navigator>

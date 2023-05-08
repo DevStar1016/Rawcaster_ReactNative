@@ -42,26 +42,27 @@ const EventSettings = () => {
   const videoAudioPlayer = useRef(null);
   const [isUpdating, setisUpdating] = useState(false);
   const [settingsData, setsettingsData] = useState({
-    waiting_room: parseInt(settings.waiting_room),
-    join_before_host: parseInt(settings.join_before_host),
-    participant_join_sound: parseInt(settings.participant_join_sound),
-    screen_share_status: parseInt(settings.screen_share_status),
-    default_melody: settings.default_melody,
+    waiting_room: parseInt(settings?.waiting_room),
+    join_before_host: parseInt(settings?.join_before_host),
+    participant_join_sound: parseInt(settings?.participant_join_sound),
+    screen_share_status: parseInt(settings?.screen_share_status),
+    default_melody: settings?.default_melody,
     meeting_header_image: {
-      uri: settings.meeting_header_image?.uri ?? settings.meeting_header_image,
+      uri:
+        settings?.meeting_header_image?.uri ?? settings?.meeting_header_image,
     },
     live_event_banner: {
-      uri: settings?.live_event_banner?.uri ?? settings.live_event_banner,
+      uri: settings?.live_event_banner?.uri ?? settings?.live_event_banner,
     },
     talkshow_event_banner: {
       uri:
-        settings.talkshow_event_banner?.uri ?? settings.talkshow_event_banner,
+        settings?.talkshow_event_banner?.uri ?? settings?.talkshow_event_banner,
     },
-    host_audio: parseInt(settings.host_audio),
-    participant_audio: parseInt(settings.participant_audio),
-    host_video: parseInt(settings.host_video),
-    participant_video: parseInt(settings.participant_video),
-    event_type: parseInt(settings.event_type),
+    host_audio: parseInt(settings?.host_audio),
+    participant_audio: parseInt(settings?.participant_audio),
+    host_video: parseInt(settings?.host_video),
+    participant_video: parseInt(settings?.participant_video),
+    event_type: parseInt(settings?.event_type),
   });
   const [isVideoLoaded, setisVideoLoaded] = useState(false);
   const [isVideoLoading, setisVideoLoading] = useState(true);

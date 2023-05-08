@@ -55,8 +55,8 @@ const SocialSignin = ({pushId}) => {
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
     formData.append('email_id', values.login_id?.trim());
-    if (locationDetails && locationDetails.geoLocation) {
-      formData.append('geo_location', locationDetails.geoLocation);
+    if (locationDetails && locationDetails?.geoLocation) {
+      formData.append('geo_location', locationDetails?.geoLocation);
     }
     formData.append('device_id', DEVICE_ID);
     formData.append('push_id', pushId);

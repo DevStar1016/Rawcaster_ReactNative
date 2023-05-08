@@ -6,6 +6,7 @@ import {
   Modal,
   PermissionsAndroid,
   RefreshControl,
+  SectionList,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,7 +23,12 @@ import Contacts from 'react-native-contacts';
 import lodash from 'lodash';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
-import {IS_IOS} from '../../../Utilities/Constants';
+import {
+  IS_IOS,
+  REFERAL_MESSAGE,
+  SHARE_OPTION,
+  TWITTER_REFERAL_MESSAGE,
+} from '../../../Utilities/Constants';
 import {
   FIREBASE_APP_ID,
   GOOGLE_CONTACTS_SERVER_CLIENT_ID,
@@ -47,67 +53,53 @@ var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 
-const referalOptionsList = [
+const REFERAL_OPTIONS_LIST = [
   {
-    id: 1,
+    id: SHARE_OPTION.contacts,
     icon: 'contact_rounded_fill_orange',
     name: 'Contacts',
-    key: 'contacts',
   },
   {
-    id: 2,
+    id: SHARE_OPTION.facebook,
     icon: 'facebook_fill',
     name: 'Facebook',
-    key: 'facebook',
   },
   {
-    id: 3,
+    id: SHARE_OPTION.instagram,
     icon: 'instagram_rounded_fill',
     name: 'Instagram',
-    key: 'instagram',
   },
   {
-    id: 4,
+    id: SHARE_OPTION.telegram,
     icon: 'telegram',
     name: 'Telegram',
-    key: 'telegram',
   },
   {
-    id: 5,
+    id: SHARE_OPTION.whatsapp,
     icon: 'whatsapp',
     name: 'Whatsapp',
-    key: 'whatsapp',
   },
   {
-    id: 6,
+    id: SHARE_OPTION.twitter,
     icon: 'twitter_rounded_fill',
     name: 'Twitter',
-    key: 'twitter',
   },
   {
-    id: 7,
+    id: SHARE_OPTION.linked_in,
     icon: 'linkedin',
     name: 'Linkedin',
-    key: 'linkedin',
   },
   {
-    id: 8,
+    id: SHARE_OPTION.gmail,
     icon: 'gmail_rounded',
     name: 'Gmail',
-    key: 'gmail',
   },
   {
-    id: 9,
+    id: SHARE_OPTION.invite_fans,
     icon: 'share_rounded_fill_blue',
     name: 'Invite fans',
-    key: 'invite_fans',
   },
 ];
-
-const REFERAL_MESSAGE =
-  'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my friends and special people to join this platform to make it easier to reach everyone with content, personalized messages, Nuggets, and invitations to participate in my special events. I expect to see you there soon.';
-const TWITTER_REFERAL_MESSAGE =
-  'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my special people to join this platform to make it easier to reach you with personalized messages.';
 
 const ReferalContactsList = ({navigation}) => {
   const profile = useProfile();
@@ -123,16 +115,16 @@ const ReferalContactsList = ({navigation}) => {
   const [openInviteFans, setopenInviteFans] = useState(false);
 
   const SHARE_OBJECTS = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: REFERAL_MESSAGE,
   };
   const IOS_FACEBOOK_SHARE_OBJECT = {
     contentType: 'link',
-    contentUrl: profile.referral_link,
+    contentUrl: profile?.referral_link,
     contentDescription: REFERAL_MESSAGE,
   };
   const SHARE_OBJECTS_TWITTER = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: TWITTER_REFERAL_MESSAGE,
   };
 
@@ -203,7 +195,7 @@ const ReferalContactsList = ({navigation}) => {
         const result = await RNShare.share(
           {
             message: TWITTER_REFERAL_MESSAGE,
-            url: profile.referral_link,
+            url: profile?.referral_link,
           },
           {
             excludedActivityTypes: [
@@ -228,7 +220,93 @@ const ReferalContactsList = ({navigation}) => {
     }
   };
 
-  const handleSocialShare = appType => {
+  function handleSocialShare({socialMedia, referalMessage = null, socialUrl}) {
+    if (socialMedia) {
+      console.log(
+        {
+          url: profile?.referral_link ?? '',
+          message: referalMessage ?? REFERAL_MESSAGE,
+          social: socialMedia,
+        },
+        'SHARE',
+      );
+      Share.shareSingle({
+        title: 'Rawcaster Invite',
+        url: profile?.referral_link ?? 'https://wwww.google.com',
+        message: referalMessage ?? REFERAL_MESSAGE,
+        social: socialMedia,
+        type: 'text/*',
+        subject: referalMessage ?? REFERAL_MESSAGE,
+      })
+        .then(res => {
+          console.log(socialMedia, 'Share RESPONSE', res);
+        })
+        .catch(err => {
+          console.log(socialMedia, 'Share Error', err);
+        });
+    } else {
+      Linking.canOpenURL(socialUrl)
+        .then(supported => {
+          if (supported) {
+            Linking.openURL(socialUrl)
+              .then(() => {})
+              .catch(e => {});
+          } else {
+            console.log(`Cannot open Telegram URL: ${socialUrl}`);
+          }
+        })
+        .catch(e => {});
+    }
+  }
+
+  const openTelegram = () => {
+    const telegramUsername = 'YOUR_TELEGRAM_USERNAME';
+    const telegramURL = IS_IOS
+      ? `tg://resolve?domain=${telegramUsername}`
+      : `https://t.me/${telegramUsername}`;
+
+    Linking.canOpenURL(telegramURL).then(supported => {
+      if (supported) {
+        Linking.openURL(telegramURL);
+      } else {
+        console.log(`Cannot open Telegram URL: ${telegramURL}`);
+      }
+    });
+  };
+
+  const onPressReferalOption = pressedShareType => {
+    switch (pressedShareType) {
+      case SHARE_OPTION.contacts:
+        setisEmail(false);
+        handlePhoneContacts();
+        break;
+      case SHARE_OPTION.facebook:
+        handleSocialShare({socialMedia: Share.Social.FACEBOOK});
+        break;
+      case SHARE_OPTION.instagram:
+        handleSocialShare({socialMedia: Share.Social.INSTAGRAM});
+        return;
+      case SHARE_OPTION.telegram:
+        handleSocialShare({socialMedia: Share.Social.TELEGRAM});
+        return;
+      case SHARE_OPTION.whatsapp:
+        handleSocialShare({socialMedia: Share.Social.WHATSAPP});
+        return;
+      case SHARE_OPTION.twitter:
+        handleSocialShare({
+          socialMedia: Share.Social.TWITTER,
+          TWITTER_REFERAL_MESSAGE,
+        });
+        return;
+      case SHARE_OPTION.linked_in:
+        handleSocialShare({socialMedia: Share.Social.LINKEDIN});
+        return;
+      case SHARE_OPTION.gmail:
+        return;
+      case SHARE_OPTION.invite_fans:
+        return;
+    }
+    return;
     if (
       IS_IOS &&
       appType !== 'contacts' &&
@@ -244,7 +322,7 @@ const ReferalContactsList = ({navigation}) => {
       case 'whatsapp':
         Linking.openURL(
           `whatsapp://send?text=${
-            REFERAL_MESSAGE + ' ' + profile.referral_link
+            REFERAL_MESSAGE + ' ' + profile?.referral_link
           }`,
         )
           .then(res => {})
@@ -325,7 +403,7 @@ const ReferalContactsList = ({navigation}) => {
         const shareOptionstelegram = {
           ...SHARE_OBJECTS,
           social: Share.Social.TELEGRAM,
-          subject: 'Rawcaster - Invite from ' + profile.name,
+          subject: 'Rawcaster - Invite from ' + profile?.name,
         };
         Share.shareSingle(shareOptionstelegram)
           .then(res => {
@@ -479,7 +557,7 @@ const ReferalContactsList = ({navigation}) => {
   };
   const openSms = phoneNumber => {
     const separator = IS_IOS ? '&' : '?';
-    const message = REFERAL_MESSAGE + ' ' + profile.referral_link;
+    const message = REFERAL_MESSAGE + ' ' + profile?.referral_link;
     const url = `sms:${phoneNumber}${separator}body=${message}`;
     Linking.openURL(url).catch(e => {});
   };
@@ -504,7 +582,38 @@ const ReferalContactsList = ({navigation}) => {
     }
   };
 
-  const RenderSuggestedProfile = ({item}) => {
+  function getContactsListSections() {
+    console.log(contactList, 'LIST');
+
+    //     const sortedData = [...contactList].sort((a, b) => {
+    //       const nameA = a.name.toLowerCase();
+    //       const nameB = b.name.toLowerCase();
+    //       if (nameA < nameB) {
+    //         return -1;
+    //       }
+    //       if (nameA > nameB) {
+    //         return 1;
+    //       }
+    //       return 0;
+    //     });
+
+    //     const groupedData = {};
+    //     [...contactList].forEach((item) => {
+    //   const firstLetter = item.name[0].toUpperCase();
+    //   if (!groupedData[firstLetter]) {
+    //     groupedData[firstLetter] = [];
+    //   }
+    //   groupedData[firstLetter].push(item);
+    // });
+    return [
+      {
+        title: 'Contacts',
+        data: contactList,
+      },
+    ];
+  }
+
+  const renderItem = ({item}) => {
     return (
       <View style={styles.profileContainer}>
         <View style={{flexDirection: 'row', width: WINDOW_WIDTH - 120}}>
@@ -548,11 +657,11 @@ const ReferalContactsList = ({navigation}) => {
     );
   };
 
-  const RederReferalOptions = ({item}) => {
+  const renderReferalOptions = ({item}) => {
     return (
       <TouchableOpacity
         style={styles.optionContainer}
-        onPress={() => handleSocialShare(item.key)}>
+        onPress={() => onPressReferalOption(item.id)}>
         <View style={styles.optionNameLogoContainer}>
           <SVGIcon icon={item.icon} />
           <StyledText style={styles.optionName}>{item.name}</StyledText>
@@ -571,7 +680,7 @@ const ReferalContactsList = ({navigation}) => {
     return <View style={styles.seperator} />;
   };
 
-  const RenderDivider = () => {
+  const Divider = () => {
     return <View style={styles.divider} />;
   };
 
@@ -586,60 +695,64 @@ const ReferalContactsList = ({navigation}) => {
     );
   };
 
+  const renderSectionHeader = ({section}) => {
+    return (
+      <View style={{paddingVertical: 10}}>
+        <StyledText style={styles.listSectionTitleText}>
+          {section.title}
+        </StyledText>
+      </View>
+    );
+  };
+
   return (
     <HOCView
       headerType="home_header"
       isEnableDefaultBackground
       isEnableTopSafeAreaHomeHeader
       isEnablePrimaryColorStatusBar
-      isEnableScroll
       headerProps={{
         isEnableBack: true,
         title: 'Invite Fans & Contacts',
         onPressBack: () => navigation.goBack(),
         bgColor: COLORS.transparent,
       }}>
-      <RenderDivider />
-      <StyledText style={{color: COLORS.white, opacity: 0.7}}>
+      <StyledText style={{color: COLORS.white, opacity: 0.7, paddingTop: 10}}>
         Invite via
       </StyledText>
-      <FlatList
-        data={referalOptionsList}
-        horizontal
-        renderItem={({item}) => {
-          return <RederReferalOptions item={item} />;
-        }}
-        keyExtractor={(item, index) => index.toString()}
-        showsHorizontalScrollIndicator={false}
-      />
-      <RenderDivider />
+      <View style={{paddingTop: 10}}>
+        <FlatList
+          data={REFERAL_OPTIONS_LIST}
+          horizontal
+          renderItem={renderReferalOptions}
+          keyExtractor={(_, index) => index.toString()}
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+      <Divider />
       {isListLoading ? (
         <Loader indicatorColor={COLORS.white} bgColor={COLORS.transparent} />
-      ) : contactList.length > 0 ? (
-        <>
-          <FlatList
-            data={contactList}
-            scrollEnabled={false}
-            renderItem={({item}) => {
-              return <RenderSuggestedProfile item={item} />;
-            }}
-            refreshControl={
-              <RefreshControl
-                tintColor={COLORS.secondary}
-                refreshing={isRefreshing}
-                onRefresh={onRefresh}
-              />
-            }
-            onEndReachedThreshold={0.2}
-            onEndReached={onEndReached}
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={renderSeperator}
-            ListFooterComponent={renderFooter}
-          />
-        </>
       ) : (
-        <RenderEmptyComponent />
+        <SectionList
+          sections={getContactsListSections()}
+          contentContainerStyle={{
+            paddingBottom: 30,
+          }}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          keyExtractor={(_, index) => index.toString()}
+          ItemSeparatorComponent={renderSeperator}
+          ListFooterComponent={renderFooter}
+          onEndReached={onEndReached}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              tintColor={COLORS.secondary}
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        />
       )}
       <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
@@ -740,5 +853,10 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.whiteTransparent,
     marginVertical: 10,
+  },
+  listSectionTitleText: {
+    color: COLORS.white,
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 17,
   },
 });

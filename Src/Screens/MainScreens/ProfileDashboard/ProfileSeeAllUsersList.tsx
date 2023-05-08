@@ -215,9 +215,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile.name,
-              profile_img: profile.profile_image,
-              user_id: profile.user_id,
+              display_name: profile?.name,
+              profile_img: profile?.profile_image,
+              user_id: profile?.user_id,
             };
             friendRequestSocket(user_id, data);
           }

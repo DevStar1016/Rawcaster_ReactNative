@@ -52,15 +52,15 @@ const ProfileNameBioContainer = ({
     useState(false);
 
   const getBioData = () => {
-    if (profile.bio_data && profile.bio_data.trim()) {
-      return htmlDecodeText(profile.bio_data.trim());
+    if (profile?.bio_data && profile?.bio_data.trim()) {
+      return htmlDecodeText(profile?.bio_data.trim());
     }
     let bioDataText = '';
-    if (profile.dob) {
+    if (profile?.dob) {
       bioDataText +=
         '<first_name> <last_name> is  <age> years old, was born in <dob>. ';
     }
-    if (profile.geo_location) {
+    if (profile?.geo_location) {
       bioDataText +=
         '<first_name> <last_name> presently resides in <location>. ';
     }
@@ -69,34 +69,34 @@ const ProfileNameBioContainer = ({
 
     bioDataText = bioDataText.replace(
       /<first_name>/g,
-      htmlDecodeText(profile.first_name),
+      htmlDecodeText(profile?.first_name),
     );
     bioDataText = bioDataText.replace(
       /<last_name>/g,
-      htmlDecodeText(profile.last_name),
+      htmlDecodeText(profile?.last_name),
     );
     bioDataText = bioDataText.replace(
       /<age>/g,
-      calcualteAge(moment(profile.dob)),
+      calcualteAge(moment(profile?.dob)),
     );
     bioDataText = bioDataText.replace(
       /<dob>/g,
-      moment(profile.dob).format(' MMM YYYY '),
+      moment(profile?.dob).format(' MMM YYYY '),
     );
     bioDataText = bioDataText.replace(
       /<location>/g,
-      htmlDecodeText(profile.geo_location),
+      htmlDecodeText(profile?.geo_location),
     );
     bioDataText = bioDataText.replace(
       /<language>/g,
-      htmlDecodeText(profile.language),
+      htmlDecodeText(profile?.language),
     );
-    bioDataText = bioDataText.replace(/<user_status>/g, profile.user_status);
+    bioDataText = bioDataText.replace(/<user_status>/g, profile?.user_status);
 
-    if (profile.date_of_join) {
+    if (profile?.date_of_join) {
       bioDataText = bioDataText.replace(
         /<date_of_join>/g,
-        utcToUserTimezone(profile.date_of_join, settings.time_zone).format(
+        utcToUserTimezone(profile?.date_of_join, settings?.time_zone).format(
           ' DD MMM YYYY ',
         ),
       );
@@ -114,8 +114,8 @@ const ProfileNameBioContainer = ({
     setisUpdating(true);
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('auth_code', getAuthCode(token + profile.name.trim()));
-    formData.append('name', profile.name);
+    formData.append('auth_code', getAuthCode(token + profile?.name.trim()));
+    formData.append('name', profile?.name);
     formData.append('bio_data', updatedData.bio);
     formData.append('influencer_category', updatedData.categoryList.toString());
     updateMyProfileService(formData)
@@ -196,7 +196,7 @@ const ProfileNameBioContainer = ({
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
           <StyledText style={styles.nameText} onPress={() => {}}>
-            {getSlicedText(profile.name, 50)}
+            {getSlicedText(profile?.name, 50)}
           </StyledText>
 
           {getSelectedCategoriesList().toString() ? (
@@ -235,7 +235,7 @@ const ProfileNameBioContainer = ({
       <View style={styles.bioContainer}>
         <StyledText>{getBioData()}</StyledText>
       </View>
-      {userId && !profile.follow && (
+      {userId && !profile?.follow && (
         <GradientButton
           buttonText={'Become a Fan'}
           rightIcon="right_arrow_white"

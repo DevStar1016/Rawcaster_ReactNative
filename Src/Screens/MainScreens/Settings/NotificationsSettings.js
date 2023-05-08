@@ -40,16 +40,18 @@ const NotificationsSettings = () => {
   const profile = useProfile();
   const [isLoading, setisLoading] = useState(false);
   const [switchStatus, setswitchStatus] = useState({
-    friend_request: settings.friend_request,
-    nuggets: settings.nuggets,
-    events: settings.events,
+    friend_request: settings?.friend_request,
+    nuggets: settings?.nuggets,
+    events: settings?.events,
   });
   const [connectionRequestSwitchStatus, setconnectionRequestSwitchStatus] =
-    useState(settings.friend_request);
+    useState(settings?.friend_request);
   const [nuggetsSwitchStatus, setnuggetsSwitchStatus] = useState(
-    settings.nuggets,
+    settings?.nuggets,
   );
-  const [eventsSwitchStatus, seteventsSwitchStatus] = useState(settings.events);
+  const [eventsSwitchStatus, seteventsSwitchStatus] = useState(
+    settings?.events,
+  );
   const [confirmationBoxData, setconfirmationBoxData] = useState({
     isOpen: false,
     verificationField: '',
@@ -113,9 +115,9 @@ const NotificationsSettings = () => {
     }
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('auth_code', getAuthCode(token + profile.name.trim()));
-    formData.append('name', profile.name.trim());
-    formData.append('first_name', profile.first_name.trim());
+    formData.append('auth_code', getAuthCode(token + profile?.name.trim()));
+    formData.append('name', profile?.name.trim());
+    formData.append('first_name', profile?.first_name.trim());
     if (fieldType.includes('sms')) {
       formData.append('mobile_no', value.trim());
     } else if (fieldType.includes('email')) {
@@ -170,11 +172,11 @@ const NotificationsSettings = () => {
   }
 
   function isEmailVerified() {
-    if (parseInt(profile.is_email_id_verified) === 1) {
+    if (parseInt(profile?.is_email_id_verified) === 1) {
       return true;
     }
     setconfirmationBoxData({isOpen: true, verificationField: 'email'});
-    // if (profile.email_id) {
+    // if (profile?.email_id) {
     //   setconfirmationBoxData({isOpen: true, verificationField: 'email'});
     // } else {
     //   setverificationInputModalData({
@@ -186,11 +188,11 @@ const NotificationsSettings = () => {
   }
 
   function isMobileVerified() {
-    if (parseInt(profile.is_mobile_no_verified) === 1) {
+    if (parseInt(profile?.is_mobile_no_verified) === 1) {
       return true;
     }
     setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
-    // if (profile.mobile) {
+    // if (profile?.mobile) {
     //   setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
     // } else {
     //   setverificationInputModalData({
@@ -293,8 +295,8 @@ const NotificationsSettings = () => {
             const otpType = confirmationBoxData.verificationField;
             closeConfirmationBox();
             if (
-              (otpType === 'email' && profile.email_id) ||
-              (otpType === 'sms' && profile.mobile)
+              (otpType === 'email' && profile?.email_id) ||
+              (otpType === 'sms' && profile?.mobile)
             ) {
               navigation.navigate('EmailPhoneVerification', {
                 otpType: otpType,

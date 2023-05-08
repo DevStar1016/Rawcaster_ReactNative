@@ -158,9 +158,9 @@ const CommentsList = ({
       const generatedTempId = new Date().getTime() + 100 * Math.random();
       const newComment = {
         comment_id: generatedTempId,
-        user_id: profile.user_id,
-        name: profile.name,
-        profile_image: profile.profile_image,
+        user_id: profile?.user_id,
+        name: profile?.name,
+        profile_image: profile?.profile_image,
         comment: preText.trim(),
         reply: [],
         commented_date: new Date(),
@@ -416,7 +416,7 @@ const CommentsList = ({
           <View style={styles.inputContainer}>
             <ProfileWithBadge
               profileSize={35}
-              profileImage={profile.profile_image}
+              profileImage={profile?.profile_image}
             />
             <BottomSheetTextInput
               ref={inpuFieldRef}

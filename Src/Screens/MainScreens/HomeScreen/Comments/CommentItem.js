@@ -90,7 +90,7 @@ const CommentItem = ({
           <View style={{flex: 1}}>
             <StyledText style={styles.text}>{item.comment}</StyledText>
           </View>
-          {!item.isLoading && profile.user_id === item.user_id && (
+          {!item.isLoading && profile?.user_id === item.user_id && (
             <View style={{paddingLeft: 10, paddingVertical: 5}}>
               <MenuPopup
                 options={[

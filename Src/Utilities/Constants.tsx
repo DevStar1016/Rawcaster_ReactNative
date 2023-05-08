@@ -12,6 +12,11 @@ export const DIMENSIONS = {
   screen: Dimensions.get('screen'),
 };
 
+export const REFERAL_MESSAGE =
+  'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my friends and special people to join this platform to make it easier to reach everyone with content, personalized messages, Nuggets, and invitations to participate in my special events. I expect to see you there soon.';
+export const TWITTER_REFERAL_MESSAGE =
+  'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my special people to join this platform to make it easier to reach you with personalized messages.';
+
 export const INTRO_DATA = [
   {
     image: LivetalkImage,
@@ -228,6 +233,18 @@ export const NUGGET_ACTIONS = [
   {id: 4, buttonName: 'Report Abuse'},
   {id: 5, buttonName: 'Share Link'},
 ];
+
+export const SHARE_OPTION = {
+  contacts: 'contacts',
+  facebook: 'facebook',
+  instagram: 'instagram',
+  telegram: 'telegram',
+  whatsapp: 'whatsapp',
+  twitter: 'twitter',
+  linked_in: 'linked_in',
+  gmail: 'gmail',
+  invite_fans: 'invite_fans',
+};
 
 export const EVENT_TYPE = {
   event: 1,

@@ -121,16 +121,16 @@ const Refer = ({navigation}) => {
   const [isActionLoading, setisActionLoading] = useState(false);
 
   const SHARE_OBJECTS = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: REFERAL_MESSAGE,
   };
   const IOS_FACEBOOK_SHARE_OBJECT = {
     contentType: 'link',
-    contentUrl: profile.referral_link,
+    contentUrl: profile?.referral_link,
     contentDescription: REFERAL_MESSAGE,
   };
   const SHARE_OBJECTS_TWITTER = {
-    url: profile.referral_link,
+    url: profile?.referral_link,
     message: TWITTER_REFERAL_MESSAGE,
   };
 
@@ -290,11 +290,13 @@ const Refer = ({navigation}) => {
       );
     } else if (mediaType === 'whatsapp') {
       Linking.openURL(
-        `whatsapp://send?text=${REFERAL_MESSAGE + ' ' + profile.referral_link}`,
+        `whatsapp://send?text=${
+          REFERAL_MESSAGE + ' ' + profile?.referral_link
+        }`,
       ).catch(Err => console.log(Err));
     } else if (mediaType === 'gmail') {
       openComposer({
-        subject: 'Rawcaster - Invite from ' + profile.name,
+        subject: 'Rawcaster - Invite from ' + profile?.name,
         body: SHARE_OBJECTS.message + ' ' + SHARE_OBJECTS.url,
       });
     } else if (mediaType === 'telegram') {
@@ -308,7 +310,7 @@ const Refer = ({navigation}) => {
         const result = await RNSHARE.share(
           {
             message: TWITTER_REFERAL_MESSAGE,
-            url: profile.referral_link,
+            url: profile?.referral_link,
           },
           {
             excludedActivityTypes: [
@@ -347,7 +349,7 @@ const Refer = ({navigation}) => {
       case 'whatsapp':
         Linking.openURL(
           `whatsapp://send?text=${
-            REFERAL_MESSAGE + ' ' + profile.referral_link
+            REFERAL_MESSAGE + ' ' + profile?.referral_link
           }`,
         )
           .then(res => {})
@@ -434,7 +436,7 @@ const Refer = ({navigation}) => {
         const shareOptionstelegram = {
           ...SHARE_OBJECTS,
           social: Share.Social.TELEGRAM,
-          subject: 'Rawcaster - Invite from ' + profile.name,
+          subject: 'Rawcaster - Invite from ' + profile?.name,
         };
         Share.shareSingle(shareOptionstelegram)
           .then(res => {

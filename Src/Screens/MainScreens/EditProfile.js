@@ -82,7 +82,7 @@ const EditProfile = ({route}) => {
       .string()
       .matches(PHONE_REGEX, 'Invalid phone number')
       .test('Required', 'Required', function (value) {
-        return profile.mobile
+        return profile?.mobile
           ? value
             ? true
             : false
@@ -96,7 +96,7 @@ const EditProfile = ({route}) => {
       .string()
       .email('Enter valid Email')
       .test('Required', 'Required', function (value) {
-        return profile.email_id
+        return profile?.email_id
           ? value
             ? true
             : false
@@ -121,16 +121,16 @@ const EditProfile = ({route}) => {
     setFieldError,
   } = useFormik({
     initialValues: {
-      firstName: profile.first_name ?? '',
-      lastName: profile.last_name ?? '',
-      displayName: profile.name ?? '',
-      gender: GENDER_LIST.find(item => item.id === profile.gender) ?? null,
-      dob: profile.dob ?? '',
-      mobileNumber: profile.mobile ?? '',
-      email: profile.email_id ?? '',
-      location: profile.geo_location ?? '',
-      workAt: profile.work_at ?? '',
-      studyAt: profile.studied_at ?? '',
+      firstName: profile?.first_name ?? '',
+      lastName: profile?.last_name ?? '',
+      displayName: profile?.name ?? '',
+      gender: GENDER_LIST.find(item => item.id === profile?.gender) ?? null,
+      dob: profile?.dob ?? '',
+      mobileNumber: profile?.mobile ?? '',
+      email: profile?.email_id ?? '',
+      location: profile?.geo_location ?? '',
+      workAt: profile?.work_at ?? '',
+      studyAt: profile?.studied_at ?? '',
     },
     validationSchema: validationSchema,
     onSubmit: values => {
@@ -314,7 +314,7 @@ const EditProfile = ({route}) => {
                 ? {
                     uri: selectedProfileImage
                       ? selectedProfileImage.path
-                      : profile.profile_image,
+                      : profile?.profile_image,
                   }
                 : DefaultProfile
             }
@@ -458,7 +458,7 @@ const EditProfile = ({route}) => {
             handleSubmit();
           }}
         />
-        {profile.acc_verify_status === 0 && (
+        {profile?.acc_verify_status === 0 && (
           <SubmitButton
             buttonText="Next"
             marginTop={10}
