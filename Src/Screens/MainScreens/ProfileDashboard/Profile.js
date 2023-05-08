@@ -415,6 +415,7 @@ const Profile = ({route}) => {
             isEnableProfile={false}
             isEnableSearch={false}
             isEnableSettings={true}
+            isEnableLive={false}
             isEnableBack
             onPressBack={() => {
               navigation.goBack();
