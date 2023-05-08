@@ -13,9 +13,9 @@ import {useInsets, useProfile, useToken} from '../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
 import {setIsOpenLoginAlert} from '../Store/Slices/UtilitySlice';
 import StyledText from './StyledText';
+import ProfileWithBadge from './ProfileWithBadge';
 import {FONTS} from '../Utilities/Fonts';
 import LiveGif from '../Assets/Gif/live.gif';
-import ProfileWithBadge from './ProfileWithBadge';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -185,7 +185,8 @@ const CustomHomeHeader = ({
             onPress={() => {
               if (isLogin()) {
               }
-            }}>
+            }}
+            style={styles.gifContainer}>
             {/* <SVGIcon
             icon="live"
             isButton
@@ -261,10 +262,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingLeft: 30,
   },
-  gif: {
+  gifContainer: {
     height: 28,
     width: 28,
     marginLeft: 5,
+    borderRadius: 14,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  gif: {
+    height: 28,
+    width: 28,
     borderRadius: 14,
   },
 });

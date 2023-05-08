@@ -209,7 +209,11 @@ const EventTalkshowCommonScreen = ({
     <HOCView
       headerType="home_header"
       isEnableTopSafeAreaHomeHeader
-      headerProps={{bgColor: COLORS.transparent, isEnableSearch: false}}
+      headerProps={{
+        bgColor: COLORS.transparent,
+        isEnableSearch: false,
+        isEnableLive: false,
+      }}
       isEnableDefaultBackground
       isEnableRLogo={getEventsList().length <= 0}
       paddingBottom={50}

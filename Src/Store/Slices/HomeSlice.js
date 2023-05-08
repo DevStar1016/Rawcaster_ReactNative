@@ -7,6 +7,7 @@ export const initialState = {
   groupsList: [],
   pendingFriendRequests: [],
   influencerCategoryList: [],
+  unreadNotificationCount: null,
 };
 
 const HomeSlice = createSlice({
@@ -31,6 +32,9 @@ const HomeSlice = createSlice({
     setInfluencerCategoryList: (state, action) => {
       state.influencerCategoryList = action.payload;
     },
+    setUnreadNotificationCount: (state, action) => {
+      state.unreadNotificationCount = action.payload;
+    },
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
       state.searchedNuggetsList = [];
@@ -38,6 +42,7 @@ const HomeSlice = createSlice({
       state.groupsList = [];
       state.pendingFriendRequests = [];
       state.influencerCategoryList = [];
+      state.unreadNotificationCount = null;
     },
   },
 });
@@ -48,6 +53,7 @@ export const {
   setGroupsList,
   setPendingFriendRequests,
   setInfluencerCategoryList,
+  setUnreadNotificationCount,
   clearHomeReduxData,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

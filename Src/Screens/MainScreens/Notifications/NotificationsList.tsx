@@ -12,16 +12,31 @@ import NotificationItem from './NotificationItem';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import SVGIcon from '../../../Components/SVGIcon';
 import {COLORS} from '../../../Utilities/Colors';
-import {useToken} from '../../../Utilities/StoreData';
-import {listNotificationsService} from '../../../Services/ApiService';
+import {
+  useToken,
+  useUnreadNotificationCount,
+} from '../../../Utilities/StoreData';
+import {
+  listNotificationsService,
+  respondToFriendRequestsService,
+} from '../../../Services/ApiService';
 import StyledText from '../../../Components/StyledText';
 import moment from 'moment';
 import {FONTS} from '../../../Utilities/Fonts';
+import Toast from '../../../Components/Toast';
+import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
+import {useDispatch} from 'react-redux';
 
 type Props = {
   notificationListType?: number;
   currentPage?: number;
   totalPages?: number;
+};
+
+type ConnectionResponseProp = {
+  responseType: number;
+  friendRequestId: number;
+  notificationId: number;
 };
 var isMount = true;
 const NotificationsList = ({
@@ -30,6 +45,8 @@ const NotificationsList = ({
   totalPages = 1,
 }: Props) => {
   const token = useToken();
+  const dispatch = useDispatch();
+  const unreadNotificationCount = useUnreadNotificationCount();
   const [isLoading, setisLoading] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -60,7 +77,7 @@ const NotificationsList = ({
         if (isMount) {
           if (res.data.status === 1) {
             seterrorText('');
-            setnotificationsList(res.data.notification_list);
+            dispatch(setUnreadNotificationCount(res.data.total_unread_count));
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               setnotificationsList(res.data.notification_list);
@@ -90,6 +107,41 @@ const NotificationsList = ({
         }
       });
   }
+
+  const handleResponseFriendRequest = ({
+    responseType,
+    friendRequestId,
+    notificationId,
+  }: ConnectionResponseProp) => {
+    // 1-accept, 2 - reject, 3 - block
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('friend_request_id', friendRequestId);
+    formData.append('notification_id', notificationId);
+    formData.append('response', responseType);
+    console.log(formData, 'SSSSSSSS');
+
+    respondToFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (unreadNotificationCount) {
+            dispatch(setUnreadNotificationCount(unreadNotificationCount - 1));
+          }
+          setnotificationsList(preList => {
+            return [...preList].filter(
+              item => item.friend_request_id !== friendRequestId,
+            );
+          });
+        } else {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {});
+  };
 
   function onRefresh() {
     currentPage = 1;
@@ -169,7 +221,12 @@ const NotificationsList = ({
   };
 
   function renderItem({item, index}: any) {
-    return <NotificationItem item={item} />;
+    return (
+      <NotificationItem
+        item={item}
+        handleFriendRequest={handleResponseFriendRequest}
+      />
+    );
   }
   const renderSectionHeader = ({section}: any) => {
     return (

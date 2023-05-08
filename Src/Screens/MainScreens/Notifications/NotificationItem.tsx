@@ -16,11 +16,21 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {useSettings} from '../../../Utilities/StoreData';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 
+type ConnectionResponseProp = {
+  responseType: number;
+  friendRequestId: number;
+  notificationId: number;
+};
 type Props = {
   item: any;
+  handleFriendRequest: ({
+    responseType,
+    friendRequestId,
+    notificationId,
+  }: ConnectionResponseProp) => void;
 };
 
-const NotificationItem = ({item}: Props) => {
+const NotificationItem = ({item, handleFriendRequest}: Props) => {
   const settings = useSettings();
   return (
     <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
@@ -58,6 +68,15 @@ const NotificationItem = ({item}: Props) => {
                     bgColor={COLORS.green}
                     icon="tick"
                     iconSize={16}
+                    onPress={() => {
+                      if (handleFriendRequest) {
+                        handleFriendRequest({
+                          responseType: 1,
+                          friendRequestId: item.friend_request_id,
+                          notificationId: item.notification_id,
+                        });
+                      }
+                    }}
                   />
                   <RoundedIconButton
                     buttonSize={23}
@@ -65,6 +84,15 @@ const NotificationItem = ({item}: Props) => {
                     icon="close_black"
                     iconSize={18}
                     buttonStyle={{marginLeft: 10}}
+                    onPress={() => {
+                      if (handleFriendRequest) {
+                        handleFriendRequest({
+                          responseType: 2,
+                          friendRequestId: item.friend_request_id,
+                          notificationId: item.notification_id,
+                        });
+                      }
+                    }}
                   />
                 </View>
               )}

@@ -72,3 +72,7 @@ export const useIsOpenLoginAlert = () => {
 export const useIsOpenVerifyPopup = () => {
   return useSelector(state => state.utility.isOpenVerifyPopup);
 };
+
+export const useUnreadNotificationCount = () => {
+  return useSelector(state => state.home.unreadNotificationCount);
+};
