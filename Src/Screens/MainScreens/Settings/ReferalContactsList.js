@@ -222,21 +222,13 @@ const ReferalContactsList = ({navigation}) => {
 
   function handleSocialShare({socialMedia, referalMessage = null, socialUrl}) {
     if (socialMedia) {
-      console.log(
-        {
-          url: profile?.referral_link ?? '',
-          message: referalMessage ?? REFERAL_MESSAGE,
-          social: socialMedia,
-        },
-        'SHARE',
-      );
       Share.shareSingle({
         title: 'Rawcaster Invite',
-        url: profile?.referral_link ?? 'https://wwww.google.com',
+        url: profile?.referral_link ?? '',
         message: referalMessage ?? REFERAL_MESSAGE,
         social: socialMedia,
         type: 'text/*',
-        subject: referalMessage ?? REFERAL_MESSAGE,
+        subject: 'Rawcaster - Invite from ' + profile?.name,
       })
         .then(res => {
           console.log(socialMedia, 'Share RESPONSE', res);
@@ -245,34 +237,13 @@ const ReferalContactsList = ({navigation}) => {
           console.log(socialMedia, 'Share Error', err);
         });
     } else {
-      Linking.canOpenURL(socialUrl)
-        .then(supported => {
-          if (supported) {
-            Linking.openURL(socialUrl)
-              .then(() => {})
-              .catch(e => {});
-          } else {
-            console.log(`Cannot open Telegram URL: ${socialUrl}`);
-          }
-        })
-        .catch(e => {});
+      Linking.openURL(socialUrl)
+        .then(() => {})
+        .catch(e => {
+          console.log(e, 'ERROR IN');
+        });
     }
   }
-
-  const openTelegram = () => {
-    const telegramUsername = 'YOUR_TELEGRAM_USERNAME';
-    const telegramURL = IS_IOS
-      ? `tg://resolve?domain=${telegramUsername}`
-      : `https://t.me/${telegramUsername}`;
-
-    Linking.canOpenURL(telegramURL).then(supported => {
-      if (supported) {
-        Linking.openURL(telegramURL);
-      } else {
-        console.log(`Cannot open Telegram URL: ${telegramURL}`);
-      }
-    });
-  };
 
   const onPressReferalOption = pressedShareType => {
     switch (pressedShareType) {
@@ -287,136 +258,52 @@ const ReferalContactsList = ({navigation}) => {
         handleSocialShare({socialMedia: Share.Social.INSTAGRAM});
         return;
       case SHARE_OPTION.telegram:
-        handleSocialShare({socialMedia: Share.Social.TELEGRAM});
+        if (IS_IOS) {
+          handleSocialShare({socialMedia: Share.Social.TELEGRAM});
+        } else {
+          handleSocialShare({
+            socialUrl: `https://telegram.me/share/url?text=${REFERAL_MESSAGE}&url=${profile?.referral_link}`,
+          });
+        }
         return;
       case SHARE_OPTION.whatsapp:
-        handleSocialShare({socialMedia: Share.Social.WHATSAPP});
-        return;
-      case SHARE_OPTION.twitter:
         handleSocialShare({
-          socialMedia: Share.Social.TWITTER,
-          TWITTER_REFERAL_MESSAGE,
+          socialUrl: `whatsapp://send?text=${encodeURIComponent(
+            REFERAL_MESSAGE,
+          )}`,
         });
         return;
+      case SHARE_OPTION.twitter:
+        if (IS_IOS) {
+          handleSocialShare({
+            socialUrl: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+              profile?.referral_link,
+            )}&text=${encodeURIComponent(TWITTER_REFERAL_MESSAGE)}`,
+          });
+        } else {
+          handleSocialShare({
+            socialMedia: Share.Social.TWITTER,
+            referalMessage: TWITTER_REFERAL_MESSAGE,
+          });
+        }
+        return;
       case SHARE_OPTION.linked_in:
-        handleSocialShare({socialMedia: Share.Social.LINKEDIN});
+        const encodedUrl = encodeURIComponent(profile?.referral_link);
+        const encodedTitle = encodeURIComponent('Rawcaster Invite');
+        const encodedDescription = encodeURIComponent(REFERAL_MESSAGE);
+        handleSocialShare({
+          socialUrl: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedDescription}`,
+        });
         return;
       case SHARE_OPTION.gmail:
+        setisEmail(true);
+        handleGoogleContacts();
         return;
       case SHARE_OPTION.invite_fans:
+        setopenInviteFans(true);
         return;
     }
     return;
-    if (
-      IS_IOS &&
-      appType !== 'contacts' &&
-      appType !== 'gmail' &&
-      appType !== 'facebook' &&
-      appType !== 'whatsapp' &&
-      appType !== 'invite_fans'
-    ) {
-      onShareHandler(appType);
-      return;
-    }
-    switch (appType) {
-      case 'whatsapp':
-        Linking.openURL(
-          `whatsapp://send?text=${
-            REFERAL_MESSAGE + ' ' + profile?.referral_link
-          }`,
-        )
-          .then(res => {})
-          .catch(err => {
-            // handleAppNotFoundAlert();
-          });
-        break;
-
-      case 'facebook':
-        const shareOptionsfb = {
-          ...SHARE_OBJECTS,
-          social: Share.Social?.FACEBOOK,
-        };
-
-        Share.shareSingle(shareOptionsfb)
-          .then(res => {
-            console.log('FACEBOOK res: ', res);
-          })
-          .catch(err => {
-            console.log('Facebook err:', err);
-          });
-        break;
-      case 'instagram':
-        const shareOptionsIns = {
-          ...SHARE_OBJECTS,
-          social: Share.Social?.INSTAGRAM,
-        };
-
-        Share.shareSingle(shareOptionsIns)
-          .then(res => {
-            console.log('instagram res: ', res);
-          })
-          .catch(err => {
-            console.log('Instagram err:', err);
-          });
-
-        break;
-      case 'contacts':
-        setisEmail(false);
-        handlePhoneContacts();
-        break;
-      case 'gmail':
-        setisEmail(true);
-        handleGoogleContacts();
-        break;
-      case 'invite_fans':
-        setopenInviteFans(true);
-        break;
-      case 'twitter':
-        const shareOptionstwitter = {
-          ...SHARE_OBJECTS_TWITTER,
-
-          social: Share.Social?.TWITTER,
-        };
-        Share.shareSingle(shareOptionstwitter)
-          .then(res => {
-            console.log('Twitter Response:', res);
-          })
-          .catch(err => {
-            console.log('Twitter Err:');
-          });
-        break;
-      case 'linkedin':
-        const shareOptionslinkedIn = {
-          ...SHARE_OBJECTS,
-
-          social: Share.Social.LINKEDIN,
-        };
-        Share.shareSingle(shareOptionslinkedIn)
-          .then(res => {
-            console.log('LINKLDEN Response:', res);
-          })
-          .catch(err => {
-            console.log('LINKLDEN Err:', err);
-          });
-        break;
-      case 'telegram':
-        const shareOptionstelegram = {
-          ...SHARE_OBJECTS,
-          social: Share.Social.TELEGRAM,
-          subject: 'Rawcaster - Invite from ' + profile?.name,
-        };
-        Share.shareSingle(shareOptionstelegram)
-          .then(res => {
-            console.log('Telegram', res);
-          })
-          .catch(err => {
-            console.log('Telegram:', err);
-          });
-        break;
-
-      default:
-        break;
-    }
   };
 
   const handleGoogleContacts = (token = null) => {
