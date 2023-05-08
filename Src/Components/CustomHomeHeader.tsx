@@ -73,13 +73,14 @@ const CustomHomeHeader = ({
         styles.mainContainer,
         {
           backgroundColor: bgColor,
-          paddingTop: isEnableSafeArea
-            ? insets.top
-              ? insets.top + paddingTop
-              : StatusBar.currentHeight
-              ? StatusBar.currentHeight + paddingTop
-              : paddingTop
-            : paddingTop,
+          paddingTop:
+            (isEnableSafeArea
+              ? insets.top
+                ? insets.top + paddingTop
+                : StatusBar.currentHeight
+                ? StatusBar.currentHeight + paddingTop
+                : paddingTop
+              : paddingTop) + 10,
         },
       ]}>
       <View style={styles.subContainer}>
@@ -94,7 +95,9 @@ const CustomHomeHeader = ({
         ) : (
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('PlansAndPrice');
+              navigation.navigate('ReferalContacts');
+
+              // navigation.navigate('PlansAndPrice');
             }}>
             <SVGIcon icon="app_logo_white" height={30} width={30} />
           </TouchableOpacity>
@@ -240,6 +243,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: 10,
   },
   subContainer: {
     flexDirection: 'row',
