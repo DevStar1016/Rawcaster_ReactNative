@@ -24,6 +24,7 @@ import {
   followAndUnfollowService,
   getOthersProfileService,
   listNuggetsService,
+  sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import ProfilesListContainerWithSeeAll from './ProfilesListContainerWithSeeAll';
@@ -36,6 +37,7 @@ import Nugget from '../HomeScreen/Nugget';
 import SVGIcon from '../../../Components/SVGIcon';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
+import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 const PADDING_HORIZONTAL = 10;
 
 var currentPage = 1;
@@ -134,6 +136,45 @@ const Profile = ({route}) => {
           });
         } else if (res.data.status === 0) {
           setemptyText(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
+
+  const sendFriendRequestsAPICall = () => {
+    if (isMount) {
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    formData.append('user_ids', JSON.stringify([othersProfile?.user_ref_id]));
+    sendFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setothersProfile(pre => {
+            return {...pre, friend_request_status: '1'};
+          });
+          if (res.data?.friend_request_ids?.length > 0) {
+            let data = {
+              friend_request_id: res.data.friend_request_ids[0],
+              display_name: profile?.name,
+              profile_img: profile?.profile_image,
+              user_id: profile?.user_id,
+            };
+            console.log('SEND FRIEND REQUEST SOCKET', data);
+            friendRequestSocket(userId, data);
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
@@ -434,6 +475,9 @@ const Profile = ({route}) => {
                 ? true
                 : false
             }
+            onPressAddUserButton={() => {
+              sendFriendRequestsAPICall();
+            }}
           />
         </View>
 

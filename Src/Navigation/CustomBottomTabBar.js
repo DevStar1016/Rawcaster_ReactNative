@@ -10,6 +10,7 @@ import {
   useIsBottomTabBarAbsolute,
   useNuggetType,
   useToken,
+  useUnreadNotificationCount,
 } from '../Utilities/StoreData';
 import CustomHomeTabButton from '../Components/CustomHomeTabButton';
 import {useDispatch} from 'react-redux';
@@ -18,12 +19,15 @@ import {listNuggetsService} from '../Services/ApiService';
 import {setNuggetsList} from '../Store/Slices/HomeSlice';
 import Toast from '../Components/Toast';
 import {htmlDecodeText} from '../Utilities/Methods';
+import StyledText from '../Components/StyledText';
 
 const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const isBottomTabBarAbsolute = useIsBottomTabBarAbsolute();
   const token = useToken();
   const dispatch = useDispatch();
   const nuggetType = useNuggetType();
+  const unreadNotificationCount = useUnreadNotificationCount();
+
   const [isLoading, setisLoading] = useState(false);
 
   return (
@@ -156,6 +160,26 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                       tintColor: isFocused ? COLORS.secondary : COLORS.white,
                     }}
                   />
+                  {route.name === 'NotificationsStack' &&
+                  unreadNotificationCount ? (
+                    <View
+                      style={[
+                        styles.badge,
+                        {
+                          width:
+                            parseInt(unreadNotificationCount) > 99 ? 30 : 20,
+                        },
+                      ]}>
+                      <StyledText
+                        style={{
+                          color: COLORS.white,
+                        }}>
+                        {unreadNotificationCount > 99
+                          ? '99+'
+                          : unreadNotificationCount}
+                      </StyledText>
+                    </View>
+                  ) : null}
                 </View>
               </Pressable>
             )}
@@ -193,6 +217,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.primary,
+  },
+  badge: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 8,
+    left: 25,
+    borderRadius: 10,
+    backgroundColor: COLORS.secondary,
   },
 });
 

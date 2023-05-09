@@ -17,6 +17,7 @@ import {
   useUnreadNotificationCount,
 } from '../../../Utilities/StoreData';
 import {
+  listAllFriendsService,
   listNotificationsService,
   respondToFriendRequestsService,
 } from '../../../Services/ApiService';
@@ -24,8 +25,12 @@ import StyledText from '../../../Components/StyledText';
 import moment from 'moment';
 import {FONTS} from '../../../Utilities/Fonts';
 import Toast from '../../../Components/Toast';
-import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
+import {
+  setConnectionsList,
+  setUnreadNotificationCount,
+} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
+import {getAuthCode} from '../../../Utilities/Methods';
 
 type Props = {
   notificationListType?: number;
@@ -119,12 +124,13 @@ const NotificationsList = ({
     formData.append('friend_request_id', friendRequestId);
     formData.append('notification_id', notificationId);
     formData.append('response', responseType);
-    console.log(formData, 'SSSSSSSS');
-
     respondToFriendRequestsService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
+          if (responseType === 1) {
+            connectionsListAPICall();
+          }
           if (unreadNotificationCount) {
             dispatch(setUnreadNotificationCount(unreadNotificationCount - 1));
           }
@@ -141,6 +147,25 @@ const NotificationsList = ({
         Toast.fail(e.message);
       })
       .finally(() => {});
+  };
+
+  const connectionsListAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    listAllFriendsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          console.log('sxXxZxZxZxxxZxZxxzxZZz');
+          dispatch(setConnectionsList(res.data.friends_list));
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setrefreshing(false);
+        }
+      });
   };
 
   function onRefresh() {
