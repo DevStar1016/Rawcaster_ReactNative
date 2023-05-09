@@ -8,7 +8,6 @@ import {
   RefreshControl,
   SectionList,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -34,11 +33,14 @@ import {
   GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from '../../../Services/ServiceConstants';
-import {getAuthCode} from '../../../Utilities/Methods';
+import {
+  getAuthCode,
+  getSlicedText,
+  isAlphabet,
+} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import ProfileIcon from '../../../Assets/Png/user.png';
 import Share from 'react-native-share';
-import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import StyledText from '../../../Components/StyledText';
 import Loader from '../../../Components/Loader';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -46,6 +48,8 @@ import {useProfile, useToken} from '../../../Utilities/StoreData';
 import InviteFanModal from '../../../Modals/InviteFanModal';
 import {inviteToRawcasterService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
+import ProfileWithBadge from '../../../Components/ProfileWithBadge';
+import SubmitButton from '../../../Components/SubmitButton';
 
 var isMount = true;
 var currentPage = 1;
@@ -104,8 +108,7 @@ const ReferalContactsList = ({navigation}) => {
   const token = useToken();
   const [contactList, setcontactList] = useState([]);
   const [contactToken, setcontactToken] = useState(null);
-  const [isEmail, setisEmail] = useState(false);
-
+  const [contactsListType, setcontactsListType] = useState(0); // 1 - mobile, 2 - email, 0 - nothing
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
@@ -169,8 +172,13 @@ const ReferalContactsList = ({navigation}) => {
   const onPressReferalOption = pressedShareType => {
     switch (pressedShareType) {
       case SHARE_OPTION.contacts:
-        setisEmail(false);
-        handlePhoneContacts();
+        if (contactsListType === 2 || contactsListType === 0) {
+          if (isMount) {
+            setcontactsListType(1);
+            setisListLoading(true);
+          }
+          handlePhoneContacts();
+        }
         break;
       case SHARE_OPTION.facebook:
         handleSocialShare({socialMedia: Share.Social.FACEBOOK});
@@ -217,20 +225,24 @@ const ReferalContactsList = ({navigation}) => {
         });
         return;
       case SHARE_OPTION.gmail:
-        setisEmail(true);
-        handleGoogleContacts();
+        if (contactsListType === 1 || contactsListType === 0) {
+          if (isMount) {
+            setcontactsListType(2);
+            setisListLoading(true);
+          }
+          handleGoogleContacts();
+        }
         return;
       case SHARE_OPTION.invite_fans:
-        setopenInviteFans(true);
+        if (isMount) {
+          setopenInviteFans(true);
+        }
         return;
     }
     return;
   };
 
   const handleGoogleContacts = (token = null) => {
-    if (!token) {
-      setisListLoading(true);
-    }
     if (IS_IOS) {
       if (!token) {
         SendIOSClientToken(GOOGLE_SIGNIN_IOS_CLIENT_ID);
@@ -295,7 +307,6 @@ const ReferalContactsList = ({navigation}) => {
   };
 
   const handlePhoneContacts = () => {
-    setisListLoading(true);
     if (IS_IOS) {
       getPhoneContacts();
     } else {
@@ -314,9 +325,10 @@ const ReferalContactsList = ({navigation}) => {
           }
         })
         .catch(e => {
-          console.log(e, 'ffdffd');
-          setisListLoading(false);
-          setisRefreshing(false);
+          if (isMount) {
+            setisListLoading(false);
+            setisRefreshing(false);
+          }
         });
     }
   };
@@ -324,33 +336,27 @@ const ReferalContactsList = ({navigation}) => {
   const getPhoneContacts = () => {
     Contacts.getAll()
       .then(contacts => {
-        // console.log(contacts, 'ddfdsfdsf');
         if (isMount) {
-          let sortedContacts = lodash.orderBy(
+          let tempContactsList = lodash.orderBy(
             contacts,
             [IS_IOS ? 'givenName' : 'displayName'],
             ['asc'],
           );
-          let contactsList = sortedContacts.map(item => {
-            return {
-              name: IS_IOS ? item.givenName : item.displayName,
-              mobile: item.phoneNumbers[0]?.number || '',
-            };
-          });
-
-          // for section list data
-          const result = lodash(contactList)
-            .groupBy(item => item.name.toUpperCase().charAt(0))
-            .map((value, key) => ({date: key, transactions: value}))
-            .value();
-
-          console.log(result);
-          // console.log(contactsList, 'CCCCCC');
-          setcontactList(contactsList);
+          tempContactsList = [...tempContactsList]
+            .map(item => {
+              const contactName = IS_IOS ? item.givenName : item.displayName;
+              return {
+                name: contactName
+                  ? contactName
+                  : item.phoneNumbers[0]?.number || '',
+                mobile: item.phoneNumbers[0]?.number || '',
+              };
+            })
+            .filter(item => item.name && item.mobile);
+          setcontactList(tempContactsList);
         }
       })
       .catch(e => {
-        console.log(e);
         if (isMount) {
           setcontactList([]);
         }
@@ -372,17 +378,16 @@ const ReferalContactsList = ({navigation}) => {
     if (isMount) {
       setisRefreshing(true);
     }
-    if (isEmail) {
+    if (contactsListType === 2) {
       handleGoogleContacts(null);
-    } else {
+    } else if (contactsListType === 1) {
       handlePhoneContacts();
     }
   };
 
   const onEndReached = () => {
     if (contactToken !== null && contactToken !== 'Reached End') {
-      if (isMount && isEmail && contactToken) {
-        console.log('dsdsfdsfdsf');
+      if (isMount && contactsListType === 2 && contactToken) {
         setisLoadMore(true);
         handleGoogleContacts(contactToken);
       }
@@ -390,74 +395,97 @@ const ReferalContactsList = ({navigation}) => {
   };
 
   function getContactsListSections() {
-    // const sortedList = [...contactList].sort((a, b) => {
-    //   const nameA = a.name.toLowerCase();
-    //   const nameB = b.name.toLowerCase();
-    //   if (nameA < nameB) {
-    //     return -1;
-    //   }
-    //   if (nameA > nameB) {
-    //     return 1;
-    //   }
-    //   return 0;
-    // });
-
-    // const groupedData = {};
-    // [...contactList].forEach(item => {
-    //   const firstLetter = item.name[0].toUpperCase();
-    //   if (!groupedData[firstLetter]) {
-    //     groupedData[firstLetter] = [];
-    //   }
-    //   groupedData[firstLetter].push(item);
-    // });
-    return [
-      {
-        title: 'Contacts',
-        data: contactList,
+    let tempContactsList = [...contactList];
+    const sortedContactsList = [...tempContactsList].sort(
+      (firstItem, secondItem) => {
+        const nameA = firstItem.name.toLowerCase();
+        const nameB = secondItem.name.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
       },
-    ];
+    );
+    const sections = [...sortedContactsList].reduce((resultSections, item) => {
+      if (isAlphabet(item.name[0])) {
+        const tempNumberItemIndex = [...resultSections].findIndex(subItem =>
+          subItem.title.toUpperCase().includes(item.name[0].toUpperCase()),
+        );
+        if (tempNumberItemIndex !== -1) {
+          resultSections[tempNumberItemIndex] = {
+            ...resultSections[tempNumberItemIndex],
+            data: [...resultSections[tempNumberItemIndex].data, {...item}],
+          };
+        } else {
+          resultSections.push({
+            title: item.name[0].toUpperCase(),
+            data: [{...item}],
+          });
+        }
+      } else {
+        const tempNumberItemIndex = [...resultSections].findIndex(subItem =>
+          subItem.title.includes('#'),
+        );
+        if (tempNumberItemIndex !== -1) {
+          resultSections[tempNumberItemIndex] = {
+            ...resultSections[tempNumberItemIndex],
+            data: [...resultSections[tempNumberItemIndex].data, {...item}],
+          };
+        } else {
+          resultSections.push({
+            title: '#',
+            data: [{...item}],
+          });
+        }
+      }
+      return resultSections;
+    }, []);
+    return [...sections];
   }
 
   const renderItem = ({item}) => {
     return (
       <View style={styles.profileContainer}>
-        <View style={{flexDirection: 'row', width: WINDOW_WIDTH - 120}}>
-          <View style={styles.profileImageContainer}>
-            <Image
-              source={ProfileIcon}
-              style={styles.profileImage}
-              resizeMode="contain"
-            />
-          </View>
-          <View style={styles.profileTextContainer}>
-            <Text
-              style={styles.profileNameText}
-              numberOfLines={1}
-              ellipsizeMode="tail">
-              {item.name}
-            </Text>
-            <Text
-              style={styles.profileDescriptionText}
-              numberOfLines={1}
-              ellipsizeMode="tail">
-              {isEmail ? item.email : item.mobile}
-            </Text>
-          </View>
+        <ProfileWithBadge
+          profileSize={35}
+          extraMargin={0}
+          padding={0}
+          containerStyle={{marginRight: 10}}
+        />
+        <View style={styles.profileTextContainer}>
+          <StyledText
+            style={styles.profileNameText}
+            numberOfLines={1}
+            normalTextModeTextProps={{ellipsizeMode: 'tail'}}>
+            {getSlicedText(item.name, 22)}
+          </StyledText>
+
+          <StyledText
+            style={styles.profileDescriptionText}
+            numberOfLines={1}
+            normalTextModeTextProps={{ellipsizeMode: 'tail'}}>
+            {contactsListType === 2 ? item.email : item.mobile}
+          </StyledText>
         </View>
-        <TouchableOpacity
-          style={styles.BecomeFanBtn}
+        <SubmitButton
+          buttonText="Invite"
+          buttonTextStyle={styles.becomeFanBtnText}
+          marginHorizontal={0}
+          marginTop={0}
+          marginBottom={0}
+          paddingVertical={2}
+          paddingHorizontal={17}
           onPress={() => {
-            if (isEmail) {
+            if (contactsListType === 2) {
               inviteToRawcasterApiCall(item.email);
             } else {
               openSms(item.mobile);
             }
-          }}>
-          <StyledText style={styles.BecomeFanBtnText}>Invite</StyledText>
-        </TouchableOpacity>
-        {/* <TouchableOpacity>
-          <SVGIcon icon="close_white" height={8} width={8} />
-        </TouchableOpacity> */}
+          }}
+        />
       </View>
     );
   };
@@ -477,7 +505,7 @@ const ReferalContactsList = ({navigation}) => {
 
   const renderFooter = () => {
     return isLoadMore ? (
-      <ActivityIndicator size={'small'} color={COLORS.primary} />
+      <ActivityIndicator size={'small'} color={COLORS.white} />
     ) : null;
   };
 
@@ -487,17 +515,6 @@ const ReferalContactsList = ({navigation}) => {
 
   const Divider = () => {
     return <View style={styles.divider} />;
-  };
-
-  const RenderEmptyComponent = () => {
-    return (
-      <View style={[styles.emptyComponent]}>
-        {/* <DefaultBackground /> */}
-        <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
-          We didn't find any results!
-        </StyledText>
-      </View>
-    );
   };
 
   const renderSectionHeader = ({section}) => {
@@ -514,6 +531,13 @@ const ReferalContactsList = ({navigation}) => {
     <HOCView
       headerType="home_header"
       isEnableDefaultBackground
+      defaultBackgroundProps={{
+        isEnableLoading: isListLoading,
+        centerText:
+          contactList.length > 0 || isListLoading
+            ? ''
+            : `We didn't find any results!`,
+      }}
       isEnableTopSafeAreaHomeHeader
       isEnablePrimaryColorStatusBar
       headerProps={{
@@ -535,30 +559,27 @@ const ReferalContactsList = ({navigation}) => {
         />
       </View>
       <Divider />
-      {isListLoading ? (
-        <Loader indicatorColor={COLORS.white} bgColor={COLORS.transparent} />
-      ) : (
-        <SectionList
-          sections={getContactsListSections()}
-          contentContainerStyle={{
-            paddingBottom: 30,
-          }}
-          renderItem={renderItem}
-          renderSectionHeader={renderSectionHeader}
-          keyExtractor={(_, index) => index.toString()}
-          ItemSeparatorComponent={renderSeperator}
-          ListFooterComponent={renderFooter}
-          onEndReached={onEndReached}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              tintColor={COLORS.secondary}
-              refreshing={isRefreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        />
-      )}
+
+      <SectionList
+        sections={getContactsListSections()}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}
+        renderItem={renderItem}
+        renderSectionHeader={renderSectionHeader}
+        keyExtractor={(_, index) => index.toString()}
+        ItemSeparatorComponent={renderSeperator}
+        ListFooterComponent={renderFooter}
+        onEndReached={onEndReached}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            tintColor={COLORS.secondary}
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      />
       <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
@@ -581,62 +602,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 5,
-    width: WINDOW_WIDTH - 20,
-    // backgroundColor: 'green',
   },
-  profileImageContainer: {
-    height: 35,
-    width: 35,
-    borderRadius: 19,
-    backgroundColor: COLORS.grey,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  profileImage: {
-    height: 27,
-    width: 27,
-    borderRadius: 15,
-  },
+
   profileNameText: {
     fontFamily: FONTS.DMSans.medium,
     fontSize: 15,
     color: COLORS.white,
-    width: WINDOW_WIDTH - 170,
   },
   profileDescriptionText: {
-    fontFamily: FONTS.DMSans.regular,
     fontSize: 13,
     color: COLORS.white,
     opacity: 0.7,
-    width: WINDOW_WIDTH - 170,
   },
   profileTextContainer: {
-    width: WINDOW_WIDTH - 170,
-    // backgroundColor: 'red',
-    // marginHorizontal: 10,
+    flex: 1,
+    paddingRight: 10,
   },
-  BecomeFanBtn: {
-    height: 30,
-    width: 80,
-    backgroundColor: COLORS.secondary,
-    borderRadius: 5,
-    // marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  BecomeFanBtnText: {
+
+  becomeFanBtnText: {
     color: COLORS.white,
     fontSize: 13,
   },
   seperator: {
-    height: 10,
-  },
-  emptyComponent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 30,
   },
   optionContainer: {
     flexDirection: 'row',
@@ -646,10 +634,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   optionNameLogoContainer: {
-    // flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // width: '50%',
   },
   optionName: {
     color: COLORS.white,

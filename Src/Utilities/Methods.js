@@ -423,3 +423,7 @@ export const calcualteAge = dob => {
 
   return Math.abs(age_dt.getUTCFullYear() - 1970);
 };
+
+export function isAlphabet(char) {
+  return /[a-zA-Z]/.test(char);
+}

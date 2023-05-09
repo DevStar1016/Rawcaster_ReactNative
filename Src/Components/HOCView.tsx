@@ -12,7 +12,7 @@ import {COLORS} from '../Utilities/Colors';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import CustomHomeHeader, {CustomHomeHeaderProps} from './CustomHomeHeader';
 import HeaderWithBack, {BackHeaderProps} from './HeaderWithBack';
-import DefaultBackground from './DefaultBackground';
+import DefaultBackground, {DefaultBgProps} from './DefaultBackground';
 import Loader, {LoaderProps} from './Loader';
 import {IS_IOS} from '../Utilities/Constants';
 import {useInsets} from '../Utilities/StoreData';
@@ -31,6 +31,7 @@ interface Props {
   isEnableRLogo?: boolean;
   isEnableSafeArea?: boolean;
   isEnableDefaultBackground?: boolean;
+  defaultBackgroundProps?: Omit<DefaultBgProps, 'isEnableRLogo'>;
   backHeaderProps?: BackHeaderProps;
   backHeaderContainerStyle?: ViewStyle;
   loaderProps?: LoaderProps;
@@ -51,6 +52,7 @@ const HOCView = ({
   headerProps = {},
   isEnableRLogo = true,
   isEnableSafeArea = true,
+  defaultBackgroundProps,
   paddingBottom,
   isEnableDefaultBackground = false,
   backHeaderProps = {},
@@ -77,7 +79,10 @@ const HOCView = ({
     //   resizeMode="stretch">
     <>
       {isEnableDefaultBackground && (
-        <DefaultBackground isEnableRLogo={isEnableRLogo} />
+        <DefaultBackground
+          isEnableRLogo={isEnableRLogo}
+          {...defaultBackgroundProps}
+        />
       )}
       {isEnablePrimaryColorStatusBar && !isEnableDefaultBackground && (
         <View

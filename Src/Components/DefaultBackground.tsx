@@ -5,11 +5,17 @@ import SVGIcon from './SVGIcon';
 import LinearGradient from 'react-native-linear-gradient';
 import StyledText from './StyledText';
 
+export type DefaultBgProps = {
+  centerText?: string;
+  isEnableLoading?: boolean;
+  isEnableRLogo?: boolean;
+};
+
 const DefaultBackground = ({
   centerText = '',
   isEnableLoading = false,
   isEnableRLogo = true,
-}) => {
+}: DefaultBgProps) => {
   return (
     <View style={styles.mainContainer}>
       <View
