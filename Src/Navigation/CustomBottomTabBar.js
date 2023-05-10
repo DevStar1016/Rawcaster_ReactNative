@@ -161,6 +161,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                     }}
                   />
                   {route.name === 'NotificationsStack' &&
+                  token &&
                   unreadNotificationCount ? (
                     <View
                       style={[

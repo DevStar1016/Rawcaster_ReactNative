@@ -427,3 +427,23 @@ export const calcualteAge = dob => {
 export function isAlphabet(char) {
   return /[a-zA-Z]/.test(char);
 }
+
+export const getNotificationType = type => {
+  switch (parseInt(type)) {
+    case 1:
+      return 'nuggets';
+    case 2:
+      return 'events';
+    case 3:
+      return 'connections';
+    case 4:
+      return 'groups';
+    case 5:
+      return 'fans';
+    case 6:
+      return 'poll_results';
+
+    default:
+      return '';
+  }
+};

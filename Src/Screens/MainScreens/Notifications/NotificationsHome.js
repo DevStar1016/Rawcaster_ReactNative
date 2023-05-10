@@ -1,5 +1,5 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
@@ -14,11 +14,17 @@ import {readNotificationService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
+import {NoticationsContext} from '../../../Utilities/Contexts';
 
 const NotificationsHome = () => {
   const dispatch = useDispatch();
   const token = useToken();
   const unreadNotificationCount = useUnreadNotificationCount();
+  const [focusedTab, setfocusedTab] = useState(5);
+
+  const noticationContextValue = {
+    setFocusedTab: setfocusedTab,
+  };
 
   const handleMarkAllRead = () => {
     const formData = new FormData();
@@ -43,46 +49,50 @@ const NotificationsHome = () => {
   }
 
   return (
-    <HOCView
-      headerType="home_header"
-      isEnableTopSafeAreaHomeHeader
-      headerProps={{
-        bgColor: COLORS.transparent,
-        isEnableSearch: false,
-        isEnableLive: false,
-      }}
-      isEnableDefaultBackground
-      isEnableRLogo={false}
-      paddingBottom={50}
-      backgroundColor={COLORS.primary}>
-      <View style={styles.titleHeaderContainer}>
-        <View style={styles.titleTextContainer}>
-          <StyledText style={styles.titleText}>Notifications</StyledText>
-          {unreadNotificationCount ? (
-            <View style={styles.countContainer}>
-              <StyledText style={styles.countText}>
-                {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-              </StyledText>
-            </View>
-          ) : null}
-        </View>
-        {/* <RoundedIconButton
+    <NoticationsContext.Provider value={noticationContextValue}>
+      <HOCView
+        headerType="home_header"
+        isEnableTopSafeAreaHomeHeader
+        headerProps={{
+          bgColor: COLORS.transparent,
+          isEnableSearch: false,
+          isEnableLive: false,
+        }}
+        isEnableDefaultBackground
+        isEnableRLogo={false}
+        paddingBottom={50}
+        backgroundColor={COLORS.primary}>
+        <View style={styles.titleHeaderContainer}>
+          <View style={styles.titleTextContainer}>
+            <StyledText style={styles.titleText}>Notifications</StyledText>
+            {unreadNotificationCount ? (
+              <View style={styles.countContainer}>
+                <StyledText style={styles.countText}>
+                  {unreadNotificationCount > 99
+                    ? '99+'
+                    : unreadNotificationCount}
+                </StyledText>
+              </View>
+            ) : null}
+          </View>
+          {/* <RoundedIconButton
           icon="search"
           bgColor={COLORS.secondary}
           buttonSize={37}
           iconSize={20}
         /> */}
-        {unreadNotificationCount ? (
-          <TouchableOpacity
-            onPress={() => handleMarkAllRead()}
-            activeOpacity={0.8}>
-            <StyledText style={styles.readText}>Mark all Read</StyledText>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-      <Divider />
-      <NotificationsTopTabNavigation />
-    </HOCView>
+          {unreadNotificationCount ? (
+            <TouchableOpacity
+              onPress={() => handleMarkAllRead()}
+              activeOpacity={0.8}>
+              <StyledText style={styles.readText}>Mark all Read</StyledText>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <Divider />
+        <NotificationsTopTabNavigation />
+      </HOCView>
+    </NoticationsContext.Provider>
   );
 };
 

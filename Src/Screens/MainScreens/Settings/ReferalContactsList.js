@@ -174,7 +174,7 @@ const ReferalContactsList = ({navigation}) => {
       case SHARE_OPTION.contacts:
         if (contactsListType === 2 || contactsListType === 0) {
           if (isMount) {
-            setcontactsListType(1);
+            // setcontactsListType(1);
             setisListLoading(true);
           }
           handlePhoneContacts();
@@ -227,7 +227,7 @@ const ReferalContactsList = ({navigation}) => {
       case SHARE_OPTION.gmail:
         if (contactsListType === 1 || contactsListType === 0) {
           if (isMount) {
-            setcontactsListType(2);
+            // setcontactsListType(2);
             setisListLoading(true);
           }
           handleGoogleContacts();
@@ -278,7 +278,9 @@ const ReferalContactsList = ({navigation}) => {
   const getEmail = token => {
     getOtherContacts(token)
       .then(response => {
-        //statement
+        if (contactsListType !== 2 && isMount) {
+          setcontactsListType(2);
+        }
         let contact = response.data;
         if (token) {
           let sortedContacts = lodash.orderBy(
@@ -337,6 +339,9 @@ const ReferalContactsList = ({navigation}) => {
     Contacts.getAll()
       .then(contacts => {
         if (isMount) {
+          if (contactsListType !== 1) {
+            setcontactsListType(1);
+          }
           let tempContactsList = lodash.orderBy(
             contacts,
             [IS_IOS ? 'givenName' : 'displayName'],
@@ -446,6 +451,18 @@ const ReferalContactsList = ({navigation}) => {
     return [...sections];
   }
 
+  const getOptionNameColor = optionId => {
+    let color;
+    if (optionId === SHARE_OPTION.contacts && contactsListType === 1) {
+      color = COLORS.secondary;
+    } else if (optionId === SHARE_OPTION.gmail && contactsListType === 2) {
+      color = COLORS.secondary;
+    } else {
+      color = COLORS.white;
+    }
+    return color;
+  };
+
   const renderItem = ({item}) => {
     return (
       <View style={styles.profileContainer}>
@@ -497,7 +514,10 @@ const ReferalContactsList = ({navigation}) => {
         onPress={() => onPressReferalOption(item.id)}>
         <View style={styles.optionNameLogoContainer}>
           <SVGIcon icon={item.icon} />
-          <StyledText style={styles.optionName}>{item.name}</StyledText>
+          <StyledText
+            style={[styles.optionName, {color: getOptionNameColor(item.id)}]}>
+            {item.name}
+          </StyledText>
         </View>
       </TouchableOpacity>
     );
