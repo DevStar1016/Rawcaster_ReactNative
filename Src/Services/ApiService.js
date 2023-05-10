@@ -204,8 +204,8 @@ export const listChatMessagesService = data => {
   return axios.post('listchatmessages', data);
 };
 
-export const uploadChatAttachmentService = data => {
-  return axios.post('uploadchatattachment', data);
+export const uploadChatAttachmentService = (data, config) => {
+  return axios.post('uploadchatattachment', data, config);
 };
 
 // Notification services
@@ -361,8 +361,4 @@ export const addClaimAccountService = data => {
 
 export const listUnClaimAccountService = data => {
   return axios.post('listunclaimaccount', data);
-};
-
-export const influencerChatService = data => {
-  return axios.post('influencerchat', data);
 };

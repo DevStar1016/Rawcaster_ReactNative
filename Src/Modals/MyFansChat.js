@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  FlatList,
 } from 'react-native';
 import HOCView from '../Components/HOCView';
 import {COLORS} from '../Utilities/Colors';
@@ -14,30 +15,36 @@ import SVGIcon from '../Components/SVGIcon';
 import {
   compressMedia,
   getFileName,
-  getSlicedText,
   getUrlWithFilePrefix,
 } from '../Utilities/Methods';
-import ProfileWithBadge from '../Components/ProfileWithBadge';
-import Badges from '../Utilities/Badges';
-import {DIMENSIONS} from '../Utilities/Constants';
+import {DIMENSIONS, IS_IOS} from '../Utilities/Constants';
 import {FONTS} from '../Utilities/Fonts';
 import {useNavigation} from '@react-navigation/native';
-import {useToken} from '../Utilities/StoreData';
+import {useGroupsList, useProfile, useToken} from '../Utilities/StoreData';
 import {influencerChatService} from '../Services/ApiService';
 import Toast from '../Components/Toast';
 import {Camera} from 'react-native-vision-camera';
 import CustomCameraView from './CameraModals/CustomCameraView';
 import AudioRecorder from './AudioRecorder';
+import {ImageVideoPicker} from '../Utilities/ImageVideoPicker';
+import MediaSmallItem from '../Components/MediaSmallItem';
+import moment from 'moment';
+import {sendMessage} from '../Services/Socket/Socket';
 
 var isMount = true;
-const InfluencerChat = ({route}) => {
+const MyFansChat = () => {
   const navigation = useNavigation();
   const token = useToken();
+  const profile = useProfile();
+  const groupsList = useGroupsList();
   const [message, setmessage] = useState('');
+  const [selectedMediaList, setselectedMediaList] = useState([]);
+  const [uploadedMediaList, setuploadedMediaList] = useState([]);
   const [type, settype] = useState(1);
   const [isOpenCamera, setisOpenCamera] = useState(false);
   const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [isLoading, setisLoading] = useState(false);
+  const [loaderText, setloaderText] = useState('');
 
   useEffect(() => {
     isMount = true;
@@ -47,71 +54,79 @@ const InfluencerChat = ({route}) => {
     };
   }, []);
 
+  function getMessageItem() {
+    const uniqueId =
+      profile.user_id +
+      '' +
+      (getGroupId() ?? '') +
+      '' +
+      moment.utc().format('x') +
+      '' +
+      Math.floor(Math.random() * 10000 + 1);
+    return {
+      event: 'groupchatmessage',
+      uniqueId: uniqueId,
+      type: 1,
+      message: message.trim(),
+      groupId: getGroupId(),
+      senderId: profile.user_id,
+      senderName: profile.name, // data.display_name,
+      userImage: profile.profile_image, //data.profile_img,
+      parentMsgId: null,
+      sentType: 1,
+      file_upload_status: 1,
+      file_download_status: 0,
+      is_edited: 0,
+      is_read: 0,
+      msg_from: 1,
+      group_name: 'My Fans',
+      media_path: null,
+      sent_datetime: moment.utc().format('YYYY-MM-DD HH:mm:ss'),
+      thumbnail: null,
+      duration: 0,
+      isContainLink: false,
+      linkpreviewdata: null,
+    };
+  }
+
   function handleSendChat() {
-    if (isMount) {
-      setisLoading(true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('type', type);
-    formData.append('message', message.trim());
-    console.log(formData, 'FORM');
-    influencerChatService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          navigation.goBack();
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisLoading(false);
-        }
+    if (uploadedMediaList.length > 0) {
+      [...uploadedMediaList].map(item => {
+        let msgData = {
+          ...getMessageItem(),
+          uniqueId: item.id,
+          media_path: item.uri,
+          type: item.type,
+        };
+        sendMessage(msgData, 'groupchatting');
       });
+    } else {
+      let msgData = {
+        ...getMessageItem(),
+      };
+      sendMessage(msgData, 'groupchatting');
+    }
+    navigation.goBack();
   }
 
   function pickMedia(type) {
-    openCloseEmojiPicker(false);
-    ImageCropPicker.openPicker({
-      multiple: true,
+    ImageVideoPicker({
       mediaType: type,
-      smartAlbums: [
-        'PhotoStream',
-        'Generic',
-        'Panoramas',
-        'Videos',
-        'Favorites',
-        'Timelapses',
-        'AllHidden',
-        'RecentlyAdded',
-        'Bursts',
-        'SlomoVideos',
-        'UserLibrary',
-        'SelfPortraits',
-        'Screenshots',
-        'DepthEffect',
-        'LivePhotos',
-        'Animated',
-        'LongExposure',
-      ],
+      multiple: true,
     })
       .then(async mediaList => {
         if (isMount) {
+          setloaderText('Compressing Media');
           setisLoading(true);
         }
         let mediaType = type === 'photo' ? 1 : 2;
         Promise.all(
           mediaList.map(async item => {
-            let mediaPath = await compressMedia(mediaType, item.path);
+            let mediaPath = await compressMedia(mediaType, item.uri);
             return {
               uri: getUrlWithFilePrefix(mediaPath),
               name: getFileName(mediaPath),
-              type: item.mime,
+              type: item.type,
             };
           }),
         )
@@ -126,20 +141,18 @@ const InfluencerChat = ({route}) => {
           .finally(() => {
             if (isMount) {
               setisLoading(false);
+              setloaderText('');
             }
           });
       })
-      .catch(e => {
-        console.log(e, 'ERRORRR');
-      });
+      .catch(e => {});
   }
 
   function handleRemoveSelectedMediaItem(selectedIndex) {
-    const filteredSelectedMediaList = [...selectedMediaList].filter(
-      (_, index) => index !== selectedIndex,
-    );
     if (isMount) {
-      setselectedMediaList(filteredSelectedMediaList);
+      setselectedMediaList(preList => {
+        return [...preList].filter((_, index) => index !== selectedIndex);
+      });
     }
   }
 
@@ -157,11 +170,13 @@ const InfluencerChat = ({route}) => {
       ) {
         if (isMount) {
           setisLoading(false);
+          setloaderText('');
           setisOpenCamera(true);
         }
       } else {
         if (isMount) {
           setisLoading(false);
+          setloaderText('');
         }
         if (newCameraPermission === 'denied') {
           Toast.fail('Camera Permission Denied');
@@ -174,6 +189,7 @@ const InfluencerChat = ({route}) => {
     } catch (e) {
       if (isMount) {
         setisLoading(false);
+        setloaderText('');
       }
       Toast.fail(e.message);
     }
@@ -212,13 +228,47 @@ const InfluencerChat = ({route}) => {
     ]);
   }
 
+  function getGroupId() {
+    const fansGroupItem = [...groupsList].find(item =>
+      item.group_name?.includes('My Fans'),
+    );
+    if (fansGroupItem) {
+      return fansGroupItem?.group_id;
+    }
+    return null;
+  }
+
+  function renderSelectedMediaItem({item, index}) {
+    return (
+      <MediaSmallItem
+        item={item}
+        isEnableUploadDownloadProcess
+        onUploadSuccess={(uniqueId, filePath, type) => {
+          setuploadedMediaList(preList => {
+            return [...preList, {id: uniqueId, uri: filePath, type: type}];
+          });
+          console.log(uniqueId, filePath, 'SUCCESS UPLOAD');
+        }}
+        onUploadFailed={(uniqueId, failedMessage = '') => {
+          console.log(item, 'FAILEDFILE');
+          Toast.fail(failedMessage);
+          handleRemoveSelectedMediaItem(index);
+        }}
+        groupId={getGroupId()}
+        onRemoveItem={() => {
+          handleRemoveSelectedMediaItem(index);
+        }}
+      />
+    );
+  }
+
   return (
     <HOCView
       //   isLoading={isLoading}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
       paddingHorizontal={5}
       loaderProps={{
-        loaderText: 'Sending Message',
+        loaderText: loaderText,
       }}
       isLoading={isLoading}
       backHeaderProps={{
@@ -240,24 +290,23 @@ const InfluencerChat = ({route}) => {
           // openCloseEmojiPicker(false);
           Keyboard.dismiss();
         }}>
-        <View>
-          <View style={styles.topContainer}>
-            <View style={styles.inputContainer}>
-              <TextInput
-                placeholder={`What’s on your mind for My Fans!`}
-                style={styles.textInput}
-                multiline
-                maxLength={500}
-                // onFocus={() => {
-                //   openCloseEmojiPicker(false);
-                // }}
-                value={message}
-                onChangeText={setmessage}
-                numberOfLines={5}
-                textAlignVertical={'top'}
-                placeholderTextColor={COLORS.placeHolderColor}
-              />
-              {/* <View style={styles.emojiIconContainer}>
+        <View style={styles.topContainer}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              placeholder={`What’s on your mind for My Fans!`}
+              style={styles.textInput}
+              multiline
+              maxLength={500}
+              // onFocus={() => {
+              //   openCloseEmojiPicker(false);
+              // }}
+              value={message}
+              onChangeText={setmessage}
+              numberOfLines={5}
+              textAlignVertical={'top'}
+              placeholderTextColor={COLORS.placeHolderColor}
+            />
+            {/* <View style={styles.emojiIconContainer}>
                 <SVGIcon
                   icon={'emojee'}
                   // height={30}
@@ -269,74 +318,83 @@ const InfluencerChat = ({route}) => {
                   }}
                 />
               </View> */}
-            </View>
-            <View style={styles.buttonsContainer}>
-              <SVGIcon
-                icon="mic_fill_white"
-                height={21}
-                width={21}
-                marginLeft={8}
-                isButton
-                // onPress={() => {
-                //   handleOpenAudioRecorder();
-                // }}
-              />
-              <SVGIcon
-                icon="camera_fill_white"
-                height={21}
-                width={21}
-                marginLeft={8}
-                isButton
-                // onPress={() => {
-                //   handleOpenCamera();
-                // }}
-              />
-              <SVGIcon
-                icon="video_fill_white"
-                height={20}
-                width={22}
-                marginLeft={10}
-                isButton
-                // onPress={() => {
-                //   pickMedia('video');
-                // }}
-              />
-            </View>
           </View>
-        </View>
-        <View>
-          <View>
-            <SubmitButton
-              buttonText="Send"
-              // isDisabled={isDisabledPostButton()}
-              disabledColor={COLORS.dimColor}
+          <View style={styles.buttonsContainer}>
+            <SVGIcon
+              icon="mic_fill_white"
+              height={21}
+              width={21}
+              marginLeft={8}
+              isButton
               onPress={() => {
-                if (message.trim()) {
-                  handleSendChat();
-                }
-                // if (!isDisabledPostButton()) {
-                //   if (
-                //     (selectedShareType.id === 3 ||
-                //       selectedShareType.id === 4) &&
-                //     shareConnectionsGroupsIdsList.length <= 0
-                //   ) {
-                //     Toast.fail(
-                //       selectedShareType.id === 3
-                //         ? 'Select groups'
-                //         : 'Select connections',
-                //     );
-                //     setisOpenSelectionModal(true);
-                //     return;
-                //   }
-                //   if (nugget) {
-                //     handleEditNugget();
-                //   } else {
-                //     handlePostNuggets();
-                //   }
-                // }
+                handleOpenAudioRecorder();
+              }}
+            />
+            <SVGIcon
+              icon="photo_fill_white"
+              height={21}
+              width={21}
+              marginLeft={8}
+              isButton
+              onPress={() => {
+                // handleOpenCamera();
+                pickMedia('photo');
+              }}
+            />
+            <SVGIcon
+              icon="video_fill_white"
+              height={20}
+              width={22}
+              marginLeft={10}
+              isButton
+              onPress={() => {
+                pickMedia('video');
               }}
             />
           </View>
+        </View>
+        <View>
+          {selectedMediaList.length > 0 && (
+            <View style={styles.selectedMediaContainer}>
+              <FlatList
+                data={selectedMediaList}
+                renderItem={renderSelectedMediaItem}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(_, index) => index.toString()}
+              />
+            </View>
+          )}
+          <SubmitButton
+            buttonText="Send"
+            // isDisabled={isDisabledPostButton()}
+            disabledColor={COLORS.dimColor}
+            isDisabled={uploadedMediaList.length <= 0 && !message.trim()}
+            onPress={() => {
+              handleSendChat();
+
+              // if (!isDisabledPostButton()) {
+              //   if (
+              //     (selectedShareType.id === 3 ||
+              //       selectedShareType.id === 4) &&
+              //     shareConnectionsGroupsIdsList.length <= 0
+              //   ) {
+              //     Toast.fail(
+              //       selectedShareType.id === 3
+              //         ? 'Select groups'
+              //         : 'Select connections',
+              //     );
+              //     setisOpenSelectionModal(true);
+              //     return;
+              //   }
+              //   if (nugget) {
+              //     handleEditNugget();
+              //   } else {
+              //     handlePostNuggets();
+              //   }
+              // }
+            }}
+          />
         </View>
       </TouchableOpacity>
       <Modal
@@ -424,7 +482,7 @@ const styles = StyleSheet.create({
     left: 0,
     height: DIMENSIONS.window.height / 2 + 10,
   },
-  selectedNuggetsContainer: {
+  selectedMediaContainer: {
     borderRadius: 10,
     borderWidth: 1,
     borderColor: COLORS.borderColor,
@@ -432,62 +490,6 @@ const styles = StyleSheet.create({
     padding: 5,
     // height: 130,
   },
-
-  backgroundVideo: {
-    width: '100%',
-    height: '100%',
-  },
-
-  removeIcon: {
-    width: 25,
-    height: 25,
-    resizeMode: 'contain',
-  },
-  emojiContaine: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 15,
-    height: DIMENSIONS.screen.height / 2 - 50,
-  },
-  playIconContainer: {
-    height: 25,
-    width: 25,
-    alignItems: 'center',
-    backgroundColor: COLORS.secondary,
-    justifyContent: 'center',
-    borderRadius: 25,
-  },
-  itemActionButtonsContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeSelectedItemIconContainer: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    padding: 3,
-    backgroundColor: COLORS.secondary,
-    borderRadius: 20 / 2,
-    height: 20,
-    width: 20,
-  },
-  itemRemoveIconContainer: {
-    position: 'absolute',
-    right: 3,
-    top: 3,
-    height: 22,
-    width: 22,
-    alignItems: 'center',
-    backgroundColor: COLORS.secondary,
-    justifyContent: 'center',
-    borderRadius: 25,
-  },
 });
 
-export default InfluencerChat;
+export default MyFansChat;

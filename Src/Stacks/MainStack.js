@@ -86,6 +86,31 @@ const MainStack = () => {
       },
       [],
     );
+
+    socketListen.on(
+      'groupchatting',
+      message => {
+        console.log('SocketListen  groupchatting on in Dashboard');
+
+        switch (message.event) {
+          case 'groupchatmessage':
+            console.log(message, 'GROUP CHAT RECEIVED');
+            break;
+          case 'groupchatmessagedelete':
+            break;
+          case 'groupchatmessageupdate':
+            break;
+          case 'grouptyping':
+            break;
+          case 'groupchatenable':
+            break;
+          case 'groupchatmsgtransfer':
+            break;
+        }
+      },
+      [],
+    );
+
     return () => {
       console.log('OFF SOCKET');
       socketListen.off('call');

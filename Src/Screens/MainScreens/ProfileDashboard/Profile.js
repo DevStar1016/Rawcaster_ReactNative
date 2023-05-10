@@ -376,7 +376,7 @@ const Profile = ({route}) => {
           isDisplayChat
           isDisplayEvent
           onPressChat={() => {
-            navigation.navigate('InfluencerChat');
+            navigation.navigate('MyFansChat');
           }}
         />
         <Divider />

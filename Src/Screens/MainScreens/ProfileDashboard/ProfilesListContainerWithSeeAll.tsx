@@ -186,9 +186,13 @@ const ProfilesListContainerWithSeeAll = ({
           });
         }}
         buttonType="text"
-        isDisplayChat={isDisplayChat}
+        isDisplayChat={
+          isDisplayChat ? (userId ? false : usersList.length > 0) : false
+        }
         onPressChat={onPressChat}
-        isDisplayEvent={isDisplayEvent}
+        isDisplayEvent={
+          isDisplayEvent ? (userId ? false : usersList.length > 0) : false
+        }
         onPressEvent={onPressEvent}
       />
 
@@ -260,7 +264,7 @@ const ProfilesListContainerWithSeeAll = ({
                               influencerId: item.user_id,
                             });
                           } else if (listType === 'influencers') {
-                            navigation.navigate('InfluencerChat', {
+                            navigation.navigate('MyFansChat', {
                               influencerId: item.user_id,
                               influencerName: item.display_name,
                             });

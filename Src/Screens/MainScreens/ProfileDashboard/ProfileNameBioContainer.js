@@ -40,7 +40,9 @@ const ProfileNameBioContainer = ({
   profile,
   paddingHorizontal,
   onLayout,
+  isEnableClaimAccount = false,
   onPressBecomeFan,
+  onPressClaimAccount,
 }) => {
   const dispatch = useDispatch();
   const token = useToken();
@@ -241,6 +243,14 @@ const ProfileNameBioContainer = ({
           rightIcon="right_arrow_white"
           marginTop={15}
           onPress={onPressBecomeFan}
+        />
+      )}
+      {isEnableClaimAccount && (
+        <GradientButton
+          buttonText={'Claim Account'}
+          rightIcon="right_arrow_white"
+          marginTop={15}
+          onPress={onPressClaimAccount}
         />
       )}
 
