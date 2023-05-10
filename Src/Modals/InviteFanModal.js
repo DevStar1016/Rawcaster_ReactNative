@@ -205,14 +205,17 @@ export default InviteFanModal;
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+    // alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 25,
     backgroundColor: COLORS.transparentDimColor,
   },
   subContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
     borderRadius: 10,
+    width: '100%',
   },
   titleContainer: {
     alignItems: 'center',

@@ -8,6 +8,14 @@ export const initialState = {
   pendingFriendRequests: [],
   influencerCategoryList: [],
   unreadNotificationCount: null,
+  typeWiseNotificationCount: {
+    fans: 0,
+    groups: 0,
+    connections: 0,
+    events: 0,
+    nuggets: 0,
+    poll_results: 0,
+  },
 };
 
 const HomeSlice = createSlice({
@@ -35,6 +43,9 @@ const HomeSlice = createSlice({
     setUnreadNotificationCount: (state, action) => {
       state.unreadNotificationCount = action.payload;
     },
+    setTypeWiseNotificationCount: (state, action) => {
+      state.typeWiseNotificationCount = action.payload;
+    },
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
       state.searchedNuggetsList = [];
@@ -43,6 +54,14 @@ const HomeSlice = createSlice({
       state.pendingFriendRequests = [];
       state.influencerCategoryList = [];
       state.unreadNotificationCount = null;
+      state.typeWiseNotificationCount = {
+        nuggets: 0,
+        events: 0,
+        connections: 0,
+        groups: 0,
+        fans: 0,
+        poll_results: 0,
+      };
     },
   },
 });
@@ -54,6 +73,7 @@ export const {
   setPendingFriendRequests,
   setInfluencerCategoryList,
   setUnreadNotificationCount,
+  setTypeWiseNotificationCount,
   clearHomeReduxData,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

@@ -17,15 +17,21 @@ import {
   useUnreadNotificationCount,
 } from '../../../Utilities/StoreData';
 import {
+  listAllFriendsService,
   listNotificationsService,
+  readNotificationService,
   respondToFriendRequestsService,
 } from '../../../Services/ApiService';
 import StyledText from '../../../Components/StyledText';
 import moment from 'moment';
 import {FONTS} from '../../../Utilities/Fonts';
 import Toast from '../../../Components/Toast';
-import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
+import {
+  setConnectionsList,
+  setUnreadNotificationCount,
+} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
+import {getAuthCode} from '../../../Utilities/Methods';
 
 type Props = {
   notificationListType?: number;
@@ -66,12 +72,9 @@ const NotificationsList = ({
     formData.append('token', token);
     formData.append('notification_type', notificationListType);
     formData.append('page_number', pageNumber);
-    if (notificationListType === 2) {
-      console.log(formData, 'FORM');
-    }
     listNotificationsService(formData)
       .then(res => {
-        if (notificationListType === 2) {
+        if (notificationListType === 6) {
           console.log(res.data, 'DATAA');
         }
         if (isMount) {
@@ -114,17 +117,21 @@ const NotificationsList = ({
     notificationId,
   }: ConnectionResponseProp) => {
     // 1-accept, 2 - reject, 3 - block
+    if (isMount) {
+      setisLoading(true);
+    }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('friend_request_id', friendRequestId);
     formData.append('notification_id', notificationId);
     formData.append('response', responseType);
-    console.log(formData, 'SSSSSSSS');
-
     respondToFriendRequestsService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
+          if (responseType === 1) {
+            connectionsListAPICall();
+          }
           if (unreadNotificationCount) {
             dispatch(setUnreadNotificationCount(unreadNotificationCount - 1));
           }
@@ -140,7 +147,72 @@ const NotificationsList = ({
       .catch(e => {
         Toast.fail(e.message);
       })
-      .finally(() => {});
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
+
+  const connectionsListAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    listAllFriendsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(setConnectionsList(res.data.friends_list));
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setrefreshing(false);
+        }
+      });
+  };
+
+  const readNotificationApiCall = (notificationId: number) => {
+    // if (isMount) {
+    //   setisLoading(true);
+    // }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('notification_id', notificationId);
+    console.log(formData, 'READ');
+
+    readNotificationService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(
+            setUnreadNotificationCount(parseInt(unreadNotificationCount) - 1),
+          );
+          setnotificationsList(preList => {
+            let tempNotificationList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.notification_id === notificationId,
+            );
+            if (tempIndex !== -1) {
+              tempNotificationList[tempIndex] = {
+                ...tempNotificationList[tempIndex],
+                is_read: 1,
+              };
+            }
+            return tempNotificationList;
+          });
+          Toast.success(res.data.msg);
+        } else {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
   };
 
   function onRefresh() {
@@ -225,6 +297,7 @@ const NotificationsList = ({
       <NotificationItem
         item={item}
         handleFriendRequest={handleResponseFriendRequest}
+        handleReadNotification={readNotificationApiCall}
       />
     );
   }

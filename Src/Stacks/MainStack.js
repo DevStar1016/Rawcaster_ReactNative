@@ -28,6 +28,7 @@ import {
   setGroupsList,
   setInfluencerCategoryList,
   setPendingFriendRequests,
+  setUnreadNotificationCount,
 } from '../Store/Slices/HomeSlice';
 import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
 import ConectionRequestModal from '../Modals/ConectionRequestModal';
@@ -209,6 +210,11 @@ const MainStack = () => {
             bio_data: htmlDecodeText(profile?.bio_data),
           };
           dispatch(setMyProfile(profile));
+          dispatch(
+            setUnreadNotificationCount(
+              profile?.unread_notification_count ?? null,
+            ),
+          );
         }
         return res;
       })

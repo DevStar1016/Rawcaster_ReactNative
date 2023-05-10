@@ -12,3 +12,6 @@ export const useNuggetParentActions = () =>
 
 export const NuggetItemActionsContext = createContext();
 export const useNuggetItemActions = () => useContext(NuggetItemActionsContext);
+
+export const NoticationsContext = createContext();
+export const useNotications = () => useContext(NoticationsContext);

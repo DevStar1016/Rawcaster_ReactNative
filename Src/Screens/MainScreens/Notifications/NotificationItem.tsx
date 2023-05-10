@@ -13,7 +13,10 @@ import {
 } from '../../../Utilities/Methods';
 import PollDataDisplay from '../../../Components/PollDataDisplay';
 import SVGIcon from '../../../Components/SVGIcon';
-import {useSettings} from '../../../Utilities/StoreData';
+import {
+  useSettings,
+  useUnreadNotificationCount,
+} from '../../../Utilities/StoreData';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 
 type ConnectionResponseProp = {
@@ -28,12 +31,30 @@ type Props = {
     friendRequestId,
     notificationId,
   }: ConnectionResponseProp) => void;
+  handleReadNotification: (notificationId: number) => void;
 };
 
-const NotificationItem = ({item, handleFriendRequest}: Props) => {
+const NotificationItem = ({
+  item,
+  handleFriendRequest,
+  handleReadNotification,
+}: Props) => {
   const settings = useSettings();
+  const unreadNotificationCount = useUnreadNotificationCount();
+
   return (
-    <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+    <TouchableOpacity
+      style={styles.itemContainer}
+      activeOpacity={0.8}
+      onPress={() => {
+        if (
+          unreadNotificationCount &&
+          !item.is_read &&
+          !(item.poll_option && item.poll_option.length > 0)
+        ) {
+          handleReadNotification(item.notification_id);
+        }
+      }}>
       <ProfileWithBadge
         profileImage={item.userImage}
         profileSize={40}
@@ -48,14 +69,35 @@ const NotificationItem = ({item, handleFriendRequest}: Props) => {
             </StyledText>
           </View>
 
-          <StyledText style={[styles.subText, {paddingTop: 0}]}>
+          <StyledText
+            style={[
+              styles.subText,
+              {
+                paddingTop: 0,
+                opacity:
+                  item.is_read ||
+                  (item.poll_option && item.poll_option.length > 0)
+                    ? 0.7
+                    : 1,
+              },
+            ]}>
             {dateToShortDate(item.created_datetime)}
           </StyledText>
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.messageActionButtonsContainer}>
             <View style={{flex: 1}}>
-              <StyledText style={styles.subText}>
+              <StyledText
+                style={[
+                  styles.subText,
+                  {
+                    opacity:
+                      item.is_read ||
+                      (item.poll_option && item.poll_option.length > 0)
+                        ? 0.7
+                        : 1,
+                  },
+                ]}>
                 {getNotificationMessage(item.type)}
               </StyledText>
             </View>
@@ -99,7 +141,16 @@ const NotificationItem = ({item, handleFriendRequest}: Props) => {
           </View>
           {item.content ? (
             <StyledText
-              style={[styles.subText, {opacity: 1}]}
+              style={[
+                styles.subText,
+                {
+                  opacity:
+                    item.is_read ||
+                    (item.poll_option && item.poll_option.length > 0)
+                      ? 0.7
+                      : 1,
+                },
+              ]}
               normalTextModeTextProps={{numberOfLines: 2}}>
               {item.content}
             </StyledText>
@@ -115,7 +166,17 @@ const NotificationItem = ({item, handleFriendRequest}: Props) => {
                   height={20}
                   width={20}
                 />
-                <StyledText style={styles.subText}>
+                <StyledText
+                  style={[
+                    styles.subText,
+                    {
+                      opacity:
+                        item.is_read ||
+                        (item.poll_option && item.poll_option.length > 0)
+                          ? 0.7
+                          : 1,
+                    },
+                  ]}>
                   {utcToUserTimezone(
                     item.event_start_time,
                     settings?.time_zone,
@@ -129,7 +190,17 @@ const NotificationItem = ({item, handleFriendRequest}: Props) => {
                   height={20}
                   width={20}
                 />
-                <StyledText style={styles.subText}>
+                <StyledText
+                  style={[
+                    styles.subText,
+                    {
+                      opacity:
+                        item.is_read ||
+                        (item.poll_option && item.poll_option.length > 0)
+                          ? 0.7
+                          : 1,
+                    },
+                  ]}>
                   {`${utcToUserTimezone(
                     item.event_start_time,
                     settings?.time_zone,
@@ -203,7 +274,7 @@ const styles = StyleSheet.create({
   subText: {
     color: COLORS.white,
     paddingTop: 5,
-    opacity: 0.7,
+    // opacity: 0.7,
   },
   dateTimeContainer: {
     flexDirection: 'row',
