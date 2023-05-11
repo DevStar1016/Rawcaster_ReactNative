@@ -75,10 +75,10 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         connectionsListAPICall(pageNumber, dataToFilter);
         return;
       case 'fans':
-        fansListAPICall(pageNumber, 1, dataToFilter);
+        fansListAPICall(pageNumber, 2, dataToFilter);
         return;
       case 'influencers':
-        fansListAPICall(pageNumber, 2, dataToFilter);
+        fansListAPICall(pageNumber, 1, dataToFilter);
         return;
     }
   }
@@ -96,10 +96,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
     if (userId) {
-      formData.append('group_ids', JSON.stringify([userId]));
-    } else {
-      formData.append('allfriends', 1);
+      formData.append('user_id', userId);
     }
+    formData.append('allfriends', 1);
     formData.append('page_number', pageNumber);
 
     if (dataToFilter) {
@@ -116,6 +115,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
     listAllFriendsService(formData)
       .then(res => {
+        console.log(res.data);
+
         if (res.data.status === 1) {
           if (isMount) {
             if (pageNumber === 1) {

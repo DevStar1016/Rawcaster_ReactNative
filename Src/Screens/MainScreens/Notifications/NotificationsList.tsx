@@ -32,6 +32,7 @@ import {
 } from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
 import {getAuthCode} from '../../../Utilities/Methods';
+import {useNotications} from '../../../Utilities/Contexts';
 
 type Props = {
   notificationListType?: number;
@@ -53,6 +54,7 @@ const NotificationsList = ({
   const token = useToken();
   const dispatch = useDispatch();
   const unreadNotificationCount = useUnreadNotificationCount();
+  const {setisActionLoading} = useNotications();
   const [isLoading, setisLoading] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -118,7 +120,7 @@ const NotificationsList = ({
   }: ConnectionResponseProp) => {
     // 1-accept, 2 - reject, 3 - block
     if (isMount) {
-      setisLoading(true);
+      setisActionLoading(true);
     }
     const formData = new FormData();
     formData.append('token', token);
@@ -149,7 +151,7 @@ const NotificationsList = ({
       })
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          setisActionLoading(false);
         }
       });
   };
@@ -173,9 +175,9 @@ const NotificationsList = ({
   };
 
   const readNotificationApiCall = (notificationId: number) => {
-    // if (isMount) {
-    //   setisLoading(true);
-    // }
+    if (isMount) {
+      setisActionLoading(true);
+    }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('notification_id', notificationId);
@@ -210,7 +212,7 @@ const NotificationsList = ({
       })
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          setisActionLoading(false);
         }
       });
   };
