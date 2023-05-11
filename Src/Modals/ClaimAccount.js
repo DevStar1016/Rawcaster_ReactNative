@@ -50,7 +50,7 @@ const ClaimAccount = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const navigation = useNavigation();
-  const {influencerId} = route.params ?? {};
+  const {influencerId, onFinishClaiming} = route.params ?? {};
   const [isFetchingLocation, setisFetchingLocation] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
@@ -102,6 +102,7 @@ const ClaimAccount = ({route}) => {
     addClaimAccountService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          onFinishClaiming(influencerId);
           setmessageBoxData({
             isOpen: true,
             message: res.data.msg,

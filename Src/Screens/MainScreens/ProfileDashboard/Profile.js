@@ -285,6 +285,11 @@ const Profile = ({route}) => {
     return profile;
   };
 
+  const onFinishClaiming = () => {
+    setothersProfile(pre => {
+      return {...pre, unclaimed_status: 1};
+    });
+  };
   const keyExtractor = useCallback((item, _) => item.nugget_id.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
@@ -368,6 +373,7 @@ const Profile = ({route}) => {
           onPressClaimAccount={() => {
             navigation.navigate('ClaimAccount', {
               influencerId: userId,
+              onFinishClaiming: onFinishClaiming,
             });
           }}
         />
@@ -385,10 +391,10 @@ const Profile = ({route}) => {
               listType="unclaimed_influencers"
               title={'Unclaimed Influencers Account'}
               paddingHorizontal={PADDING_HORIZONTAL}
-              ProfileItemProps={{
-                topRightIcon: 'shield_secondary',
-                topRightIconContainerBackgroundColor: COLORS.white,
-              }}
+              // ProfileItemProps={{
+              //   topRightIcon: 'shield_secondary',
+              //   topRightIconContainerBackgroundColor: COLORS.white,
+              // }}
             />
           </>
         ) : (

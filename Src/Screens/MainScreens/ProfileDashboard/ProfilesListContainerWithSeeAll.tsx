@@ -157,6 +157,8 @@ const ProfilesListContainerWithSeeAll = ({
     formData.append('token', token);
     listUnClaimAccountService(formData)
       .then(res => {
+        console.log(res.data, 'SSSSS');
+
         if (res.data.status === 1) {
           setusersList(res.data.unclaim_accounts);
         }
@@ -359,6 +361,21 @@ const ProfilesListContainerWithSeeAll = ({
                           if (listType === 'unclaimed_influencers') {
                             navigation.navigate('ClaimAccount', {
                               influencerId: item.user_id,
+                              onFinishClaiming: (value: any) => {
+                                setusersList(preList => {
+                                  let tempList = [...preList];
+                                  let tempIndex = tempList.findIndex(
+                                    sub => sub.user_id === value,
+                                  );
+                                  if (tempIndex !== -1) {
+                                    tempList[tempIndex] = {
+                                      ...tempList[tempIndex],
+                                      unclaimed_status: 1,
+                                    };
+                                  }
+                                  return tempList;
+                                });
+                              },
                             });
                           } else if (userId) {
                             if (listType === 'influencers' && !item.follow) {
@@ -377,15 +394,19 @@ const ProfilesListContainerWithSeeAll = ({
                           }
                         }}
                         topRightIcon={
-                          userId &&
-                          ((item.request_status === null ||
-                            item.request_status === '' ||
-                            item.request_status === 2) &&
-                          listType === 'connections'
-                            ? 'user_plus_pink'
-                            : !item.follow &&
-                              listType === 'influencers' &&
-                              'plus_rounded_fill_primary')
+                          listType === 'unclaimed_influencers' &&
+                          !item.unclaimed_status
+                            ? 'shield_secondary'
+                            : userId
+                            ? (item.request_status === null ||
+                                item.request_status === '' ||
+                                item.request_status === 2) &&
+                              listType === 'connections'
+                              ? 'user_plus_pink'
+                              : !item.follow && listType === 'influencers'
+                              ? 'plus_rounded_fill_primary'
+                              : undefined
+                            : undefined
                         }
                         topRightIconContainerBackgroundColor={COLORS.white}
                         {...ProfileItemProps}
