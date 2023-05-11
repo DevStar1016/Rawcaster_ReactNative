@@ -277,7 +277,10 @@ function NuggetActionsOverlay({
 
   const getMenuOptions = () => {
     if (nugget.is_nugget_owner === 1) {
-      if (nugget.poll_option && nugget.poll_option.length > 0) {
+      if (
+        (nugget.poll_option && nugget.poll_option.length > 0) ||
+        nugget.type === 2
+      ) {
         return [...NUGGET_ACTIONS].filter(item => item.id === 2);
       }
       return [...NUGGET_ACTIONS].filter(item => item.id < 3);
