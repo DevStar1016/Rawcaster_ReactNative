@@ -224,27 +224,23 @@ const PostEditNugget = ({route}) => {
       );
     }
 
-    if (selectedMediaList.length > 0) {
-      const tempSelectdeMediaList = [...selectedMediaList].filter(
-        item => !item.media_id,
+    const tempSelectdeMediaList = [...selectedMediaList].filter(
+      item => !item.media_id,
+    );
+    if (tempSelectdeMediaList.length > 0) {
+      tempSelectdeMediaList.map(item => {
+        formData.append('nuggets_media', item);
+      });
+    }
+    const tempRemovedMediaList = [...nugget.media_list].filter(
+      item =>
+        !selectedMediaList.find(subItem => subItem.media_id === item.media_id),
+    );
+    if (tempRemovedMediaList.length > 0) {
+      formData.append(
+        'delete_media_id',
+        JSON.stringify([...tempRemovedMediaList].map(item => item.media_id)),
       );
-      if (tempSelectdeMediaList.length > 0) {
-        tempSelectdeMediaList.map(item => {
-          formData.append('nuggets_media', item);
-        });
-      }
-      const tempRemovedMediaList = [...nugget.media_list].filter(
-        item =>
-          !selectedMediaList.find(
-            subItem => subItem.media_id === item.media_id,
-          ),
-      );
-      if (tempRemovedMediaList.length > 0) {
-        formData.append(
-          'delete_media_id',
-          JSON.stringify([...tempRemovedMediaList].map(item => item.media_id)),
-        );
-      }
     }
 
     editNuggetService(formData)
@@ -269,6 +265,7 @@ const PostEditNugget = ({route}) => {
           if (tempIndex !== -1) {
             tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
           }
+          dispatch(setNuggetsList([]));
           dispatch(setNuggetsList(tempNuggetsList));
 
           navigation.goBack();

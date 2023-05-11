@@ -116,6 +116,7 @@ const MainStack = () => {
         return res;
       })
       .catch(e => {
+        console.log(e?.response, 'ERROR');
         console.log(e, 'INITIAL API ERROR');
       })
       .finally(() => {

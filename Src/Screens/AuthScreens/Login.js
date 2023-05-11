@@ -21,6 +21,7 @@ import ReplaceStatusBar from '../../Components/ReplaceStatusBar';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import SubmitButton from '../../Components/SubmitButton';
 import PoliciesFooter from '../../Components/PoliciesFooter';
+import SocialSignin from './SocialSignin';
 
 const validationSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -191,6 +192,7 @@ const Login = () => {
               Sign up
             </StyledText>
           </View>
+          <SocialSignin pushId={pushId} />
 
           <PoliciesFooter />
         </View>

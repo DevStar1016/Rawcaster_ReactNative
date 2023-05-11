@@ -122,10 +122,6 @@ const EventSettings = () => {
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(
-            {...settings, [keyText]: reduxData ?? valueText},
-            'UPDATEDDATAAA',
-          );
           dispatch(
             setSettings({...settings, [keyText]: reduxData ?? valueText}),
           );

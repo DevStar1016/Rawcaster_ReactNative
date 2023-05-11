@@ -3,7 +3,11 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import lodash from 'lodash';
 import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
 import StyledText from '../../../../Components/StyledText';
-import {dateToShortDate} from '../../../../Utilities/Methods';
+import {
+  dateToShortDate,
+  getSlicedText,
+  htmlDecodeText,
+} from '../../../../Utilities/Methods';
 import SVGIcon from '../../../../Components/SVGIcon';
 import {COLORS} from '../../../../Utilities/Colors';
 import {FONTS} from '../../../../Utilities/Fonts';
@@ -81,14 +85,22 @@ const CommentItem = ({
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.rowContainer}>
-          <StyledText style={styles.nameText}>{item.name}</StyledText>
-          <StyledText style={styles.text}>
-            {dateToShortDate(item.commented_date)}
-          </StyledText>
+          <View style={{flex: 1}}>
+            <StyledText style={styles.nameText}>
+              {getSlicedText(htmlDecodeText(item.name), 22)}
+            </StyledText>
+          </View>
+          <View style={{paddingLeft: 5}}>
+            <StyledText style={styles.text}>
+              {dateToShortDate(item.commented_date)}
+            </StyledText>
+          </View>
         </View>
         <View style={[styles.rowContainer, {paddingBottom: 0}]}>
           <View style={{flex: 1}}>
-            <StyledText style={styles.text}>{item.comment}</StyledText>
+            <StyledText style={styles.text}>
+              {htmlDecodeText(item.comment)}
+            </StyledText>
           </View>
           {!item.isLoading && profile?.user_id === item.user_id && (
             <View style={{paddingLeft: 10, paddingVertical: 5}}>
