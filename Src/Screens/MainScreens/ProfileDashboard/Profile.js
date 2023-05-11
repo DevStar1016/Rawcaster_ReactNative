@@ -172,7 +172,6 @@ const Profile = ({route}) => {
               profile_img: profile?.profile_image,
               user_id: profile?.user_id,
             };
-            console.log('SEND FRIEND REQUEST SOCKET', data);
             friendRequestSocket(userId, data);
           }
         } else if (res.data.status === 0) {
@@ -221,8 +220,6 @@ const Profile = ({route}) => {
         }
       });
   }
-
-  console.log(unclaimedAccountsList, 'LIST');
 
   const listNuggetsAPICall = (pageNumber = 1) => {
     const formData = new FormData();
@@ -294,6 +291,18 @@ const Profile = ({route}) => {
       return {...pre, unclaimed_status: 1};
     });
   };
+
+  function getIsEnableClaimAccount() {
+    let tempUnclaimedList = [...unclaimedAccountsList];
+    const tempUnclaimedUser = tempUnclaimedList.find(
+      item => item.user_id === getProfileData().user_id,
+    );
+    if (tempUnclaimedUser) {
+      return tempUnclaimedUser.unclaimed_status === 0;
+    }
+    return false;
+  }
+
   const keyExtractor = useCallback((item, _) => item.nugget_id.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
@@ -364,20 +373,22 @@ const Profile = ({route}) => {
         <ProfileTopSection
           userId={userId}
           profile={getProfileData()}
+          isEnableFansList={
+            !(userId ? Boolean(parseInt(getProfileData().lock_fans)) : false)
+          }
           paddingHorizontal={PADDING_HORIZONTAL}
         />
         <ProfileNameBioContainer
           userId={userId}
           profile={getProfileData()}
           paddingHorizontal={PADDING_HORIZONTAL}
-          isEnableClaimAccount={getProfileData().unclaimed_status === 0}
+          isEnableClaimAccount={getIsEnableClaimAccount()}
           onPressBecomeFan={() => {
             handleBecomeFan();
           }}
           onPressClaimAccount={() => {
             navigation.navigate('ClaimAccount', {
               influencerId: userId,
-              onFinishClaiming: onFinishClaiming,
             });
           }}
         />
@@ -394,13 +405,9 @@ const Profile = ({route}) => {
             <ProfilesListContainerWithSeeAll
               listType="unclaimed_influencers"
               list={unclaimedAccountsList}
-              isCallInitialAPI={true}
+              isExternalListOnly
               title={'Unclaimed Influencers Account'}
               paddingHorizontal={PADDING_HORIZONTAL}
-              // ProfileItemProps={{
-              //   topRightIcon: 'shield_secondary',
-              //   topRightIconContainerBackgroundColor: COLORS.white,
-              // }}
             />
           </>
         ) : (

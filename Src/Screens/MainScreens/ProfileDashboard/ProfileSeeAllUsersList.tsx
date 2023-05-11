@@ -13,7 +13,11 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import {useProfile, useToken} from '../../../Utilities/StoreData';
+import {
+  useProfile,
+  useToken,
+  useUnclaimedAccountsList,
+} from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
 import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {
@@ -39,6 +43,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   let currentPage = 1;
   let totalPages = 1;
   const dispatch = useDispatch();
+  const unclaimedAccountsList = useUnclaimedAccountsList();
   const {initialList, userId, listType, title}: Props = route.params ?? {};
   const [isActionLoading, setisActionLoading] = useState(false);
   const [filterData, setfilterData] = useState(null);
@@ -63,6 +68,14 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           setisLoading(true);
         }
         listApiCalls(1);
+      } else {
+        if (isMount) {
+          setisLoading(false);
+        }
+      }
+    } else {
+      if (isMount) {
+        setisLoading(false);
       }
     }
 
@@ -87,6 +100,11 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       case 'unclaimed_influencers':
         unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
         return;
+      default:
+        if (isMount) {
+          setisLoading(false);
+        }
+        break;
     }
   }
 
@@ -220,8 +238,15 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           if (isMount) {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
+              dispatch(setUnclaimedAccountsList(res.data.unclaim_accounts));
               setusersList(res.data.unclaim_accounts);
             } else {
+              dispatch(
+                setUnclaimedAccountsList([
+                  ...unclaimedAccountsList,
+                  ...res.data.unclaim_accounts,
+                ]),
+              );
               setusersList(preList => [
                 ...preList,
                 ...res.data.unclaim_accounts,

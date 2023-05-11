@@ -10,7 +10,11 @@ import CustomDateMonthYearPicker from '../Components/CustomDateMonthYearPicker';
 import DropDownPicker from '../Components/DropDownPicker';
 import {getLocationAddress} from '../Utilities/Methods';
 import {PHONE_REGEX} from '../Utilities/Constants';
-import {useProfile, useToken} from '../Utilities/StoreData';
+import {
+  useProfile,
+  useToken,
+  useUnclaimedAccountsList,
+} from '../Utilities/StoreData';
 import GooglePlacesList from '../Components/GooglePlacesList';
 import SubmitButton from '../Components/SubmitButton';
 import Toast from '../Components/Toast';
@@ -23,6 +27,8 @@ import ProfileTopSection from '../Screens/MainScreens/ProfileDashboard/ProfileTo
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import StyledText from '../Components/StyledText';
 import {FONTS} from '../Utilities/Fonts';
+import {useDispatch} from 'react-redux';
+import {setUnclaimedAccountsList} from '../Store/Slices/HomeSlice';
 
 var isMount = true;
 
@@ -47,10 +53,12 @@ const validationSchema = yup.object().shape({
 });
 
 const ClaimAccount = ({route}) => {
+  const dispatch = useDispatch();
+  const unclaimedAccountsList = useUnclaimedAccountsList();
   const token = useToken();
   const profile = useProfile();
   const navigation = useNavigation();
-  const {influencerId, onFinishClaiming} = route.params ?? {};
+  const {influencerId} = route.params ?? {};
   const [isFetchingLocation, setisFetchingLocation] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
@@ -102,7 +110,18 @@ const ClaimAccount = ({route}) => {
     addClaimAccountService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          onFinishClaiming(influencerId);
+          let tempUnclaimedList = [...unclaimedAccountsList];
+          const tempIndex = tempUnclaimedList.findIndex(
+            item => item.user_id === influencerId,
+          );
+          if (tempIndex !== -1) {
+            tempUnclaimedList[tempIndex] = {
+              ...tempUnclaimedList[tempIndex],
+              unclaimed_status: 1,
+            };
+          }
+          dispatch(setUnclaimedAccountsList(tempUnclaimedList));
+
           setmessageBoxData({
             isOpen: true,
             message: res.data.msg,

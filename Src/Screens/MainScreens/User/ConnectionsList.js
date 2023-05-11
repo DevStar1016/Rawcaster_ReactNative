@@ -117,7 +117,6 @@ const ConnectionsList = () => {
           dispatch(setConnectionsList(res[0].data.friends_list));
         }
         if (res[1].data.status === 1) {
-          console.log(res[1].data.pending_requests, 'PENDING LIST');
           dispatch(setPendingFriendRequests(res[1].data.pending_requests));
         }
       })

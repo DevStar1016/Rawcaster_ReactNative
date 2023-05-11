@@ -18,7 +18,6 @@ import {
   followAndUnfollowService,
   getFollowListService,
   listAllFriendsService,
-  listUnClaimAccountService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
@@ -35,6 +34,7 @@ type Props = {
   listType: 'connections' | 'influencers' | 'fans' | 'unclaimed_influencers';
   ProfileItemProps: ProfileWithBadgeProps;
   isDisplayChat?: boolean;
+  isExternalListOnly?: boolean;
   onPressChat?: () => void;
   isDisplayEvent?: boolean;
   onPressEvent?: () => void;
@@ -42,11 +42,12 @@ type Props = {
 
 const EXTRA_MARGIN = 10;
 const PROFILE_CONTAINER_MARGIN = 18;
-const ProfilesListContainerWithSeeAll = ({
+function ProfilesListContainerWithSeeAll({
   userId,
   paddingHorizontal = 0,
   isLock,
   list = [],
+  isExternalListOnly = false,
   title = '',
   listType,
   ProfileItemProps,
@@ -54,7 +55,7 @@ const ProfilesListContainerWithSeeAll = ({
   onPressChat,
   isDisplayEvent = false,
   onPressEvent,
-}: Props) => {
+}: Props) {
   let isMount = true;
   const navigation = useNavigation();
   const token = useToken();
@@ -87,10 +88,20 @@ const ProfilesListContainerWithSeeAll = ({
           case 'influencers':
             fansListAPICall();
             return;
-          case 'unclaimed_influencers':
-            unclaimedInfluencersListAPICall();
-            return;
+          default:
+            if (isMount) {
+              setisLoading(false);
+            }
+            break;
         }
+      } else {
+        if (isMount) {
+          setisLoading(false);
+        }
+      }
+    } else {
+      if (isMount) {
+        setisLoading(false);
       }
     }
 
@@ -112,7 +123,6 @@ const ProfilesListContainerWithSeeAll = ({
     }
     listAllFriendsService(formData)
       .then(res => {
-        console.log(res.data);
         if (res.data.status === 1) {
           setusersList(res.data.friends_list);
         }
@@ -139,28 +149,6 @@ const ProfilesListContainerWithSeeAll = ({
       .then(res => {
         if (res.data.status === 1) {
           setusersList(res.data.follow_list);
-        }
-      })
-      .catch(e => {})
-      .finally(() => {
-        if (isMount) {
-          setisLoading(false);
-        }
-      });
-  };
-
-  const unclaimedInfluencersListAPICall = () => {
-    if (isMount) {
-      setisLoading(true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    listUnClaimAccountService(formData)
-      .then(res => {
-        console.log(res.data, 'SSSSS');
-
-        if (res.data.status === 1) {
-          setusersList(res.data.unclaim_accounts);
         }
       })
       .catch(e => {})
@@ -240,7 +228,6 @@ const ProfilesListContainerWithSeeAll = ({
               profile_img: profile?.profile_image,
               user_id: profile?.user_id,
             };
-            console.log('SEND FRIEND REQUEST SOCKET', data);
             friendRequestSocket(userId, data);
           }
         } else if (res.data.status === 0) {
@@ -257,8 +244,15 @@ const ProfilesListContainerWithSeeAll = ({
       });
   };
 
+  function getList() {
+    if (isExternalListOnly) {
+      return list;
+    }
+    return usersList;
+  }
+
   function getIsShowButton() {
-    if (isLoading || isLock || usersList.length <= 6) {
+    if (isLoading || isLock || getList().length <= 6) {
       return false;
     }
     return true;
@@ -268,7 +262,7 @@ const ProfilesListContainerWithSeeAll = ({
     if (isLock) {
       return title;
     }
-    return `${title} (${usersList.length})`;
+    return `${title} (${getList().length})`;
   }
 
   return (
@@ -278,7 +272,7 @@ const ProfilesListContainerWithSeeAll = ({
         isDisplayButton={getIsShowButton()}
         onPressButton={() => {
           navigation.navigate('ProfileSeeAllUsersList', {
-            initialList: [...usersList],
+            initialList: [...getList()],
             userId: userId,
             listType: listType,
             title: title,
@@ -286,11 +280,11 @@ const ProfilesListContainerWithSeeAll = ({
         }}
         buttonType="text"
         isDisplayChat={
-          isDisplayChat ? (userId ? false : usersList.length > 0) : false
+          isDisplayChat ? (userId ? false : getList().length > 0) : false
         }
         onPressChat={onPressChat}
         isDisplayEvent={
-          isDisplayEvent ? (userId ? false : usersList.length > 0) : false
+          isDisplayEvent ? (userId ? false : getList().length > 0) : false
         }
         onPressEvent={onPressEvent}
       />
@@ -329,9 +323,9 @@ const ProfilesListContainerWithSeeAll = ({
                 </TouchableOpacity>
               );
             })
-          ) : usersList && usersList.length > 0 ? (
+          ) : getList() && getList().length > 0 ? (
             <View style={styles.profilesContainer}>
-              {[...usersList]
+              {[...getList()]
                 .filter((_, index) => index < 6)
                 .map((item: any, index) => {
                   return (
@@ -361,21 +355,6 @@ const ProfilesListContainerWithSeeAll = ({
                           if (listType === 'unclaimed_influencers') {
                             navigation.navigate('ClaimAccount', {
                               influencerId: item.user_id,
-                              onFinishClaiming: (value: any) => {
-                                setusersList(preList => {
-                                  let tempList = [...preList];
-                                  let tempIndex = tempList.findIndex(
-                                    sub => sub.user_id === value,
-                                  );
-                                  if (tempIndex !== -1) {
-                                    tempList[tempIndex] = {
-                                      ...tempList[tempIndex],
-                                      unclaimed_status: 1,
-                                    };
-                                  }
-                                  return tempList;
-                                });
-                              },
                             });
                           } else if (userId) {
                             if (listType === 'influencers' && !item.follow) {
@@ -443,7 +422,7 @@ const ProfilesListContainerWithSeeAll = ({
       </Modal>
     </View>
   );
-};
+}
 
 export default ProfilesListContainerWithSeeAll;
 

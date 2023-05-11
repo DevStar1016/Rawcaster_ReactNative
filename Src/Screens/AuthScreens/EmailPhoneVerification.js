@@ -20,6 +20,7 @@ import {FONTS} from '../../Utilities/Fonts';
 import StyledText from '../../Components/StyledText';
 import PoliciesFooter from '../../Components/PoliciesFooter';
 import SubmitButton from '../../Components/SubmitButton';
+import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
 
 const otpVerificationSchema = Yup.object({
   otp: Yup.string()
@@ -124,12 +125,14 @@ const EmailPhoneVerification = ({route}) => {
     if (alt_token_id) {
       formData.append('alt_token_id', alt_token_id);
     }
-
+    console.log(formData, 'FORMDATA SIGNUP VERIFY');
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
           if (isFromLoginSignup) {
-            console.log(res.data, 'DATA VERIFIED');
+            if (parseInt(res.data.first_time) === 1) {
+              dispatch(setIsVisibleInfluencers(true));
+            }
             const userData = {
               name: res.data.name,
               user_id: res.data.user_id,

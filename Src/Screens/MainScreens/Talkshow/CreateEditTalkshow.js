@@ -217,6 +217,7 @@ const CreateEditTalkshow = ({route}) => {
 
   const createTalkshowAPICall = () => {
     const formData = getDefaultCreateEditFormData();
+
     addLiveEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -269,6 +270,7 @@ const CreateEditTalkshow = ({route}) => {
         JSON.stringify(tempRemovedGroupsIdsList),
       );
     }
+    console.log(JSON.stringify(formData), 'EDIT FORMDATA');
     editLiveEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
