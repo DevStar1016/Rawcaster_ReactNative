@@ -13,6 +13,8 @@ import DefaultBackground from '../../../Components/DefaultBackground';
 import SVGIcon from '../../../Components/SVGIcon';
 import {COLORS} from '../../../Utilities/Colors';
 import {
+  useConnectionsList,
+  usePendingFriendRequests,
   useToken,
   useUnreadNotificationCount,
 } from '../../../Utilities/StoreData';
@@ -28,6 +30,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import Toast from '../../../Components/Toast';
 import {
   setConnectionsList,
+  setPendingFriendRequests,
   setUnreadNotificationCount,
 } from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
@@ -55,6 +58,8 @@ const NotificationsList = ({
   const dispatch = useDispatch();
   const unreadNotificationCount = useUnreadNotificationCount();
   const {setisActionLoading} = useNotications();
+  const pendingConnectionRequests = usePendingFriendRequests();
+  const connectionsList = useConnectionsList();
   const [isLoading, setisLoading] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -132,8 +137,20 @@ const NotificationsList = ({
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           if (responseType === 1) {
-            connectionsListAPICall();
+            dispatch(
+              setConnectionsList([
+                {...res.data.friend_details},
+                ...connectionsList,
+              ]),
+            );
           }
+          dispatch(
+            setPendingFriendRequests(
+              [...pendingConnectionRequests].filter(
+                item => item.friend_request_id !== friendRequestId,
+              ),
+            ),
+          );
           if (unreadNotificationCount) {
             dispatch(setUnreadNotificationCount(unreadNotificationCount - 1));
           }
