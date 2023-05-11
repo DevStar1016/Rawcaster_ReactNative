@@ -19,15 +19,18 @@ import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {
   getFollowListService,
   listAllFriendsService,
+  listUnClaimAccountService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import FilterProfileSeeAllUsers from '../../../Modals/FilterProfileSeeAllUsers';
+import {setUnclaimedAccountsList} from '../../../Store/Slices/HomeSlice';
+import {useDispatch} from 'react-redux';
 
 type Props = {
   initialList: [];
   userId?: any;
-  listType: 'connections' | 'influencers' | 'fans';
+  listType: 'connections' | 'influencers' | 'fans' | 'unclaimed_influencers';
   title: string;
 };
 
@@ -35,6 +38,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   let isMount = true;
   let currentPage = 1;
   let totalPages = 1;
+  const dispatch = useDispatch();
   const {initialList, userId, listType, title}: Props = route.params ?? {};
   const [isActionLoading, setisActionLoading] = useState(false);
   const [filterData, setfilterData] = useState(null);
@@ -80,6 +84,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       case 'influencers':
         fansListAPICall(pageNumber, 1, dataToFilter);
         return;
+      case 'unclaimed_influencers':
+        unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
+        return;
     }
   }
 
@@ -115,8 +122,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
     listAllFriendsService(formData)
       .then(res => {
-        console.log(res.data);
-
         if (res.data.status === 1) {
           if (isMount) {
             if (pageNumber === 1) {
@@ -187,6 +192,57 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         setLoaders(false);
       });
   }
+
+  const unclaimedInfluencersListAPICall = (
+    pageNumber = 1,
+    dataToFilter: any,
+  ) => {
+    const formData = new FormData();
+    formData.append('token', token);
+    if (userId) {
+      formData.append('user_id', userId);
+    }
+    formData.append('page_number', pageNumber);
+    if (dataToFilter) {
+      if (dataToFilter?.country) {
+        formData.append('Location', dataToFilter?.country?.name);
+      }
+      if (dataToFilter?.gender) {
+        formData.append('gender', dataToFilter?.gender?.id);
+      }
+      if (dataToFilter?.age) {
+        formData.append('age', dataToFilter?.age);
+      }
+    }
+    listUnClaimAccountService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          if (isMount) {
+            if (pageNumber === 1) {
+              totalPages = parseInt(res.data.total_pages);
+              setusersList(res.data.unclaim_accounts);
+            } else {
+              setusersList(preList => [
+                ...preList,
+                ...res.data.unclaim_accounts,
+              ]);
+            }
+          }
+        } else if (res.data.status === 0) {
+          if (isMount) {
+            setusersList([]);
+          }
+        }
+      })
+      .catch(e => {
+        if (isMount) {
+          setusersList([]);
+        }
+      })
+      .finally(() => {
+        setLoaders(false);
+      });
+  };
 
   const handleSendFriendRequest = (userRefId: any, user_id: any) => {
     if (isMount) {

@@ -60,7 +60,7 @@ const ProfilesListContainerWithSeeAll = ({
   const token = useToken();
   const profile = useProfile();
   const [isLoading, setisLoading] = useState(
-    !isLock && (userId || list.length) <= 0 ? true : false,
+    !isLock && (userId || list.length <= 0) ? true : false,
   );
   const [usersList, setusersList] = useState<any[]>(
     list.length > 0 ? [...list] : [],

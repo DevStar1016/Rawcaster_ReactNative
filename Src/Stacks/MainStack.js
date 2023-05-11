@@ -13,6 +13,7 @@ import {
   listAllFriendGroupsService,
   listAllFriendRequestsService,
   listAllFriendsService,
+  listUnClaimAccountService,
 } from '../Services/ApiService';
 import {useDispatch} from 'react-redux';
 import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
@@ -23,6 +24,7 @@ import {
   setGroupsList,
   setInfluencerCategoryList,
   setPendingFriendRequests,
+  setUnclaimedAccountsList,
   setUnreadNotificationCount,
 } from '../Store/Slices/HomeSlice';
 import GlobalSearchStack from './GlobalSearchStack';
@@ -64,6 +66,7 @@ const MainStack = () => {
       listAllFriendGroupsService(getCommonFormData()),
       listAllFriendRequestsService(getCommonFormData()),
       getInfluencerCategoryService(getCommonFormData()),
+      listUnClaimAccountService(getCommonFormData()),
     ])
       .then(res => {
         if (res[0].data.status === 1) {
@@ -112,6 +115,13 @@ const MainStack = () => {
       .then(res => {
         if (res[5].data.status === 1) {
           dispatch(setInfluencerCategoryList(res[5].data.influencer_category));
+        }
+        return res;
+      })
+      .then(res => {
+        if (res[6].data.status === 1) {
+          console.log(res[6].data, 'UNCLAIM');
+          dispatch(setUnclaimedAccountsList(res[6].data.unclaim_accounts));
         }
         return res;
       })

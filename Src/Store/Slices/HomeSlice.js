@@ -7,6 +7,7 @@ export const initialState = {
   groupsList: [],
   pendingFriendRequests: [],
   influencerCategoryList: [],
+  unclaimedAccountsList: [],
   unreadNotificationCount: null,
   typeWiseNotificationCount: {
     fans: 0,
@@ -40,6 +41,9 @@ const HomeSlice = createSlice({
     },
     setInfluencerCategoryList: (state, action) => {
       state.influencerCategoryList = action.payload;
+    },
+    setUnclaimedAccountsList: (state, action) => {
+      state.unclaimedAccountsList = action.payload;
     },
     setUnreadNotificationCount: (state, action) => {
       state.unreadNotificationCount = action.payload;
@@ -77,6 +81,7 @@ export const {
   setGroupsList,
   setPendingFriendRequests,
   setInfluencerCategoryList,
+  setUnclaimedAccountsList,
   setUnreadNotificationCount,
   setTypeWiseNotificationCount,
   clearHomeReduxData,

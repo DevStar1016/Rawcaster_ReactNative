@@ -18,6 +18,7 @@ import {
   useNuggetsList,
   useProfile,
   useToken,
+  useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
@@ -49,6 +50,7 @@ const Profile = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const myNuggetsList = useNuggetsList();
+  const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
@@ -220,6 +222,8 @@ const Profile = ({route}) => {
       });
   }
 
+  console.log(unclaimedAccountsList, 'LIST');
+
   const listNuggetsAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -389,6 +393,8 @@ const Profile = ({route}) => {
             <Divider />
             <ProfilesListContainerWithSeeAll
               listType="unclaimed_influencers"
+              list={unclaimedAccountsList}
+              isCallInitialAPI={true}
               title={'Unclaimed Influencers Account'}
               paddingHorizontal={PADDING_HORIZONTAL}
               // ProfileItemProps={{

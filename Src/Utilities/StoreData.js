@@ -55,6 +55,9 @@ export const usePendingFriendRequests = () => {
 export const useInfluencerCategoryList = () => {
   return useSelector(state => state.home.influencerCategoryList);
 };
+export const useUnclaimedAccountsList = () => {
+  return useSelector(state => state.home.unclaimedAccountsList);
+};
 export const useLikedNuggetsIds = () => {
   return useSelector(state => state.nugget_actions.likedNuggetsIds);
 };
