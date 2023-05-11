@@ -15,6 +15,7 @@ import {
 } from '../../../Services/ApiService';
 import {
   useInsets,
+  useIsHomeNuggetsLoading,
   useNuggetsList,
   useNuggetType,
   useToken,
@@ -25,7 +26,10 @@ import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import GradientButton from '../../../Components/GradientButton';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
-import {setNuggetsList} from '../../../Store/Slices/HomeSlice';
+import {
+  setIsHomeNuggetsLoading,
+  setNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
 import Loader from '../../../Components/Loader';
 import {setIsBottomTabBarAbsolute} from '../../../Store/Slices/UtilitySlice';
 import {htmlDecodeText} from '../../../Utilities/Methods';
@@ -42,7 +46,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const insets = useInsets();
-  const [isLoading, setisLoading] = useState(true);
+  const isHomeNuggetsLoading = useIsHomeNuggetsLoading();
   const token = useToken();
   const flatlistRef = useRef(null);
   const nuggetType = useNuggetType();
@@ -103,7 +107,7 @@ const Dashboard = () => {
   useEffect(() => {
     currentPage = 1;
     totalPages = 1;
-    setisLoading(true);
+    dispatch(setIsHomeNuggetsLoading(true));
     dispatch(setNuggetsList([]));
     listNuggetsAPICall(1);
   }, [token, selectedFilterTab]);
@@ -123,7 +127,6 @@ const Dashboard = () => {
     formData.append('page_number', pageNumber);
     formData.append('nugget_type', nuggetType);
     formData.append('filter_type', selectedFilterTab);
-    console.log(formData, 'FORMDATA');
     listNuggetsService(formData, controller.signal)
       .then(res => {
         if (res.data.status === 1) {
@@ -143,12 +146,12 @@ const Dashboard = () => {
             dispatch(setNuggetsList([...nuggetsList, ...decodedNuggetList]));
           }
         }
-        setisLoading(false);
+        dispatch(setIsHomeNuggetsLoading(false));
       })
       .catch(e => {
         console.log(e, 'ERRORIP');
         if (!e.message.includes('canceled')) {
-          setisLoading(false);
+          dispatch(setIsHomeNuggetsLoading(false));
         }
       })
       .finally(() => {
@@ -321,7 +324,7 @@ const Dashboard = () => {
           )}
         </View>
         {
-          isLoading ? (
+          isHomeNuggetsLoading ? (
             <Loader
               loaderText="Fetching Nuggets"
               isEnableDefaultLoaderBackground={true}

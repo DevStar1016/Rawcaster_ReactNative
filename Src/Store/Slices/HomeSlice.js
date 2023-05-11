@@ -16,6 +16,7 @@ export const initialState = {
     nuggets: 0,
     poll_results: 0,
   },
+  isHomeNuggetsLoading: true,
 };
 
 const HomeSlice = createSlice({
@@ -46,6 +47,10 @@ const HomeSlice = createSlice({
     setTypeWiseNotificationCount: (state, action) => {
       state.typeWiseNotificationCount = action.payload;
     },
+    setIsHomeNuggetsLoading: (state, action) => {
+      state.isHomeNuggetsLoading = action.payload;
+    },
+
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
       state.searchedNuggetsList = [];
@@ -75,5 +80,6 @@ export const {
   setUnreadNotificationCount,
   setTypeWiseNotificationCount,
   clearHomeReduxData,
+  setIsHomeNuggetsLoading,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

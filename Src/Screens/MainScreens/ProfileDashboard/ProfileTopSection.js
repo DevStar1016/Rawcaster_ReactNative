@@ -15,7 +15,14 @@ import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 
 const BANNER_IMAGE_HEIGHT = 140;
 const PROFILE_SIZE = 100;
-const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
+const ProfileTopSection = ({
+  userId,
+  profile,
+  paddingHorizontal,
+  onLayout,
+  isEnableFansList = true,
+  isEnableEdit = true,
+}) => {
   const dispatch = useDispatch();
   const token = useToken();
   const [profileImage, setprofileImage] = useState(null);
@@ -83,7 +90,7 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
           resizeMode="cover"
           style={{width: '100%', height: '100%'}}
         />
-        {!userId && (
+        {!userId && isEnableEdit && (
           <RoundedIconButton
             icon="camera_black"
             iconSize={18}
@@ -111,7 +118,7 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
           containerStyle={{
             marginRight: 10,
           }}
-          isEnableImagePicker={!userId}
+          isEnableImagePicker={!userId && isEnableEdit}
           onSelectImage={selectedImage => {
             if (!userId) {
               setprofileImage(selectedImage);
@@ -120,10 +127,12 @@ const ProfileTopSection = ({userId, profile, paddingHorizontal, onLayout}) => {
             }
           }}
         />
-        <FansProfilesContainer
-          userId={userId}
-          profileSize={PROFILE_SIZE / 2 - 5}
-        />
+        {isEnableFansList && (
+          <FansProfilesContainer
+            userId={userId}
+            profileSize={PROFILE_SIZE / 2 - 5}
+          />
+        )}
       </View>
       <Modal transparent visible={actionLoadingData.isLoading}>
         <Loader

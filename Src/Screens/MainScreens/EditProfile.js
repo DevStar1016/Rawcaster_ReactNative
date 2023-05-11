@@ -177,7 +177,6 @@ const EditProfile = ({route}) => {
         name: getFileName(selectedProfileImage.path),
       });
     }
-    console.log(formData, 'FORMDATA');
     updateMyProfileService(formData)
       .then(res => {
         if (res.data.status === 1) {

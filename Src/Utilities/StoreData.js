@@ -76,3 +76,6 @@ export const useIsOpenVerifyPopup = () => {
 export const useUnreadNotificationCount = () => {
   return useSelector(state => state.home.unreadNotificationCount);
 };
+export const useIsHomeNuggetsLoading = () => {
+  return useSelector(state => state.home.isHomeNuggetsLoading);
+};

@@ -60,11 +60,7 @@ const SearchProfileItem = ({
             )}
           </View>
         </View>
-        <StyledText style={{paddingVertical: 5}}>
-          I’ve left Muskville. Come join Me at @TheTweetOfGod@universeodon.com.
-          Still can’t help plugging My book “The Book of Pslam” out now:
-          tinyurl.com/yckjn828
-        </StyledText>
+        <StyledText style={{paddingVertical: 5}}>{item.bio}</StyledText>
       </View>
     </TouchableOpacity>
   );

@@ -1,5 +1,6 @@
 import {
   FlatList,
+  Modal,
   RefreshControl,
   StyleSheet,
   Text,
@@ -7,7 +8,11 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {useConnectionsList, useToken} from '../../../Utilities/StoreData';
+import {
+  useConnectionsList,
+  usePendingFriendRequests,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
@@ -16,16 +21,29 @@ import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useMyConnections} from '../../../Utilities/Contexts';
 import {useDispatch} from 'react-redux';
-import {listAllFriendsService} from '../../../Services/ApiService';
-import {setConnectionsList} from '../../../Store/Slices/HomeSlice';
+import {
+  listAllFriendRequestsService,
+  listAllFriendsService,
+} from '../../../Services/ApiService';
+import {
+  setConnectionsList,
+  setPendingFriendRequests,
+} from '../../../Store/Slices/HomeSlice';
+import RoundedIconButton from '../../../Components/RoundedIconButton';
+import {respondToFriendRequestsService} from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
+import Loader from '../../../Components/Loader';
 
 var isMount = true;
 const ConnectionsList = () => {
   const dispatch = useDispatch();
   const token = useToken();
+  const pendingConnectionRequests = usePendingFriendRequests();
   const connectionsList = useConnectionsList();
   const {searchText} = useMyConnections();
   const [refreshing, setrefreshing] = useState(false);
+  const [actionLoaderText, setactionLoaderText] = useState('');
+  const [isActionLoading, setisActionLoading] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -35,17 +53,77 @@ const ConnectionsList = () => {
     };
   }, []);
 
-  function connectionsListAPICall() {
+  const handleResponseFriendRequest = (
+    friendRequestId,
+    responseType, // 1-accept, 2 - reject, 3 - block
+  ) => {
+    if (isMount) {
+      setactionLoaderText(
+        `${responseType === 1 ? 'Accepting ' : 'Rejecting'} Friend Request`,
+      );
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('friend_request_id', friendRequestId);
+    formData.append('response', responseType);
+    respondToFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (responseType === 1) {
+            dispatch(
+              setConnectionsList([
+                {...res.data.friend_details},
+                ...connectionsList,
+              ]),
+            );
+          }
+          dispatch(
+            setPendingFriendRequests(
+              [...pendingConnectionRequests].filter(
+                item => item.friend_request_id !== friendRequestId,
+              ),
+            ),
+          );
+        } else {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+          setactionLoaderText('');
+        }
+      });
+  };
+
+  function listAPICalls() {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
-    listAllFriendsService(formData)
+    formData.append('allfriends', 1);
+    Promise.all([
+      listAllFriendsService(formData),
+      listAllFriendRequestsService(formData),
+    ])
       .then(res => {
-        if (res.data.status === 1) {
-          dispatch(setConnectionsList(res.data.friends_list));
+        console.log(res[0].data, 'RESSS');
+        if (res[0].data.status === 1) {
+          console.log(res[0].data.friends_list, 'FRIENDSLIST');
+          dispatch(setConnectionsList(res[0].data.friends_list));
+        }
+        if (res[1].data.status === 1) {
+          console.log(res[1].data.pending_requests, 'PENDING LIST');
+          dispatch(setPendingFriendRequests(res[1].data.pending_requests));
         }
       })
-      .catch(e => {})
+      .catch(e => {
+        console.log(e, 'ERROR');
+      })
       .finally(() => {
         if (isMount) {
           setrefreshing(false);
@@ -56,17 +134,17 @@ const ConnectionsList = () => {
   function onRefresh() {
     if (isMount) {
       setrefreshing(true);
-      connectionsListAPICall();
+      listAPICalls();
     }
   }
 
   function getList() {
     if (searchText && searchText.trim()) {
-      return [...connectionsList].filter(item =>
+      return [...pendingConnectionRequests, ...connectionsList].filter(item =>
         item.display_name.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
-    return [...connectionsList];
+    return [...pendingConnectionRequests, ...connectionsList];
   }
 
   function keyExtractor(item, index) {
@@ -100,20 +178,47 @@ const ConnectionsList = () => {
             </StyledText>
           </View>
         </View>
+
         <View style={styles.actionIconsContainer}>
-          <SVGIcon icon="chat_white" height={20} width={20} />
-          <SVGIcon
-            icon="audio_call_white"
-            height={20}
-            width={20}
-            marginLeft={10}
-          />
-          <SVGIcon
-            icon="video_call_white"
-            height={23}
-            width={23}
-            marginLeft={10}
-          />
+          {item.online == undefined ? (
+            <>
+              <RoundedIconButton
+                buttonSize={23}
+                bgColor={COLORS.green}
+                icon="tick"
+                iconSize={16}
+                onPress={() => {
+                  handleResponseFriendRequest(item.friend_request_id, 1);
+                }}
+              />
+              <RoundedIconButton
+                buttonSize={23}
+                bgColor={COLORS.white}
+                icon="close_black"
+                iconSize={18}
+                buttonStyle={{marginLeft: 10}}
+                onPress={() => {
+                  handleResponseFriendRequest(item.friend_request_id, 2);
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <SVGIcon icon="chat_white" height={20} width={20} />
+              <SVGIcon
+                icon="audio_call_white"
+                height={20}
+                width={20}
+                marginLeft={10}
+              />
+              <SVGIcon
+                icon="video_call_white"
+                height={23}
+                width={23}
+                marginLeft={10}
+              />
+            </>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -141,6 +246,12 @@ const ConnectionsList = () => {
           <StyledText style={styles.emptyListText}>No data found</StyledText>
         </View>
       )}
+      <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+        <Loader
+          bgColor={COLORS.transparentDimColor}
+          loaderText={actionLoaderText}
+        />
+      </Modal>
     </View>
   );
 };

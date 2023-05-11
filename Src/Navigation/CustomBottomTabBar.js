@@ -8,6 +8,7 @@ import TalkShowIcon from '../Assets/Png/talkshow.png';
 import UserIcon from '../Assets/Png/user.png';
 import {
   useIsBottomTabBarAbsolute,
+  useIsHomeNuggetsLoading,
   useNuggetType,
   useToken,
   useUnreadNotificationCount,
@@ -16,7 +17,10 @@ import CustomHomeTabButton from '../Components/CustomHomeTabButton';
 import {useDispatch} from 'react-redux';
 import {setIsOpenLoginAlert, setNuggetType} from '../Store/Slices/UtilitySlice';
 import {listNuggetsService} from '../Services/ApiService';
-import {setNuggetsList} from '../Store/Slices/HomeSlice';
+import {
+  setIsHomeNuggetsLoading,
+  setNuggetsList,
+} from '../Store/Slices/HomeSlice';
 import Toast from '../Components/Toast';
 import {htmlDecodeText} from '../Utilities/Methods';
 import StyledText from '../Components/StyledText';
@@ -27,8 +31,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const dispatch = useDispatch();
   const nuggetType = useNuggetType();
   const unreadNotificationCount = useUnreadNotificationCount();
-
-  const [isLoading, setisLoading] = useState(false);
+  const isHomeNuggetsLoading = useIsHomeNuggetsLoading();
 
   return (
     <View
@@ -93,12 +96,12 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
         };
 
         const listNuggetsAPICall = tempNuggetType => {
-          setisLoading(true);
+          dispatch(setIsHomeNuggetsLoading(true));
+          dispatch(setNuggetsList([]));
           const formData = new FormData();
           formData.append('token', token ?? 'RAWCAST');
           formData.append('page_number', 1);
           formData.append('nugget_type', tempNuggetType);
-          console.log(formData, 'IOPDATA');
           listNuggetsService(formData)
             .then(res => {
               if (res.data.status === 1) {
@@ -135,14 +138,17 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
               Toast.fail(e.message);
             })
             .finally(() => {
-              setisLoading(false);
+              dispatch(setIsHomeNuggetsLoading(false));
             });
         };
 
         return (
           <View key={index} style={styles.mainItemContainer}>
             {index === 2 ? (
-              <CustomHomeTabButton onPress={onPress} isLoading={isLoading} />
+              <CustomHomeTabButton
+                onPress={onPress}
+                isLoading={isHomeNuggetsLoading}
+              />
             ) : (
               <Pressable onPress={onPress}>
                 <View

@@ -1,11 +1,4 @@
-import {
-  Modal,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Modal, SafeAreaView, StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
@@ -13,7 +6,6 @@ import {COLORS} from '../../../Utilities/Colors';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {
   useInfluencerCategoryList,
-  useProfile,
   useSettings,
   useToken,
 } from '../../../Utilities/StoreData';

@@ -1,4 +1,4 @@
-import {Modal, StyleSheet, Text, View} from 'react-native';
+import {Keyboard, Modal, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useFormik} from 'formik';
@@ -19,6 +19,10 @@ import {useNavigation} from '@react-navigation/native';
 import Loader from '../Components/Loader';
 
 import ConfirmationPopup from './ConfirmationPopup';
+import ProfileTopSection from '../Screens/MainScreens/ProfileDashboard/ProfileTopSection';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import StyledText from '../Components/StyledText';
+import {FONTS} from '../Utilities/Fonts';
 
 var isMount = true;
 
@@ -36,7 +40,7 @@ const validationSchema = yup.object().shape({
   dob: yup.string().required('Date of birth is required'),
   mobileNumber: yup
     .string()
-    .matches(PHONE_REGEX, 'Invalid Telephone number')
+    .matches(PHONE_REGEX, 'Invalid Phone number')
     .required('Required'),
   email: yup.string().email('Enter valid Email').required('Required'),
   location: yup.string().min(2, 'Enter Valid location').required('Required'),
@@ -77,8 +81,10 @@ const ClaimAccount = ({route}) => {
 
   useEffect(() => {
     isMount = true;
-
+    AvoidSoftInput.setAdjustResize();
     return () => {
+      AvoidSoftInput.setAdjustPan();
+      Keyboard.dismiss();
       isMount = false;
     };
   }, []);
@@ -153,79 +159,93 @@ const ClaimAccount = ({route}) => {
       />
       <KeyboardAwareScrollView
         extraScrollHeight={10}
-        style={{paddingHorizontal: 10}}
         contentContainerStyle={{paddingBottom: 25}}
         enableOnAndroid={true}
         bounces={false}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps={'handled'}
         scrollEnabled={true}>
-        <TextBox
-          title="First Name"
-          placeHolder="Enter your First Name"
-          value={values.firstName}
-          errorText={
-            errors.firstName && touched.firstName ? errors.firstName : ''
-          }
-          onChangeText={handleChange('firstName')}
+        <ProfileTopSection
+          profile={profile}
+          paddingHorizontal={10}
+          isEnableFansList={false}
+          isEnableEdit={false}
         />
-        <TextBox
-          title="Last Name"
-          placeHolder="Enter your Last Name"
-          value={values.lastName}
-          errorText={errors.lastName && touched.lastName ? errors.lastName : ''}
-          onChangeText={handleChange('lastName')}
-        />
-        <TextBox
-          title="Telephone"
-          placeHolder="Enter your Telephone"
-          value={values.mobileNumber}
-          errorText={
-            errors.mobileNumber && touched.mobileNumber
-              ? errors.mobileNumber
-              : ''
-          }
-          onChangeText={handleChange('mobileNumber')}
-        />
-        <TextBox
-          title="Email"
-          placeHolder="Enter your Email"
-          value={values.email}
-          errorText={errors.email && touched.email ? errors.email : ''}
-          onChangeText={handleChange('email')}
-        />
-        <CustomDateMonthYearPicker
-          value={values.dob}
-          errorText={errors.dob && touched.dob ? errors.dob : ''}
-          onSelect={handleChange('dob')}
-          onSelectDateMonthYearError={() => {
-            if (isMount) {
-              setFieldValue('dob', '');
+        <View style={{flex: 1, paddingHorizontal: 10}}>
+          <View style={styles.titleContainer}>
+            <StyledText style={{fontSize: 16, fontFamily: FONTS.DMSans.bold}}>
+              Confirm Profile Data
+            </StyledText>
+          </View>
+          <TextBox
+            title="First Name"
+            placeHolder="Enter your First Name"
+            value={values.firstName}
+            errorText={
+              errors.firstName && touched.firstName ? errors.firstName : ''
             }
-          }}
-        />
-        <DropDownPicker
-          title={'Location'}
-          isInsideList={false}
-          value={values.location}
-          errorText={touched.location && errors.location}
-          dropDownIcon="gps"
-          isDropDownIconAsButton={true}
-          dropDownIconSize={20}
-          isLoadingIcon={isFetchingLocation}
-          onPress={() => {
-            if (isMount) {
-              setisOpenGooglePlacesListModal(true);
+            onChangeText={handleChange('firstName')}
+          />
+          <TextBox
+            title="Last Name"
+            placeHolder="Enter your Last Name"
+            value={values.lastName}
+            errorText={
+              errors.lastName && touched.lastName ? errors.lastName : ''
             }
-          }}
-          onPressIcon={() => {
-            handleGetCurrentLocationAddress();
-          }}
-          titlePaddingVertical={3}
-          inputContainerMarginVertical={0}
-          placeHolderText={'Select Location'}
-        />
-        <SubmitButton buttonText="Claim Account" onPress={handleSubmit} />
+            onChangeText={handleChange('lastName')}
+          />
+          <TextBox
+            title="Phone Number"
+            placeHolder="Enter your Phone Number"
+            value={values.mobileNumber}
+            errorText={
+              errors.mobileNumber && touched.mobileNumber
+                ? errors.mobileNumber
+                : ''
+            }
+            onChangeText={handleChange('mobileNumber')}
+          />
+          <TextBox
+            title="Email"
+            placeHolder="Enter your Email"
+            value={values.email}
+            errorText={errors.email && touched.email ? errors.email : ''}
+            onChangeText={handleChange('email')}
+          />
+          <CustomDateMonthYearPicker
+            value={values.dob}
+            errorText={errors.dob && touched.dob ? errors.dob : ''}
+            onSelect={handleChange('dob')}
+            onSelectDateMonthYearError={() => {
+              if (isMount) {
+                setFieldValue('dob', '');
+              }
+            }}
+          />
+          <DropDownPicker
+            title={'Location'}
+            isInsideList={false}
+            value={values.location}
+            errorText={touched.location && errors.location}
+            dropDownIcon="gps"
+            isDropDownIconAsButton={true}
+            dropDownIconSize={20}
+            isLoadingIcon={isFetchingLocation}
+            onPress={() => {
+              if (isMount) {
+                setisOpenGooglePlacesListModal(true);
+              }
+            }}
+            onPressIcon={() => {
+              handleGetCurrentLocationAddress();
+            }}
+            titlePaddingVertical={3}
+            inputContainerMarginVertical={0}
+            placeHolderText={'Select Location'}
+          />
+          <SubmitButton buttonText="Submit" onPress={handleSubmit} />
+        </View>
       </KeyboardAwareScrollView>
       <Modal
         onRequestClose={() => {
@@ -249,6 +269,14 @@ const ClaimAccount = ({route}) => {
           onClose={() => {
             closeMessageBox();
           }}
+          titleContainerStyle={styles.confirmationTitleContainer}
+          bottomTitleLogo="claim_user"
+          bottomTitleLogoProps={{height: 55, width: 55}}
+          bottomLogoContainerStyle={{paddingTop: 10}}
+          titleTextStyle={{color: COLORS.white}}
+          titleText="Claim Account"
+          closeIconProps={{icon: 'close_white', height: 18, width: 18}}
+          contentTextStyle={{textAlign: 'center'}}
           onPressPositiveButton={() => {
             closeMessageBox();
           }}
@@ -271,5 +299,16 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
+  },
+  titleContainer: {
+    paddingTop: 15,
+    paddingBottom: 5,
+  },
+  confirmationTitleContainer: {
+    backgroundColor: COLORS.primary,
+    paddingTop: 15,
+    paddingBottom: 15,
+    borderBottomEndRadius: 0,
+    borderBottomStartRadius: 0,
   },
 });

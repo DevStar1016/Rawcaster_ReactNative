@@ -214,6 +214,14 @@ const EventTalkshowCommonScreen = ({
         isEnableSearch: false,
         isEnableLive: false,
       }}
+      defaultBackgroundProps={{
+        centerText: isLoading
+          ? 'Fetching Talkshow List'
+          : getEventsList().length <= 0
+          ? 'No data found'
+          : '',
+        isEnableLoading: isLoading,
+      }}
       isEnableDefaultBackground
       isEnableRLogo={getEventsList().length <= 0}
       paddingBottom={50}
@@ -261,13 +269,6 @@ const EventTalkshowCommonScreen = ({
         }}
         ItemSeparatorComponent={() => {
           return <View style={{height: 15}} />;
-        }}
-        ListEmptyComponent={() => {
-          return isLoading ? (
-            <View style={styles.listEmptyContainer}>
-              <ActivityIndicator size={'large'} color={COLORS.white} />
-            </View>
-          ) : null;
         }}
         refreshControl={
           <RefreshControl

@@ -409,9 +409,10 @@ export const getNotificationMessage = type => {
       return 'Posted a talkshow';
     case 14:
       return 'Live now';
+    case 15:
+      return 'Started following you';
     case 16:
       return 'Poll Results';
-
     default:
       return '';
   }

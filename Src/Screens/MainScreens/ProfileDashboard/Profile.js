@@ -361,8 +361,14 @@ const Profile = ({route}) => {
           userId={userId}
           profile={getProfileData()}
           paddingHorizontal={PADDING_HORIZONTAL}
+          isEnableClaimAccount={getProfileData().unclaimed_status === 0}
           onPressBecomeFan={() => {
             handleBecomeFan();
+          }}
+          onPressClaimAccount={() => {
+            navigation.navigate('ClaimAccount', {
+              influencerId: userId,
+            });
           }}
         />
         <Divider />

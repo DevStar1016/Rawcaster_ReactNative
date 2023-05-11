@@ -124,7 +124,7 @@ const EmailPhoneVerification = ({route}) => {
     if (alt_token_id) {
       formData.append('alt_token_id', alt_token_id);
     }
-    console.log(formData, 'FORMDATA');
+
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
