@@ -150,7 +150,7 @@ const Profile = ({route}) => {
 
   const sendFriendRequestsAPICall = () => {
     if (isMount) {
-      setisLoading(true);
+      setisActionLoading(true);
     }
     const formData = new FormData();
     formData.append('token', token);
@@ -161,7 +161,7 @@ const Profile = ({route}) => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           setothersProfile(pre => {
-            return {...pre, friend_request_status: '1'};
+            return {...pre, friend_status: '1'};
           });
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
@@ -182,7 +182,7 @@ const Profile = ({route}) => {
       })
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          setisActionLoading(false);
         }
       });
   };
@@ -406,10 +406,6 @@ const Profile = ({route}) => {
           listType="influencers"
           title={'Influencers'}
           paddingHorizontal={PADDING_HORIZONTAL}
-          // ProfileItemProps={{
-          //   topRightIcon: 'message_primary',
-          //   topRightIconContainerBackgroundColor: COLORS.white,
-          // }}
         />
         <Divider />
         <ProfilesListContainerWithSeeAll

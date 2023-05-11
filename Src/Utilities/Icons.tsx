@@ -24,6 +24,7 @@ import SearchIcon from '../Assets/Svg/search.svg';
 import LiveIcon from '../Assets/Svg/live.svg';
 import UserIcon from '../Assets/Svg/user.svg';
 import UserPlusIcon from '../Assets/Svg/user_plus.svg';
+import UserPlusPinkIcon from '../Assets/Svg/user_plus_pink.svg';
 import ProfileImage from '../Assets/Svg/sample_profile.svg';
 import Medal from '../Assets/Svg/silver_medal.svg';
 import ActiveCheckMark from '../Assets/Svg/active_checkmark.svg';
@@ -48,6 +49,7 @@ import PhoneIcon from '../Assets/Svg/phone.svg';
 import EmailIcon from '../Assets/Svg/email.svg';
 import GPSIcon from '../Assets/Svg/gps.svg';
 import PlusIcon from '../Assets/Svg/plus.svg';
+import PlusRoundedFillPrimaryIcon from '../Assets/Svg/plus_rounded_fill_primary.svg';
 import RLogoIcon from '../Assets/Svg/logo_R.svg';
 import DownFillWhiteIcon from '../Assets/Svg/down_fill_white.svg';
 import LockFillWhiteIcon from '../Assets/Svg/lock_fill_white.svg';
@@ -154,6 +156,7 @@ export type IconType =
   | 'search'
   | 'user'
   | 'user_plus'
+  | 'user_plus_pink'
   | 'influencer'
   | 'medal'
   | 'active_checkmark'
@@ -184,6 +187,7 @@ export type IconType =
   | 'email'
   | 'gps'
   | 'plus'
+  | 'plus_rounded_fill_primary'
   | 'down_fill_white'
   | 'lock_fill_white'
   | 'logo_R'
@@ -281,6 +285,7 @@ export const ICONS = {
   live: LiveIcon,
   user: UserIcon,
   user_plus: UserPlusIcon,
+  user_plus_pink: UserPlusPinkIcon,
   influencer: ProfileImage,
   medal: Medal,
   active_checkmark: ActiveCheckMark,
@@ -312,6 +317,7 @@ export const ICONS = {
   email: EmailIcon,
   gps: GPSIcon,
   plus: PlusIcon,
+  plus_rounded_fill_primary: PlusRoundedFillPrimaryIcon,
   logo_R: RLogoIcon,
   down_fill_white: DownFillWhiteIcon,
   lock_fill_white: LockFillWhiteIcon,

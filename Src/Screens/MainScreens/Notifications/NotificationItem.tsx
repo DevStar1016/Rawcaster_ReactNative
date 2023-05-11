@@ -75,6 +75,7 @@ const NotificationItem = ({
               {
                 paddingTop: 0,
                 opacity:
+                  !unreadNotificationCount ||
                   item.is_read ||
                   (item.poll_option && item.poll_option.length > 0)
                     ? 0.7
@@ -92,6 +93,7 @@ const NotificationItem = ({
                   styles.subText,
                   {
                     opacity:
+                      !unreadNotificationCount ||
                       item.is_read ||
                       (item.poll_option && item.poll_option.length > 0)
                         ? 0.7
@@ -145,6 +147,7 @@ const NotificationItem = ({
                 styles.subText,
                 {
                   opacity:
+                    !unreadNotificationCount ||
                     item.is_read ||
                     (item.poll_option && item.poll_option.length > 0)
                       ? 0.7
@@ -171,7 +174,7 @@ const NotificationItem = ({
                     styles.subText,
                     {
                       opacity:
-                        item.is_read ||
+                        (!unreadNotificationCount && item.is_read) ||
                         (item.poll_option && item.poll_option.length > 0)
                           ? 0.7
                           : 1,
@@ -195,6 +198,7 @@ const NotificationItem = ({
                     styles.subText,
                     {
                       opacity:
+                        !unreadNotificationCount ||
                         item.is_read ||
                         (item.poll_option && item.poll_option.length > 0)
                           ? 0.7

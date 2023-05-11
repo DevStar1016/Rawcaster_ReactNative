@@ -166,7 +166,8 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                       tintColor: isFocused ? COLORS.secondary : COLORS.white,
                     }}
                   />
-                  {route.name === 'NotificationsStack' &&
+                  {!isFocused &&
+                  route.name === 'NotificationsStack' &&
                   token &&
                   unreadNotificationCount ? (
                     <View
@@ -174,12 +175,13 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
                         styles.badge,
                         {
                           width:
-                            parseInt(unreadNotificationCount) > 99 ? 30 : 20,
+                            parseInt(unreadNotificationCount) > 99 ? 25 : 15,
                         },
                       ]}>
                       <StyledText
                         style={{
                           color: COLORS.white,
+                          fontSize: 11,
                         }}>
                         {unreadNotificationCount > 99
                           ? '99+'
@@ -226,14 +228,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   badge: {
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
     top: 8,
     left: 25,
-    borderRadius: 10,
+    borderRadius: 8,
     backgroundColor: COLORS.secondary,
   },
 });

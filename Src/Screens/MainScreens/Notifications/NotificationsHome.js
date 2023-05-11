@@ -1,4 +1,4 @@
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Modal, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
@@ -15,18 +15,22 @@ import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
 import {NoticationsContext} from '../../../Utilities/Contexts';
+import Loader from '../../../Components/Loader';
 
 const NotificationsHome = () => {
   const dispatch = useDispatch();
   const token = useToken();
   const unreadNotificationCount = useUnreadNotificationCount();
   const [focusedTab, setfocusedTab] = useState(5);
+  const [isActionLoading, setisActionLoading] = useState(false);
 
   const noticationContextValue = {
     setFocusedTab: setfocusedTab,
+    setisActionLoading: setisActionLoading,
   };
 
   const handleMarkAllRead = () => {
+    setisActionLoading(true);
     const formData = new FormData();
     formData.append('token', token);
     formData.append('mark_all_as_read', 1);
@@ -41,6 +45,9 @@ const NotificationsHome = () => {
       })
       .catch(e => {
         Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisActionLoading(false);
       });
   };
 
@@ -91,6 +98,9 @@ const NotificationsHome = () => {
         </View>
         <Divider />
         <NotificationsTopTabNavigation />
+        <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+          <Loader bgColor={COLORS.transparentDimColor} />
+        </Modal>
       </HOCView>
     </NoticationsContext.Provider>
   );

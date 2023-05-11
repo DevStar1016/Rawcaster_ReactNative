@@ -29,7 +29,7 @@ const FansProfilesContainer = ({profileSize = 40, userId}) => {
   const getFollowListAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('type', 1);
+    formData.append('type', 2);
     if (userId) {
       formData.append('user_id', userId);
     }

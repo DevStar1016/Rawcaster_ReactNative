@@ -7,7 +7,7 @@ import TitleRowContainer from './TitleRowContainer';
 import ProfileWithBadge, {
   ProfileWithBadgeProps,
 } from '../../../Components/ProfileWithBadge';
-import {useToken} from '../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -15,10 +15,16 @@ import {StackActions, useNavigation} from '@react-navigation/native';
 import UsersProfilesDoubleRowListLoader from '../../../Components/Skelotons/UsersProfilesDoubleRowListLoader';
 import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {
+  followAndUnfollowService,
   getFollowListService,
   listAllFriendsService,
   listUnClaimAccountService,
+  sendFriendRequestsService,
 } from '../../../Services/ApiService';
+import Toast from '../../../Components/Toast';
+import {Modal} from 'react-native';
+import Loader from '../../../Components/Loader';
+import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 
 type Props = {
   userId?: any;
@@ -52,10 +58,14 @@ const ProfilesListContainerWithSeeAll = ({
   let isMount = true;
   const navigation = useNavigation();
   const token = useToken();
+  const profile = useProfile();
   const [isLoading, setisLoading] = useState(
     !isLock && (userId || list.length) <= 0 ? true : false,
   );
-  const [usersList, setusersList] = useState(list.length > 0 ? [...list] : []);
+  const [usersList, setusersList] = useState<any[]>(
+    list.length > 0 ? [...list] : [],
+  );
+  const [isActionLoading, setisActionLoading] = useState(false);
   const PROFILE_SIZE =
     (DIMENSIONS.window.width -
       paddingHorizontal * 2 -
@@ -72,10 +82,10 @@ const ProfilesListContainerWithSeeAll = ({
             connectionsListAPICall();
             return;
           case 'fans':
-            fansListAPICall();
+            fansListAPICall(2);
             return;
           case 'influencers':
-            fansListAPICall(2);
+            fansListAPICall();
             return;
           case 'unclaimed_influencers':
             unclaimedInfluencersListAPICall();
@@ -102,6 +112,7 @@ const ProfilesListContainerWithSeeAll = ({
     }
     listAllFriendsService(formData)
       .then(res => {
+        console.log(res.data);
         if (res.data.status === 1) {
           setusersList(res.data.friends_list);
         }
@@ -154,6 +165,92 @@ const ProfilesListContainerWithSeeAll = ({
       .finally(() => {
         if (isMount) {
           setisLoading(false);
+        }
+      });
+  };
+
+  const handleBecomeFan = (followUserId: any) => {
+    // 1 - follow, 2 - unfollow
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('follow_userid', followUserId);
+    formData.append('type', 1);
+    followAndUnfollowService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setusersList(preList => {
+            let tempList = [...preList];
+            let tempIndex = tempList.findIndex(
+              sub => sub.user_ref_id === followUserId,
+            );
+            if (tempIndex !== -1) {
+              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+            }
+            return tempList;
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  };
+
+  const handleSendFriendRequest = (userRefId: any, userId: any) => {
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    formData.append('user_ids', JSON.stringify([userRefId]));
+    sendFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setusersList(preList => {
+            let tempProfileList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempProfileList[tempIndex] = {
+                ...tempProfileList[tempIndex],
+                request_status: '1',
+              };
+            }
+            return tempProfileList;
+          });
+          if (res.data?.friend_request_ids?.length > 0) {
+            let data = {
+              friend_request_id: res.data.friend_request_ids[0],
+              display_name: profile?.name,
+              profile_img: profile?.profile_image,
+              user_id: profile?.user_id,
+            };
+            console.log('SEND FRIEND REQUEST SOCKET', data);
+            friendRequestSocket(userId, data);
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
         }
       });
   };
@@ -263,13 +360,34 @@ const ProfilesListContainerWithSeeAll = ({
                             navigation.navigate('ClaimAccount', {
                               influencerId: item.user_id,
                             });
-                          } else if (listType === 'influencers') {
-                            navigation.navigate('MyFansChat', {
-                              influencerId: item.user_id,
-                              influencerName: item.display_name,
-                            });
+                          } else if (userId) {
+                            if (listType === 'influencers' && !item.follow) {
+                              handleBecomeFan(item.user_ref_id);
+                            } else if (
+                              listType === 'connections' &&
+                              (item.request_status === null ||
+                                item.request_status === '' ||
+                                item.request_status === 2)
+                            ) {
+                              handleSendFriendRequest(
+                                item.user_ref_id,
+                                item.user_id,
+                              );
+                            }
                           }
                         }}
+                        topRightIcon={
+                          userId &&
+                          ((item.request_status === null ||
+                            item.request_status === '' ||
+                            item.request_status === 2) &&
+                          listType === 'connections'
+                            ? 'user_plus_pink'
+                            : !item.follow &&
+                              listType === 'influencers' &&
+                              'plus_rounded_fill_primary')
+                        }
+                        topRightIconContainerBackgroundColor={COLORS.white}
                         {...ProfileItemProps}
                       />
                       <View style={{flex: 1, paddingTop: 10}}>
@@ -299,6 +417,9 @@ const ProfilesListContainerWithSeeAll = ({
           {isLock && <BlurOverlay />}
         </View>
       )}
+      <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </View>
   );
 };
