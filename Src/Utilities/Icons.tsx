@@ -25,6 +25,7 @@ import LiveIcon from '../Assets/Svg/live.svg';
 import UserIcon from '../Assets/Svg/user.svg';
 import UserPlusIcon from '../Assets/Svg/user_plus.svg';
 import UserPlusPinkIcon from '../Assets/Svg/user_plus_pink.svg';
+import UserPlusWhiteIcon from '../Assets/Svg/user_plus_white.svg';
 import ProfileImage from '../Assets/Svg/sample_profile.svg';
 import Medal from '../Assets/Svg/silver_medal.svg';
 import ActiveCheckMark from '../Assets/Svg/active_checkmark.svg';
@@ -159,6 +160,7 @@ export type IconType =
   | 'user'
   | 'user_plus'
   | 'user_plus_pink'
+  | 'user_plus_white'
   | 'influencer'
   | 'medal'
   | 'active_checkmark'
@@ -289,6 +291,7 @@ export const ICONS = {
   user: UserIcon,
   user_plus: UserPlusIcon,
   user_plus_pink: UserPlusPinkIcon,
+  user_plus_white: UserPlusWhiteIcon,
   influencer: ProfileImage,
   medal: Medal,
   active_checkmark: ActiveCheckMark,

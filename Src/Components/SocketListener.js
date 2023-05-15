@@ -4,9 +4,10 @@ import {useDispatch, useStore} from 'react-redux';
 import moment from 'moment';
 import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
 import ConectionRequestModal from '../Modals/ConectionRequestModal';
-import {useUserData} from '../Utilities/StoreData';
-import {setConnectionsList} from '../Store/Slices/HomeSlice';
+import {useGroupsList, useUserData} from '../Utilities/StoreData';
+import {setConnectionsList, setGroupsList} from '../Store/Slices/HomeSlice';
 import {SocketEvents} from '../Services/Socket/SocketEvents';
+import {GROUP_PROCESS_SOCKET_TYPE} from '../Services/Socket/SocketConstants';
 
 const SocketListener = () => {
   const dispatch = useDispatch();
@@ -16,12 +17,18 @@ const SocketListener = () => {
     useState(false);
   const [socketFriendRequestData, setsocketFriendRequestData] = useState(null);
 
+  //Socket Connect and Disconnect
   useEffect(() => {
     if (user) {
       ConnectSocket(user.user_id);
     }
+    return () => {
+      console.log('OFF SOCKET');
+      socketListen.off('call');
+    };
   }, []);
 
+  //Socket Connect and Disconnect Status
   useEffect(() => {
     socketListen.on('connect', () => {
       console.log(socketListen.connected, 'socket status');
@@ -29,7 +36,37 @@ const SocketListener = () => {
     socketListen.on('disconnect', () => {
       console.log('disconnect', 'socket status');
     });
+  }, []);
 
+  // Socket Type "groupchatting" Received
+  useEffect(() => {
+    socketListen.on(
+      'groupchatting',
+      message => {
+        console.log('SocketListen  groupchatting on in Dashboard');
+        switch (message.event) {
+          case 'groupchatmessage':
+            console.log(message, 'GROUP CHAT RECEIVED');
+            break;
+          case 'groupchatmessagedelete':
+            break;
+          case 'groupchatmessageupdate':
+            break;
+          case 'grouptyping':
+            break;
+          case 'groupchatenable':
+            break;
+          case 'groupchatmsgtransfer':
+            handleGroupFunctionalities(message);
+            break;
+        }
+      },
+      [],
+    );
+  }, []);
+
+  // Socket Type "message" Received
+  useEffect(() => {
     socketListen.on(
       'message',
       message => {
@@ -48,33 +85,6 @@ const SocketListener = () => {
       },
       [],
     );
-    socketListen.on(
-      'groupchatting',
-      message => {
-        console.log('SocketListen  groupchatting on in Dashboard');
-        switch (message.event) {
-          case 'groupchatmessage':
-            console.log(message, 'GROUP CHAT RECEIVED');
-            break;
-          case 'groupchatmessagedelete':
-            break;
-          case 'groupchatmessageupdate':
-            break;
-          case 'grouptyping':
-            break;
-          case 'groupchatenable':
-            break;
-          case 'groupchatmsgtransfer':
-            break;
-        }
-      },
-      [],
-    );
-
-    return () => {
-      console.log('OFF SOCKET');
-      socketListen.off('call');
-    };
   }, []);
 
   function handleSocketFriendRequests(data) {
@@ -133,6 +143,58 @@ const SocketListener = () => {
       );
     });
     dispatch(setConnectionsList(newFriendList));
+  }
+
+  function handleGroupFunctionalities(message) {
+    switch (message.processType) {
+      case GROUP_PROCESS_SOCKET_TYPE.createGroup:
+        handleCreateGroup(message?.groupData);
+        break;
+      case GROUP_PROCESS_SOCKET_TYPE.editGroup:
+        handleEditGroup(message?.groupData);
+        break;
+      case GROUP_PROCESS_SOCKET_TYPE.deleteGroup:
+        handleDeleteGroup(message?.groupId);
+        break;
+      case GROUP_PROCESS_SOCKET_TYPE.removeGroupMember:
+        break;
+      case GROUP_PROCESS_SOCKET_TYPE.addGroupMember:
+        break;
+    }
+  }
+
+  function handleCreateGroup(groupDetails) {
+    if (groupDetails) {
+      let tempGroupsList = store.getState().home.groupsList;
+      const tempIndex = tempGroupsList.findIndex(
+        item => item.group_id === groupDetails?.group_id,
+      );
+      if (tempIndex === -1) {
+        tempGroupsList = [{...groupDetails}, ...tempGroupsList];
+      }
+      dispatch(setGroupsList(tempGroupsList));
+    }
+  }
+
+  function handleEditGroup(groupDetails) {
+    if (groupDetails) {
+      let tempGroupsList = store.getState().home.groupsList;
+      const tempIndex = tempGroupsList.findIndex(
+        item => item.group_id === groupDetails?.group_id,
+      );
+      if (tempIndex !== -1) {
+        tempGroupsList[tempIndex] = {...groupDetails};
+      }
+      dispatch(setGroupsList(tempGroupsList));
+    }
+  }
+
+  function handleDeleteGroup(groupId) {
+    let tempGroupsList = store.getState().home.groupsList;
+    tempGroupsList = [...tempGroupsList].filter(
+      item => item.group_id !== groupId,
+    );
+    dispatch(setGroupsList(tempGroupsList));
   }
 
   return (

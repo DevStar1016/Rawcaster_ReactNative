@@ -172,7 +172,7 @@ const Profile = ({route}) => {
               profile_img: profile?.profile_image,
               user_id: profile?.user_id,
             };
-            friendRequestSocket(userId, data);
+            friendRequestSocket({user_id: userId, data: data});
           }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);

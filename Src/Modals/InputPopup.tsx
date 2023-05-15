@@ -11,6 +11,8 @@ import SubmitButton, {SubmitButtonProps} from '../Components/SubmitButton';
 type Props = {
   closePopup: () => void;
   title?: string;
+  isRequired?: boolean;
+  requiredErrorText?: string;
   textInputProps?: Omit<TextBoxProps, 'value' | 'onChangeText'>;
   submitButtonProps?: Omit<SubmitButtonProps, 'onPress'>;
   onSubmit: (value: string) => void;
@@ -20,10 +22,13 @@ const InputPopup = ({
   closePopup,
   title = '',
   textInputProps,
+  requiredErrorText = 'Required',
+  isRequired = true,
   submitButtonProps,
   onSubmit,
 }: Props) => {
   const [value, setvalue] = useState('');
+  const [errorText, seterrorText] = useState('');
   return (
     <View style={styles.mainContainer}>
       <KeyboardAwareScrollView
@@ -47,11 +52,25 @@ const InputPopup = ({
               onPress={closePopup}
             />
           </View>
-          <TextBox value={value} onChangeText={setvalue} {...textInputProps} />
+          <TextBox
+            value={value}
+            errorText={errorText}
+            onChangeText={text => {
+              if (text.trim()) {
+                seterrorText('');
+              }
+              setvalue(text);
+            }}
+            {...textInputProps}
+          />
           <SubmitButton
             buttonText="SUBMIT"
             marginTop={5}
             onPress={() => {
+              if (!value.trim() && isRequired) {
+                seterrorText(requiredErrorText);
+                return;
+              }
               onSubmit(value);
             }}
             {...submitButtonProps}

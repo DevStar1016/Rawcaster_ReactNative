@@ -1,5 +1,5 @@
 import {io} from 'socket.io-client';
-import {SOCKET_URL} from '../ServiceConstants';
+import {SOCKET_URL} from './SocketConstants';
 const socket = io(SOCKET_URL, {
   secure: false,
   reconnection: true,

@@ -1,10 +1,9 @@
 import {
+  Alert,
   FlatList,
   LayoutAnimation,
   Modal,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
@@ -21,11 +20,13 @@ import {
   useToken,
 } from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
-import RadioButton from '../../../Components/RadioButton';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {
   addFriendGroupService,
   editFriendGroupService,
+  exitFromGroupService,
+  groupAbuseReportService,
+  removeFriendsfFromGroupService,
 } from '../../../Services/ApiService';
 import {useNavigation} from '@react-navigation/native';
 import Toast from '../../../Components/Toast';
@@ -33,10 +34,20 @@ import {useDispatch} from 'react-redux';
 import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import MenuContainer from '../../../Modals/MenuContainer';
-import SVGIcon from '../../../Components/SVGIcon';
 import {GROUP_CATEGORY} from '../../../Utilities/Constants';
+import GroupUserItem from './GroupUserItem';
+import {deleteFriendGroupService} from '../../../Services/ApiService';
+import InputPopup from '../../../Modals/InputPopup';
+import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
+import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
 
 var isMount = true;
+const GROUP_OPERATIONS = {
+  enableDisableMemberChat: 1,
+  deleteGroup: 2,
+  reportGroup: 3,
+  exitGroup: 4,
+};
 const CreateEditGroup = ({route}) => {
   const {groupId} = route.params ?? {};
   const groupsList = useGroupsList();
@@ -54,10 +65,12 @@ const CreateEditGroup = ({route}) => {
   const [groupProfileImage, setgroupProfileImage] = useState(
     groupDetails ? {uri: groupDetails.group_icon} : null,
   );
+  const [loaderText, setloaderText] = useState('');
   const [isLoading, setisLoading] = useState(false);
   const [isShowAddButton, setisShowAddButton] = useState(true);
   const listViewOffset = useRef(0);
   const [isOpenGroupMenu, setisOpenGroupMenu] = useState(false);
+  const [isOpenReportModal, setisOpenReportModal] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -66,8 +79,6 @@ const CreateEditGroup = ({route}) => {
       isMount = false;
     };
   }, []);
-
-  console.log(groupDetails, 'CATEGORY');
 
   function getCommonFormData() {
     const formData = new FormData();
@@ -89,6 +100,12 @@ const CreateEditGroup = ({route}) => {
     addFriendGroupService(getCommonFormData())
       .then(res => {
         if (res.data.status === 1) {
+          groupFunctionalitySocket({
+            groupId: res.data.group_details.group_id,
+            processType: GROUP_PROCESS_SOCKET_TYPE.createGroup,
+            userId: profile?.user_id,
+            groupData: {...res.data.group_details},
+          });
           dispatch(setGroupsList([{...res.data.group_details}, ...groupsList]));
           Toast.success(res.data.msg);
           navigation.goBack();
@@ -102,6 +119,7 @@ const CreateEditGroup = ({route}) => {
       .finally(() => {
         if (isMount) {
           setisLoading(false);
+          setloaderText('');
         }
       });
   }
@@ -111,7 +129,17 @@ const CreateEditGroup = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           console.log(res.data.group_details, 'EDITED GROUP DATA');
-          // dispatch(setGroupsList([{...res.data.group_details}, ...groupsList]));
+          const tempGroupsList = [...groupsList];
+          let tempIndex = [...tempGroupsList].findIndex(
+            item => item.group_id === groupId,
+          );
+          if (tempIndex !== -1) {
+            tempGroupsList[tempIndex] = {
+              ...tempGroupsList[tempIndex],
+              ...res.data.group_details,
+            };
+          }
+          dispatch(setGroupsList([...tempGroupsList]));
           Toast.success(res.data.msg);
           navigation.goBack();
         } else if (res.data.status === 0) {
@@ -124,22 +152,163 @@ const CreateEditGroup = ({route}) => {
       .finally(() => {
         if (isMount) {
           setisLoading(false);
+          setloaderText('');
         }
       });
   }
 
-  function onSubmit() {
-    if (getGroupNameError()) {
-      Toast.fail(`You can't create group name with ${groupName.trim()}`);
-      return;
-    }
+  function handleRemoveUser(userId) {
     if (isMount) {
+      setloaderText('Removing member from group');
       setisLoading(true);
     }
-    if (groupId) {
-      handleEditGroup();
-    } else {
-      handleCreateGroup();
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('group_id', groupId);
+    formData.append('group_members', JSON.stringify([userId]));
+    removeFriendsfFromGroupService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempGroupsList = [...groupsList];
+          const tempIndex = tempGroupsList.findIndex(
+            item => item.group_id === groupId,
+          );
+          if (tempIndex !== -1) {
+            let filteredGroupMembersList = [
+              ...tempGroupsList[tempIndex]?.group_members_list,
+            ].filter(item => item.user_id !== userId);
+            tempGroupsList[tempIndex].group_members_list = [
+              ...filteredGroupMembersList,
+            ];
+          }
+          dispatch(setGroupsList(tempGroupsList));
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+          setloaderText('');
+        }
+      });
+  }
+
+  function handleDeleteGroup() {
+    if (isMount) {
+      setloaderText('Leaving and Deleting this Group');
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('group_id', groupId);
+    deleteFriendGroupService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          groupFunctionalitySocket({
+            groupId: groupId,
+            processType: GROUP_PROCESS_SOCKET_TYPE.deleteGroup,
+            userId: profile?.user_id,
+          });
+          handleSuccessExitGroup(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+          setloaderText('');
+        }
+      });
+  }
+
+  function handleReportGroup(message = '') {
+    if (isMount) {
+      setloaderText('Reporting and Leaving from this Group');
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('group_id', groupId);
+    formData.append('message', message.trim());
+    groupAbuseReportService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          handleSuccessExitGroup(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(() => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+          setloaderText('');
+        }
+      });
+  }
+
+  function handleExitGroup() {
+    if (isMount) {
+      setloaderText('Leaving from this Group');
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('group_id', groupId);
+    exitFromGroupService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          handleSuccessExitGroup(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+          setloaderText('');
+        }
+      });
+  }
+
+  function handleSuccessExitGroup(successMessage = '') {
+    let filteredGroupsList = [...groupsList].filter(
+      item => item.group_id !== groupId,
+    );
+    dispatch(setGroupsList(filteredGroupsList));
+    Toast.success(successMessage);
+    navigation.goBack();
+  }
+
+  function onSubmit() {
+    if (getGroupNameError()) {
+      Toast.fail(getGroupNameError());
+      return;
+    }
+
+    if (isMount) {
+      if (groupId) {
+        setloaderText('Editing Group');
+        handleEditGroup();
+      } else {
+        setloaderText('Creating Group');
+        handleCreateGroup();
+      }
+      setisLoading(true);
     }
   }
 
@@ -155,14 +324,68 @@ const CreateEditGroup = ({route}) => {
     }
   }
 
+  function onDeleteGroup() {
+    Alert.alert(
+      'Exit and Delete!',
+      'Are you sure to exit and delete this group?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            handleDeleteGroup();
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  function onExitGroup() {
+    Alert.alert(
+      'Exit!',
+      'Are you sure to exit from this group?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            handleExitGroup();
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
   function onPressMenuOption(selectedButtonId) {
     if (isMount) {
       setisOpenGroupMenu(false);
     }
-    console.log(selectedButtonId, 'KL');
-    // switch(selectedButtonId){
-    //   case 1:
-    // }
+
+    switch (selectedButtonId) {
+      case GROUP_OPERATIONS.enableDisableMemberChat:
+        break;
+      case GROUP_OPERATIONS.deleteGroup:
+        onDeleteGroup();
+        break;
+      case GROUP_OPERATIONS.reportGroup:
+        if (isMount) {
+          setisOpenReportModal(true);
+        }
+        break;
+      case GROUP_OPERATIONS.exitGroup:
+        onExitGroup();
+        break;
+    }
   }
 
   function isDisabledSubmitButton() {
@@ -186,20 +409,31 @@ const CreateEditGroup = ({route}) => {
   }
 
   function getMenuOptions() {
-    return [
-      {
-        id: 1,
+    let groupMenuList = [];
+
+    if (isGroupOwner()) {
+      groupMenuList.push({
+        id: GROUP_OPERATIONS.enableDisableMemberChat,
         buttonName: 'Enable Member Chat',
-      },
-      {
-        id: 2,
-        buttonName: 'Delete Group',
-      },
-      {
-        id: 3,
-        buttonName: 'Report Group',
-      },
-    ];
+      });
+      if (isOtherGroup()) {
+        groupMenuList.push({
+          id: GROUP_OPERATIONS.deleteGroup,
+          buttonName: 'Exit and Delete Group',
+        });
+      }
+    } else {
+      groupMenuList.push({
+        id: GROUP_OPERATIONS.exitGroup,
+        buttonName: 'Exit Group',
+      });
+      groupMenuList.push({
+        id: GROUP_OPERATIONS.reportGroup,
+        buttonName: 'Report and Exit Group',
+      });
+    }
+
+    return [...groupMenuList];
   }
 
   function getList() {
@@ -280,53 +514,43 @@ const CreateEditGroup = ({route}) => {
     return isGroupOwner() && isOtherGroup();
   }
 
-  function getItemRightComponent(item) {
-    if (groupDetails) {
-      if (isGroupOwner(item.user_id)) {
-        return <StyledText style={{color: COLORS.secondary}}>Owner</StyledText>;
-      } else if (isEnableEdit()) {
-        return <SVGIcon isButton icon="close_white" height={15} width={15} />;
-      }
-      return false;
-    }
-    return (
-      <RadioButton
-        disabled={true}
-        isSelected={isSelected(item.user_id)}
-        mainContainerStyle={{marginVertical: 0}}
-        radioContainerStyle={{marginRight: 0, borderColor: COLORS.white}}
-        isDisabledInsideCircleOuterSpace
-        radioSelectedColor={COLORS.secondary}
-      />
+  function onPressItemDelete(userId) {
+    Alert.alert(
+      'Delete!',
+      'Do you want to remove this member from group?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            handleRemoveUser(userId);
+          },
+        },
+      ],
+      {cancelable: false},
     );
   }
 
   function renderItem({item}) {
     return (
-      <TouchableOpacity
-        style={styles.itemContainer}
-        disabled={groupId ? true : false}
-        onPress={() => {
+      <GroupUserItem
+        item={item}
+        groupId={groupId}
+        isEnableEdit={isEnableEdit()}
+        isGroupOwner={isGroupOwner(item.user_id)}
+        isMe={isMe(item.user_id)}
+        isSelected={isSelected(item.user_id)}
+        onPressItem={() => {
           handleSelectUnselectUser(item.user_id);
         }}
-        activeOpacity={0.8}>
-        <ProfileWithBadge
-          profileImage={item.profile_img}
-          extraMargin={0}
-          isEnableGradient
-          padding={0}
-          profileSize={50}
-          containerStyle={{marginRight: 10}}
-        />
-        <View style={styles.displayTextContainer}>
-          <StyledText
-            style={{color: COLORS.white}}
-            normalTextModeTextProps={{numberOfLines: 1}}>
-            {`${isMe(item.user_id) ? 'You' : item.display_name.trim()}`}
-          </StyledText>
-        </View>
-        {getItemRightComponent(item)}
-      </TouchableOpacity>
+        onPressRemove={() => {
+          onPressItemDelete(item.user_id);
+        }}
+      />
     );
   }
 
@@ -341,12 +565,12 @@ const CreateEditGroup = ({route}) => {
         rightIconSize: 18,
         onPressRightIcon: () => {
           if (isMount) {
-            setisOpenGroupMenu(true);
+            setisOpenGroupMenu(getMenuOptions().length > 0);
           }
         },
       }}
       isLoading={isLoading}
-      loaderProps={{loaderText: `${groupId ? 'Editing' : 'Creating'} Group`}}
+      loaderProps={{loaderText: loaderText}}
       isEnableSafeArea={false}
       defaultBackgroundProps={{bgColor: COLORS.primaryDark}}
       paddingBottom={0}
@@ -427,14 +651,52 @@ const CreateEditGroup = ({route}) => {
         />
       </View>
 
-      {groupId && isShowAddButton && (
+      {groupId && isGroupOwner() && isOtherGroup() && isShowAddButton && (
         <RoundedPlusButton
           style={styles.addButton}
+          icon="user_plus_white"
+          iconSize={23}
           onPress={() => {
-            // navigation.navigate('CreateEditGroup');
+            navigation.navigate('AddUserToGroup', {
+              groupId: groupId,
+            });
           }}
         />
       )}
+
+      <Modal
+        visible={isOpenReportModal}
+        transparent
+        onRequestClose={() => {
+          if (isMount) {
+            setisOpenReportModal(false);
+          }
+        }}>
+        <InputPopup
+          closePopup={() => {
+            if (isMount) {
+              setisOpenReportModal(false);
+            }
+          }}
+          title={'Report this group to Rawcaster'}
+          submitButtonProps={{
+            buttonText: 'Report',
+          }}
+          requiredErrorText="Report Reason is reuired"
+          textInputProps={{
+            placeHolder: 'Enter your message',
+            multiline: true,
+            inputContainerHeight: 100,
+            textAlignVertical: 'top',
+          }}
+          onSubmit={message => {
+            if (isMount) {
+              setisOpenReportModal(false);
+            }
+            handleReportGroup(message);
+          }}
+        />
+      </Modal>
 
       <Modal
         visible={isOpenGroupMenu}
@@ -468,17 +730,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 25,
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-  },
-  displayTextContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingRight: 20,
   },
   addButton: {
     position: 'absolute',
