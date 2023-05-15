@@ -101,6 +101,19 @@ export const getFilteredDuplicatesList = (dataList = [], fieldName) => {
   }, []);
 };
 
+export const getIsEnableFriendRequest = status => {
+  switch (status) {
+    case 0:
+      return false;
+    case 1:
+      return false;
+    case 3:
+      return false;
+    default:
+      return true;
+  }
+};
+
 const getIsGrantedLocationPermission = async () => {
   let result;
   if (Platform.OS === 'ios') {

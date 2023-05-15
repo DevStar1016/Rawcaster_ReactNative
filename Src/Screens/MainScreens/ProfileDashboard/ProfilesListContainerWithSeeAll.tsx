@@ -265,6 +265,23 @@ function ProfilesListContainerWithSeeAll({
     return `${title} (${getList().length})`;
   }
 
+  function getTopRightIcon(item: any) {
+    if (item.user_id !== profile.user_id) {
+      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
+        return 'shield_secondary';
+      }
+      if (userId) {
+        if (listType === 'connections' && item.friend_status === 0) {
+          return 'user_plus_pink';
+        }
+        if (listType === 'influencers' && !item.follow) {
+          return 'plus_rounded_fill_primary';
+        }
+      }
+    }
+    return undefined;
+  }
+
   return (
     <View style={[styles.mainContainer, {paddingHorizontal}]}>
       <TitleRowContainer
@@ -335,7 +352,10 @@ function ProfilesListContainerWithSeeAll({
                       activeOpacity={0.8}
                       onPress={() => {
                         const pushAction = StackActions.push('ProfileStack', {
-                          userId: item.user_id,
+                          userId:
+                            item.user_id === profile?.user_id
+                              ? null
+                              : item.user_id,
                         });
                         navigation.dispatch(pushAction);
                       }}
@@ -361,9 +381,7 @@ function ProfilesListContainerWithSeeAll({
                               handleBecomeFan(item.user_ref_id);
                             } else if (
                               listType === 'connections' &&
-                              (item.request_status === null ||
-                                item.request_status === '' ||
-                                item.request_status === 2)
+                              item.friend_status === 0
                             ) {
                               handleSendFriendRequest(
                                 item.user_ref_id,
@@ -372,21 +390,7 @@ function ProfilesListContainerWithSeeAll({
                             }
                           }
                         }}
-                        topRightIcon={
-                          listType === 'unclaimed_influencers' &&
-                          !item.unclaimed_status
-                            ? 'shield_secondary'
-                            : userId
-                            ? (item.request_status === null ||
-                                item.request_status === '' ||
-                                item.request_status === 2) &&
-                              listType === 'connections'
-                              ? 'user_plus_pink'
-                              : !item.follow && listType === 'influencers'
-                              ? 'plus_rounded_fill_primary'
-                              : undefined
-                            : undefined
-                        }
+                        topRightIcon={getTopRightIcon(item)}
                         topRightIconContainerBackgroundColor={COLORS.white}
                         {...ProfileItemProps}
                       />

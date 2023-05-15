@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: COLORS.transparentDimColor,
+    backgroundColor: 'rgba(0,0,0,0.7)',
   },
   contentContainer: {
     padding: 15,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   optionsContainer: {
     backgroundColor: COLORS.white,
     borderRadius: 10,
-    marginVertical: 15,
+    marginVertical: 6,
   },
   buttonItemContainer: {
     alignItems: 'center',

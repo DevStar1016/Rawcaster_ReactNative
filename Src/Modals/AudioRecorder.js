@@ -90,9 +90,14 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
 
   const handlePlayRecordedAudio = async () => {
     try {
+      const dirs = RNFetchBlob.fs.dirs;
+      const path = Platform.select({
+        ios: 'rawcaster_recorded_audio.m4a',
+        android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
+      });
       setisPaused(false);
       setisPlaying(true);
-      await audioPlayer.startPlayer();
+      await audioPlayer.startPlayer(path);
       audioPlayer.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition / 1000) >= 0) {
           setplayingSeconds(Math.floor(e.currentPosition / 1000));
@@ -100,6 +105,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
         return;
       });
     } catch (e) {
+      console.log(e, 'ERROR');
       setisPlaying(false);
     }
   };

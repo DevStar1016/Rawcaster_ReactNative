@@ -33,6 +33,7 @@ import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerificatio
 import ProfileStack from './ProfileStack';
 import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 import SocketListener from '../Components/SocketListener';
+import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 
 const Stack = createStackNavigator();
 
@@ -70,7 +71,6 @@ const MainStack = () => {
     ])
       .then(res => {
         if (res[0].data.status === 1) {
-          console.log(res[0].data.profile, 'PROFILEEEE');
           let profile = {...res[0].data.profile};
           profile = {
             ...profile,
@@ -120,7 +120,6 @@ const MainStack = () => {
       })
       .then(res => {
         if (res[6].data.status === 1) {
-          console.log(res[6].data, 'UNCLAIM');
           dispatch(setUnclaimedAccountsList(res[6].data.unclaim_accounts));
         }
         return res;
@@ -163,6 +162,7 @@ const MainStack = () => {
               component={GlobalSearchStack}
             />
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
+            <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen
               name="ReferalContacts"
               component={ReferalContactsList}

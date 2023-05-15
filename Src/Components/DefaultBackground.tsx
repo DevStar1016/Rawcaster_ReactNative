@@ -7,6 +7,7 @@ import StyledText from './StyledText';
 
 export type DefaultBgProps = {
   centerText?: string;
+  bgColor?: string;
   isEnableLoading?: boolean;
   isEnableRLogo?: boolean;
 };
@@ -14,10 +15,11 @@ export type DefaultBgProps = {
 const DefaultBackground = ({
   centerText = '',
   isEnableLoading = false,
+  bgColor = COLORS.primary,
   isEnableRLogo = true,
 }: DefaultBgProps) => {
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer, {backgroundColor: bgColor}]}>
       <View
         style={{
           position: 'absolute',

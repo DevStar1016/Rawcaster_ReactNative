@@ -20,9 +20,9 @@ import TitleDescriptionContainer from '../../../Components/TitleDescriptionConta
 const resetPasswordSchema = Yup.object({
   currentPassword: Yup.string().required('Current password is required'),
   newPassword: Yup.string()
-    .min(8, 'New Password to be at least 8 characters long')
-    .trim()
-    .required('New password is required'),
+    .min(8, 'Password to be at least 8 characters long')
+    .trim('Password cannot include leading and trailing spaces')
+    .strict(true),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
     .required('Confirm password is required'),

@@ -6,7 +6,10 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {COLORS} from '../../../Utilities/Colors';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {FONTS} from '../../../Utilities/Fonts';
-import {getSlicedText} from '../../../Utilities/Methods';
+import {
+  getIsEnableFriendRequest,
+  getSlicedText,
+} from '../../../Utilities/Methods';
 
 const SearchProfileItem = ({
   item,
@@ -46,13 +49,15 @@ const SearchProfileItem = ({
                 bgColor={COLORS.primaryLight}
                 marginTop={0}
                 onPress={onBecomeFan}
-                marginHorizontal={item.friend_request_status === '' ? 10 : 0}
+                marginHorizontal={
+                  getIsEnableFriendRequest(item.friend_request_status) ? 10 : 0
+                }
                 buttonTextStyle={{fontSize: 14}}
                 paddingVertical={5}
                 borderRadius={30}
               />
             )}
-            {item.friend_request_status === '' && (
+            {getIsEnableFriendRequest(item.friend_request_status) && (
               <RoundedPlusButton
                 style={styles.connectionRequestButton}
                 onPress={onConnectionRequest}

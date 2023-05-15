@@ -565,6 +565,9 @@ const ReferalContactsList = ({navigation}) => {
         title: 'Invite Fans & Contacts',
         onPressBack: () => navigation.goBack(),
         bgColor: COLORS.transparent,
+        isEnableSearch: false,
+        isEnableLive: false,
+        isEnableProfile: false,
       }}>
       <StyledText style={{color: COLORS.white, opacity: 0.7, paddingTop: 10}}>
         Invite via

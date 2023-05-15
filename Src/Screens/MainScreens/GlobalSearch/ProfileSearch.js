@@ -258,7 +258,8 @@ const ProfileSearch = () => {
                 }}
                 onPressItem={() => {
                   navigation.navigate('ProfileStack', {
-                    userId: item.user_id,
+                    userId:
+                      item.user_id === profile?.user_id ? null : item.user_id,
                   });
                 }}
                 onConnectionRequest={() => {

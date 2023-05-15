@@ -48,6 +48,8 @@ const SignupWithPhone = ({route}) => {
     name: Yup.string().required('Name is required'),
     password: Yup.string()
       .min(8, 'Password to be at least 8 characters long')
+      .trim('Password cannot include leading and trailing spaces')
+      .strict(true)
       // .matches(
       //   PASSWORD_REGEX,
       //   'Password contain uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a number (0-9)',

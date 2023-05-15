@@ -366,7 +366,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         activeOpacity={0.7}
         onPress={() => {
           const pushAction = StackActions.push('ProfileStack', {
-            userId: item.user_id,
+            userId: item.user_id === profile?.user_id ? null : item.user_id,
           });
           navigation.dispatch(pushAction);
         }}>

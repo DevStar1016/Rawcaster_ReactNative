@@ -56,7 +56,7 @@ const SubmitButton = ({
   rightIcon,
   rightIconSize = 15,
   loaderColor = COLORS.white,
-  disabledColor,
+  disabledColor = COLORS.dimColor,
   isLoading = false,
   marginTop = 20,
   marginBottom,

@@ -284,25 +284,43 @@ const GeneralSettings = () => {
           text: 'Yes',
           onPress: () => {
             if (isMount) {
-              setsettingsData(preData => {
-                updateUsersSettingsAPICall(
-                  'account_active_inactive',
-                  0,
-                  undefined,
-                  undefined,
-                  true,
-                );
-                return {
-                  ...preData,
-                  account_active_inactive: 0,
-                };
-              });
+              handleChangeSettingsData(
+                0,
+                'account_active_inactive',
+                undefined,
+                undefined,
+                true,
+              );
             }
           },
         },
       ],
       {cancelable: false},
     );
+  }
+
+  function handleChangeSettingsData(
+    valueText,
+    keyText,
+    reduxData = undefined,
+    otherKeyText,
+    isLogout = false,
+  ) {
+    setsettingsData(preData => {
+      if (preData[keyText] !== valueText) {
+        updateUsersSettingsAPICall(
+          keyText,
+          valueText,
+          reduxData,
+          otherKeyText,
+          isLogout,
+        );
+      }
+      return {
+        ...preData,
+        [keyText]: valueText,
+      };
+    });
   }
 
   function getEnabledSwitchesIds() {
@@ -368,16 +386,7 @@ const GeneralSettings = () => {
             dataList={DEFAULT_PAGES_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              setsettingsData(preData => {
-                updateUsersSettingsAPICall(
-                  'mobile_default_page',
-                  selectedItem.id,
-                );
-                return {
-                  ...preData,
-                  mobile_default_page: selectedItem.id,
-                };
-              });
+              handleChangeSettingsData(selectedItem.id, 'mobile_default_page');
             }}
           />
           {CHOICE_CONTAINERS_LIST.map(item => {
@@ -413,13 +422,7 @@ const GeneralSettings = () => {
                         specificListType: selectedId === 3 ? 1 : 2,
                       });
                     } else {
-                      setsettingsData(preData => {
-                        updateUsersSettingsAPICall(item.fieldName, selectedId);
-                        return {
-                          ...preData,
-                          [item.fieldName]: selectedId,
-                        };
-                      });
+                      handleChangeSettingsData(selectedId, item.fieldName);
                     }
                   }
                 }}
@@ -466,13 +469,7 @@ const GeneralSettings = () => {
             dataList={languagesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              setsettingsData(preData => {
-                updateUsersSettingsAPICall('language_id', selectedItem.id);
-                return {
-                  ...preData,
-                  language_id: selectedItem.id,
-                };
-              });
+              handleChangeSettingsData(selectedItem.id, 'language_id');
             }}
           />
           <DropDownPicker
@@ -485,13 +482,7 @@ const GeneralSettings = () => {
             dataList={timeZonesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              setsettingsData(preData => {
-                updateUsersSettingsAPICall('time_zone', selectedItem.name);
-                return {
-                  ...preData,
-                  time_zone: selectedItem.name,
-                };
-              });
+              handleChangeSettingsData(selectedItem.name, 'time_zone');
             }}
           />
           <DropDownPicker
@@ -503,18 +494,12 @@ const GeneralSettings = () => {
             dataList={DEFAULT_DATE_FORMAT_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              setsettingsData(preData => {
-                updateUsersSettingsAPICall(
-                  'default_date_format',
-                  selectedItem.type,
-                  undefined,
-                  'date_format',
-                );
-                return {
-                  ...preData,
-                  default_date_format: selectedItem.type,
-                };
-              });
+              handleChangeSettingsData(
+                selectedItem.type,
+                'default_date_format',
+                undefined,
+                'date_format',
+              );
             }}
           />
 
@@ -526,18 +511,7 @@ const GeneralSettings = () => {
               if (selectedId === 0) {
                 onPressInActiveAccount();
               } else {
-                setsettingsData(preData => {
-                  if (preData.account_active_inactive !== selectedId) {
-                    updateUsersSettingsAPICall(
-                      'account_active_inactive',
-                      selectedId,
-                    );
-                  }
-                  return {
-                    ...preData,
-                    account_active_inactive: selectedId,
-                  };
-                });
+                handleChangeSettingsData(selectedId, 'account_active_inactive');
               }
             }}
           />
@@ -637,5 +611,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     paddingHorizontal: 10,
+    alignItems: 'flex-start',
   },
 });

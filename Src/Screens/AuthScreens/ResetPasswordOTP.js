@@ -30,11 +30,10 @@ const resetPasswordSchema = Yup.object({
     .max(6, 'Enter valid OTP'),
   password: Yup.string()
     .min(8, 'Password to be at least 8 characters long')
-    .trim()
-    .required('Password is required'),
+    .trim('Password cannot include leading and trailing spaces')
+    .strict(true),
   confirm_password: Yup.string()
     .oneOf([Yup.ref('password'), null], 'Passwords must match')
-
     .required('Confirm password is required'),
 });
 

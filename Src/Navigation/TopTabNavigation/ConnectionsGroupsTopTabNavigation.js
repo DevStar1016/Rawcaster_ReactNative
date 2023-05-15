@@ -1,8 +1,8 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import ConnectionsListStack from '../../Stacks/ConnectionsListStack';
-import GroupsListStack from '../../Stacks/GroupsListStack';
 import {useMyConnections} from '../../Utilities/Contexts';
 import ConnectionsGroupsTopTab from './ConnectionsGroupsTopTab';
+import GroupsList from '../../Screens/MainScreens/User/GroupsList';
+import ConnectionsList from '../../Screens/MainScreens/User/ConnectionsList';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -14,23 +14,23 @@ function ConnectionsGroupsTopTabNavigation() {
       tabBar={props => <ConnectionsGroupsTopTab {...props} />}
       screenListeners={{
         focus: e => {
-          if (e.target.includes('ConnectionsListStack')) {
+          if (e.target.includes('ConnectionsList')) {
             setFocusedTab(1);
-          } else if (e.target.includes('GroupsListStack')) {
+          } else if (e.target.includes('GroupsList')) {
             setFocusedTab(2);
           }
         },
       }}>
       <Tab.Screen
-        name="ConnectionsListStack"
-        component={ConnectionsListStack}
+        name="ConnectionsList"
+        component={ConnectionsList}
         options={{
           title: 'User List',
         }}
       />
       <Tab.Screen
-        name="GroupsListStack"
-        component={GroupsListStack}
+        name="GroupsList"
+        component={GroupsList}
         options={{
           title: 'Group List',
         }}

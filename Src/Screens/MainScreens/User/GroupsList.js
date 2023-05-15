@@ -1,12 +1,15 @@
 import {
   FlatList,
+  LayoutAnimation,
   RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {useDispatch} from 'react-redux';
 import {useGroupsList, useToken} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -16,16 +19,19 @@ import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import SVGIcon from '../../../Components/SVGIcon';
 import {useMyConnections} from '../../../Utilities/Contexts';
 import {listAllFriendGroupsService} from '../../../Services/ApiService';
-import {useDispatch} from 'react-redux';
 import {setGroupsList} from '../../../Store/Slices/HomeSlice';
+import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 
 var isMount = true;
 const GroupsList = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
   const groupsList = useGroupsList();
   const {searchText} = useMyConnections();
   const [refreshing, setrefreshing] = useState(false);
+  const [isShowAddButton, setisShowAddButton] = useState(true);
+  const listViewOffset = useRef(0);
 
   useEffect(() => {
     isMount = true;
@@ -60,6 +66,36 @@ const GroupsList = () => {
     }
   }
 
+  const onScrollEvent = event => {
+    const CustomLayoutAnimation = {
+      duration: 300,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      delete: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+    };
+
+    let currentOffset = event.nativeEvent.contentOffset.y;
+    const direction =
+      currentOffset > 0 && currentOffset > listViewOffset.current
+        ? 'down'
+        : 'up';
+    const isEnableButton = direction === 'up';
+    if (isEnableButton !== isShowAddButton) {
+      LayoutAnimation.configureNext(CustomLayoutAnimation);
+      setisShowAddButton(isEnableButton);
+    }
+    listViewOffset.current = currentOffset;
+  };
+
   function getList() {
     if (searchText && searchText.trim()) {
       return [...groupsList].filter(item =>
@@ -75,7 +111,14 @@ const GroupsList = () => {
 
   function renderItem({item, index}) {
     return (
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.itemContainer}
+        activeOpacity={0.8}
+        onPress={() => {
+          navigation.navigate('CreateEditGroup', {
+            groupId: item.group_id,
+          });
+        }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge
             profileImage={item.group_icon}
@@ -116,6 +159,7 @@ const GroupsList = () => {
           contentContainerStyle={{paddingBottom: 20}}
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
+          onScroll={onScrollEvent}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -128,6 +172,14 @@ const GroupsList = () => {
         <View style={styles.emptyListContainer}>
           <StyledText style={styles.emptyListText}>No data found</StyledText>
         </View>
+      )}
+      {isShowAddButton && (
+        <RoundedPlusButton
+          style={styles.addButton}
+          onPress={() => {
+            navigation.navigate('CreateEditGroup');
+          }}
+        />
       )}
     </View>
   );
@@ -176,5 +228,13 @@ const styles = StyleSheet.create({
   emptyListText: {
     color: COLORS.white,
     fontFamily: FONTS.DMSans.medium,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    height: 50,
+    width: 50,
+    borderRadius: 25,
   },
 });

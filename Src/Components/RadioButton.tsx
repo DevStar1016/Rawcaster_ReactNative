@@ -15,35 +15,47 @@ type Props = {
   onPress?: () => void;
   text?: string;
   mainContainerStyle?: ViewStyle;
+  radioContainerStyle?: ViewStyle;
   nameTextStyle?: TextStyle;
+  disabled?: boolean;
+  radioSelectedColor?: string;
+  isDisabledInsideCircleOuterSpace?: boolean;
 };
 
 const RadioButton = ({
   isSelected,
   onPress,
   text = '',
+  disabled = false,
+  isDisabledInsideCircleOuterSpace = false,
   mainContainerStyle,
+  radioSelectedColor = COLORS.radioSelectedColor,
+  radioContainerStyle,
   nameTextStyle,
 }: Props) => {
   return (
     <TouchableOpacity
       style={[styles.mainContainer, mainContainerStyle]}
       activeOpacity={0.8}
+      disabled={disabled}
       onPress={onPress}>
-      <View style={styles.radioContainer}>
+      <View style={[styles.radioContainer, radioContainerStyle]}>
         {isSelected ? (
           <View
             style={[
               styles.radioInsideContainer,
               {
-                backgroundColor: isSelected
-                  ? COLORS.radioSelectedColor
-                  : COLORS.white,
+                backgroundColor: isSelected ? radioSelectedColor : COLORS.white,
+              },
+              isDisabledInsideCircleOuterSpace && {
+                width: '100%',
+                height: '100%',
+                borderRadius: 16 / 2,
               },
             ]}></View>
         ) : null}
       </View>
-      <View style={{flex: 1}}>
+      <View>
         <StyledText style={nameTextStyle}>{text}</StyledText>
       </View>
     </TouchableOpacity>

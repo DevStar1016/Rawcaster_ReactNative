@@ -94,9 +94,9 @@ const CustomHomeHeader = ({
           />
         ) : (
           <TouchableOpacity
+            disabled={true}
             onPress={() => {
-              navigation.navigate('ReferalContacts');
-
+              // navigation.navigate('ReferalContacts');
               // navigation.navigate('PlansAndPrice');
             }}>
             <SVGIcon icon="app_logo_white" height={30} width={30} />

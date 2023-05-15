@@ -17,6 +17,7 @@ const UsersGroupsListHome = () => {
   const connectionsList = useConnectionsList();
   const [focusedTab, setfocusedTab] = useState(1); //1 - user, 2- group
   const [searchText, setsearchText] = useState('');
+  const [headerHeight, setheaderHeight] = useState(0);
 
   const myConnectionsContextValue = {
     searchText: searchText,
@@ -27,6 +28,10 @@ const UsersGroupsListHome = () => {
 
   function getList() {
     return [...connectionsList].filter(item => parseInt(item.online) === 1);
+  }
+
+  function onLayout(e) {
+    setheaderHeight(e.nativeEvent.layout.height);
   }
 
   function renderRecentChatItem({item, index}) {
@@ -59,29 +64,31 @@ const UsersGroupsListHome = () => {
           isEnableLive={false}
         />
         <View style={styles.contentContainer}>
-          <SearchInput
-            placeHolderText={`Search ${
-              focusedTab === 2 ? 'Group' : 'Connection'
-            }`}
-            searchWhenClickedButton={false}
-            onSearch={setsearchText}
-            marginTop={15}
-            marginBottom={10}
-            searchButtonColor={COLORS.secondary}
-            marginHorizontal={10}
-          />
-          <View style={{paddingBottom: 10}}>
-            <FlatList
-              data={getList()}
-              horizontal
-              keyExtractor={(_, index) => index.toString()}
-              contentContainerStyle={{paddingHorizontal: 10}}
-              showsHorizontalScrollIndicator={false}
-              renderItem={renderRecentChatItem}
-              ItemSeparatorComponent={() => {
-                return <View style={{width: 10}} />;
-              }}
+          <View onLayout={onLayout}>
+            <SearchInput
+              placeHolderText={`Search ${
+                focusedTab === 2 ? 'Group' : 'Connection'
+              }`}
+              searchWhenClickedButton={false}
+              onSearch={setsearchText}
+              marginTop={15}
+              marginBottom={10}
+              searchButtonColor={COLORS.secondary}
+              marginHorizontal={10}
             />
+            <View style={{paddingBottom: 10}}>
+              <FlatList
+                data={getList()}
+                horizontal
+                keyExtractor={(_, index) => index.toString()}
+                contentContainerStyle={{paddingHorizontal: 10}}
+                showsHorizontalScrollIndicator={false}
+                renderItem={renderRecentChatItem}
+                ItemSeparatorComponent={() => {
+                  return <View style={{width: 10}} />;
+                }}
+              />
+            </View>
           </View>
           <View style={styles.topTabContainer}>
             <ConnectionsGroupsTopTabNavigation />

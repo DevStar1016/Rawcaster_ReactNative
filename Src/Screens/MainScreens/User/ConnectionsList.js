@@ -1,5 +1,6 @@
 import {
   FlatList,
+  LayoutAnimation,
   Modal,
   RefreshControl,
   StyleSheet,
@@ -7,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   useConnectionsList,
   usePendingFriendRequests,
@@ -33,6 +34,7 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {respondToFriendRequestsService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
+import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 
 var isMount = true;
 const ConnectionsList = () => {
@@ -44,6 +46,8 @@ const ConnectionsList = () => {
   const [refreshing, setrefreshing] = useState(false);
   const [actionLoaderText, setactionLoaderText] = useState('');
   const [isActionLoading, setisActionLoading] = useState(false);
+  const [isShowAddButton, setisShowAddButton] = useState(true);
+  const listViewOffset = useRef(0);
 
   useEffect(() => {
     isMount = true;
@@ -111,9 +115,7 @@ const ConnectionsList = () => {
       listAllFriendRequestsService(formData),
     ])
       .then(res => {
-        console.log(res[0].data, 'RESSS');
         if (res[0].data.status === 1) {
-          console.log(res[0].data.friends_list, 'FRIENDSLIST');
           dispatch(setConnectionsList(res[0].data.friends_list));
         }
         if (res[1].data.status === 1) {
@@ -136,6 +138,36 @@ const ConnectionsList = () => {
       listAPICalls();
     }
   }
+
+  const onScrollEvent = event => {
+    const CustomLayoutAnimation = {
+      duration: 300,
+      create: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      delete: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+      update: {
+        type: LayoutAnimation.Types.easeInEaseOut,
+        property: LayoutAnimation.Properties.scaleXY,
+      },
+    };
+
+    let currentOffset = event.nativeEvent.contentOffset.y;
+    const direction =
+      currentOffset > 0 && currentOffset > listViewOffset.current
+        ? 'down'
+        : 'up';
+    const isEnableButton = direction === 'up';
+    if (isEnableButton !== isShowAddButton) {
+      LayoutAnimation.configureNext(CustomLayoutAnimation);
+      setisShowAddButton(isEnableButton);
+    }
+    listViewOffset.current = currentOffset;
+  };
 
   function getList() {
     if (searchText && searchText.trim()) {
@@ -232,6 +264,7 @@ const ConnectionsList = () => {
           contentContainerStyle={{paddingBottom: 20}}
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
+          onScroll={onScrollEvent}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -245,6 +278,7 @@ const ConnectionsList = () => {
           <StyledText style={styles.emptyListText}>No data found</StyledText>
         </View>
       )}
+      {isShowAddButton && <RoundedPlusButton style={styles.addButton} />}
       <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
         <Loader
           bgColor={COLORS.transparentDimColor}
@@ -298,5 +332,13 @@ const styles = StyleSheet.create({
   emptyListText: {
     color: COLORS.white,
     fontFamily: FONTS.DMSans.medium,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    height: 50,
+    width: 50,
+    borderRadius: 25,
   },
 });

@@ -44,6 +44,7 @@ export type ProfileWithBadgeProps = {
   padding?: number;
   isEnableOnlineOfflineStatus?: boolean;
   isButton?: boolean;
+  isEnableOnPressImagePicker?: boolean;
   onPressProfile?: () => void;
   badgeContainerStyle?: ViewStyle;
   cameraIconContainerStyle?: ViewStyle;
@@ -59,6 +60,7 @@ const ProfileWithBadge = ({
   isEnableOnlineOfflineStatus = false,
   isButton = false,
   onPressProfile,
+  isEnableOnPressImagePicker = false,
   isOnline = false,
   topRightIconAsButton = true,
   isEnableWhiteBorderArroundGradient = false,
@@ -127,7 +129,13 @@ const ProfileWithBadge = ({
           ...containerStyle,
         },
       ]}
-      onPress={onPressProfile}
+      onPress={() => {
+        if (isEnableOnPressImagePicker) {
+          onSelectProfilePhoto();
+        } else if (onPressProfile) {
+          onPressProfile();
+        }
+      }}
       disabled={!isButton}
       activeOpacity={isButton ? 0.9 : 1}>
       {isEnableGradient ? (

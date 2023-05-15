@@ -45,10 +45,10 @@ var currentPage = 1;
 var totalPages = 1;
 const Profile = ({route}) => {
   let isMount = true;
+  const profile = useProfile();
   const {userId} = route.params ?? {};
   const navigation = useNavigation();
   const token = useToken();
-  const profile = useProfile();
   const myNuggetsList = useNuggetsList();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();

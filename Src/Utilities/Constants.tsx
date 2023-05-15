@@ -81,6 +81,12 @@ export const VISIBLE_CHOICES_LIST = [
   },
 ];
 
+export const GROUP_CATEGORY = {
+  myFans: 1,
+  influencer: 2,
+  other: 3,
+};
+
 export const DISPLAY_CHOICES_LIST = [
   {
     id: 0,

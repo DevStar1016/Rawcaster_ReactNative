@@ -35,7 +35,7 @@ export type TextBoxProps = {
   icon?: IconType;
   iconHeight?: number;
   iconWidth?: number;
-  value?: string | null;
+  value?: string | undefined;
   keyboardType?: KeyboardTypeOptions;
   maxLength?: number;
   mainContainerMarginTop?: number;
@@ -71,7 +71,6 @@ export type TextBoxProps = {
     | 'placeholder'
     | 'keyboardType'
     | 'maxLength'
-    | 'placeholderTextColor'
     | 'multiline'
     | 'textAlignVertical'
     | 'clearButtonMode'

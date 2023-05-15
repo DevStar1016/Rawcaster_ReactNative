@@ -25,7 +25,7 @@ type Props = {
   onPress?: () => void;
 };
 
-const StyledText = ({
+function StyledText({
   children,
   textMode = 'normal',
   numberOfLines = 0,
@@ -34,7 +34,7 @@ const StyledText = ({
   readMoreButtonTextStyle = {},
   style,
   normalTextModeTextProps,
-}: Props) => {
+}: Props) {
   const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
 
@@ -52,13 +52,13 @@ const StyledText = ({
     return styles.text;
   };
 
-  const renderText = () => {
+  function renderText() {
     return (
       <Text style={getStyle()} onPress={onPress} {...normalTextModeTextProps}>
         {children}
       </Text>
     );
-  };
+  }
 
   const renderReadMoreText = () => {
     return (
@@ -117,8 +117,8 @@ const StyledText = ({
     }
   };
 
-  return <TextComponent />;
-};
+  return TextComponent();
+}
 
 export default StyledText;
 

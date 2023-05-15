@@ -7,8 +7,6 @@ import {
   setNuggetType,
 } from '../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
-import GlobalSearchStack from './GlobalSearchStack';
-import ProfileStack from './ProfileStack';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 
 const Stack = createStackNavigator();
