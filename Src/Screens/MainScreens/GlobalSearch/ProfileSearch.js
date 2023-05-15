@@ -176,8 +176,7 @@ const ProfileSearch = () => {
               profile_img: profile?.profile_image,
               user_id: profile?.user_id,
             };
-            console.log('SEND FRIEND REQUEST SOCKET', data);
-            friendRequestSocket(user_id, data);
+            friendRequestSocket({user_id: user_id, data: data});
           }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);

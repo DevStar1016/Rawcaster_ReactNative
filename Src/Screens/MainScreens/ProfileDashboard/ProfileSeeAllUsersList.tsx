@@ -301,7 +301,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
               profile_img: profile?.profile_image,
               user_id: profile?.user_id,
             };
-            friendRequestSocket(user_id, data);
+            friendRequestSocket({user_id: user_id, data: data});
           }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
