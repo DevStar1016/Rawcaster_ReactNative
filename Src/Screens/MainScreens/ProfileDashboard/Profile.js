@@ -291,6 +291,12 @@ const Profile = ({route}) => {
       return {...pre, unclaimed_status: 1};
     });
   };
+  const onFinishDelete = nuggetId => {
+    setnuggetsList(preList => {
+      let tempList = [...preList].filter(item => item.nugget_id !== nuggetId);
+      return tempList;
+    });
+  };
 
   function getIsEnableClaimAccount() {
     let tempUnclaimedList = [...unclaimedAccountsList];
@@ -356,7 +362,14 @@ const Profile = ({route}) => {
   ]);
 
   function renderItem({item, index}) {
-    return <Nugget nugget={item} nuggetIndex={index} />;
+    return (
+      <Nugget
+        nugget={item}
+        nuggetIndex={index}
+        isFromProfile={true}
+        onFinishDelete={onFinishDelete}
+      />
+    );
   }
 
   const renderFooter = () => {

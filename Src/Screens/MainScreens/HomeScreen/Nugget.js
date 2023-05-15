@@ -44,7 +44,12 @@ import {
 } from '../../../Utilities/Contexts';
 import BigList from 'react-native-big-list';
 
-const Nugget = ({nugget, nuggetIndex}) => {
+const Nugget = ({
+  nugget,
+  nuggetIndex,
+  isFromProfile = false,
+  onFinishDelete,
+}) => {
   const {
     scrollNuggetsListToTop,
     isFromGlobalSearch,
@@ -199,6 +204,9 @@ const Nugget = ({nugget, nuggetIndex}) => {
                 ),
               ),
             );
+          }
+          if (isFromProfile) {
+            onFinishDelete(nuggetId);
           }
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.nugget_id !== nuggetId,

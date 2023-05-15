@@ -189,7 +189,10 @@ const ProfileNameBioContainer = ({
       style={[styles.mainContainer, {paddingHorizontal}]}>
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
-          <StyledText style={styles.nameText} onPress={() => {}}>
+          <StyledText
+            style={[styles.nameText, {maxWidth: '60%'}]}
+            normalTextModeTextProps={{numberOfLines: 1}}
+            onPress={() => {}}>
             {getSlicedText(profile?.name, 50)}
           </StyledText>
 
@@ -201,6 +204,7 @@ const ProfileNameBioContainer = ({
           {getSelectedCategoriesList().toString() ? (
             <StyledText
               style={styles.nameText}
+              normalTextModeTextProps={{numberOfLines: 1}}
               onPress={() => {
                 if (getSelectedCategoriesList().toString().length > 15) {
                   setisOpenCategoriesListModal(true);
