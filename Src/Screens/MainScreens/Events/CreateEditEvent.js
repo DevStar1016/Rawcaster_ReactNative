@@ -536,6 +536,8 @@ const CreateEditEvent = ({route}) => {
             datePickerProps={{
               mode: 'time',
               is24Hour: true,
+              locale: settings?.time_zone,
+              minimumDate: new Date().setHours('00:00:00:00'),
             }}
             dropDownIcon="clock_black"
             placeHolderText={'Select Duration'}

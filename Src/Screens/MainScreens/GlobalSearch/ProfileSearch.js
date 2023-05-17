@@ -164,7 +164,7 @@ const ProfileSearch = () => {
             if (tempIndex !== -1) {
               tempProfileList[tempIndex] = {
                 ...tempProfileList[tempIndex],
-                friend_request_status: '1',
+                friend_request_status: 1,
               };
             }
             return tempProfileList;

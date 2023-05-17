@@ -137,8 +137,10 @@ const styles = StyleSheet.create({
   },
   subContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 15,
     borderRadius: 10,
+    width: '100%',
   },
   titleContainer: {
     alignItems: 'center',

@@ -190,7 +190,7 @@ const ProfileNameBioContainer = ({
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
           <StyledText
-            style={[styles.nameText, {maxWidth: '60%'}]}
+            style={[styles.nameText, {maxWidth: '55%'}]}
             normalTextModeTextProps={{numberOfLines: 1}}
             onPress={() => {}}>
             {getSlicedText(profile?.name, 50)}
@@ -203,7 +203,7 @@ const ProfileNameBioContainer = ({
           )}
           {getSelectedCategoriesList().toString() ? (
             <StyledText
-              style={styles.nameText}
+              style={[styles.nameText, {maxWidth: '40%'}]}
               normalTextModeTextProps={{numberOfLines: 1}}
               onPress={() => {
                 if (getSelectedCategoriesList().toString().length > 15) {

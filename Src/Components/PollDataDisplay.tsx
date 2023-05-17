@@ -160,6 +160,10 @@ const PollDataDisplay = ({
             key={item.option_id.toString()}
             paddingVertical={5}
             buttonText={item.option_name}
+            buttonTextStyle={{
+              width: '100%',
+              textAlign: 'center',
+            }}
             marginTop={10}
             isDisabled={pollVotedData.isVoted}
             onPress={() => {
@@ -180,7 +184,7 @@ const PollDataDisplay = ({
       <StyledText style={{color: COLORS.white, paddingTop: 10}}>
         {`${getTotalVotes()} votes ${
           getRemainingTimeOfPoll() ? `. ${getRemainingTimeOfPoll()}` : ``
-        }`}
+        }   `}
       </StyledText>
     </View>
   );

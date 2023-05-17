@@ -66,6 +66,7 @@ const NuggetsSearch = () => {
       nuggetsSearchAPICall(1);
     }
   }, [searchText]);
+  console.log(insets, 'IIIII', topLayerHeight);
 
   const nuggetsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
@@ -145,7 +146,7 @@ const NuggetsSearch = () => {
     isEnableADDButton: false,
     isEnableTopInsetsPadding: false,
     textNuggetNumberOfLines: 12,
-    mediaHeight: insets.mediaHeight - topLayerHeight,
+    mediaHeight: insets.mediaHeight - (topLayerHeight + insets.top),
     isEnableHeaderContainerHeightforTopButtons: false,
     onFinishPlaying: index => {
       if (index < searchedNuggetsList.length - 1) {
@@ -165,8 +166,8 @@ const NuggetsSearch = () => {
   const keyExtractor = useCallback(item => item.nugget_id.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
-      length: insets.mediaHeight - topLayerHeight,
-      offset: (insets.mediaHeight - topLayerHeight) * index,
+      length: insets.mediaHeight - (topLayerHeight + insets.top),
+      offset: (insets.mediaHeight - (topLayerHeight + insets.top)) * index,
       index,
     }),
     [],
