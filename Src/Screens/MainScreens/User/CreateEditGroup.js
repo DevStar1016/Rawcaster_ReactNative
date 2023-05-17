@@ -35,7 +35,6 @@ import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import MenuContainer from '../../../Modals/MenuContainer';
 import {GROUP_CATEGORY} from '../../../Utilities/Constants';
-import GroupUserItem from './GroupUserItem';
 import {deleteFriendGroupService} from '../../../Services/ApiService';
 import InputPopup from '../../../Modals/InputPopup';
 import {
@@ -43,6 +42,7 @@ import {
   groupFunctionalitySocket,
 } from '../../../Services/Socket/SocketRequests';
 import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
+import UserItem from './UserItem';
 
 var isMount = true;
 var isOnSameGroup = true;
@@ -605,7 +605,7 @@ const CreateEditGroup = ({route}) => {
 
   function renderItem({item}) {
     return (
-      <GroupUserItem
+      <UserItem
         item={item}
         groupId={groupId}
         isEnableEdit={isEnableEdit()}

@@ -16,7 +16,6 @@ import {
   useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
-import GroupUserItem from './GroupUserItem';
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import SearchInput from '../../../Components/SearchInput';
@@ -24,6 +23,7 @@ import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {searchRawcasterUsersService} from '../../../Services/ApiService';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import axios from 'axios';
+import UserItem from './UserItem';
 
 var isMount = true;
 var currentPage = 1;
@@ -151,7 +151,7 @@ const AddNewConnection = () => {
 
   function renderItem({item}) {
     return (
-      <GroupUserItem
+      <UserItem
         item={item}
         isSelected={isSelected(item.user_id)}
         isGroup={false}

@@ -8,7 +8,7 @@ import RadioButton from '../../../Components/RadioButton';
 import SubmitButton from '../../../Components/SubmitButton';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 
-const GroupUserItem = ({
+const UserItem = ({
   item,
   groupId,
   isGroupOwner,
@@ -100,7 +100,7 @@ const GroupUserItem = ({
   );
 };
 
-export default GroupUserItem;
+export default UserItem;
 
 const styles = StyleSheet.create({
   itemContainer: {

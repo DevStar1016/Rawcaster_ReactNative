@@ -8,7 +8,6 @@ import {
   useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
-import GroupUserItem from './GroupUserItem';
 import {
   addFriendsToGroupService,
   removeFriendsfFromGroupService,
@@ -19,6 +18,8 @@ import {useNavigation} from '@react-navigation/native';
 import Toast from '../../../Components/Toast';
 import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
 import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
+import SearchInput from '../../../Components/SearchInput';
+import UserItem from './UserItem';
 
 var isMount = true;
 const AddUserToGroup = ({route}) => {
@@ -30,6 +31,7 @@ const AddUserToGroup = ({route}) => {
   const groupsList = useGroupsList();
   const [isLoading, setisLoading] = useState(false);
   const [loaderText, setloaderText] = useState('');
+  const [searchText, setsearchText] = useState('');
   const connectionsList = useConnectionsList();
   const [selectedConnectionsIds, setselectedConnectionsIds] = useState([]);
 
@@ -118,12 +120,14 @@ const AddUserToGroup = ({route}) => {
   }
 
   function getUsersList() {
+    let usersList = [...connectionsList];
+
     if (
       getGroupDetails() &&
       getGroupDetails()?.group_members_list?.length > 0
     ) {
       const groupDetails = {...getGroupDetails()};
-      return [...connectionsList].filter(
+      usersList = [...usersList].filter(
         item =>
           !groupDetails?.group_members_list?.find(
             subItem => subItem.user_id === item.user_id,
@@ -131,12 +135,18 @@ const AddUserToGroup = ({route}) => {
       );
     }
 
-    return [...connectionsList];
+    if (searchText.trim()) {
+      return [...usersList].filter(item =>
+        item.display_name.toLowerCase().includes(searchText.toLowerCase()),
+      );
+    }
+
+    return [...usersList];
   }
 
   function renderItem({item}) {
     return (
-      <GroupUserItem
+      <UserItem
         item={item}
         isSelected={isSelected(item.user_id)}
         onPressItem={() => {
@@ -164,10 +174,22 @@ const AddUserToGroup = ({route}) => {
       isLoading={isLoading}
       loaderProps={{loaderText: loaderText}}
       isEnableSafeArea={false}
-      defaultBackgroundProps={{bgColor: COLORS.primaryDark}}
+      isEnableDefaultBackground={getUsersList().length <= 0}
+      defaultBackgroundProps={{
+        bgColor: COLORS.primaryDark,
+        centerText: 'No users found',
+      }}
       paddingBottom={0}
       paddingHorizontal={0}
       backgroundColor={COLORS.primaryDark}>
+      <SearchInput
+        searchButtonColor={COLORS.secondary}
+        marginVertical={10}
+        searchWhenClickedButton={false}
+        placeHolderText="Search User"
+        marginHorizontal={15}
+        onSearch={setsearchText}
+      />
       <View style={{flex: 1}}>
         <FlatList
           bounces={false}
