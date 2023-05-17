@@ -35,6 +35,7 @@ import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContacts
 import SocketListener from '../Components/SocketListener';
 import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
+import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 
 const Stack = createStackNavigator();
 
@@ -165,6 +166,10 @@ const MainStack = () => {
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
             <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen name="AddUserToGroup" component={AddUserToGroup} />
+            <Stack.Screen
+              name="AddNewConnection"
+              component={AddNewConnection}
+            />
 
             <Stack.Screen
               name="ReferalContacts"

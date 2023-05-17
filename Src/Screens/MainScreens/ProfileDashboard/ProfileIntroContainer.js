@@ -57,20 +57,32 @@ const ProfileIntroContainer = ({
       ) : (
         false
       )}
-      <RowContainer text={profile?.geo_location} icon={'location_grey'} />
-      <RowContainer
-        text={`Date of Birth ${moment(profile?.dob, 'YYYY-MM-DD').format(
-          'DD/MM/YYYY',
-        )}`}
-        icon={'cake_grey'}
-      />
-      <RowContainer
-        text={`Joined RAWCASTER on ${moment(profile?.date_of_join).format(
-          'DD MMM YYYY',
-        )}`}
-        icon={'calander_grey'}
-        iconSize={23}
-      />
+      {profile?.geo_location ? (
+        <RowContainer text={profile?.geo_location} icon={'location_grey'} />
+      ) : (
+        false
+      )}
+      {profile?.dob ? (
+        <RowContainer
+          text={`Date of Birth ${moment(profile?.dob, 'YYYY-MM-DD').format(
+            'DD/MM/YYYY',
+          )}`}
+          icon={'cake_grey'}
+        />
+      ) : (
+        false
+      )}
+      {profile?.date_of_join ? (
+        <RowContainer
+          text={`Joined RAWCASTER on ${moment(profile?.date_of_join).format(
+            'DD MMM YYYY',
+          )}`}
+          icon={'calander_grey'}
+          iconSize={23}
+        />
+      ) : (
+        false
+      )}
     </View>
   );
 };
