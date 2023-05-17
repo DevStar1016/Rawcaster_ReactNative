@@ -157,8 +157,8 @@ const AddUserToGroup = ({route}) => {
         }`,
         isTitleCenter: true,
         rightIcon: 'tick',
-        isEnableRightIcon: true,
-        rightIconSize: 22,
+        isEnableRightIcon: selectedConnectionsIds.length > 0,
+        rightIconSize: 20,
         onPressRightIcon: handleAddusersToGroup,
       }}
       isLoading={isLoading}

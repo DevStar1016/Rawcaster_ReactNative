@@ -35,9 +35,11 @@ import {respondToFriendRequestsService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 const ConnectionsList = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
   const pendingConnectionRequests = usePendingFriendRequests();
@@ -278,7 +280,14 @@ const ConnectionsList = () => {
           <StyledText style={styles.emptyListText}>No data found</StyledText>
         </View>
       )}
-      {isShowAddButton && <RoundedPlusButton style={styles.addButton} />}
+      {isShowAddButton && (
+        <RoundedPlusButton
+          style={styles.addButton}
+          onPress={() => {
+            navigation.navigate('AddNewConnection');
+          }}
+        />
+      )}
       <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
         <Loader
           bgColor={COLORS.transparentDimColor}

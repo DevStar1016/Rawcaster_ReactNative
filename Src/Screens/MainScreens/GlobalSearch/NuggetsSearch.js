@@ -66,7 +66,6 @@ const NuggetsSearch = () => {
       nuggetsSearchAPICall(1);
     }
   }, [searchText]);
-  console.log(insets, 'IIIII', topLayerHeight);
 
   const nuggetsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();

@@ -65,8 +65,8 @@ export const updateMyProfileService = data => {
   return axios.post('updatemyprofile', data);
 };
 
-export const searchRawcasterUsersService = data => {
-  return axios.post('searchrawcasterusers', data);
+export const searchRawcasterUsersService = (data, cancelToken) => {
+  return axios.post('searchrawcasterusers', data, {cancelToken});
 };
 
 export const inviteToRawcasterService = data => {
