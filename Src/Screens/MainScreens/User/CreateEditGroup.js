@@ -38,10 +38,14 @@ import {GROUP_CATEGORY} from '../../../Utilities/Constants';
 import GroupUserItem from './GroupUserItem';
 import {deleteFriendGroupService} from '../../../Services/ApiService';
 import InputPopup from '../../../Modals/InputPopup';
-import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
+import {
+  groupChatEnableDisableSocket,
+  groupFunctionalitySocket,
+} from '../../../Services/Socket/SocketRequests';
 import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
 
 var isMount = true;
+var isOnSameGroup = true;
 const GROUP_OPERATIONS = {
   enableDisableMemberChat: 1,
   deleteGroup: 2,
@@ -74,11 +78,26 @@ const CreateEditGroup = ({route}) => {
 
   useEffect(() => {
     isMount = true;
-
+    isOnSameGroup = true;
     return () => {
       isMount = false;
+      isOnSameGroup = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (groupId && isOnSameGroup) {
+      const tempIndex = [...groupsList].findIndex(
+        item => item.group_id === groupId,
+      );
+      if (tempIndex === -1) {
+        Toast.fail(
+          "Either you've been removed from the group or the group has been deleted by the owner",
+        );
+        navigation.goBack();
+      }
+    }
+  }, [groupsList]);
 
   function getCommonFormData() {
     const formData = new FormData();
@@ -128,7 +147,6 @@ const CreateEditGroup = ({route}) => {
     editFriendGroupService(getCommonFormData())
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data.group_details, 'EDITED GROUP DATA');
           const tempGroupsList = [...groupsList];
           let tempIndex = [...tempGroupsList].findIndex(
             item => item.group_id === groupId,
@@ -139,6 +157,12 @@ const CreateEditGroup = ({route}) => {
               ...res.data.group_details,
             };
           }
+          groupFunctionalitySocket({
+            groupId: groupId,
+            processType: GROUP_PROCESS_SOCKET_TYPE.editGroup,
+            userId: profile?.user_id,
+            groupData: {...res.data.group_details},
+          });
           dispatch(setGroupsList([...tempGroupsList]));
           Toast.success(res.data.msg);
           navigation.goBack();
@@ -162,6 +186,27 @@ const CreateEditGroup = ({route}) => {
       setloaderText('Removing member from group');
       setisLoading(true);
     }
+
+    let tempGroupsList = [...groupsList];
+    const tempIndex = tempGroupsList.findIndex(
+      item => item.group_id === groupId,
+    );
+    if (tempIndex !== -1) {
+      let filteredGroupMembersList = [
+        ...tempGroupsList[tempIndex]?.group_members_list,
+      ].filter(item => item.user_id !== userId);
+      tempGroupsList[tempIndex].group_members_list = [
+        ...filteredGroupMembersList,
+      ];
+      groupFunctionalitySocket({
+        groupId: groupId,
+        processType: GROUP_PROCESS_SOCKET_TYPE.removeGroupMember,
+        userId: profile?.user_id,
+        removed_user_id: userId,
+        groupData: {...tempGroupsList[tempIndex]},
+      });
+    }
+
     const formData = new FormData();
     formData.append('token', token);
     formData.append('group_id', groupId);
@@ -169,18 +214,6 @@ const CreateEditGroup = ({route}) => {
     removeFriendsfFromGroupService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          let tempGroupsList = [...groupsList];
-          const tempIndex = tempGroupsList.findIndex(
-            item => item.group_id === groupId,
-          );
-          if (tempIndex !== -1) {
-            let filteredGroupMembersList = [
-              ...tempGroupsList[tempIndex]?.group_members_list,
-            ].filter(item => item.user_id !== userId);
-            tempGroupsList[tempIndex].group_members_list = [
-              ...filteredGroupMembersList,
-            ];
-          }
           dispatch(setGroupsList(tempGroupsList));
           Toast.success(res.data.msg);
         } else if (res.data.status === 0) {
@@ -214,7 +247,7 @@ const CreateEditGroup = ({route}) => {
             processType: GROUP_PROCESS_SOCKET_TYPE.deleteGroup,
             userId: profile?.user_id,
           });
-          handleSuccessExitGroup(res.data.msg);
+          handleSuccessExitGroup(res.data.msg, true);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -285,10 +318,18 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
-  function handleSuccessExitGroup(successMessage = '') {
+  function handleSuccessExitGroup(successMessage = '', isDelete = false) {
     let filteredGroupsList = [...groupsList].filter(
       item => item.group_id !== groupId,
     );
+    if (!isDelete) {
+      groupFunctionalitySocket({
+        groupId: groupId,
+        processType: GROUP_PROCESS_SOCKET_TYPE.exitGroup,
+        userId: profile?.user_id,
+      });
+    }
+    isOnSameGroup = false;
     dispatch(setGroupsList(filteredGroupsList));
     Toast.success(successMessage);
     navigation.goBack();
@@ -310,6 +351,26 @@ const CreateEditGroup = ({route}) => {
       }
       setisLoading(true);
     }
+  }
+
+  function handleEnableDisableMemberChat() {
+    const changedStatus = isEnabledMemberChat() ? 0 : 1;
+    let tempGroupsList = [...groupsList];
+    const tempIndex = [...tempGroupsList].findIndex(
+      item => item.group_id === groupId,
+    );
+    if (tempIndex !== -1) {
+      tempGroupsList[tempIndex] = {
+        ...tempGroupsList[tempIndex],
+        chat_enabled: changedStatus,
+      };
+    }
+    groupChatEnableDisableSocket({
+      groupId,
+      userId: profile.user_id,
+      status: changedStatus,
+    });
+    dispatch(setGroupsList(tempGroupsList));
   }
 
   function handleSelectUnselectUser(id) {
@@ -373,6 +434,7 @@ const CreateEditGroup = ({route}) => {
 
     switch (selectedButtonId) {
       case GROUP_OPERATIONS.enableDisableMemberChat:
+        handleEnableDisableMemberChat();
         break;
       case GROUP_OPERATIONS.deleteGroup:
         onDeleteGroup();
@@ -399,6 +461,10 @@ const CreateEditGroup = ({route}) => {
     return [...selectedConnectionsIds].includes(id);
   }
 
+  function isEnabledMemberChat() {
+    return parseInt(groupDetails?.chat_enabled) === 1;
+  }
+
   function getGroupNameError() {
     if (groupDetails?.group_name?.toLowerCase() !== 'my fans') {
       if (groupName.trim().toLowerCase() === 'my fans') {
@@ -414,7 +480,9 @@ const CreateEditGroup = ({route}) => {
     if (isGroupOwner()) {
       groupMenuList.push({
         id: GROUP_OPERATIONS.enableDisableMemberChat,
-        buttonName: 'Enable Member Chat',
+        buttonName: `${
+          isEnabledMemberChat() ? 'Disable' : 'Enable'
+        } Member Chat`,
       });
       if (isOtherGroup()) {
         groupMenuList.push({

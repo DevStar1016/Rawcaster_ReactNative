@@ -43,8 +43,11 @@ const UsersGroupsListHome = () => {
           isEnableOnlineOfflineStatus
           isOnline
         />
-        <StyledText style={styles.profileNameText}>
-          {getSlicedText(item.display_name, 20)}
+
+        <StyledText
+          style={styles.profileNameText}
+          normalTextModeTextProps={{numberOfLines: 1}}>
+          {item.display_name}
         </StyledText>
       </TouchableOpacity>
     );
@@ -56,7 +59,7 @@ const UsersGroupsListHome = () => {
         <CustomHomeHeader
           title="My Connections"
           isEnableSafeArea
-          isEnableSearch={false}
+          isEnableSearch={true}
           // isEnableBack
           // onPressBack={() => {
           //   navigation.goBack();
@@ -85,7 +88,7 @@ const UsersGroupsListHome = () => {
                 showsHorizontalScrollIndicator={false}
                 renderItem={renderRecentChatItem}
                 ItemSeparatorComponent={() => {
-                  return <View style={{width: 10}} />;
+                  return <View style={{width: 5}} />;
                 }}
               />
             </View>
@@ -114,10 +117,12 @@ const styles = StyleSheet.create({
   itemContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: 90,
   },
   profileNameText: {
     color: COLORS.white,
     fontFamily: FONTS.DMSans.medium,
+    textAlign: 'center',
   },
   topTabContainer: {
     flex: 1,

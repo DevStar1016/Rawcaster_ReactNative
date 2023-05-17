@@ -4,7 +4,7 @@ import {useDispatch, useStore} from 'react-redux';
 import moment from 'moment';
 import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
 import ConectionRequestModal from '../Modals/ConectionRequestModal';
-import {useGroupsList, useUserData} from '../Utilities/StoreData';
+import {useUserData} from '../Utilities/StoreData';
 import {setConnectionsList, setGroupsList} from '../Store/Slices/HomeSlice';
 import {SocketEvents} from '../Services/Socket/SocketEvents';
 import {GROUP_PROCESS_SOCKET_TYPE} from '../Services/Socket/SocketConstants';
@@ -46,7 +46,6 @@ const SocketListener = () => {
         console.log('SocketListen  groupchatting on in Dashboard');
         switch (message.event) {
           case 'groupchatmessage':
-            console.log(message, 'GROUP CHAT RECEIVED');
             break;
           case 'groupchatmessagedelete':
             break;
@@ -55,6 +54,7 @@ const SocketListener = () => {
           case 'grouptyping':
             break;
           case 'groupchatenable':
+            handleEnableDisableGroupChat(message?.groupId, message?.status);
             break;
           case 'groupchatmsgtransfer':
             handleGroupFunctionalities(message);
@@ -70,7 +70,6 @@ const SocketListener = () => {
     socketListen.on(
       'message',
       message => {
-        console.log(message, 'Socket Received Message');
         switch (message.event) {
           case SocketEvents.friendRequest:
             handleSocketFriendRequests(message?.data);
@@ -151,21 +150,26 @@ const SocketListener = () => {
         handleCreateGroup(message?.groupData);
         break;
       case GROUP_PROCESS_SOCKET_TYPE.editGroup:
-        handleEditGroup(message?.groupData);
+        handleUpdateGroup(message?.groupData);
         break;
       case GROUP_PROCESS_SOCKET_TYPE.deleteGroup:
         handleDeleteGroup(message?.groupId);
         break;
       case GROUP_PROCESS_SOCKET_TYPE.removeGroupMember:
+        handleRemoveGroupMember(message?.removed_user_id, message?.groupData);
         break;
       case GROUP_PROCESS_SOCKET_TYPE.addGroupMember:
+        handleUpdateGroup(message?.groupData);
+        break;
+      case GROUP_PROCESS_SOCKET_TYPE.exitGroup:
+        handleExitGroup(message?.userId, message?.groupId);
         break;
     }
   }
 
   function handleCreateGroup(groupDetails) {
     if (groupDetails) {
-      let tempGroupsList = store.getState().home.groupsList;
+      let tempGroupsList = [...store.getState().home.groupsList];
       const tempIndex = tempGroupsList.findIndex(
         item => item.group_id === groupDetails?.group_id,
       );
@@ -176,24 +180,66 @@ const SocketListener = () => {
     }
   }
 
-  function handleEditGroup(groupDetails) {
+  function handleUpdateGroup(groupDetails) {
     if (groupDetails) {
-      let tempGroupsList = store.getState().home.groupsList;
+      let tempGroupsList = [...store.getState().home.groupsList];
       const tempIndex = tempGroupsList.findIndex(
         item => item.group_id === groupDetails?.group_id,
       );
       if (tempIndex !== -1) {
         tempGroupsList[tempIndex] = {...groupDetails};
+      } else {
+        tempGroupsList = [{...groupDetails}, ...tempGroupsList];
       }
       dispatch(setGroupsList(tempGroupsList));
     }
   }
 
   function handleDeleteGroup(groupId) {
-    let tempGroupsList = store.getState().home.groupsList;
+    let tempGroupsList = [...store.getState().home.groupsList];
     tempGroupsList = [...tempGroupsList].filter(
       item => item.group_id !== groupId,
     );
+    dispatch(setGroupsList(tempGroupsList));
+  }
+
+  function handleRemoveGroupMember(removedUserId, groupDetails) {
+    const profile = store.getState().auth.profile;
+    if (removedUserId === profile.user_id) {
+      handleDeleteGroup(groupDetails?.group_id);
+    } else {
+      handleUpdateGroup(groupDetails);
+    }
+  }
+
+  function handleEnableDisableGroupChat(groupId, changedStatus) {
+    let tempGroupsList = [...store.getState().home.groupsList];
+    const tempIndex = [...tempGroupsList].findIndex(
+      item => item.group_id === groupId,
+    );
+    if (tempIndex !== -1) {
+      tempGroupsList[tempIndex] = {
+        ...tempGroupsList[tempIndex],
+        chat_enabled: changedStatus,
+      };
+    }
+    dispatch(setGroupsList(tempGroupsList));
+  }
+
+  function handleExitGroup(userId, groupId) {
+    let tempGroupsList = [...store.getState().home.groupsList];
+    let tempIndex = [...tempGroupsList].findIndex(
+      item => item.group_id === groupId,
+    );
+    if (tempIndex !== -1) {
+      let filteredMembersList = [
+        ...tempGroupsList[tempIndex]?.group_members_list,
+      ].filter(item => item.user_id !== userId);
+      tempGroupsList[tempIndex] = {
+        ...tempGroupsList[tempIndex],
+        group_members_list: [...filteredMembersList],
+      };
+    }
     dispatch(setGroupsList(tempGroupsList));
   }
 

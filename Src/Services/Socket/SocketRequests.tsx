@@ -3,6 +3,7 @@ import {GROUP_PROCESS_SOCKET_TYPE} from './SocketConstants';
 import {SocketEvents} from './SocketEvents';
 import {
   FriendRequestSocketProps,
+  GroupChatEnableDisableProps,
   groupFunctionalitySocketProps,
 } from './SocketTypes';
 
@@ -23,6 +24,9 @@ export const groupFunctionalitySocket = ({
   userId,
   processType,
   groupData,
+  createdBy,
+  added_user_ids,
+  removed_user_id,
 }: groupFunctionalitySocketProps) => {
   const socketMessage = {
     event: SocketEvents.groupchatmsgtransfer,
@@ -30,8 +34,25 @@ export const groupFunctionalitySocket = ({
     groupId: groupId,
     userId: userId,
     groupData: groupData,
+    createdBy: createdBy,
+    added_user_ids: added_user_ids,
+    removed_user_id: removed_user_id,
   };
-  console.log(JSON.stringify(socketMessage), 'SOCKET MESSAGE SEND');
+
+  sendMessage(socketMessage, 'groupchatting');
+};
+
+export const groupChatEnableDisableSocket = ({
+  groupId,
+  userId,
+  status,
+}: GroupChatEnableDisableProps) => {
+  const socketMessage = {
+    event: SocketEvents.groupchatenable,
+    groupId: groupId,
+    userId: userId,
+    status: status,
+  };
 
   sendMessage(socketMessage, 'groupchatting');
 };

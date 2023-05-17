@@ -6,4 +6,5 @@ export const GROUP_PROCESS_SOCKET_TYPE = {
   deleteGroup: 'delete_group',
   removeGroupMember: 'remove_group_member',
   addGroupMember: 'add_group_member',
+  exitGroup: 'exit_group',
 };

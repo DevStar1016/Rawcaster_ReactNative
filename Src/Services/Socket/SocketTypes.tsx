@@ -20,4 +20,13 @@ export type groupFunctionalitySocketProps = {
     | 'remove_group_member'
     | 'add_group_member';
   groupData?: any;
+  createdBy?: string;
+  added_user_ids?: any[];
+  removed_user_id?: any;
+};
+
+export type GroupChatEnableDisableProps = {
+  groupId: any;
+  userId: any;
+  status: number;
 };

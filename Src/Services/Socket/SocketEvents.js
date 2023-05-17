@@ -3,4 +3,5 @@ export const SocketEvents = {
   friendResponse: 'friendresponse',
   friendStatus: 'friendstatus',
   groupchatmsgtransfer: 'groupchatmsgtransfer',
+  groupchatenable: 'groupchatenable',
 };

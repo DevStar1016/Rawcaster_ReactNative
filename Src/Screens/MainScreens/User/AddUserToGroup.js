@@ -5,6 +5,7 @@ import {COLORS} from '../../../Utilities/Colors';
 import {
   useConnectionsList,
   useGroupsList,
+  useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
 import GroupUserItem from './GroupUserItem';
@@ -16,6 +17,8 @@ import {useDispatch} from 'react-redux';
 import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 import {useNavigation} from '@react-navigation/native';
 import Toast from '../../../Components/Toast';
+import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
+import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
 
 var isMount = true;
 const AddUserToGroup = ({route}) => {
@@ -23,6 +26,7 @@ const AddUserToGroup = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
+  const profile = useProfile();
   const groupsList = useGroupsList();
   const [isLoading, setisLoading] = useState(false);
   const [loaderText, setloaderText] = useState('');
@@ -65,7 +69,16 @@ const AddUserToGroup = ({route}) => {
             tempGroupsList[tempIndex].group_members_list = [
               ...groupMembersList,
             ];
+            groupFunctionalitySocket({
+              groupId: groupId,
+              processType: GROUP_PROCESS_SOCKET_TYPE.addGroupMember,
+              userId: profile?.user_id,
+              createdBy: profile.name,
+              added_user_ids: selectedConnectionsIds,
+              groupData: {...tempGroupsList[tempIndex]},
+            });
           }
+
           dispatch(setGroupsList(tempGroupsList));
           Toast.success(res.data.msg);
           navigation.goBack();

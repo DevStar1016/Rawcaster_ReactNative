@@ -62,7 +62,6 @@ const NotificationsHome = () => {
         isEnableTopSafeAreaHomeHeader
         headerProps={{
           bgColor: COLORS.transparent,
-          isEnableSearch: false,
           isEnableLive: false,
         }}
         isEnableDefaultBackground

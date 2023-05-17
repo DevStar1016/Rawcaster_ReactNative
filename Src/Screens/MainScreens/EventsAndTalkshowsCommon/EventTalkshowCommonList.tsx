@@ -211,7 +211,6 @@ const EventTalkshowCommonScreen = ({
       isEnableTopSafeAreaHomeHeader
       headerProps={{
         bgColor: COLORS.transparent,
-        isEnableSearch: false,
         isEnableLive: false,
       }}
       defaultBackgroundProps={{
