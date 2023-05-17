@@ -190,6 +190,7 @@ const Blocking = () => {
   }
 
   function onBlockusers(list) {
+    console.log(list, 'BLOCK');
     Alert.alert(
       'Block!',
       'Do you want to block the selected Users?',
