@@ -19,6 +19,7 @@ function NuggetItem({
   onDeleteNugget,
   onPressShare,
   onPressShareType,
+  onBlockUser,
 }) {
   const {isMuted, viewableNuggetItem, mediaHeight, isAutoPlay} =
     useNuggetParentActions();
@@ -89,6 +90,7 @@ function NuggetItem({
           onPressShare={onPressShare}
           onEditNugget={onEditNugget}
           onDeleteNugget={onDeleteNugget}
+          onBlockUser={onBlockUser}
           isPaused={paused}
           onPlayPauseVideo={() => {
             setpaused(pre => !pre);

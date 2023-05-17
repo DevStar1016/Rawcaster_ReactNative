@@ -175,6 +175,7 @@ const ConnectionsList = () => {
         item.display_name.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
+    console.log([...pendingConnectionRequests, ...connectionsList], 'SSSSS');
     return [...pendingConnectionRequests, ...connectionsList];
   }
 
