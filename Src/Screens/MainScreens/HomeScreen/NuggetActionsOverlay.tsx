@@ -67,6 +67,7 @@ type Props = {
   onPressShareType: () => void;
   onDeleteNugget: () => void;
   onPlayPauseVideo?: () => void;
+  onBlockUser: () => void;
 };
 type ActionContainerProps = {
   icon: IconType;
@@ -99,6 +100,7 @@ function NuggetActionsOverlay({
   onDeleteNugget,
   onPressShareType,
   onPlayPauseVideo,
+  onBlockUser,
 }: Props) {
   const {
     headerContainerHeight,
@@ -302,6 +304,8 @@ function NuggetActionsOverlay({
         onDeleteNugget();
         break;
       case 3:
+        onBlockUser();
+        break;
       case 4:
       case 5:
     }

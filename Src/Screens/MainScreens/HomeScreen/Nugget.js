@@ -21,6 +21,7 @@ import {
 } from '../../../Utilities/StoreData';
 import PollNugget from './NuggetItemTypes/PollNugget';
 import {
+  blockUnblockUserService,
   deleteNuggetService,
   followAndUnfollowService,
   likeAndUnlikeNuggetService,
@@ -181,6 +182,28 @@ const Nugget = ({
       {cancelable: false},
     );
 
+  const onBlockUser = () =>
+    Alert.alert(
+      'Block!',
+      'Do you want to block this user?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            setloaderText('Blocking User...');
+            setisActionLoading(true);
+            handleBlockUser(nuggetData.user_id);
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+
   const onEditNugget = () => {
     navigation.navigate('PostEditNugget', {
       nugget: nuggetData,
@@ -210,6 +233,41 @@ const Nugget = ({
           }
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.nugget_id !== nuggetId,
+          );
+          dispatch(setNuggetsList(filteredNuggetsList));
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setloaderText('');
+        setisActionLoading(false);
+      });
+  };
+
+  const handleBlockUser = userId => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('user_id', userId);
+    formData.append('action', 1);
+    blockUnblockUserService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (isFromGlobalSearch) {
+            dispatch(
+              setSearchedNuggetsList(
+                [...searchedNuggetsList].filter(
+                  item => item.user_id !== userId,
+                ),
+              ),
+            );
+          }
+          const filteredNuggetsList = [...nuggetsList].filter(
+            item => item.user_id !== userId,
           );
           dispatch(setNuggetsList(filteredNuggetsList));
         } else if (res.data.status === 0) {
@@ -347,6 +405,9 @@ const Nugget = ({
         onPressShare={onPressShare}
         index={index}
         onPressShareType={onPressShareType}
+        onBlockUser={() => {
+          onBlockUser();
+        }}
       />
     );
   }
@@ -397,6 +458,9 @@ const Nugget = ({
             }}
             onPressShareType={onPressShareType}
             onPressShare={onPressShare}
+            onBlockUser={() => {
+              onBlockUser();
+            }}
           />
         ) : (
           <TextOnlyNugget
@@ -406,6 +470,9 @@ const Nugget = ({
             }}
             onPressShareType={onPressShareType}
             onPressShare={onPressShare}
+            onBlockUser={() => {
+              onBlockUser();
+            }}
           />
         )}
 

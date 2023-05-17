@@ -12,6 +12,7 @@ const TextOnlyNugget = ({
   onPressShareType,
   onEditNugget,
   onDeleteNugget,
+  onBlockUser,
 }) => {
   const {mediaHeight} = useNuggetParentActions();
   const insets = useInsets();
@@ -30,6 +31,7 @@ const TextOnlyNugget = ({
         onDeleteNugget={onDeleteNugget}
         onPressShare={onPressShare}
         onPressShareType={onPressShareType}
+        onBlockUser={onBlockUser}
       />
     </View>
   );
