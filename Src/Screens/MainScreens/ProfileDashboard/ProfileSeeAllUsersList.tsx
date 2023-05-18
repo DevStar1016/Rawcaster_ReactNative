@@ -21,6 +21,7 @@ import {
 import StyledText from '../../../Components/StyledText';
 import {getAuthCode, getSlicedText} from '../../../Utilities/Methods';
 import {
+  followAndUnfollowService,
   getFollowListService,
   listAllFriendsService,
   listUnClaimAccountService,
@@ -30,6 +31,8 @@ import Toast from '../../../Components/Toast';
 import FilterProfileSeeAllUsers from '../../../Modals/FilterProfileSeeAllUsers';
 import {setUnclaimedAccountsList} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
+import SVGIcon from '../../../Components/SVGIcon';
+import Loader from '../../../Components/Loader';
 
 type Props = {
   initialList: [];
@@ -128,7 +131,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
     if (dataToFilter) {
       if (dataToFilter?.country) {
-        formData.append('Location', dataToFilter?.country?.name);
+        formData.append('location', dataToFilter?.country?.name);
       }
       if (dataToFilter?.gender) {
         formData.append('gender', dataToFilter?.gender?.id);
@@ -175,7 +178,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     formData.append('page_number', pageNumber);
     if (dataToFilter) {
       if (dataToFilter?.country) {
-        formData.append('Location', dataToFilter?.country?.name);
+        formData.append('location', dataToFilter?.country?.name);
       }
       if (dataToFilter?.gender) {
         formData.append('gender', dataToFilter?.gender?.id);
@@ -223,7 +226,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     formData.append('page_number', pageNumber);
     if (dataToFilter) {
       if (dataToFilter?.country) {
-        formData.append('Location', dataToFilter?.country?.name);
+        formData.append('location', dataToFilter?.country?.name);
       }
       if (dataToFilter?.gender) {
         formData.append('gender', dataToFilter?.gender?.id);
@@ -281,19 +284,19 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          // setprofileList(preList => {
-          //   let tempProfileList = [...preList];
-          //   let tempIndex = [...preList].findIndex(
-          //     item => item.user_ref_id === userRefId,
-          //   );
-          //   if (tempIndex !== -1) {
-          //     tempProfileList[tempIndex] = {
-          //       ...tempProfileList[tempIndex],
-          //       friend_request_status: '1',
-          //     };
-          //   }
-          //   return tempProfileList;
-          // });
+          setusersList(preList => {
+            let tempUserList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempUserList[tempIndex] = {
+                ...tempUserList[tempIndex],
+                friend_status: 1,
+              };
+            }
+            return tempUserList;
+          });
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
@@ -316,6 +319,79 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         }
       });
   };
+
+  const handleBecomeFan = (followUserId: any) => {
+    // 1 - follow, 2 - unfollow
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('follow_userid', followUserId);
+    formData.append('type', 1);
+    followAndUnfollowService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setusersList(preList => {
+            let tempList = [...preList];
+            let tempIndex = tempList.findIndex(
+              sub => sub.user_ref_id === followUserId,
+            );
+            if (tempIndex !== -1) {
+              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+            }
+            return tempList;
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  };
+
+  function getRightIcon(item: any) {
+    if (item.user_id !== profile.user_id) {
+      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
+        return 'shield_secondary';
+      }
+      if (userId) {
+        if (listType === 'connections' && item.friend_status === 0) {
+          return 'user_plus_pink';
+        }
+        if (listType === 'influencers' && !item.follow) {
+          return 'plus_rounded_fill_primary';
+        }
+      }
+      return undefined;
+    }
+    return undefined;
+  }
+
+  function getRightIconAction(item: any) {
+    if (item.user_id !== profile.user_id) {
+      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
+        navigation.navigate('ClaimAccount', {
+          influencerId: item.user_id,
+        });
+      }
+      if (userId) {
+        if (listType === 'connections' && item.friend_status === 0) {
+          handleSendFriendRequest(item.user_ref_id, item.user_id);
+        }
+        if (listType === 'influencers' && !item.follow) {
+          handleBecomeFan(item.user_ref_id);
+        }
+      }
+    }
+  }
 
   function onPressFilter() {
     if (isMount) {
@@ -381,17 +457,17 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         <View style={styles.displayTextContainer}>
           <StyledText>{getSlicedText(item.display_name.trim(), 15)}</StyledText>
         </View>
-        {/* {listType === 'connections' && (
+        {getRightIcon(item) && (
           <View style={styles.actionButtonsContainer}>
-            <RoundedPlusButton
-              iconSize={20}
-              style={{height: 35, width: 35, borderRadius: 35 / 2}}
+            <SVGIcon
+              icon={getRightIcon(item)}
+              isButton
               onPress={() => {
-                console.log(item, 'OIPPOOI');
+                getRightIconAction(item);
               }}
             />
           </View>
-        )} */}
+        )}
       </TouchableOpacity>
     );
   };
@@ -452,6 +528,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           preFilterData={filterData}
           listType={listType}
         />
+      </Modal>
+      <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
     </View>
   );

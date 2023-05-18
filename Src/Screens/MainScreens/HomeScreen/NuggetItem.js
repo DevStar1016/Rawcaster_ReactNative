@@ -20,6 +20,7 @@ function NuggetItem({
   onPressShare,
   onPressShareType,
   onBlockUser,
+  onReportAbouseNugget,
 }) {
   const {isMuted, viewableNuggetItem, mediaHeight, isAutoPlay} =
     useNuggetParentActions();
@@ -95,6 +96,7 @@ function NuggetItem({
           onPlayPauseVideo={() => {
             setpaused(pre => !pre);
           }}
+          onReportAbouseNugget={onReportAbouseNugget}
         />
       </View>
     ),

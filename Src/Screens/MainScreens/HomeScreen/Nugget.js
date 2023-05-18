@@ -25,6 +25,7 @@ import {
   deleteNuggetService,
   followAndUnfollowService,
   likeAndUnlikeNuggetService,
+  nuggetAbuseReportService,
   saveAndUnsaveNuggetService,
   shareNuggetService,
 } from '../../../Services/ApiService';
@@ -44,6 +45,7 @@ import {
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
 import BigList from 'react-native-big-list';
+import InputPopup from '../../../Modals/InputPopup';
 
 const Nugget = ({
   nugget,
@@ -79,6 +81,7 @@ const Nugget = ({
   const [totalComments, settotalComments] = useState(nuggetData.total_comments);
   const [isRepeatVideo, setisRepeatVideo] = useState(false);
   const [viewableItem, setviewableItem] = useState('');
+  const [isOpenReportModal, setisOpenReportModal] = useState(false);
   const viewConfigRef = useRef({
     waitForInteraction: false,
     minimumViewTime: 100,
@@ -336,6 +339,45 @@ const Nugget = ({
     }
   };
 
+  function handleReportNugget(nuggetId, message = '') {
+    setloaderText('Reporting this Nugget');
+    setisActionLoading(true);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nuggetId);
+    formData.append('message', message.trim());
+    nuggetAbuseReportService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (isFromGlobalSearch) {
+            dispatch(
+              setSearchedNuggetsList(
+                [...searchedNuggetsList].filter(
+                  item => item.nugget_id !== nuggetId,
+                ),
+              ),
+            );
+          }
+          const filteredNuggetsList = [...nuggetsList].filter(
+            item => item.nugget_id !== nuggetId,
+          );
+          dispatch(setNuggetsList(filteredNuggetsList));
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(() => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+          setloaderText('');
+        }
+      });
+  }
+
   const onPressShare = () => {
     setisOpenSharTypeList(true);
   };
@@ -408,6 +450,9 @@ const Nugget = ({
         onBlockUser={() => {
           onBlockUser();
         }}
+        onReportAbouseNugget={() => {
+          setisOpenReportModal(true);
+        }}
       />
     );
   }
@@ -461,6 +506,9 @@ const Nugget = ({
             onBlockUser={() => {
               onBlockUser();
             }}
+            onReportAbouseNugget={() => {
+              setisOpenReportModal(true);
+            }}
           />
         ) : (
           <TextOnlyNugget
@@ -472,6 +520,9 @@ const Nugget = ({
             onPressShare={onPressShare}
             onBlockUser={() => {
               onBlockUser();
+            }}
+            onReportAbouseNugget={() => {
+              setisOpenReportModal(true);
             }}
           />
         )}
@@ -542,6 +593,34 @@ const Nugget = ({
           <Loader
             bgColor={COLORS.transparentDimColor}
             loaderText={loaderText}
+          />
+        </Modal>
+
+        <Modal
+          visible={isOpenReportModal}
+          transparent
+          onRequestClose={() => {
+            setisOpenReportModal(false);
+          }}>
+          <InputPopup
+            closePopup={() => {
+              setisOpenReportModal(false);
+            }}
+            title={'Report this nugget to Rawcaster'}
+            submitButtonProps={{
+              buttonText: 'Report',
+            }}
+            requiredErrorText="Report Reason is required"
+            textInputProps={{
+              placeHolder: 'Enter your message',
+              multiline: true,
+              inputContainerHeight: 100,
+              textAlignVertical: 'top',
+            }}
+            onSubmit={message => {
+              setisOpenReportModal(false);
+              handleReportNugget(nuggetData.nugget_id, message);
+            }}
           />
         </Modal>
       </View>
