@@ -7,6 +7,7 @@ import SVGIcon from '../../../Components/SVGIcon';
 import RadioButton from '../../../Components/RadioButton';
 import SubmitButton from '../../../Components/SubmitButton';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
+import {getIsEnableFriendRequest} from '../../../Utilities/Methods';
 
 const UserItem = ({
   item,
@@ -16,6 +17,8 @@ const UserItem = ({
   isSelected,
   onPressItem,
   onPressRemove,
+  onBecomeFan,
+  onConnectionRequest,
   isMe,
   isGroup = true,
 }) => {
@@ -52,24 +55,28 @@ const UserItem = ({
     }
     return (
       <View style={styles.requestActionButtonsContainer}>
-        <SubmitButton
-          buttonText="Become a fan"
-          marginTop={0}
-          marginBottom={0}
-          padding={0}
-          marginHorizontal={10}
-          paddingHorizontal={10}
-          paddingVertical={3}
-          buttonTextStyle={{
-            fontSize: 13,
-          }}
-          onPress={() => {}}
-        />
-        <RoundedIconButton
-          bgColor={COLORS.primaryLight}
-          icon="user_plus_white"
-          onPress={() => {}}
-        />
+        {!item.follow && (
+          <SubmitButton
+            buttonText="Become a fan"
+            marginTop={0}
+            marginBottom={0}
+            padding={0}
+            marginHorizontal={10}
+            paddingHorizontal={10}
+            paddingVertical={3}
+            buttonTextStyle={{
+              fontSize: 13,
+            }}
+            onPress={onBecomeFan}
+          />
+        )}
+        {getIsEnableFriendRequest(item.friend_request_status) && (
+          <RoundedIconButton
+            bgColor={COLORS.primaryLight}
+            icon="user_plus_white"
+            onPress={onConnectionRequest}
+          />
+        )}
       </View>
     );
   }
@@ -95,7 +102,7 @@ const UserItem = ({
           {`${isMe && isGroup ? 'You' : item.display_name.trim()}`}
         </StyledText>
       </View>
-      {getItemRightComponent(item)}
+      {getItemRightComponent()}
     </TouchableOpacity>
   );
 };

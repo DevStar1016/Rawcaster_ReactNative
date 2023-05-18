@@ -20,16 +20,22 @@ import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import SearchInput from '../../../Components/SearchInput';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
-import {searchRawcasterUsersService} from '../../../Services/ApiService';
+import {
+  followAndUnfollowService,
+  searchRawcasterUsersService,
+  sendFriendRequestsService,
+} from '../../../Services/ApiService';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import axios from 'axios';
 import UserItem from './UserItem';
+import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const AddNewConnection = () => {
   const token = useToken();
+  const profile = useProfile();
   const [isActionLoading, setisActionLoading] = useState(false);
   const [actionLoaderText, setactionLoaderText] = useState('');
   const [usersList, setusersList] = useState([]);
@@ -124,6 +130,94 @@ const AddNewConnection = () => {
       });
   };
 
+  const handleBecomeFan = userRefId => {
+    // 1 - follow, 2 - unfollow
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('follow_userid', userRefId);
+    formData.append('type', 1);
+    followAndUnfollowService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setusersList(preList => {
+            let tempUserList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempUserList[tempIndex] = {
+                ...tempUserList[tempIndex],
+                follow: 1,
+              };
+            }
+            return tempUserList;
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  };
+
+  const handleSendFriendRequest = (userRefId, user_id) => {
+    if (isMount) {
+      setisActionLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    formData.append('user_ids', JSON.stringify([userRefId]));
+    sendFriendRequestsService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          setusersList(preList => {
+            let tempUserList = [...preList];
+            let tempIndex = [...preList].findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempUserList[tempIndex] = {
+                ...tempUserList[tempIndex],
+                friend_request_status: 1,
+              };
+            }
+            return tempUserList;
+          });
+          if (res.data?.friend_request_ids?.length > 0) {
+            let data = {
+              friend_request_id: res.data.friend_request_ids[0],
+              display_name: profile?.name,
+              profile_img: profile?.profile_image,
+              user_id: profile?.user_id,
+            };
+            friendRequestSocket({user_id: user_id, data: data});
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisActionLoading(false);
+        }
+      });
+  };
+
   function onRefresh() {
     currentPage = 1;
     totalPages = 1;
@@ -157,6 +251,12 @@ const AddNewConnection = () => {
         isGroup={false}
         onPressItem={() => {
           handleSelectUnselectUser(item.user_id);
+        }}
+        onBecomeFan={() => {
+          handleBecomeFan(item.user_ref_id);
+        }}
+        onConnectionRequest={() => {
+          handleSendFriendRequest(item.user_ref_id, item.user_id);
         }}
       />
     );

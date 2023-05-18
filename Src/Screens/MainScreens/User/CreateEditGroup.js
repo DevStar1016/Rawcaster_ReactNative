@@ -750,7 +750,7 @@ const CreateEditGroup = ({route}) => {
           submitButtonProps={{
             buttonText: 'Report',
           }}
-          requiredErrorText="Report Reason is reuired"
+          requiredErrorText="Report Reason is required"
           textInputProps={{
             placeHolder: 'Enter your message',
             multiline: true,

@@ -12,6 +12,7 @@ const PollNugget = ({
   onPressShare,
   onPressShareType,
   onBlockUser,
+  onReportAbouseNugget,
 }) => {
   const {mediaHeight} = useNuggetParentActions();
 
@@ -32,6 +33,7 @@ const PollNugget = ({
         onEditNugget={onEditNugget}
         onDeleteNugget={onDeleteNugget}
         onBlockUser={onBlockUser}
+        onReportAbouseNugget={onReportAbouseNugget}
       />
     </View>
   );

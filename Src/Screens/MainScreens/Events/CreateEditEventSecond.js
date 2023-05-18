@@ -39,7 +39,7 @@ const CreateEditEventSecond = ({route}) => {
   );
   useEffect(() => {
     isMount = true;
-
+    console.log(submitedData, 'SUM');
     return () => {
       isMount = false;
     };
