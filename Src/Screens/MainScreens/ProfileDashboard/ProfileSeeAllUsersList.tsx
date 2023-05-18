@@ -33,6 +33,7 @@ import {setUnclaimedAccountsList} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
 import SVGIcon from '../../../Components/SVGIcon';
 import Loader from '../../../Components/Loader';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 type Props = {
   initialList: [];
@@ -478,12 +479,23 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     );
   };
 
+  function renderEmptyComponent() {
+    return (
+      <View style={[styles.emptyComponent]}>
+        {/* <DefaultBackground /> */}
+        <StyledText style={{color: COLORS.black, paddingVertical: 5}}>
+          We didn't find any results!
+        </StyledText>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.mainContainer}>
       <HeaderWithBack
         title={title}
         isEnableSafeArea
-        isEnableRightIcon
+        isEnableRightIcon={listType !== 'unclaimed_influencers'}
         rightIcon="filter_line_white"
         rightIconSize={18}
         onPressRightIcon={onPressFilter}
@@ -518,6 +530,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
                 onRefresh={onRefresh}
               />
             }
+            ListEmptyComponent={renderEmptyComponent}
           />
         </View>
       )}
@@ -569,4 +582,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actionButtonsContainer: {},
+  emptyComponent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
