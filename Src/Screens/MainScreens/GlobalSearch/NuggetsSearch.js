@@ -155,8 +155,6 @@ const NuggetsSearch = () => {
     },
   };
 
-  console.log(insets.mediaHeight - topLayerHeight, topLayerHeight, 'HEIGHt');
-
   const renderNuggetItem = useCallback(renderItem, [
     searchedNuggetsList,
     isMuted,

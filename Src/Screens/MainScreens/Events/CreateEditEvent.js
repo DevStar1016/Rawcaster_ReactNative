@@ -41,7 +41,7 @@ const CreateEditEvent = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const settings = useSettings();
-  const {eventId} = route.params ?? {};
+  const {eventId, isFromEventSearch} = route.params ?? {};
   const [eventTypesList, seteventTypesList] = useState([]);
   const [liveEventDate, setliveEventDate] = useState(new Date());
   const [loaderText, setloaderText] = useState(
@@ -133,10 +133,16 @@ const CreateEditEvent = ({route}) => {
             ...selectedValues,
           };
 
-          navigation.navigate('CreateEditEventSecond', {
-            submitedData: data,
-            eventId,
-          });
+          navigation.navigate(
+            isFromEventSearch
+              ? 'CreateEditSearchEventSecond'
+              : 'CreateEditEventSecond',
+            {
+              isFromEventSearch: isFromEventSearch,
+              submitedData: data,
+              eventId,
+            },
+          );
         }
       },
     });

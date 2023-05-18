@@ -334,7 +334,7 @@ const EventTalkshowCommonScreen = ({
         </Modal>
 
         <Modal visible={isActionLoading} transparent>
-          <Loader bgColor={COLORS.white} />
+          <Loader bgColor={COLORS.transparentDimColor} />
         </Modal>
       </View>
     </View>

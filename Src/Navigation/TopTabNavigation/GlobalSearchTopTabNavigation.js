@@ -7,6 +7,7 @@ import TagsSearch from '../../Screens/MainScreens/GlobalSearch/TagsSearch';
 import {setIsBottomTabBarAbsolute} from '../../Store/Slices/UtilitySlice';
 import {useGlobalSearch} from '../../Utilities/Contexts';
 import GlobalSearchCustomTopTabBar from './GlobalSearchCustomTopTabBar';
+import EventsSearchStack from '../../Stacks/EventsSearchStack';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -46,8 +47,8 @@ function GlobalSearchTopTabNavigation() {
         options={{title: 'Nuggets'}}
       />
       <Tab.Screen
-        name="EventsSearch"
-        component={EventsSearch}
+        name="EventsSearchStack"
+        component={EventsSearchStack}
         options={{title: 'Events'}}
       />
       <Tab.Screen

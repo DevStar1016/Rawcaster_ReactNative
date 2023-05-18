@@ -17,6 +17,7 @@ const EventListItem = ({
   item,
   isDarkTheme = false,
   onPressEdit,
+  isFromGlobalSearch = false,
   onPressDelete,
   isEnableBorder = false,
   onPressStartJoinEvent,
@@ -84,7 +85,7 @@ const EventListItem = ({
               Hosted by {htmlDecodeText(item.original_user_name)}
             </StyledText>
           </View>
-          {isOwner() && (
+          {isOwner() && !isFromGlobalSearch && (
             <View style={styles.actionButtonsContainer}>
               <TouchableOpacity
                 style={styles.button}

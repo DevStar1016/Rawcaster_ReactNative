@@ -20,7 +20,7 @@ var isMount = true;
 const CreateEditEventSecond = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
-  const {submitedData, eventId} = route.params ?? {};
+  const {submitedData, eventId, isFromEventSearch} = route.params ?? {};
   const [loaderText, setloaderText] = useState('');
   const [isLoading, setisLoading] = useState(false);
   const [bannerImage, setbannerImage] = useState(
@@ -92,7 +92,7 @@ const CreateEditEventSecond = ({route}) => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
-            routes: [{name: 'Events'}],
+            routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -145,7 +145,7 @@ const CreateEditEventSecond = ({route}) => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
-            routes: [{name: 'Events'}],
+            routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -370,7 +370,7 @@ const CreateEditEventSecond = ({route}) => {
             marginHorizontal={10}
             onPress={() => {
               navigation.reset({
-                routes: [{name: 'Events'}],
+                routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
               });
             }}
           />
