@@ -103,6 +103,10 @@ const REFERAL_OPTIONS_LIST = [
   },
 ];
 
+const APPSTORE_WHATSAPP_LINK =
+  'https://apps.apple.com/us/app/whatsapp-messenger/id310633997';
+const PLAYSTORE_WHATSAPP_LINK =
+  'https://play.google.com/store/apps/details?id=com.whatsapp&hl=en&gl=US&pli=1';
 const ReferalContactsList = ({navigation}) => {
   const profile = useProfile();
   const token = useToken();
@@ -144,7 +148,12 @@ const ReferalContactsList = ({navigation}) => {
     }
   };
 
-  function handleSocialShare({socialMedia, referalMessage = null, socialUrl}) {
+  function handleSocialShare({
+    socialMedia,
+    referalMessage = null,
+    socialUrl,
+    isWhatsApp = false,
+  }) {
     if (socialMedia) {
       Share.shareSingle({
         title: 'Rawcaster Invite',
@@ -165,6 +174,21 @@ const ReferalContactsList = ({navigation}) => {
         .then(() => {})
         .catch(e => {
           console.log(e, 'ERROR IN');
+          if (isWhatsApp) {
+            if (IS_IOS) {
+              Linking.openURL(APPSTORE_WHATSAPP_LINK)
+                .then(() => {})
+                .catch(e => {
+                  console.log(e, 'ERROR IN WHATSAPP');
+                });
+            } else {
+              Linking.openURL(PLAYSTORE_WHATSAPP_LINK)
+                .then(() => {})
+                .catch(e => {
+                  console.log(e, 'ERROR IN WHATSAPP');
+                });
+            }
+          }
         });
     }
   }
@@ -200,6 +224,7 @@ const ReferalContactsList = ({navigation}) => {
           socialUrl: `whatsapp://send?text=${encodeURIComponent(
             REFERAL_MESSAGE,
           )}`,
+          isWhatsApp: true,
         });
         return;
       case SHARE_OPTION.twitter:

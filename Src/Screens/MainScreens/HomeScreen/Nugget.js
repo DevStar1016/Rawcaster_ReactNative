@@ -586,6 +586,11 @@ const Nugget = ({
                 handleSharNugget(selectedShareTypeId, list);
               }
             }}
+            noDataText={
+              selectedShareTypeId === 3
+                ? 'No Groups Found'
+                : 'No Connections Found'
+            }
           />
         </Modal>
 

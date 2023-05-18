@@ -577,6 +577,11 @@ const GeneralSettings = () => {
               // setshareConnectionsGroupsIdsList(list);
             }
           }}
+          noDataText={
+            specificUsersModalData.specificListType === 2
+              ? 'No Groups Found'
+              : 'No Connections Found'
+          }
         />
       </Modal>
       <Modal visible={isLoading} transparent>

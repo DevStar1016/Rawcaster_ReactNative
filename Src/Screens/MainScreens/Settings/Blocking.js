@@ -403,6 +403,7 @@ const Blocking = () => {
             }
             onBlockusers(list);
           }}
+          noDataText="No Users found"
         />
       </Modal>
 

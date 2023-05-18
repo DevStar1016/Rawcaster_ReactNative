@@ -81,7 +81,7 @@ const NotificationsList = ({
     formData.append('page_number', pageNumber);
     listNotificationsService(formData)
       .then(res => {
-        if (notificationListType === 6) {
+        if (notificationListType === 4) {
           console.log(res.data, 'DATAA');
         }
         if (isMount) {

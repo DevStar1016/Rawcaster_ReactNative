@@ -32,6 +32,7 @@ type Props = {
   rightButtonText?: string;
   isEnableSelection?: boolean;
   displayFieldName?: string;
+  noDataText?: string;
   idFieldName?: string;
   imageFieldName?: string;
   isTitleCenter?: boolean;
@@ -60,6 +61,7 @@ const MultiItemsSelectList = ({
   maxSelectedCount = 0,
   isEnableSelection = true,
   isEnableLocalSearch = true,
+  noDataText = 'No Category found',
   rightButtonType = 'icon',
   rightButtonText = '',
   displayFieldName,
@@ -234,7 +236,7 @@ const MultiItemsSelectList = ({
             />
           </View>
         ) : (
-          <DefaultBackground centerText="No Category found" />
+          <DefaultBackground centerText={noDataText} />
         )}
       </View>
     </View>

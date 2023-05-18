@@ -1006,6 +1006,11 @@ const PostEditNugget = ({route}) => {
               setshareConnectionsGroupsIdsList(list);
             }
           }}
+          noDataText={
+            selectedShareType.id === 3
+              ? 'No Groups Found'
+              : 'No Connections Found'
+          }
         />
       </Modal>
     </HOCView>
