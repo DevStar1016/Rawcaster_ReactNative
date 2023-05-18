@@ -20,6 +20,7 @@ const InviteFanModal = ({setModal}) => {
   const [inviteUserText, setinviteUserText] = useState('');
   const [invitedUsersList, setinvitedUsersList] = useState([]);
   const [isLoading, setisLoading] = useState(false);
+  const [errorText, seterrorText] = useState('');
 
   useEffect(() => {
     isMount = true;
@@ -75,14 +76,14 @@ const InviteFanModal = ({setModal}) => {
     let temp = inviteUserText.toLowerCase().replace(',', '');
     temp = temp.replace(' ', '');
     if (mailformat.test(temp) === false) {
-      Toast.fail('Enter Valid Email id');
+      seterrorText('Enter Valid Email id');
       if (isMount) {
         setinviteUserText(temp);
       }
       return;
     }
     if (invitedUsersList.includes(temp)) {
-      Toast.fail('Email Already Added');
+      seterrorText('Email Already Added');
       if (isMount) {
         setinviteUserText(temp);
       }
@@ -109,12 +110,8 @@ const InviteFanModal = ({setModal}) => {
           setinvitedUsersList(prev => [...prev, ...newMail]);
         }
       }
-
-      // if (eventId) {
-      //   setAddinvitedusers((prev) => [...prev, ...newMail]);
-      // }
     } else {
-      Toast.fail('Please enter valid email');
+      seterrorText('Please enter valid email');
     }
 
     if (inviteUserInputRef.current) {
@@ -132,71 +129,70 @@ const InviteFanModal = ({setModal}) => {
   };
 
   return (
-    <View style={styles.mainContainer}>
-      <KeyboardAwareScrollView
-        keyboardShouldPersistTaps={'handled'}
-        style={{flexGrow: 0}}
-        contentContainerStyle={{
-          justifyContent: 'center',
-          paddingVertical: 20,
-        }}
-        showsVerticalScrollIndicator={false}>
-        <SafeAreaView style={styles.subContainer}>
-          <View style={styles.titleContainer}>
-            <View style={{flex: 1, justifyContent: 'center'}}>
-              <StyledText style={styles.titleText}>Invite Fans</StyledText>
-            </View>
-            <SVGIcon
-              icon="close_rounded_black"
-              isButton
-              height={20}
-              width={20}
-              onPress={() => {
-                setModal(false);
-              }}
-            />
+    <KeyboardAwareScrollView
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps={'handled'}
+      contentContainerStyle={[
+        styles.mainContainer,
+        {justifyContent: 'center'},
+      ]}>
+      <SafeAreaView style={styles.subContainer}>
+        <View style={styles.titleContainer}>
+          <View style={{flex: 1, justifyContent: 'center'}}>
+            <StyledText style={styles.titleText}>Invite Fans</StyledText>
           </View>
-
-          <TextBox
-            innerRef={inviteUserInputRef}
-            title="Invite your friends via email"
-            placeHolder="Your friend's email..."
-            value={inviteUserText}
-            onChangeText={text => {
-              if (isMount) {
-                setinviteUserText(text);
-              }
-              if (text.includes(',') || text.includes(' ')) {
-                addInvitedUsers();
-              }
-            }}
-            isEnableListAppend
-            appendedListProps={{
-              list: invitedUsersList,
-              onRemoveItem: handleRemoveInvitedUser,
-            }}
-            returnKeyType="send"
-            clearButtonMode="while-editing"
-            onSubmitEditing={addInvitedUsers}
-            textAlignVertical={'top'}
-          />
-          <SubmitButton
-            buttonText="SUBMIT"
-            marginTop={5}
+          <SVGIcon
+            icon="close_rounded_black"
+            isButton
+            height={20}
+            width={20}
             onPress={() => {
-              if (invitedUsersList.length === 0) {
-                addInvitedUsers(true);
-              } else {
-                inviteToRawcasterApiCall();
-              }
+              setModal(false);
             }}
           />
-        </SafeAreaView>
-      </KeyboardAwareScrollView>
+        </View>
+
+        <TextBox
+          innerRef={inviteUserInputRef}
+          title="Invite your friends via email"
+          placeHolder="Your friend's email..."
+          value={inviteUserText}
+          onChangeText={text => {
+            if (isMount) {
+              seterrorText('');
+              setinviteUserText(text);
+            }
+            if (text.includes(',') || text.includes(' ')) {
+              addInvitedUsers();
+            }
+          }}
+          errorText={errorText}
+          isEnableListAppend
+          appendedListProps={{
+            list: invitedUsersList,
+            onRemoveItem: handleRemoveInvitedUser,
+          }}
+          returnKeyType="send"
+          clearButtonMode="while-editing"
+          onSubmitEditing={addInvitedUsers}
+          textAlignVertical={'top'}
+        />
+        <SubmitButton
+          buttonText="SUBMIT"
+          marginTop={5}
+          onPress={() => {
+            if (invitedUsersList.length === 0) {
+              addInvitedUsers(true);
+            } else {
+              inviteToRawcasterApiCall();
+            }
+          }}
+        />
+      </SafeAreaView>
       <Modal visible={isLoading} transparent>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 

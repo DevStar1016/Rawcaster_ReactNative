@@ -36,6 +36,7 @@ import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useNavigation} from '@react-navigation/native';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 var isMount = true;
 const ConnectionsList = () => {

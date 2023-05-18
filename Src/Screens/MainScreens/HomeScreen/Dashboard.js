@@ -1,11 +1,9 @@
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
   StatusBar,
   StyleSheet,
   View,
-  VirtualizedList,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import BigList from 'react-native-big-list';
@@ -34,10 +32,8 @@ import Loader from '../../../Components/Loader';
 import {setIsBottomTabBarAbsolute} from '../../../Store/Slices/UtilitySlice';
 import {htmlDecodeText} from '../../../Utilities/Methods';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
-import {DIMENSIONS} from '../../../Utilities/Constants';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {NuggetParentActionsContext} from '../../../Utilities/Contexts';
-import {debounce} from 'lodash';
 var currentPage = 1;
 var totalPages = 1;
 var controller = undefined;
