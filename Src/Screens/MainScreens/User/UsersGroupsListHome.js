@@ -10,7 +10,7 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroupsTopTabNavigation';
 import {MyConnectionsContext} from '../../../Utilities/Contexts';
-import {getSlicedText} from '../../../Utilities/Methods';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 const UsersGroupsListHome = () => {
   const navigation = useNavigation();
@@ -59,13 +59,11 @@ const UsersGroupsListHome = () => {
         <CustomHomeHeader
           title="My Connections"
           isEnableSafeArea
+          bgColor={COLORS.transparent}
           isEnableSearch={true}
-          // isEnableBack
-          // onPressBack={() => {
-          //   navigation.goBack();
-          // }}
           isEnableLive={false}
         />
+        <DefaultBackground isEnableRLogo={false} bgColor={COLORS.primaryDark} />
         <View style={styles.contentContainer}>
           <View onLayout={onLayout}>
             <SearchInput

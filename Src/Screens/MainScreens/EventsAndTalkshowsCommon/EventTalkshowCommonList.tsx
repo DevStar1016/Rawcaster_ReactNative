@@ -27,6 +27,8 @@ import {
 } from '../../../Utilities/Constants';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
+import CustomHomeHeader from '../../../Components/CustomHomeHeader';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 type Props = {
   screenType: 'event_and_live' | 'talkshow';
@@ -45,7 +47,6 @@ const EventTalkshowCommonScreen = ({
   onPressStartJoinEvent,
 }: Props) => {
   const token = useToken();
-  const [isLoading, setisLoading] = useState(false);
   const [searchText, setsearchText] = useState('');
   const [eventsList, seteventsList] = useState<any[]>([]);
   const [eventFilterType, seteventFilterType] = useState(
@@ -54,6 +55,7 @@ const EventTalkshowCommonScreen = ({
   const [isActionLoading, setisActionLoading] = useState(false);
   const [refreshing, setrefreshing] = useState(false);
   const [isLoadMore, setisLoadMore] = useState(false);
+  const [isListLoading, setisListLoading] = useState(true);
   const [isOpenEventFilterList, setisOpenEventFilterList] = useState(false);
 
   useEffect(() => {
@@ -68,7 +70,7 @@ const EventTalkshowCommonScreen = ({
     totalPages = 1;
     currentPage = 1;
     if (isMount) {
-      setisLoading(true);
+      setisListLoading(true);
       seteventsList([]);
     }
     listEventsTalkshowApiCall(1);
@@ -102,7 +104,7 @@ const EventTalkshowCommonScreen = ({
       })
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          setisListLoading(false);
           setrefreshing(false);
           setisLoadMore(false);
         }
@@ -201,136 +203,141 @@ const EventTalkshowCommonScreen = ({
 
   const renderFooter = () => {
     return isLoadMore ? (
-      <ActivityIndicator size={'small'} color={COLORS.primary} />
+      <ActivityIndicator size={'small'} color={COLORS.white} />
     ) : null;
   };
 
   return (
-    <HOCView
-      headerType="home_header"
-      isEnableTopSafeAreaHomeHeader
-      headerProps={{
-        bgColor: COLORS.transparent,
-        isEnableLive: false,
-      }}
-      defaultBackgroundProps={{
-        centerText: isLoading
-          ? 'Fetching Talkshow List'
-          : getEventsList().length <= 0
-          ? 'No data found'
-          : '',
-        isEnableLoading: isLoading,
-      }}
-      isEnableDefaultBackground
-      isEnableRLogo={getEventsList().length <= 0}
-      paddingBottom={50}
-      backgroundColor={COLORS.primary}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <RoundedIconButton
-          buttonStyle={{
-            marginRight: 10,
-            backgroundColor: COLORS.secondary,
-            paddingTop: 5,
-            height: 45,
-            width: 45,
-            borderRadius: 45 / 2,
-          }}
-          iconProps={{marginLeft: 2}}
-          iconSize={20}
-          icon="filter_line_white"
-          onPress={() => {
-            if (isMount) {
-              setisOpenEventFilterList(true);
-            }
-          }}
-        />
-        <SearchInput
-          placeHolderText={getSearchPlaceHolderText()}
-          containerStyle={{flex: 1}}
-          onSearch={setsearchText}
-          searchWhenClickedButton={false}
-          marginVertical={10}
-          searchButtonColor={COLORS.secondary}
-        />
-      </View>
-      {/* <DropDownPicker
+    <View style={{flex: 1}}>
+      <CustomHomeHeader
+        title={screenType === 'talkshow' ? 'Talkshow' : 'Events'}
+        bgColor={COLORS.transparent}
+        isEnableSafeArea
+        isEnableSearch={true}
+        isEnableLive={false}
+      />
+      <DefaultBackground
+        isEnableRLogo={getEventsList().length <= 0}
+        bgColor={COLORS.primaryDark}
+        isEnableLoading={isListLoading}
+        centerText={
+          isListLoading
+            ? `Fetching ${
+                screenType === 'talkshow' ? 'Talkshow' : 'Events'
+              } List`
+            : getEventsList().length <= 0
+            ? 'No data found'
+            : ''
+        }
+      />
+      <View style={styles.contentContainer}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <RoundedIconButton
+            buttonStyle={{
+              marginRight: 10,
+              backgroundColor: COLORS.secondary,
+              paddingTop: 5,
+              height: 45,
+              width: 45,
+              borderRadius: 45 / 2,
+            }}
+            iconProps={{marginLeft: 2}}
+            iconSize={20}
+            icon="filter_line_white"
+            onPress={() => {
+              if (isMount) {
+                setisOpenEventFilterList(true);
+              }
+            }}
+          />
+          <SearchInput
+            placeHolderText={getSearchPlaceHolderText()}
+            containerStyle={{flex: 1}}
+            onSearch={setsearchText}
+            searchWhenClickedButton={false}
+            marginVertical={10}
+            searchButtonColor={COLORS.secondary}
+          />
+        </View>
+        {/* <DropDownPicker
         dataList={['Public Events', 'Invited Events', 'My Events']}
       /> */}
 
-      <FlatList
-        data={getEventsList()}
-        contentContainerStyle={{
-          paddingBottom: 30,
-        }}
-        ItemSeparatorComponent={() => {
-          return <View style={{height: 15}} />;
-        }}
-        refreshControl={
-          <RefreshControl
-            tintColor={COLORS.secondary}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
-        onEndReachedThreshold={0.2}
-        onEndReached={onEndReached}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item, _}: any) => (
-          <EventListItem
-            item={item}
-            isDarkTheme
-            onPressEdit={() => {
-              onEditEvent(item?.event_id);
-            }}
-            onPressDelete={() => {
-              onPressDelete(item?.event_id);
-            }}
-            onPressStartJoinEvent={() => {
-              onPressStartJoinEvent(item);
-            }}
-          />
-        )}
-        ListFooterComponent={renderFooter}
-      />
+        <FlatList
+          data={getEventsList()}
+          contentContainerStyle={{
+            paddingBottom: 30,
+          }}
+          ItemSeparatorComponent={() => {
+            return <View style={{height: 15}} />;
+          }}
+          refreshControl={
+            <RefreshControl
+              tintColor={COLORS.secondary}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+          onEndReachedThreshold={0.2}
+          onEndReached={onEndReached}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item, _}: any) => (
+            <EventListItem
+              item={item}
+              isDarkTheme
+              onPressEdit={() => {
+                onEditEvent(item?.event_id);
+              }}
+              onPressDelete={() => {
+                onPressDelete(item?.event_id);
+              }}
+              onPressStartJoinEvent={() => {
+                onPressStartJoinEvent(item);
+              }}
+            />
+          )}
+          ListFooterComponent={renderFooter}
+        />
 
-      <RoundedPlusButton
-        onPress={onPressAddButton}
-        style={styles.createEventPluButton}
-      />
+        <RoundedPlusButton
+          onPress={onPressAddButton}
+          style={styles.createEventPluButton}
+        />
 
-      <Modal
-        visible={isOpenEventFilterList}
-        onRequestClose={() => {
-          setisOpenEventFilterList(false);
-        }}
-        transparent
-        style={{backgroundColor: COLORS.transparentDimColor}}>
-        <SafeAreaView
-          style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
-          <ItemSelectionMiniList
-            maxHeight={DIMENSIONS.screen.height / 2 - 100}
-            onClose={() => {
-              setisOpenEventFilterList(false);
-            }}
-            fieldName={'name'}
-            listData={EVENTS_LIST_FILTER_TYPES}
-            onSelectItem={item => {
-              seteventFilterType(item);
-              setisOpenEventFilterList(false);
-            }}
-          />
-        </SafeAreaView>
-      </Modal>
+        <Modal
+          visible={isOpenEventFilterList}
+          onRequestClose={() => {
+            setisOpenEventFilterList(false);
+          }}
+          transparent
+          style={{backgroundColor: COLORS.transparentDimColor}}>
+          <SafeAreaView
+            style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
+            <ItemSelectionMiniList
+              maxHeight={DIMENSIONS.screen.height / 2 - 100}
+              onClose={() => {
+                setisOpenEventFilterList(false);
+              }}
+              fieldName={'name'}
+              listData={EVENTS_LIST_FILTER_TYPES}
+              onSelectItem={item => {
+                seteventFilterType(item);
+                setisOpenEventFilterList(false);
+              }}
+            />
+          </SafeAreaView>
+        </Modal>
 
-      <Modal visible={isActionLoading} transparent>
-        <Loader bgColor={COLORS.transparentDimColor} />
-      </Modal>
-    </HOCView>
+        <Modal visible={isActionLoading} transparent>
+          <Loader bgColor={COLORS.white} />
+        </Modal>
+      </View>
+    </View>
   );
 };
 
@@ -342,6 +349,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  contentContainer: {
+    flex: 1,
+    paddingBottom: 50,
+    paddingHorizontal: 15,
+  },
+
   listEmptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -350,7 +364,7 @@ const styles = StyleSheet.create({
   },
   createEventPluButton: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 80,
     right: 30,
     height: 50,
     width: 50,

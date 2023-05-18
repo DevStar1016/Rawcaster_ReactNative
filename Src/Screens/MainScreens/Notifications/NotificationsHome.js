@@ -16,6 +16,8 @@ import {useDispatch} from 'react-redux';
 import {setUnreadNotificationCount} from '../../../Store/Slices/HomeSlice';
 import {NoticationsContext} from '../../../Utilities/Contexts';
 import Loader from '../../../Components/Loader';
+import CustomHomeHeader from '../../../Components/CustomHomeHeader';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 const NotificationsHome = () => {
   const dispatch = useDispatch();
@@ -57,50 +59,47 @@ const NotificationsHome = () => {
 
   return (
     <NoticationsContext.Provider value={noticationContextValue}>
-      <HOCView
-        headerType="home_header"
-        isEnableTopSafeAreaHomeHeader
-        headerProps={{
-          bgColor: COLORS.transparent,
-          isEnableLive: false,
-        }}
-        isEnableDefaultBackground
-        isEnableRLogo={false}
-        paddingBottom={50}
-        backgroundColor={COLORS.primary}>
-        <View style={styles.titleHeaderContainer}>
-          <View style={styles.titleTextContainer}>
-            <StyledText style={styles.titleText}>Notifications</StyledText>
+      <View style={{flex: 1}}>
+        <CustomHomeHeader
+          bgColor={COLORS.transparent}
+          isEnableSafeArea
+          isEnableSearch={true}
+          isEnableLive={false}
+        />
+        <DefaultBackground isEnableRLogo={false} bgColor={COLORS.primaryDark} />
+        <View style={styles.contentContainer}>
+          <View style={styles.titleHeaderContainer}>
+            <View style={styles.titleTextContainer}>
+              <StyledText style={styles.titleText}>Notifications</StyledText>
+              {unreadNotificationCount ? (
+                <View style={styles.countContainer}>
+                  <StyledText style={styles.countText}>
+                    {unreadNotificationCount > 99
+                      ? '99+'
+                      : unreadNotificationCount}
+                  </StyledText>
+                </View>
+              ) : null}
+            </View>
+
             {unreadNotificationCount ? (
-              <View style={styles.countContainer}>
-                <StyledText style={styles.countText}>
-                  {unreadNotificationCount > 99
-                    ? '99+'
-                    : unreadNotificationCount}
-                </StyledText>
-              </View>
+              <TouchableOpacity
+                onPress={() => handleMarkAllRead()}
+                activeOpacity={0.8}>
+                <StyledText style={styles.readText}>Mark all Read</StyledText>
+              </TouchableOpacity>
             ) : null}
           </View>
-          {/* <RoundedIconButton
-          icon="search"
-          bgColor={COLORS.secondary}
-          buttonSize={37}
-          iconSize={20}
-        /> */}
-          {unreadNotificationCount ? (
-            <TouchableOpacity
-              onPress={() => handleMarkAllRead()}
-              activeOpacity={0.8}>
-              <StyledText style={styles.readText}>Mark all Read</StyledText>
-            </TouchableOpacity>
-          ) : null}
+          <Divider />
+          <NotificationsTopTabNavigation />
+          <Modal
+            onRequestClose={() => {}}
+            transparent
+            visible={isActionLoading}>
+            <Loader bgColor={COLORS.transparentDimColor} />
+          </Modal>
         </View>
-        <Divider />
-        <NotificationsTopTabNavigation />
-        <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
-          <Loader bgColor={COLORS.transparentDimColor} />
-        </Modal>
-      </HOCView>
+      </View>
     </NoticationsContext.Provider>
   );
 };
@@ -108,6 +107,11 @@ const NotificationsHome = () => {
 export default NotificationsHome;
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    paddingBottom: 50,
+    paddingHorizontal: 15,
+  },
   titleHeaderContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
