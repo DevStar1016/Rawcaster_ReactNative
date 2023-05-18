@@ -4,6 +4,7 @@ import {useDispatch} from 'react-redux';
 import CreateEditTalkshow from '../Screens/MainScreens/Talkshow/CreateEditTalkshow';
 import Talkshow from '../Screens/MainScreens/Talkshow/Talkshow';
 import {setIsBottomTabBarAbsolute} from '../Store/Slices/UtilitySlice';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
@@ -11,7 +12,7 @@ const TalkshowStack = () => {
   const dispatch = useDispatch();
   return (
     <Stack.Navigator
-      screenOptions={{headerShown: false}}
+      screenOptions={{headerShown: false, ...StackAnimation}}
       screenListeners={{
         focus: e => {
           if (e.target.includes('CreateEditTalkshow')) {

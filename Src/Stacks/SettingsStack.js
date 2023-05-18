@@ -8,12 +8,13 @@ import NotificationsSettings from '../Screens/MainScreens/Settings/Notifications
 import Refer from '../Screens/MainScreens/Settings/Refer';
 import SettingsHome from '../Screens/MainScreens/Settings/SettingsHome';
 import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
 const SettingsStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{headerShown: false, ...StackAnimation}}>
       <Stack.Screen name="SettingsHome" component={SettingsHome} />
       <Stack.Screen name="GeneralSettings" component={GeneralSettings} />
       <Stack.Screen

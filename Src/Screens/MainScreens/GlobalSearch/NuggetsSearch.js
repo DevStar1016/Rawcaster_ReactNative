@@ -3,7 +3,6 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
@@ -145,7 +144,7 @@ const NuggetsSearch = () => {
     isEnableADDButton: false,
     isEnableTopInsetsPadding: false,
     textNuggetNumberOfLines: 12,
-    mediaHeight: insets.mediaHeight - (topLayerHeight + insets.top),
+    mediaHeight: insets.mediaHeight - topLayerHeight,
     isEnableHeaderContainerHeightforTopButtons: false,
     onFinishPlaying: index => {
       if (index < searchedNuggetsList.length - 1) {
@@ -156,6 +155,8 @@ const NuggetsSearch = () => {
     },
   };
 
+  console.log(insets.mediaHeight - topLayerHeight, topLayerHeight, 'HEIGHt');
+
   const renderNuggetItem = useCallback(renderItem, [
     searchedNuggetsList,
     isMuted,
@@ -165,11 +166,11 @@ const NuggetsSearch = () => {
   const keyExtractor = useCallback(item => item.nugget_id.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
-      length: insets.mediaHeight - (topLayerHeight + insets.top),
-      offset: (insets.mediaHeight - (topLayerHeight + insets.top)) * index,
+      length: insets.mediaHeight - topLayerHeight,
+      offset: (insets.mediaHeight - topLayerHeight) * index,
       index,
     }),
-    [],
+    [topLayerHeight],
   );
 
   function renderItem({item, index}) {
@@ -222,6 +223,7 @@ const NuggetsSearch = () => {
             }
             onEndReachedThreshold={0.5}
             onEndReached={onEndReached}
+            controlItemRender={false}
             itemHeight={insets.mediaHeight - topLayerHeight}
             ListEmptyComponent={renderEmptyComponent}
             onViewableItemsChanged={onViewRef.current}
@@ -233,9 +235,9 @@ const NuggetsSearch = () => {
           //   data={searchedNuggetsList}
           //   keyExtractor={item => item.nugget_id.toString()}
           //   getItemLayout={(_, index) => ({
-          // length: insets.mediaHeight - topLayerHeight,
-          // offset: (insets.mediaHeight - topLayerHeight) * index,
-          // index,
+          //     length: insets.mediaHeight - topLayerHeight,
+          //     offset: (insets.mediaHeight - topLayerHeight) * index,
+          //     index,
           //   })}
           //   windowSize={20}
           //   renderItem={({item, index}) => (
@@ -267,7 +269,7 @@ const NuggetsSearch = () => {
           //   onEndReached={onEndReached}
           //   ListFooterComponent={renderFooter}
           //   onViewableItemsChanged={onViewRef.current}
-          //   viewabilityConfig={viewConfigRef.current}
+          //   // viewabilityConfig={viewConfigRef.current}
           // />
         )}
       </View>

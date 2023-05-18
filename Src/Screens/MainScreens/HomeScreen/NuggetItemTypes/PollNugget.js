@@ -13,7 +13,7 @@ const PollNugget = ({
   onPressShareType,
   onBlockUser,
 }) => {
-  const {mediaHeight} = useNuggetParentActions();
+  const {mediaHeight, headerContainerHeight} = useNuggetParentActions();
 
   const insets = useInsets();
   const windowHeight = mediaHeight ?? insets.mediaHeight;

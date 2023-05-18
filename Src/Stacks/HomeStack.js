@@ -8,6 +8,7 @@ import {
 } from '../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
@@ -16,7 +17,7 @@ const HomeStack = () => {
 
   return (
     <Stack.Navigator
-      screenOptions={{headerShown: false}}
+      screenOptions={{headerShown: false, ...StackAnimation}}
       screenListeners={{
         focus: e => {
           if (e.target.includes('Dashboard')) {

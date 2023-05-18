@@ -5,6 +5,7 @@ import CreateEditEvent from '../Screens/MainScreens/Events/CreateEditEvent';
 import CreateEditEventSecond from '../Screens/MainScreens/Events/CreateEditEventSecond';
 import Events from '../Screens/MainScreens/Events/Events';
 import {setIsBottomTabBarAbsolute} from '../Store/Slices/UtilitySlice';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
@@ -12,7 +13,7 @@ const EventsStack = () => {
   const dispatch = useDispatch();
   return (
     <Stack.Navigator
-      screenOptions={{headerShown: false}}
+      screenOptions={{headerShown: false, ...StackAnimation}}
       screenListeners={{
         focus: e => {
           if (e.target.includes('CreateEditEvent')) {

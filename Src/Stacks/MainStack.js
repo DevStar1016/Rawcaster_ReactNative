@@ -1,6 +1,10 @@
 import {StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import {
+  CardStyleInterpolators,
+  TransitionSpecs,
+  createStackNavigator,
+} from '@react-navigation/stack';
 import BottomTabNavigation from '../Navigation/BottomTabNavigation';
 import Loader from '../Components/Loader';
 import {useIsVisibleInfluencers, useToken} from '../Utilities/StoreData';
@@ -36,6 +40,7 @@ import SocketListener from '../Components/SocketListener';
 import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
@@ -143,7 +148,11 @@ const MainStack = () => {
   ) : (
     <>
       <SocketListener />
-      <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          ...StackAnimation,
+        }}>
         {isVisibleInfluencers ? (
           <Stack.Screen name="InfluencersList" component={InfluencersList} />
         ) : (

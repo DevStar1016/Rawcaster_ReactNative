@@ -4,12 +4,13 @@ import ClaimAccount from '../Modals/ClaimAccount';
 import Profile from '../Screens/MainScreens/ProfileDashboard/Profile';
 import ProfileSeeAllUsersList from '../Screens/MainScreens/ProfileDashboard/ProfileSeeAllUsersList';
 import MyFansChat from '../Modals/MyFansChat';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
 const ProfileStack = ({route}) => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{headerShown: false, ...StackAnimation}}>
       <Stack.Screen
         name="Profile"
         component={Profile}

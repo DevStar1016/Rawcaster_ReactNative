@@ -7,12 +7,13 @@ import Login from '../Screens/AuthScreens/Login';
 import ResetPasswordOTP from '../Screens/AuthScreens/ResetPasswordOTP';
 import Signup from '../Screens/AuthScreens/SignupScreens/Signup';
 import SignupWithPhone from '../Screens/AuthScreens/SignupScreens/SignupWithPhone';
+import StackAnimation from '../Utilities/StackAnimation';
 
 const Stack = createStackNavigator();
 
 const RootStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{headerShown: false, ...StackAnimation}}>
       <Stack.Screen
         name="BottomTabNavigationBeforeLogin"
         component={BottomTabNavigation}

@@ -1,4 +1,4 @@
-import {Modal, StyleSheet} from 'react-native';
+import {Modal, StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import SearchInput from '../../../Components/SearchInput';
@@ -34,7 +34,7 @@ const GlobalSearchHome = () => {
           marginVertical={10}
           marginHorizontal={15}
           onLayoutHeight={height => {
-            settopLayerHeight(pre => pre + height + 20);
+            settopLayerHeight(pre => pre + height + 20); // 20 is marginVertical 10- search input
           }}
           onSearch={setsearchText}
           placeHolderText={'Search ' + focusedTab}
