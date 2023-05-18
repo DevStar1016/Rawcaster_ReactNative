@@ -100,9 +100,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       case 'influencers':
         fansListAPICall(pageNumber, 1, dataToFilter);
         return;
-      case 'unclaimed_influencers':
-        unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
-        return;
+      // case 'unclaimed_influencers':
+      //   unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
+      //   return;
       default:
         if (isMount) {
           setisLoading(false);
@@ -110,7 +110,13 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         break;
     }
   }
-
+  const getList = () => {
+    if (listType === 'unclaimed_influencers') {
+      return [...unclaimedAccountsList];
+    } else {
+      return [...usersList];
+    }
+  };
   function setLoaders(status = true) {
     if (isMount) {
       setisLoading(status);
@@ -490,7 +496,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       ) : (
         <View style={styles.contentContainer}>
           <FlatList
-            data={[...usersList]}
+            data={getList()}
             renderItem={renderItem}
             keyExtractor={(_, index) => index.toString()}
             showsVerticalScrollIndicator={false}
