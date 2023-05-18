@@ -9,6 +9,7 @@ import UserIcon from '../Assets/Png/user.png';
 import {
   useIsBottomTabBarAbsolute,
   useIsHomeNuggetsLoading,
+  useNuggetFilterType,
   useNuggetType,
   useToken,
   useUnreadNotificationCount,
@@ -28,6 +29,7 @@ import StyledText from '../Components/StyledText';
 const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const isBottomTabBarAbsolute = useIsBottomTabBarAbsolute();
   const token = useToken();
+  const nuggetFilterType = useNuggetFilterType();
   const dispatch = useDispatch();
   const nuggetType = useNuggetType();
   const unreadNotificationCount = useUnreadNotificationCount();
@@ -102,6 +104,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           formData.append('token', token ?? 'RAWCAST');
           formData.append('page_number', 1);
           formData.append('nugget_type', tempNuggetType);
+          formData.append('filter_type', nuggetFilterType);
           listNuggetsService(formData)
             .then(res => {
               if (res.data.status === 1) {

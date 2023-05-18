@@ -39,6 +39,10 @@ export const useNuggetsList = () => {
   return useSelector(state => state.home.nuggetsList);
 };
 
+export const useNuggetFilterType = () => {
+  return useSelector(state => state.home.nuggetFilterType);
+};
+
 export const useSearchedNuggetsList = () => {
   return useSelector(state => state.home.searchedNuggetsList);
 };

@@ -26,6 +26,7 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
 import {
   setIsHomeNuggetsLoading,
+  setNuggetFilterType,
   setNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
 import Loader from '../../../Components/Loader';
@@ -292,12 +293,14 @@ const Dashboard = () => {
             onPressFirstFilterTab={() => {
               if (selectedFilterTab !== 1) {
                 setselectedFilterTab(1);
+                dispatch(setNuggetFilterType(1));
                 resetViewabilityItem();
               }
             }}
             onPressSecondFilterTab={() => {
               if (selectedFilterTab !== 0) {
                 setselectedFilterTab(0);
+                dispatch(setNuggetFilterType(0));
                 resetViewabilityItem();
               }
             }}
