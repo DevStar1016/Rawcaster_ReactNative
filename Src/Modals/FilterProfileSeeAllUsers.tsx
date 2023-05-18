@@ -13,7 +13,7 @@ import {GENDER_LIST} from '../Utilities/Constants';
 type Props = {
   setModal: (val: boolean) => void;
   onSubmit: (filterData: any) => void;
-  listType: 'connections' | 'fans' | 'influencers';
+  listType: 'connections' | 'fans' | 'influencers' | 'unclaimed_influencers';
   preFilterData?: any;
 };
 var isMount = true;
@@ -59,6 +59,8 @@ const FilterProfileSeeAllUsers = ({
         return 'Filter Fans';
       case 'influencers':
         return 'Filter Influencers';
+      case 'unclaimed_influencers':
+        return 'Filter Unclaimed Influencers';
       default:
         return '';
     }
