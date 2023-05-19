@@ -7,7 +7,12 @@ import TitleRowContainer from './TitleRowContainer';
 import ProfileWithBadge, {
   ProfileWithBadgeProps,
 } from '../../../Components/ProfileWithBadge';
-import {useProfile, useToken} from '../../../Utilities/StoreData';
+import {
+  useOtherConnectionsList,
+  useOtherInfluencerList,
+  useProfile,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -24,6 +29,11 @@ import Toast from '../../../Components/Toast';
 import {Modal} from 'react-native';
 import Loader from '../../../Components/Loader';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
+import {useDispatch} from 'react-redux';
+import {
+  setOtherConnectionsList,
+  setOtherInfluencersList,
+} from '../../../Store/Slices/HomeSlice';
 
 type Props = {
   userId?: any;
@@ -58,8 +68,11 @@ function ProfilesListContainerWithSeeAll({
 }: Props) {
   let isMount = true;
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const token = useToken();
   const profile = useProfile();
+  const otherInfluencerList = useOtherInfluencerList();
+  const otherConnectionsList = useOtherConnectionsList();
   const [isLoading, setisLoading] = useState(
     !isLock && (userId || list.length <= 0) ? true : false,
   );
@@ -125,6 +138,9 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           setusersList(res.data.friends_list);
+          if (userId) {
+            dispatch(setOtherConnectionsList(res.data.friends_list));
+          }
         }
       })
       .catch(e => {})
@@ -149,6 +165,9 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           setusersList(res.data.follow_list);
+          if (userId && type === 1) {
+            dispatch(setOtherInfluencersList(res.data.follow_list));
+          }
         }
       })
       .catch(e => {})
@@ -172,16 +191,14 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          setusersList(preList => {
-            let tempList = [...preList];
-            let tempIndex = tempList.findIndex(
-              sub => sub.user_ref_id === followUserId,
-            );
-            if (tempIndex !== -1) {
-              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
-            }
-            return tempList;
-          });
+          let tempList = [...otherInfluencerList];
+          let tempIndex = tempList.findIndex(
+            sub => sub.user_ref_id === followUserId,
+          );
+          if (tempIndex !== -1) {
+            tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+          }
+          dispatch(setOtherInfluencersList(tempList));
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -208,19 +225,17 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          setusersList(preList => {
-            let tempProfileList = [...preList];
-            let tempIndex = [...preList].findIndex(
-              item => item.user_ref_id === userRefId,
-            );
-            if (tempIndex !== -1) {
-              tempProfileList[tempIndex] = {
-                ...tempProfileList[tempIndex],
-                request_status: '1',
-              };
-            }
-            return tempProfileList;
-          });
+          let tempConnectionList = [...otherConnectionsList];
+          let tempIndex = tempConnectionList.findIndex(
+            item => item.user_ref_id === userRefId,
+          );
+          if (tempIndex !== -1) {
+            tempConnectionList[tempIndex] = {
+              ...tempConnectionList[tempIndex],
+              friend_status: 1,
+            };
+          }
+          dispatch(setOtherConnectionsList(tempConnectionList));
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
@@ -247,6 +262,12 @@ function ProfilesListContainerWithSeeAll({
   function getList() {
     if (isExternalListOnly) {
       return list;
+    }
+    if (userId && listType === 'connections') {
+      return otherConnectionsList;
+    }
+    if (userId && listType === 'influencers') {
+      return otherInfluencerList;
     }
     return usersList;
   }
