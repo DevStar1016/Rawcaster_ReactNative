@@ -127,6 +127,7 @@ const Dashboard = () => {
     listNuggetsService(formData, controller.signal)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(JSON.stringify(res.data.nuggets_list), 'NUGGETS LIST');
           let decodedNuggetList = [...res.data.nuggets_list].map(item => {
             return {
               ...item,
