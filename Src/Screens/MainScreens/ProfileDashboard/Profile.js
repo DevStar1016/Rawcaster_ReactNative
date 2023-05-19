@@ -43,12 +43,14 @@ import {
   setOtherConnectionsList,
   setOtherInfluencersList,
 } from '../../../Store/Slices/HomeSlice';
+import {useDispatch} from 'react-redux';
 const PADDING_HORIZONTAL = 10;
 
 var currentPage = 1;
 var totalPages = 1;
 const Profile = ({route}) => {
   let isMount = true;
+  const dispatch = useDispatch();
   const profile = useProfile();
   const {userId} = route.params ?? {};
   const navigation = useNavigation();
@@ -427,6 +429,14 @@ const Profile = ({route}) => {
               isExternalListOnly
               title={'Unclaimed Influencers Account'}
               paddingHorizontal={PADDING_HORIZONTAL}
+              ProfileItemProps={{
+                topRightIconContainerStyle: {
+                  backgroundColor: COLORS.transparent,
+                  height: 30,
+                  width: 30,
+                },
+                topRightIconSize: 30,
+              }}
             />
           </>
         ) : (
