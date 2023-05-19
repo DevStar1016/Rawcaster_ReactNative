@@ -14,8 +14,8 @@ import {COLORS} from '../../../Utilities/Colors';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {
-  useOtherConnectionsList,
-  useOtherInfluencerList,
+  useOtherConnectionsRequestList,
+  useOtherInfluencersRequestList,
   useProfile,
   useToken,
   useUnclaimedAccountsList,
@@ -32,8 +32,8 @@ import {
 import Toast from '../../../Components/Toast';
 import FilterProfileSeeAllUsers from '../../../Modals/FilterProfileSeeAllUsers';
 import {
-  setOtherConnectionsList,
-  setOtherInfluencersList,
+  setOtherConnectionsRequestList,
+  setOtherInfluencersRequestList,
   setUnclaimedAccountsList,
 } from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
@@ -54,8 +54,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   let totalPages = 1;
   const dispatch = useDispatch();
   const unclaimedAccountsList = useUnclaimedAccountsList();
-  const otherInfluencerList = useOtherInfluencerList();
-  const otherConnectionsList = useOtherConnectionsList();
+  const otherInfluencersRequestList = useOtherInfluencersRequestList();
+  const otherConnectionsRequestList = useOtherConnectionsRequestList();
   const {initialList, userId, listType, title}: Props = route.params ?? {};
   const [isActionLoading, setisActionLoading] = useState(false);
   const [filterData, setfilterData] = useState(null);
@@ -123,12 +123,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     if (listType === 'unclaimed_influencers') {
       return [...unclaimedAccountsList];
     }
-    if (userId && listType === 'connections') {
-      return [...otherConnectionsList];
-    }
-    if (userId && listType === 'influencers') {
-      return [...otherInfluencerList];
-    }
     return [...usersList];
   };
   function setLoaders(status = true) {
@@ -168,19 +162,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               setusersList(res.data.friends_list);
-              if (userId) {
-                dispatch(setOtherConnectionsList(res.data.friends_list));
-              }
             } else {
               setusersList(preList => [...preList, ...res.data.friends_list]);
-              if (userId) {
-                dispatch(
-                  setOtherConnectionsList([
-                    ...otherConnectionsList,
-                    ...res.data.friends_list,
-                  ]),
-                );
-              }
             }
           }
         } else if (res.data.status === 0) {
@@ -225,19 +208,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               setusersList(res.data.follow_list);
-              if (userId && type === 1) {
-                dispatch(setOtherInfluencersList(res.data.follow_list));
-              }
             } else {
               setusersList(preList => [...preList, ...res.data.follow_list]);
-              if (userId && type === 1) {
-                dispatch(
-                  setOtherInfluencersList([
-                    ...otherInfluencerList,
-                    ...res.data.follow_list,
-                  ]),
-                );
-              }
             }
           }
         } else if (res.data.status === 0) {
@@ -326,17 +298,26 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          let tempConnectionList = [...otherConnectionsList];
-          let tempIndex = tempConnectionList.findIndex(
-            item => item.user_ref_id === userRefId,
+          setusersList(preList => {
+            let tempConnectionList = [...preList];
+            let tempIndex = tempConnectionList.findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempConnectionList[tempIndex] = {
+                ...tempConnectionList[tempIndex],
+                friend_status: 1,
+              };
+            }
+            return tempConnectionList;
+          });
+
+          dispatch(
+            setOtherConnectionsRequestList([
+              ...otherConnectionsRequestList,
+              userRefId,
+            ]),
           );
-          if (tempIndex !== -1) {
-            tempConnectionList[tempIndex] = {
-              ...tempConnectionList[tempIndex],
-              friend_status: 1,
-            };
-          }
-          dispatch(setOtherConnectionsList(tempConnectionList));
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
@@ -373,14 +354,23 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          let tempList = [...otherInfluencerList];
-          let tempIndex = tempList.findIndex(
-            sub => sub.user_ref_id === followUserId,
+          setusersList(preList => {
+            let tempList = [...preList];
+            let tempIndex = tempList.findIndex(
+              sub => sub.user_ref_id === followUserId,
+            );
+            if (tempIndex !== -1) {
+              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+            }
+            return tempList;
+          });
+
+          dispatch(
+            setOtherInfluencersRequestList([
+              ...otherInfluencersRequestList,
+              followUserId,
+            ]),
           );
-          if (tempIndex !== -1) {
-            tempList[tempIndex] = {...tempList[tempIndex], follow: true};
-          }
-          dispatch(setOtherInfluencersList(tempList));
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

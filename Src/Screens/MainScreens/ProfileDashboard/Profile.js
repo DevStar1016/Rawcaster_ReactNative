@@ -39,10 +39,6 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
-import {
-  setOtherConnectionsList,
-  setOtherInfluencersList,
-} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
 const PADDING_HORIZONTAL = 10;
 
@@ -102,8 +98,8 @@ const Profile = ({route}) => {
       isMount = false;
       currentPage = 1;
       totalPages = 1;
-      dispatch(setOtherConnectionsList([]));
-      dispatch(setOtherInfluencersList([]));
+      // dispatch(setOtherConnectionsList([]));
+      // dispatch(setOtherInfluencersList([]));
     };
   }, []);
 

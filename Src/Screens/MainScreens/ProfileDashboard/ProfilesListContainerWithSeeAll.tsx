@@ -8,8 +8,8 @@ import ProfileWithBadge, {
   ProfileWithBadgeProps,
 } from '../../../Components/ProfileWithBadge';
 import {
-  useOtherConnectionsList,
-  useOtherInfluencerList,
+  useOtherConnectionsRequestList,
+  useOtherInfluencersRequestList,
   useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
@@ -31,8 +31,8 @@ import Loader from '../../../Components/Loader';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import {
-  setOtherConnectionsList,
-  setOtherInfluencersList,
+  setOtherConnectionsRequestList,
+  setOtherInfluencersRequestList,
 } from '../../../Store/Slices/HomeSlice';
 
 type Props = {
@@ -71,8 +71,8 @@ function ProfilesListContainerWithSeeAll({
   const dispatch = useDispatch();
   const token = useToken();
   const profile = useProfile();
-  const otherInfluencerList = useOtherInfluencerList();
-  const otherConnectionsList = useOtherConnectionsList();
+  const otherInfluencersRequestList = useOtherInfluencersRequestList();
+  const otherConnectionsRequestList = useOtherConnectionsRequestList();
   const [isLoading, setisLoading] = useState(
     !isLock && (userId || list.length <= 0) ? true : false,
   );
@@ -138,9 +138,6 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           setusersList(res.data.friends_list);
-          if (userId) {
-            dispatch(setOtherConnectionsList(res.data.friends_list));
-          }
         }
       })
       .catch(e => {})
@@ -165,9 +162,6 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           setusersList(res.data.follow_list);
-          if (userId && type === 1) {
-            dispatch(setOtherInfluencersList(res.data.follow_list));
-          }
         }
       })
       .catch(e => {})
@@ -191,14 +185,23 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          let tempList = [...otherInfluencerList];
-          let tempIndex = tempList.findIndex(
-            sub => sub.user_ref_id === followUserId,
+          setusersList(preList => {
+            let tempList = [...preList];
+            let tempIndex = tempList.findIndex(
+              sub => sub.user_ref_id === followUserId,
+            );
+            if (tempIndex !== -1) {
+              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+            }
+            return tempList;
+          });
+
+          dispatch(
+            setOtherInfluencersRequestList([
+              ...otherInfluencersRequestList,
+              followUserId,
+            ]),
           );
-          if (tempIndex !== -1) {
-            tempList[tempIndex] = {...tempList[tempIndex], follow: true};
-          }
-          dispatch(setOtherInfluencersList(tempList));
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -225,17 +228,26 @@ function ProfilesListContainerWithSeeAll({
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          let tempConnectionList = [...otherConnectionsList];
-          let tempIndex = tempConnectionList.findIndex(
-            item => item.user_ref_id === userRefId,
+          setusersList(preList => {
+            let tempConnectionList = [...preList];
+            let tempIndex = tempConnectionList.findIndex(
+              item => item.user_ref_id === userRefId,
+            );
+            if (tempIndex !== -1) {
+              tempConnectionList[tempIndex] = {
+                ...tempConnectionList[tempIndex],
+                friend_status: 1,
+              };
+            }
+            return tempConnectionList;
+          });
+
+          dispatch(
+            setOtherConnectionsRequestList([
+              ...otherConnectionsRequestList,
+              userRefId,
+            ]),
           );
-          if (tempIndex !== -1) {
-            tempConnectionList[tempIndex] = {
-              ...tempConnectionList[tempIndex],
-              friend_status: 1,
-            };
-          }
-          dispatch(setOtherConnectionsList(tempConnectionList));
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
@@ -263,12 +275,6 @@ function ProfilesListContainerWithSeeAll({
     if (isExternalListOnly) {
       return list;
     }
-    if (userId && listType === 'connections') {
-      return otherConnectionsList;
-    }
-    if (userId && listType === 'influencers') {
-      return otherInfluencerList;
-    }
     return usersList;
   }
 
@@ -292,10 +298,18 @@ function ProfilesListContainerWithSeeAll({
         return 'shield_secondary';
       }
       if (userId) {
-        if (listType === 'connections' && item.friend_status === 0) {
+        if (
+          listType === 'connections' &&
+          item.friend_status === 0 &&
+          !otherConnectionsRequestList.includes(item.user_ref_id)
+        ) {
           return 'user_plus_pink';
         }
-        if (listType === 'influencers' && !item.follow) {
+        if (
+          listType === 'influencers' &&
+          !item.follow &&
+          !otherInfluencersRequestList.includes(item.user_ref_id)
+        ) {
           return 'plus_rounded_fill_primary';
         }
       }
