@@ -50,6 +50,12 @@ export const useSearchedNuggetsList = () => {
 export const useConnectionsList = () => {
   return useSelector(state => state.home.connectionsList);
 };
+export const useOtherConnectionsList = () => {
+  return useSelector(state => state.home.otherConnectionsList);
+};
+export const useOtherInfluencerList = () => {
+  return useSelector(state => state.home.otherInfluencersList);
+};
 export const useGroupsList = () => {
   return useSelector(state => state.home.groupsList);
 };

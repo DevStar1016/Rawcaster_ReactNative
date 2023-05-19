@@ -19,6 +19,8 @@ export const initialState = {
   },
   isHomeNuggetsLoading: true,
   nuggetFilterType: 0,
+  otherConnectionsList: [],
+  otherInfluencersList: [],
 };
 
 const HomeSlice = createSlice({
@@ -58,6 +60,12 @@ const HomeSlice = createSlice({
     setNuggetFilterType: (state, action) => {
       state.nuggetFilterType = action.payload;
     },
+    setOtherConnectionsList: (state, action) => {
+      state.otherConnectionsList = action.payload;
+    },
+    setOtherInfluencersList: (state, action) => {
+      state.otherInfluencersList = action.payload;
+    },
 
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
@@ -76,6 +84,8 @@ const HomeSlice = createSlice({
         poll_results: 0,
       };
       state.nuggetFilterType = 0;
+      state.otherConnectionsList = [];
+      state.otherInfluencersList = [];
     },
   },
 });
@@ -92,5 +102,7 @@ export const {
   clearHomeReduxData,
   setIsHomeNuggetsLoading,
   setNuggetFilterType,
+  setOtherConnectionsList,
+  setOtherInfluencersList,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

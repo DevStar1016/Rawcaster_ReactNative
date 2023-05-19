@@ -39,6 +39,10 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
+import {
+  setOtherConnectionsList,
+  setOtherInfluencersList,
+} from '../../../Store/Slices/HomeSlice';
 const PADDING_HORIZONTAL = 10;
 
 var currentPage = 1;
@@ -96,6 +100,8 @@ const Profile = ({route}) => {
       isMount = false;
       currentPage = 1;
       totalPages = 1;
+      dispatch(setOtherConnectionsList([]));
+      dispatch(setOtherInfluencersList([]));
     };
   }, []);
 
