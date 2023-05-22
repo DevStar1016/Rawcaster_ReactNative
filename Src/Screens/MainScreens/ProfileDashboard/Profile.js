@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import ProfileTopSection from './ProfileTopSection';
 import ProfileNameBioContainer from './ProfileNameBioContainer';
 import ProfileIntroContainer from './ProfileIntroContainer';
@@ -285,9 +285,9 @@ const Profile = ({route}) => {
 
   const getProfileData = () => {
     if (userId) {
-      return othersProfile;
+      return othersProfile ?? {};
     }
-    return profile;
+    return profile ?? {};
   };
 
   const onFinishClaiming = () => {
@@ -384,8 +384,8 @@ const Profile = ({route}) => {
     ) : null;
   };
 
-  function renderHeader() {
-    return (
+  const renderHeader = useMemo(
+    () => (
       <View style={{flex: 1, backgroundColor: COLORS.white, paddingBottom: 10}}>
         <ProfileTopSection
           userId={userId}
@@ -481,8 +481,15 @@ const Profile = ({route}) => {
           paddingHorizontal={PADDING_HORIZONTAL}
         />
       </View>
-    );
-  }
+    ),
+    [
+      userId,
+      getProfileData(),
+      getIsEnableClaimAccount(),
+      unclaimedAccountsList,
+      connections,
+    ],
+  );
 
   return (
     <NuggetParentActionsContext.Provider value={nuggetActions}>

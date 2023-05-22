@@ -82,7 +82,6 @@ const NotificationsList = ({
     listNotificationsService(formData)
       .then(res => {
         if (notificationListType === 4) {
-          console.log(res.data, 'DATAA');
         }
         if (isMount) {
           if (res.data.status === 1) {

@@ -52,7 +52,7 @@ type Props = {
 
 const EXTRA_MARGIN = 10;
 const PROFILE_CONTAINER_MARGIN = 18;
-function ProfilesListContainerWithSeeAll({
+const ProfilesListContainerWithSeeAll = ({
   userId,
   paddingHorizontal = 0,
   isLock,
@@ -65,7 +65,7 @@ function ProfilesListContainerWithSeeAll({
   onPressChat,
   isDisplayEvent = false,
   onPressEvent,
-}: Props) {
+}: Props) => {
   let isMount = true;
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -461,7 +461,7 @@ function ProfilesListContainerWithSeeAll({
       </Modal>
     </View>
   );
-}
+};
 
 export default ProfilesListContainerWithSeeAll;
 

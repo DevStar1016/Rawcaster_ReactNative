@@ -62,6 +62,7 @@ import {
   setSearchedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
+import EmojiModal from 'react-native-emoji-modal';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -794,22 +795,11 @@ const PostEditNugget = ({route}) => {
               borderTopStartRadius: 10,
               borderTopEndRadius: 10,
             }}>
-            {/* <EmojiSelector
-              showSearchBar={false}
-              showSectionTitles={false}
-              columns="8"
-              showHistory={false}
-              category={Categories.emotion}
-              onEmojiSelected={res => {
-                if (isMount) {
-                  settypedText(pre => {
-                    if (pre.length < 500) {
-                      return pre + res;
-                    }
-                    return pre;
-                  });
-                }
-              }}
+            {/* <EmojiModal
+              onEmojiSelected={emoji => {}}
+              containerStyle={{width: '100%'}}
+              columns={8}
+
             /> */}
             <EmojiKeyboard
               onEmojiSelected={res => {
@@ -828,73 +818,10 @@ const PostEditNugget = ({route}) => {
               defaultHeight={DIMENSIONS.window.height / 2 + 10}
               styles={{
                 header: {fontFamily: FONTS.DMSans.medium},
-                // container
-                // container: {width: },
               }}
             />
-            {/* <EmojiPicker
-              onEmojiSelected={res => {
-                console.log(res, 'EMOJIIII');
-              }}
-              rows={7}
-              onPressOutside={() => {}}
-              hideClearButton
-              localizedCategories={[
-                // Always in this order:
-                'Smileys and emotion',
-                'People and body',
-                'Animals and nature',
-                'Food and drink',
-                'Activities',
-                'Travel and places',
-                'Objects',
-                'Symbols',
-              ]}
-            /> */}
           </View>
         ) : null}
-        {/* <EmojiPicker
-          onEmojiSelected={res => {
-            if (isMount) {
-              settypedText(pre => {
-                if (pre.length < 500) {
-                  return pre + res.emoji;
-                }
-                return pre;
-              });
-            }
-          }}
-          enableRecentlyUsed
-          categoryPosition="bottom"
-          defaultHeight={DIMENSIONS.window.height / 2 + 10}
-          theme={{backdrop: COLORS.transparent}}
-          allowMultipleSelections
-          expandable={false}
-          open={isOpenEmojiContainer}
-          styles={{
-            header: {fontFamily: FONTS.DMSans.medium},
-          }}
-          onClose={() => setisOpenEmojiContainer(false)}
-        /> */}
-        {/* {!isPollClicked && isOpenEmojiContainer && (
-          <View style={styles.emojiContainer}>
-            <EmojiKeyboard
-              onEmojiSelected={res => {
-                if (isMount) {
-                  settypedText(pre => pre + res.emoji);
-                }
-              }}
-              categoryPosition="bottom"
-              enableCategoryChangeGesture={false}
-              defaultHeight={DIMENSIONS.window.height / 2 + 10}
-              styles={{
-                header: {fontFamily: FONTS.DMSans.medium},
-                // container
-                // container: {width: },
-              }}
-            />
-          </View>
-        )} */}
       </TouchableOpacity>
 
       <Modal
