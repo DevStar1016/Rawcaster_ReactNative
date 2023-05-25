@@ -41,6 +41,7 @@ import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
+import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
 
 const Stack = createStackNavigator();
 
@@ -122,6 +123,11 @@ const MainStack = () => {
       .then(res => {
         if (res[5].data.status === 1) {
           dispatch(setInfluencerCategoryList(res[5].data.influencer_category));
+          dispatch(
+            initiateAllNuggetsLoadingTotalPages(
+              res[5].data.influencer_category,
+            ),
+          );
         }
         return res;
       })

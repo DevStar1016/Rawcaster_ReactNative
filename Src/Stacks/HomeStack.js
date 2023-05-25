@@ -44,6 +44,7 @@ const HomeStack = () => {
         <Stack.Screen
           name="DashboardWithCategory"
           component={DashboardWithCategory}
+          initialParams={{filterType: 0, categoryName: 'forYou'}}
         />
       )}
       <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />

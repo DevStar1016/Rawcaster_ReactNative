@@ -461,3 +461,10 @@ export const getNotificationType = type => {
       return '';
   }
 };
+
+export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
+  return {
+    categoryName,
+    nuggetsList,
+  };
+};

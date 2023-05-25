@@ -44,6 +44,7 @@ import {
   compressMedia,
   getFileName,
   getMediaMimeType,
+  getNuggetsReduxStoreDataFormate,
   getSlicedText,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
@@ -57,12 +58,10 @@ import AudioRecorder from '../../../Modals/AudioRecorder';
 import PollContainer from './PollContainer';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {useDispatch} from 'react-redux';
-import {
-  setNuggetsList,
-  setSearchedNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
+import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import EmojiModal from 'react-native-emoji-modal';
+import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -71,10 +70,10 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 var isMount = true;
 
 const PostEditNugget = ({route}) => {
-  const {nugget, isSearchNugget} = route.params ?? {};
+  const {nugget, isSearchNugget, categoryName} = route.params ?? {};
   const searchedNuggetsList = useSearchedNuggetsList();
   const dispatch = useDispatch();
-  const nuggetsList = useNuggetsList();
+  const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
   const navigation = useNavigation();
@@ -259,19 +258,22 @@ const PostEditNugget = ({route}) => {
             dispatch(setSearchedNuggetsList(tempSearchedNuggetsList));
           }
 
-          // let tempNuggetsList = [...nuggetsList];
-          // const tempIndex = tempNuggetsList.findIndex(
-          //   item => item.nugget_id === nugget.nugget_id,
-          // );
-          // if (tempIndex !== -1) {
-          //   tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
-          // }
-          // dispatch(setNuggetsList([]));
-          // dispatch(setNuggetsList(tempNuggetsList));
-          navigation.reset({
-            routes: [{name: 'DashboardTopTabNavigation'}],
-          });
-          // navigation.goBack();
+          let tempNuggetsList = [...nuggetsList];
+          const tempIndex = tempNuggetsList.findIndex(
+            item => item.nugget_id === nugget.nugget_id,
+          );
+          if (tempIndex !== -1) {
+            tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
+          }
+          dispatch(
+            setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+          );
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
+            ),
+          );
+          navigation.goBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

@@ -1,5 +1,4 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {listNuggets} from '../ThunkAPIServices';
 
 export const initialState = {
   searchedNuggetsList: [],
@@ -17,27 +16,15 @@ export const initialState = {
     nuggets: 0,
     poll_results: 0,
   },
-  isHomeNuggetsLoading: true,
   nuggetFilterType: 0,
   otherConnectionsRequestList: [],
   otherInfluencersRequestList: [],
-  nuggetsLoading: {
-    influencing: true,
-    forYou: true,
-  },
-  nuggetsList: {
-    influencing: [],
-    forYou: [],
-  },
 };
 
 const HomeSlice = createSlice({
   name: 'HomeSlice',
   initialState,
   reducers: {
-    setNuggetsList: (state, action) => {
-      state.nuggetsList = action.payload;
-    },
     setSearchedNuggetsList: (state, action) => {
       state.searchedNuggetsList = action.payload;
     },
@@ -61,9 +48,6 @@ const HomeSlice = createSlice({
     },
     setTypeWiseNotificationCount: (state, action) => {
       state.typeWiseNotificationCount = action.payload;
-    },
-    setIsHomeNuggetsLoading: (state, action) => {
-      state.isHomeNuggetsLoading = action.payload;
     },
     setNuggetFilterType: (state, action) => {
       state.nuggetFilterType = action.payload;
@@ -96,22 +80,8 @@ const HomeSlice = createSlice({
       state.otherInfluencersRequestList = [];
     },
   },
-  extraReducers: builder => {
-    builder
-      .addCase(listNuggets.pending, (state, action) => {
-        console.log(action.meta, 'PENDING DATA META');
-        console.log(action.payload, 'PENDING DATA PAYLOAD');
-        state.nuggetsLoading.forYou = true;
-      })
-      .addCase(listNuggets.fulfilled, (state, action) => {
-        console.log(action.payload, 'FULLFILLED DATA');
-        // state.posts = action.payload
-        // state.loader = false
-      });
-  },
 });
 export const {
-  setNuggetsList,
   setSearchedNuggetsList,
   setConnectionsList,
   setGroupsList,
@@ -121,7 +91,6 @@ export const {
   setUnreadNotificationCount,
   setTypeWiseNotificationCount,
   clearHomeReduxData,
-  setIsHomeNuggetsLoading,
   setNuggetFilterType,
   setOtherConnectionsRequestList,
   setOtherInfluencersRequestList,
