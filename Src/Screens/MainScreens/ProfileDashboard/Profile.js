@@ -332,6 +332,7 @@ const Profile = ({route}) => {
     isMuted: isMuted,
     setisMuted: setisMuted,
     isAutoPlay: false,
+    categoryName: 'forYou',
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
     viewableNuggetItem: viewableItem?.nugget_id,

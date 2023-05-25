@@ -13,9 +13,10 @@ import {
 } from '../../../Services/ApiService';
 import {
   useInsets,
-  useIsHomeNuggetsLoading,
-  useNuggetsList,
+  useIsNuggetsLoading,
   useNuggetType,
+  useNuggetsList,
+  useNuggetsListTotalPages,
   useToken,
 } from '../../../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
@@ -27,18 +28,25 @@ import {COLORS} from '../../../Utilities/Colors';
 
 import Loader from '../../../Components/Loader';
 import {setIsBottomTabBarAbsolute} from '../../../Store/Slices/UtilitySlice';
-import {htmlDecodeText} from '../../../Utilities/Methods';
+import {
+  getNuggetsReduxStoreDataFormate,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {
   NuggetParentActionsContext,
   useDashboardTopTabCategories,
 } from '../../../Utilities/Contexts';
-import {listNuggets} from '../../../Store/ThunkAPIServices';
+import {getListNuggets} from '../../../Store/ThunkAPIServices';
+import {
+  resetNuggetsTotalPages,
+  setNuggetsList,
+  setNuggetsLoading,
+} from '../../../Store/Slices/NuggetsListSlice';
 
 const DashboardWithCategory = ({route}) => {
   let currentPage = 1;
-  let totalPages = 1;
   let controller = undefined;
   const navigation = useNavigation();
   const {filterType, categoryType, categoryName} = route.params ?? {};
@@ -47,16 +55,16 @@ const DashboardWithCategory = ({route}) => {
   const insets = useInsets();
   const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
-  const [isNuggetsLoading, setisNuggetsLoading] = useState(true);
+  const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
+  const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
+  const totalPages = useNuggetsListTotalPages(categoryName ?? 'forYou');
   const token = useToken();
   const flatlistRef = useRef(null);
   const nuggetType = useNuggetType();
-  // const nuggetsList = useNuggetsList();
   const [viewableItem, setviewableItem] = useState({
     nugget_id: '',
     viewed: false,
   });
-  const [nuggetsList, setnuggetsList] = useState([]);
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
@@ -77,12 +85,12 @@ const DashboardWithCategory = ({route}) => {
 
   useEffect(() => {
     currentPage = 1;
-    totalPages = 1;
+    dispatch(resetNuggetsTotalPages(categoryName));
     dispatch(setIsBottomTabBarAbsolute(true));
 
     return () => {
       currentPage = 1;
-      totalPages = 1;
+      dispatch(resetNuggetsTotalPages(categoryName));
       controller = undefined;
     };
   }, []);
@@ -107,9 +115,9 @@ const DashboardWithCategory = ({route}) => {
 
   useEffect(() => {
     currentPage = 1;
-    totalPages = 1;
-    setisNuggetsLoading(true);
-    setnuggetsList([]);
+    dispatch(resetNuggetsTotalPages(categoryName));
+    dispatch(setNuggetsLoading({categoryName, status: true}));
+    dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
     listNuggetsAPICall(1);
   }, [token, nuggetType]);
 
@@ -126,58 +134,18 @@ const DashboardWithCategory = ({route}) => {
       controller.abort();
     }
     controller = new AbortController();
-    // dispatch(
-    //   listNuggets({
-    //     categoryName,
-    //     categoryType,
-    //     nuggetType,
-    //     filterType,
-    //     pageNumber,
-    //     token: token ?? 'RAWCAST',
-    //     controller,
-    //   }),
-    // );
-
-    const formData = new FormData();
-    formData.append('token', token ?? 'RAWCAST');
-    formData.append('page_number', pageNumber);
-    formData.append('nugget_type', nuggetType);
-    formData.append('filter_type', filterType ?? 0);
-    if (categoryType) {
-      formData.append('category', categoryType);
-    }
-
-    listNuggetsService(formData, controller.signal)
-      .then(res => {
-        if (res.data.status === 1) {
-          let decodedNuggetList = [...res.data.nuggets_list].map(item => {
-            return {
-              ...item,
-              content: htmlDecodeText(item.content),
-              original_user_name: htmlDecodeText(item.original_user_name),
-              user_name: htmlDecodeText(item.user_name),
-            };
-          });
-
-          if (pageNumber === 1) {
-            totalPages = parseInt(res.data.total_pages);
-            setnuggetsList(decodedNuggetList);
-          } else {
-            setnuggetsList([...nuggetsList, ...decodedNuggetList]);
-          }
-        }
-        setisNuggetsLoading(false);
-      })
-      .catch(e => {
-        console.log(e, 'ERRORIP');
-        if (!e.message.includes('canceled')) {
-          setisNuggetsLoading(false);
-        }
-      })
-      .finally(() => {
-        setrefreshing(false);
-        setisLoadMore(false);
-      });
+    dispatch(
+      getListNuggets({
+        categoryName:
+          categoryName ?? (filterType === 1 ? 'influencing' : 'forYou'),
+        categoryType,
+        nuggetType,
+        filterType: filterType ?? 0,
+        pageNumber,
+        token: token ?? 'RAWCAST',
+        signal: controller.signal,
+      }),
+    );
   }
 
   function onViewNugget(nuggetId) {
@@ -195,7 +163,11 @@ const DashboardWithCategory = ({route}) => {
         ...item,
       };
     });
-    setnuggetsList(tempNuggetsList);
+    dispatch(
+      setNuggetsList(
+        getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
+      ),
+    );
     handleViewNugget(nuggetId);
   }
 
@@ -219,7 +191,9 @@ const DashboardWithCategory = ({route}) => {
 
   function onRefresh() {
     currentPage = 1;
-    totalPages = 1;
+    dispatch(resetNuggetsTotalPages(categoryName));
+    dispatch(setNuggetsLoading({categoryName, status: true}));
+    dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
     resetViewabilityItem();
     listNuggetsAPICall(1);
   }
@@ -253,6 +227,7 @@ const DashboardWithCategory = ({route}) => {
     headerContainerHeight: getHeaderHeight(),
     isMuted: isMuted,
     setisMuted: setisMuted,
+    categoryName: categoryName ?? 'forYou',
     isAutoPlay: true,
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,

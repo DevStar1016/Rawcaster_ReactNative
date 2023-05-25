@@ -32,10 +32,7 @@ import {
 import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
 import Toast from '../../../Components/Toast';
-import {
-  setNuggetsList,
-  setSearchedNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
+import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
@@ -46,6 +43,8 @@ import {
 } from '../../../Utilities/Contexts';
 import BigList from 'react-native-big-list';
 import InputPopup from '../../../Modals/InputPopup';
+import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
+import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
 
 const Nugget = ({
   nugget,
@@ -58,6 +57,7 @@ const Nugget = ({
     isFromGlobalSearch,
     mediaHeight,
     onFinishPlaying,
+    categoryName,
   } = useNuggetParentActions();
 
   const navigation = useNavigation();
@@ -211,6 +211,7 @@ const Nugget = ({
     navigation.navigate('PostEditNugget', {
       nugget: nuggetData,
       isSearchNugget: isFromGlobalSearch,
+      categoryName: categoryName ?? 'forYou',
     });
   };
 
@@ -230,14 +231,20 @@ const Nugget = ({
                 ),
               ),
             );
-          }
-          if (isFromProfile) {
+          } else if (isFromProfile) {
             onFinishDelete(nuggetId);
           }
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.nugget_id !== nuggetId,
           );
-          dispatch(setNuggetsList(filteredNuggetsList));
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(
+                categoryName,
+                filteredNuggetsList,
+              ),
+            ),
+          );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -272,7 +279,14 @@ const Nugget = ({
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.user_id !== userId,
           );
-          dispatch(setNuggetsList(filteredNuggetsList));
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(
+                categoryName,
+                filteredNuggetsList,
+              ),
+            ),
+          );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -302,7 +316,15 @@ const Nugget = ({
       .then(res => {
         if (res.data.status === 1) {
           console.log(res.data.nugget_detail, 'SHARED DETAILS');
-          dispatch(setNuggetsList([res.data.nugget_detail, ...nuggetsList]));
+
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(categoryName, [
+                res.data.nugget_detail,
+                ...nuggetsList,
+              ]),
+            ),
+          );
           scrollNuggetsListToTop && scrollNuggetsListToTop();
         }
       })
@@ -362,7 +384,14 @@ const Nugget = ({
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.nugget_id !== nuggetId,
           );
-          dispatch(setNuggetsList(filteredNuggetsList));
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(
+                categoryName,
+                filteredNuggetsList,
+              ),
+            ),
+          );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

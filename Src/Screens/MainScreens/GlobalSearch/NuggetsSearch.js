@@ -137,6 +137,7 @@ const NuggetsSearch = () => {
   const nuggetActions = {
     headerContainerHeight: topLayerHeight,
     isMuted: isMuted,
+    categoryName: 'forYou',
     isAutoPlay: true,
     setisMuted: setisMuted,
     viewableNuggetItem: viewableItem,

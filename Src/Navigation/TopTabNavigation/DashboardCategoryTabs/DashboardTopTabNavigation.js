@@ -9,18 +9,13 @@ import {
   useToken,
 } from '../../../Utilities/StoreData';
 import {DashboardCategoryTopTabContext} from '../../../Utilities/Contexts';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
-import GradientButton from '../../../Components/GradientButton';
-import {useNavigation} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
 
 const Tab = createMaterialTopTabNavigator();
 
 function DashboardTopTabNavigation() {
-  const dispatch = useDispatch();
   const insets = useInsets();
-  const navigation = useNavigation();
   const categoryList = useInfluencerCategoryList();
   const token = useToken();
   const [
@@ -124,7 +119,11 @@ function DashboardTopTabNavigation() {
               options={{
                 title: item.name,
               }}
-              initialParams={{filterType: item.id}}
+              initialParams={{
+                categoryType: item.id,
+                categoryName: item.name?.split(' ').join(''),
+                filterType: 0,
+              }}
             />
           );
         })}
@@ -135,7 +134,7 @@ function DashboardTopTabNavigation() {
           options={{
             title: 'Influencing',
           }}
-          initialParams={{filterType: 1}}
+          initialParams={{filterType: 1, categoryName: 'influencing'}}
         />
         <Tab.Screen
           name="ForYou"
@@ -143,7 +142,7 @@ function DashboardTopTabNavigation() {
           options={{
             title: 'For You',
           }}
-          initialParams={{filterType: 0}}
+          initialParams={{filterType: 0, categoryName: 'forYou'}}
         />
       </Tab.Navigator>
     </DashboardCategoryTopTabContext.Provider>

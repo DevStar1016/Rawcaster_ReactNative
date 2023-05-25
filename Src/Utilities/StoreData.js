@@ -35,10 +35,6 @@ export const useIsVisibleInfluencers = () => {
   return useSelector(state => state.utility.isVisibleInfluencers);
 };
 
-export const useNuggetsList = () => {
-  return useSelector(state => state.home.nuggetsList);
-};
-
 export const useNuggetFilterType = () => {
   return useSelector(state => state.home.nuggetFilterType);
 };
@@ -89,6 +85,32 @@ export const useIsOpenVerifyPopup = () => {
 export const useUnreadNotificationCount = () => {
   return useSelector(state => state.home.unreadNotificationCount);
 };
-export const useIsHomeNuggetsLoading = () => {
-  return useSelector(state => state.home.isHomeNuggetsLoading);
+
+export const useIsNuggetsLoading = (categoryName = 'forYou') => {
+  if (categoryName) {
+    return useSelector(
+      state => state.nugget_list_data.nuggetsLoading[categoryName],
+    );
+  }
+  return useSelector(state => {
+    const loadingStatusList = Object.keys(
+      state.nugget_list_data.nuggetsLoading,
+    ).map(keyName => state.nugget_list_data.nuggetsLoading[keyName]);
+    if (loadingStatusList.includes(true)) {
+      return true;
+    }
+    return false;
+  });
+};
+
+export const useNuggetsList = (categoryName = 'forYou') => {
+  return categoryName
+    ? useSelector(state => state.nugget_list_data.nuggetsList[categoryName]) ??
+        []
+    : [];
+};
+export const useNuggetsListTotalPages = (categoryName = 'forYou') => {
+  return categoryName
+    ? useSelector(state => state.nugget_list_data.totalPages[categoryName]) ?? 1
+    : 1;
 };

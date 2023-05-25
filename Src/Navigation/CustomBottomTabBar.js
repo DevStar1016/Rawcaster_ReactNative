@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 
 import {View, Pressable, StyleSheet, Image} from 'react-native';
 import {COLORS} from '../Utilities/Colors';
@@ -7,9 +7,8 @@ import NotificationsIcon from '../Assets/Png/notification.png';
 import TalkShowIcon from '../Assets/Png/talkshow.png';
 import UserIcon from '../Assets/Png/user.png';
 import {
+  useIsNuggetsLoading,
   useIsBottomTabBarAbsolute,
-  useIsHomeNuggetsLoading,
-  useNuggetFilterType,
   useNuggetType,
   useToken,
   useUnreadNotificationCount,
@@ -17,23 +16,15 @@ import {
 import CustomHomeTabButton from '../Components/CustomHomeTabButton';
 import {useDispatch} from 'react-redux';
 import {setIsOpenLoginAlert, setNuggetType} from '../Store/Slices/UtilitySlice';
-import {listNuggetsService} from '../Services/ApiService';
-import {
-  setIsHomeNuggetsLoading,
-  setNuggetsList,
-} from '../Store/Slices/HomeSlice';
-import Toast from '../Components/Toast';
-import {htmlDecodeText} from '../Utilities/Methods';
 import StyledText from '../Components/StyledText';
 
 const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const isBottomTabBarAbsolute = useIsBottomTabBarAbsolute();
   const token = useToken();
-  const nuggetFilterType = useNuggetFilterType();
   const dispatch = useDispatch();
   const nuggetType = useNuggetType();
   const unreadNotificationCount = useUnreadNotificationCount();
-  const isHomeNuggetsLoading = useIsHomeNuggetsLoading();
+  const isAllNuggetsLoading = useIsNuggetsLoading();
 
   return (
     <View
@@ -98,60 +89,12 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           }
         };
 
-        const listNuggetsAPICall = tempNuggetType => {
-          dispatch(setIsHomeNuggetsLoading(true));
-          dispatch(setNuggetsList([]));
-          const formData = new FormData();
-          formData.append('token', token ?? 'RAWCAST');
-          formData.append('page_number', 1);
-          formData.append('nugget_type', tempNuggetType);
-          formData.append('filter_type', nuggetFilterType);
-          listNuggetsService(formData)
-            .then(res => {
-              if (res.data.status === 1) {
-                let decodedNuggetList = [...res.data.nuggets_list].map(item => {
-                  return {
-                    ...item,
-                    content: htmlDecodeText(item.content),
-                    original_user_name: htmlDecodeText(item.original_user_name),
-                    user_name: htmlDecodeText(item.user_name),
-                  };
-                });
-                // if (tempNuggetType === 1) {
-                //   decodedNuggetList = [...decodedNuggetList].filter(item => {
-                //     if (item.media_list?.length > 1) {
-                //       let tempMediaList = [...item.media_list].filter(
-                //         subItem => subItem.media_type === 'video',
-                //       );
-                //       if (tempMediaList.length === item.media_list?.length) {
-                //         return true;
-                //       }
-                //       return false;
-                //     }
-                //     return true;
-                //   });
-                // }
-
-                dispatch(setNuggetsList(decodedNuggetList));
-                dispatch(setNuggetType(tempNuggetType));
-              } else if (res.data.status === 0) {
-                Toast.fail(res.data.msg);
-              }
-            })
-            .catch(e => {
-              Toast.fail(e.message);
-            })
-            .finally(() => {
-              dispatch(setIsHomeNuggetsLoading(false));
-            });
-        };
-
         return (
           <View key={index} style={styles.mainItemContainer}>
             {index === 2 ? (
               <CustomHomeTabButton
                 onPress={onPress}
-                isLoading={isHomeNuggetsLoading}
+                isLoading={isAllNuggetsLoading}
               />
             ) : (
               <Pressable onPress={onPress}>
