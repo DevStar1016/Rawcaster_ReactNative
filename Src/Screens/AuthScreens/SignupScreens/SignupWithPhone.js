@@ -8,7 +8,7 @@ import TextBox from '../../../Components/TextBox';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
 import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPicker';
-import {IS_IOS} from '../../../Utilities/Constants';
+import {GENDER_LIST, IS_IOS} from '../../../Utilities/Constants';
 import {signupService} from '../../../Services/ApiService';
 import {
   DEVICE_ID,
@@ -27,6 +27,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
 import SubmitButton from '../../../Components/SubmitButton';
 import PoliciesFooter from '../../../Components/PoliciesFooter';
+import DropDownPicker from '../../../Components/DropDownPicker';
 
 let isMount = true;
 const SignupWithPhone = ({route}) => {
@@ -59,6 +60,7 @@ const SignupWithPhone = ({route}) => {
       ? Yup.string().required('Phone number is required')
       : Yup.string().email('Enter valid email').required('Email is required'),
     dob: Yup.string().required('Date of birth is required'),
+    gender: Yup.object().nullable().required('Gender is required'),
   });
 
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
@@ -68,6 +70,7 @@ const SignupWithPhone = ({route}) => {
         login_id: loginId ?? '',
         password: '',
         dob: '',
+        gender: null,
       },
       validationSchema: validationSchema,
       onSubmit: values => {
@@ -96,6 +99,7 @@ const SignupWithPhone = ({route}) => {
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
     formData.append('dob', values.dob);
+    formData.append('gender', values.gender?.id);
     formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
@@ -246,6 +250,20 @@ const SignupWithPhone = ({route}) => {
             onSelectDateMonthYearError={() => {
               setFieldValue('dob', '');
             }}
+          />
+          <DropDownPicker
+            dataList={GENDER_LIST.filter(item => item.id > 0)}
+            title={'Gender'}
+            errorText={touched.gender && errors.gender}
+            value={values.gender}
+            fieldName="name"
+            onSelectItem={item => {
+              console.log(item, 'GGGGG');
+              setFieldValue('gender', item);
+            }}
+            titlePaddingVertical={3}
+            inputContainerMarginVertical={0}
+            placeHolderText={'Select gender'}
           />
           <View
             style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>

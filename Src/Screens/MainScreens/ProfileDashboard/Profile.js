@@ -5,6 +5,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -40,6 +41,8 @@ import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
+import StyledText from '../../../Components/StyledText';
+import {FONTS} from '../../../Utilities/Fonts';
 const PADDING_HORIZONTAL = 10;
 
 var currentPage = 1;
@@ -57,10 +60,14 @@ const Profile = ({route}) => {
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
+  const [isFavourites, setisFavourites] = useState(false);
   const connections = useConnectionsList();
   const flatlistRef = useRef(null);
   const [nuggetsList, setnuggetsList] = useState(
     userId ? [] : [...myNuggetsList],
+  );
+  const [nuggetsCount, setnuggetsCount] = useState(
+    userId ? 0 : [...myNuggetsList].length,
   );
   const [isMuted, setisMuted] = useState(true);
   const [isLoading, setisLoading] = useState(userId ? true : false);
@@ -124,7 +131,7 @@ const Profile = ({route}) => {
       }
       listNuggetsAPICall(1);
     }
-  }, [userId, othersProfile]);
+  }, [userId, othersProfile, isFavourites]);
 
   const getOthersProfileAPI = () => {
     const formData = new FormData();
@@ -232,9 +239,13 @@ const Profile = ({route}) => {
     if (userId || profile?.user_id) {
       formData.append('user_id', userId ?? profile?.user_id);
     }
+    if (isFavourites) {
+      formData.append('saved', 1);
+    }
     listNuggetsService(formData)
       .then(res => {
         if (isMount) {
+          console.log(res.data, 'RRRRRR');
           if (res.data.status === 1) {
             let decodedNuggetList = [...res.data.nuggets_list].map(item => {
               return {
@@ -247,19 +258,21 @@ const Profile = ({route}) => {
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-
+              setnuggetsCount(res.data.nuggets_count);
               setnuggetsList(decodedNuggetList);
             } else {
               setnuggetsList(preList => [...preList, ...decodedNuggetList]);
             }
           } else if (res.data.status === 0) {
             setnuggetsList([]);
+            setnuggetsCount(0);
           }
         }
       })
       .catch(e => {
         if (isMount) {
           setnuggetsList([]);
+          setnuggetsCount(0);
         }
       })
       .finally(() => {
@@ -480,6 +493,49 @@ const Profile = ({route}) => {
           title={'Connections'}
           paddingHorizontal={PADDING_HORIZONTAL}
         />
+
+        {!userId ? (
+          <>
+            <Divider />
+            <View style={styles.nuggetFilterComponent}>
+              <TouchableOpacity
+                style={styles.nuggetFilter}
+                onPress={() => {
+                  if (isFavourites) {
+                    setisFavourites(false);
+                  }
+                }}>
+                <StyledText
+                  style={[
+                    styles.nuggetFilterText,
+                    {color: !isFavourites ? COLORS.black : COLORS.grey},
+                  ]}>
+                  My Nuggets{' '}
+                  {!isFavourites && nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
+                </StyledText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.nuggetFilter}
+                onPress={() => {
+                  if (!isFavourites) {
+                    setisFavourites(true);
+                  }
+                }}>
+                <SVGIcon icon="save_yellow" height={18} />
+                <StyledText
+                  style={[
+                    styles.nuggetFilterText,
+                    {color: isFavourites ? COLORS.black : COLORS.grey},
+                  ]}>
+                  Favorites{' '}
+                  {isFavourites && nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
+                </StyledText>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          false
+        )}
       </View>
     ),
     [
@@ -488,6 +544,8 @@ const Profile = ({route}) => {
       getIsEnableClaimAccount(),
       unclaimedAccountsList,
       connections,
+      isFavourites,
+      nuggetsCount,
     ],
   );
 
@@ -628,5 +686,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
+  },
+  nuggetFilterComponent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    // justifyContent: 'space-between',
+  },
+  nuggetFilter: {
+    flexDirection: 'row',
+    marginRight: 10,
+  },
+  nuggetFilterText: {
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 16,
   },
 });
