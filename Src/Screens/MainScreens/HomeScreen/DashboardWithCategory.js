@@ -24,37 +24,41 @@ import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import GradientButton from '../../../Components/GradientButton';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
-import {
-  setIsHomeNuggetsLoading,
-  setNuggetFilterType,
-  setNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
+
 import Loader from '../../../Components/Loader';
 import {setIsBottomTabBarAbsolute} from '../../../Store/Slices/UtilitySlice';
 import {htmlDecodeText} from '../../../Utilities/Methods';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import DefaultBackground from '../../../Components/DefaultBackground';
-import {NuggetParentActionsContext} from '../../../Utilities/Contexts';
-var currentPage = 1;
-var totalPages = 1;
-var controller = undefined;
-const Dashboard = () => {
+import {
+  NuggetParentActionsContext,
+  useDashboardTopTabCategories,
+} from '../../../Utilities/Contexts';
+import {listNuggets} from '../../../Store/ThunkAPIServices';
+
+const DashboardWithCategory = ({route}) => {
+  let currentPage = 1;
+  let totalPages = 1;
+  let controller = undefined;
   const navigation = useNavigation();
+  const {filterType, categoryType, categoryName} = route.params ?? {};
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const insets = useInsets();
-  const isHomeNuggetsLoading = useIsHomeNuggetsLoading();
+  const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
+  const [headerHeight, setheaderHeight] = useState(0);
+  const [isNuggetsLoading, setisNuggetsLoading] = useState(true);
   const token = useToken();
   const flatlistRef = useRef(null);
   const nuggetType = useNuggetType();
-  const nuggetsList = useNuggetsList();
+  // const nuggetsList = useNuggetsList();
   const [viewableItem, setviewableItem] = useState({
     nugget_id: '',
     viewed: false,
   });
+  const [nuggetsList, setnuggetsList] = useState([]);
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
-  const [headerContainerHeight, setheaderContainerHeight] = useState(0);
   const [refreshing, setrefreshing] = useState(false);
   const viewConfigRef = useRef({
     waitForInteraction: false,
@@ -70,7 +74,6 @@ const Dashboard = () => {
       });
     }
   });
-  const [selectedFilterTab, setselectedFilterTab] = useState(0); // 1 - Influencing, 0 - For You
 
   useEffect(() => {
     currentPage = 1;
@@ -80,6 +83,7 @@ const Dashboard = () => {
     return () => {
       currentPage = 1;
       totalPages = 1;
+      controller = undefined;
     };
   }, []);
 
@@ -104,10 +108,14 @@ const Dashboard = () => {
   useEffect(() => {
     currentPage = 1;
     totalPages = 1;
-    dispatch(setIsHomeNuggetsLoading(true));
-    dispatch(setNuggetsList([]));
+    setisNuggetsLoading(true);
+    setnuggetsList([]);
     listNuggetsAPICall(1);
-  }, [token, selectedFilterTab]);
+  }, [token, nuggetType]);
+
+  function getHeaderHeight() {
+    return headerContainerHeight ?? headerHeight;
+  }
 
   function scrollNuggetsListToTop() {
     flatlistRef.current.scrollToOffset({animated: false, offset: 0});
@@ -118,12 +126,27 @@ const Dashboard = () => {
       controller.abort();
     }
     controller = new AbortController();
+    // dispatch(
+    //   listNuggets({
+    //     categoryName,
+    //     categoryType,
+    //     nuggetType,
+    //     filterType,
+    //     pageNumber,
+    //     token: token ?? 'RAWCAST',
+    //     controller,
+    //   }),
+    // );
 
     const formData = new FormData();
     formData.append('token', token ?? 'RAWCAST');
     formData.append('page_number', pageNumber);
     formData.append('nugget_type', nuggetType);
-    formData.append('filter_type', selectedFilterTab);
+    formData.append('filter_type', filterType ?? 0);
+    if (categoryType) {
+      formData.append('category', categoryType);
+    }
+
     listNuggetsService(formData, controller.signal)
       .then(res => {
         if (res.data.status === 1) {
@@ -138,17 +161,17 @@ const Dashboard = () => {
 
           if (pageNumber === 1) {
             totalPages = parseInt(res.data.total_pages);
-            dispatch(setNuggetsList(decodedNuggetList));
+            setnuggetsList(decodedNuggetList);
           } else {
-            dispatch(setNuggetsList([...nuggetsList, ...decodedNuggetList]));
+            setnuggetsList([...nuggetsList, ...decodedNuggetList]);
           }
         }
-        dispatch(setIsHomeNuggetsLoading(false));
+        setisNuggetsLoading(false);
       })
       .catch(e => {
         console.log(e, 'ERRORIP');
         if (!e.message.includes('canceled')) {
-          dispatch(setIsHomeNuggetsLoading(false));
+          setisNuggetsLoading(false);
         }
       })
       .finally(() => {
@@ -172,8 +195,7 @@ const Dashboard = () => {
         ...item,
       };
     });
-
-    dispatch(setNuggetsList(tempNuggetsList));
+    setnuggetsList(tempNuggetsList);
     handleViewNugget(nuggetId);
   }
 
@@ -187,10 +209,12 @@ const Dashboard = () => {
   function handleViewNugget(nuggetId) {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('nugget_id', nuggetId);
+    formData.append('nugget_id', JSON.stringify([nuggetId]));
     addNuggetViewService(formData)
       .then(res => {})
-      .catch(e => {});
+      .catch(e => {
+        console.log(e, 'Nugget VIEW ERRORRRR');
+      });
   }
 
   function onRefresh() {
@@ -222,11 +246,11 @@ const Dashboard = () => {
     nuggetsList,
     isMuted,
     viewableItem,
-    headerContainerHeight,
+    getHeaderHeight(),
   ]);
 
   const nuggetActions = {
-    headerContainerHeight: headerContainerHeight,
+    headerContainerHeight: getHeaderHeight(),
     isMuted: isMuted,
     setisMuted: setisMuted,
     isAutoPlay: true,
@@ -275,38 +299,20 @@ const Dashboard = () => {
           }
           isEnableLoading={nuggetsList && nuggetsList.length > 0}
         />
-        <View
-          onLayout={e => {
-            setheaderContainerHeight(e.nativeEvent.layout.height);
-          }}
-          style={{
-            position: 'absolute',
-            top: insets.top ? insets.top : StatusBar.currentHeight,
-            left: 0,
-            right: 0,
-            zIndex: 1,
-          }}>
-          <CustomHomeHeader
-            bgColor={COLORS.transparent}
-            isEnableNuggetFilterTabs
-            selectedTab={selectedFilterTab === 1 ? 'first' : 'second'}
-            onPressFirstFilterTab={() => {
-              if (selectedFilterTab !== 1) {
-                setselectedFilterTab(1);
-                dispatch(setNuggetFilterType(1));
-                resetViewabilityItem();
-              }
+        {!token && (
+          <View
+            onLayout={e => {
+              setheaderHeight(e.nativeEvent.layout.height);
             }}
-            onPressSecondFilterTab={() => {
-              if (selectedFilterTab !== 0) {
-                setselectedFilterTab(0);
-                dispatch(setNuggetFilterType(0));
-                resetViewabilityItem();
-              }
-            }}
-          />
+            style={{
+              position: 'absolute',
+              top: insets.top ? insets.top : StatusBar.currentHeight,
+              left: 0,
+              right: 0,
+              zIndex: 1,
+            }}>
+            <CustomHomeHeader bgColor={COLORS.transparent} />
 
-          {!token && (
             <GradientButton
               icon="app_logo_white"
               rightIcon="right_arrow_white"
@@ -320,10 +326,10 @@ const Dashboard = () => {
               buttonTextStyle={{fontSize: 14, marginLeft: 10, marginRight: 10}}
               leftIcon={'app_logo_white'}
             />
-          )}
-        </View>
+          </View>
+        )}
         {
-          isHomeNuggetsLoading ? (
+          isNuggetsLoading ? (
             <Loader
               loaderText="Fetching Nuggets"
               isEnableDefaultLoaderBackground={true}
@@ -384,7 +390,7 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardWithCategory;
 
 const styles = StyleSheet.create({
   mainContainer: {

@@ -5,12 +5,12 @@ import {useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
 import SearchInput from '../../../Components/SearchInput';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import {useConnectionsList, useProfile} from '../../../Utilities/StoreData';
+import {useConnectionsList} from '../../../Utilities/StoreData';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroupsTopTabNavigation';
 import {MyConnectionsContext} from '../../../Utilities/Contexts';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroups/ConnectionsGroupsTopTabNavigation';
 
 const UsersGroupsListHome = () => {
   const navigation = useNavigation();

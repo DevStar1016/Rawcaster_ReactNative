@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {listNuggets} from '../ThunkAPIServices';
 
 export const initialState = {
-  nuggetsList: [],
   searchedNuggetsList: [],
   connectionsList: [],
   groupsList: [],
@@ -21,6 +21,14 @@ export const initialState = {
   nuggetFilterType: 0,
   otherConnectionsRequestList: [],
   otherInfluencersRequestList: [],
+  nuggetsLoading: {
+    influencing: true,
+    forYou: true,
+  },
+  nuggetsList: {
+    influencing: [],
+    forYou: [],
+  },
 };
 
 const HomeSlice = createSlice({
@@ -87,6 +95,19 @@ const HomeSlice = createSlice({
       state.otherConnectionsRequestList = [];
       state.otherInfluencersRequestList = [];
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(listNuggets.pending, (state, action) => {
+        console.log(action.meta, 'PENDING DATA META');
+        console.log(action.payload, 'PENDING DATA PAYLOAD');
+        state.nuggetsLoading.forYou = true;
+      })
+      .addCase(listNuggets.fulfilled, (state, action) => {
+        console.log(action.payload, 'FULLFILLED DATA');
+        // state.posts = action.payload
+        // state.loader = false
+      });
   },
 });
 export const {

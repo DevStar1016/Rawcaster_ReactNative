@@ -3,9 +3,9 @@ import React, {useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import SearchInput from '../../../Components/SearchInput';
 import {GlobalSearchContext} from '../../../Utilities/Contexts';
-import GlobalSearchTopTabNavigation from '../../../Navigation/TopTabNavigation/GlobalSearchTopTabNavigation';
 import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
+import GlobalSearchTopTabNavigation from '../../../Navigation/TopTabNavigation/GlobalSearch/GlobalSearchTopTabNavigation';
 
 const GlobalSearchHome = () => {
   const [searchText, setsearchText] = useState(null);

@@ -1,13 +1,13 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import {useDispatch} from 'react-redux';
-import EventsSearch from '../../Screens/MainScreens/GlobalSearch/EventsSearch';
-import NuggetsSearch from '../../Screens/MainScreens/GlobalSearch/NuggetsSearch';
-import ProfileSearch from '../../Screens/MainScreens/GlobalSearch/ProfileSearch';
-import TagsSearch from '../../Screens/MainScreens/GlobalSearch/TagsSearch';
-import {setIsBottomTabBarAbsolute} from '../../Store/Slices/UtilitySlice';
-import {useGlobalSearch} from '../../Utilities/Contexts';
+
 import GlobalSearchCustomTopTabBar from './GlobalSearchCustomTopTabBar';
-import EventsSearchStack from '../../Stacks/EventsSearchStack';
+
+import NuggetsSearch from '../../../Screens/MainScreens/GlobalSearch/NuggetsSearch';
+import EventsSearchStack from '../../../Stacks/EventsSearchStack';
+import TagsSearch from '../../../Screens/MainScreens/GlobalSearch/TagsSearch';
+import ProfileSearch from '../../../Screens/MainScreens/GlobalSearch/ProfileSearch';
+import {useGlobalSearch} from '../../../Utilities/Contexts';
 
 const Tab = createMaterialTopTabNavigator();
 

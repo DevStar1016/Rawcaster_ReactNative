@@ -1,11 +1,9 @@
 import {Modal, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import RoundedIconButton from '../../../Components/RoundedIconButton';
-import NotificationsTopTabNavigation from '../../../Navigation/TopTabNavigation/NotificationsTopTabNavigation';
+import NotificationsTopTabNavigation from '../../../Navigation/TopTabNavigation/Notifications/NotificationsTopTabNavigation';
 import {
   useToken,
   useUnreadNotificationCount,

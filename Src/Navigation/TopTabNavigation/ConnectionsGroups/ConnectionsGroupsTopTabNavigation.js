@@ -1,8 +1,9 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import {useMyConnections} from '../../Utilities/Contexts';
+
 import ConnectionsGroupsTopTab from './ConnectionsGroupsTopTab';
-import GroupsList from '../../Screens/MainScreens/User/GroupsList';
-import ConnectionsList from '../../Screens/MainScreens/User/ConnectionsList';
+import {useMyConnections} from '../../../Utilities/Contexts';
+import GroupsList from '../../../Screens/MainScreens/User/GroupsList';
+import ConnectionsList from '../../../Screens/MainScreens/User/ConnectionsList';
 
 const Tab = createMaterialTopTabNavigator();
 

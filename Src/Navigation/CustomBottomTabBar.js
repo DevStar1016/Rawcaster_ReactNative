@@ -74,7 +74,8 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
             } else {
               tempNuggetType = 2;
             }
-            listNuggetsAPICall(tempNuggetType);
+            dispatch(setNuggetType(tempNuggetType));
+            // listNuggetsAPICall(tempNuggetType);
           } else {
             dispatch(setNuggetType(0));
           }

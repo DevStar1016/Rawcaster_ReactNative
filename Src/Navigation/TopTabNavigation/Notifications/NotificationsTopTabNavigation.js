@@ -1,13 +1,13 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-import ConnectionsNotifications from '../../Screens/MainScreens/Notifications/ConnectionsNotifications';
-import EventsNotifications from '../../Screens/MainScreens/Notifications/EventsNotifications';
-import FansNotifications from '../../Screens/MainScreens/Notifications/FansNotifications';
-import GroupsNotifications from '../../Screens/MainScreens/Notifications/GroupsNotifications';
-import NuggetsNotifications from '../../Screens/MainScreens/Notifications/NuggetsNotifications';
-import PollResultsNotifications from '../../Screens/MainScreens/Notifications/PollResultsNotifications';
-import {COLORS} from '../../Utilities/Colors';
-import {FONTS} from '../../Utilities/Fonts';
-import {useNotications} from '../../Utilities/Contexts';
+import ConnectionsNotifications from '../../../Screens/MainScreens/Notifications/ConnectionsNotifications';
+import EventsNotifications from '../../../Screens/MainScreens/Notifications/EventsNotifications';
+import FansNotifications from '../../../Screens/MainScreens/Notifications/FansNotifications';
+import GroupsNotifications from '../../../Screens/MainScreens/Notifications/GroupsNotifications';
+import NuggetsNotifications from '../../../Screens/MainScreens/Notifications/NuggetsNotifications';
+import PollResultsNotifications from '../../../Screens/MainScreens/Notifications/PollResultsNotifications';
+import {COLORS} from '../../../Utilities/Colors';
+import {FONTS} from '../../../Utilities/Fonts';
+import {useNotications} from '../../../Utilities/Contexts';
 
 const Tab = createMaterialTopTabNavigator();
 

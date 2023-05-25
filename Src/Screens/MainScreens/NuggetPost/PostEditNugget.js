@@ -187,7 +187,7 @@ const PostEditNugget = ({route}) => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
-            routes: [{name: 'BottomTabNavigationAfterLogin'}],
+            routes: [{name: 'DashboardTopTabNavigation'}],
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -259,17 +259,19 @@ const PostEditNugget = ({route}) => {
             dispatch(setSearchedNuggetsList(tempSearchedNuggetsList));
           }
 
-          let tempNuggetsList = [...nuggetsList];
-          const tempIndex = tempNuggetsList.findIndex(
-            item => item.nugget_id === nugget.nugget_id,
-          );
-          if (tempIndex !== -1) {
-            tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
-          }
-          dispatch(setNuggetsList([]));
-          dispatch(setNuggetsList(tempNuggetsList));
-
-          navigation.goBack();
+          // let tempNuggetsList = [...nuggetsList];
+          // const tempIndex = tempNuggetsList.findIndex(
+          //   item => item.nugget_id === nugget.nugget_id,
+          // );
+          // if (tempIndex !== -1) {
+          //   tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
+          // }
+          // dispatch(setNuggetsList([]));
+          // dispatch(setNuggetsList(tempNuggetsList));
+          navigation.reset({
+            routes: [{name: 'DashboardTopTabNavigation'}],
+          });
+          // navigation.goBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

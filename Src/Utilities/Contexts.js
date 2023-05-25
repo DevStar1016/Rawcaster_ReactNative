@@ -15,3 +15,7 @@ export const useNuggetItemActions = () => useContext(NuggetItemActionsContext);
 
 export const NoticationsContext = createContext();
 export const useNotications = () => useContext(NoticationsContext);
+
+export const DashboardCategoryTopTabContext = createContext();
+export const useDashboardTopTabCategories = () =>
+  useContext(DashboardCategoryTopTabContext);

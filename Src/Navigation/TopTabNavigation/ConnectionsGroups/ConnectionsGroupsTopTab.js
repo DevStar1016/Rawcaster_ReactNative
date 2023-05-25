@@ -1,7 +1,7 @@
 import {Animated, View, TouchableOpacity, StyleSheet} from 'react-native';
-import {COLORS} from '../../Utilities/Colors';
-import {DIMENSIONS} from '../../Utilities/Constants';
-import {FONTS} from '../../Utilities/Fonts';
+import {COLORS} from '../../../Utilities/Colors';
+import {DIMENSIONS} from '../../../Utilities/Constants';
+import {FONTS} from '../../../Utilities/Fonts';
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 function ConnectionsGroupsTopTab({state, descriptors, navigation, position}) {
   return (

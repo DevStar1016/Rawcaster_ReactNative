@@ -26,6 +26,8 @@ export type CustomHomeHeaderProps = {
   isEnableSafeArea?: boolean;
   isEnableSearch?: boolean;
   title?: string;
+  onLeftContainerLayout?: (width: number) => void;
+  onRightContainerLayout?: (width: number) => void;
   isEnableLive?: boolean;
   isEnableBack?: boolean;
   isEnableNuggetFilterTabs?: boolean;
@@ -45,6 +47,8 @@ const CustomHomeHeader = ({
   paddingTop = 0,
   title = '',
   onPressBack,
+  onLeftContainerLayout,
+  onRightContainerLayout,
   isEnableLive = true,
   isEnableBack = false,
   isEnableSafeArea = false,
@@ -83,7 +87,13 @@ const CustomHomeHeader = ({
               : paddingTop) + 10,
         },
       ]}>
-      <View style={styles.subContainer}>
+      <View
+        style={styles.subContainer}
+        onLayout={event => {
+          if (onLeftContainerLayout) {
+            onLeftContainerLayout(event.nativeEvent.layout.width);
+          }
+        }}>
         {isEnableBack ? (
           <SVGIcon
             icon="back"
@@ -158,7 +168,13 @@ const CustomHomeHeader = ({
           </View>
         ) : null}
       </View>
-      <View style={[styles.subContainer, {justifyContent: 'flex-end'}]}>
+      <View
+        style={[styles.subContainer, {justifyContent: 'flex-end'}]}
+        onLayout={event => {
+          if (onRightContainerLayout) {
+            onRightContainerLayout(event.nativeEvent.layout.width);
+          }
+        }}>
         {isEnableSearch && (
           <SVGIcon
             icon="search"
