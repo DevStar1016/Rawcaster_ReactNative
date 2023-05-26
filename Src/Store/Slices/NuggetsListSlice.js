@@ -88,7 +88,8 @@ const NuggetsListSlice = createSlice({
         state.nuggetsLoading[categoryName] = false;
       })
       .addCase(getListNuggets.rejected, (state, action) => {
-        console.log(action.payload, 'REJECTED DATA');
+        const {categoryName} = action.payload;
+        state.nuggetsLoading[categoryName] = false;
       });
   },
 });

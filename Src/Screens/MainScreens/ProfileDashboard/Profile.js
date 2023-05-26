@@ -653,57 +653,59 @@ const Profile = ({route}) => {
             }}
           />
         </View>
-        <View style={{flex: 1, display: isFocused ? 'flex' : 'none'}}>
-          {isLoading ? (
-            <Loader
-              indicatorColor={COLORS.primary}
-              loaderText={'Fetching Profile'}
-              loaderTextColor={COLORS.primary}
-            />
-          ) : isShowProfile() ? (
-            <FlatList
-              ref={flatlistRef}
-              showsVerticalScrollIndicator={false}
-              data={getNuggetList()}
-              keyExtractor={keyExtractor}
-              contentContainerStyle={{
-                // paddingBottom: 20,
-                backgroundColor: COLORS.white,
-              }}
-              // pagingEnabled
-              // getItemLayout={getItemLayout}
-              renderItem={renderNuggetItem}
-              ListHeaderComponent={renderHeader}
-              ListEmptyComponent={() => {
-                return isListLoading ? (
-                  <View style={{alignItems: 'center'}}>
-                    <ActivityIndicator color={COLORS.primary} size="large" />
-                  </View>
-                ) : (
-                  parseInt(getProfileData().lock_nugget) === 1 && (
-                    <View style={styles.lockNuggetsContainer}>
-                      <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
-                      <BlurOverlay />
+        {isFocused && (
+          <>
+            {isLoading ? (
+              <Loader
+                indicatorColor={COLORS.primary}
+                loaderText={'Fetching Profile'}
+                loaderTextColor={COLORS.primary}
+              />
+            ) : isShowProfile() ? (
+              <FlatList
+                ref={flatlistRef}
+                showsVerticalScrollIndicator={false}
+                data={getNuggetList()}
+                keyExtractor={keyExtractor}
+                contentContainerStyle={{
+                  // paddingBottom: 20,
+                  backgroundColor: COLORS.white,
+                }}
+                // pagingEnabled
+                // getItemLayout={getItemLayout}
+                renderItem={renderNuggetItem}
+                ListHeaderComponent={renderHeader}
+                ListEmptyComponent={() => {
+                  return isListLoading ? (
+                    <View style={{alignItems: 'center'}}>
+                      <ActivityIndicator color={COLORS.primary} size="large" />
                     </View>
-                  )
-                );
-              }}
-              renderFooter={renderFooter}
-              onEndReachedThreshold={0.5}
-              onEndReached={onEndReached}
-            />
-          ) : emptyText ? (
-            <View style={styles.emptyComponent}>
-              <DefaultBackground centerText={emptyText} />
-            </View>
-          ) : null}
-          <Modal
-            onRequestClose={() => {}}
-            transparent
-            visible={isActionLoading}>
-            <Loader bgColor={COLORS.transparentDimColor} />
-          </Modal>
-        </View>
+                  ) : (
+                    parseInt(getProfileData().lock_nugget) === 1 && (
+                      <View style={styles.lockNuggetsContainer}>
+                        <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
+                        <BlurOverlay />
+                      </View>
+                    )
+                  );
+                }}
+                renderFooter={renderFooter}
+                onEndReachedThreshold={0.5}
+                onEndReached={onEndReached}
+              />
+            ) : emptyText ? (
+              <View style={styles.emptyComponent}>
+                <DefaultBackground centerText={emptyText} />
+              </View>
+            ) : null}
+            <Modal
+              onRequestClose={() => {}}
+              transparent
+              visible={isActionLoading}>
+              <Loader bgColor={COLORS.transparentDimColor} />
+            </Modal>
+          </>
+        )}
 
         {!isFocused && <DefaultBackground />}
       </View>
