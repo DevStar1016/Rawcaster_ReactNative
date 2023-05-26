@@ -43,6 +43,7 @@ import CommentIcon from '../Assets/Svg/comment.svg';
 import CommentPinkIcon from '../Assets/Svg/comment_pink.svg';
 import SavePinkIcon from '../Assets/Svg/save_pink.svg';
 import SaveWhiteIcon from '../Assets/Svg/save_white.svg';
+import SaveYellowIcon from '../Assets/Svg/save_yellow.svg';
 import ShareIcon from '../Assets/Svg/share.svg';
 import PlayWhiteIcon from '../Assets/Svg/play_white.svg';
 import AppTextLogo from '../Assets/Svg/app_text_logo_colored.svg';
@@ -184,6 +185,7 @@ export type IconType =
   | 'comment'
   | 'save_pink'
   | 'save_white'
+  | 'save_yellow'
   | 'share'
   | 'play_white'
   | 'app_text_logo_colored'
@@ -316,6 +318,7 @@ export const ICONS = {
   comment: CommentIcon,
   save_pink: SavePinkIcon,
   save_white: SaveWhiteIcon,
+  save_yellow: SaveYellowIcon,
   share: ShareIcon,
   play_white: PlayWhiteIcon,
   app_text_logo_colored: AppTextLogo,

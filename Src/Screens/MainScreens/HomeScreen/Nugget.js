@@ -16,6 +16,8 @@ import {
   useGroupsList,
   useInsets,
   useNuggetsList,
+  useSavedNuggetsCount,
+  useSavedNuggetsList,
   useSearchedNuggetsList,
   useToken,
 } from '../../../Utilities/StoreData';
@@ -32,8 +34,12 @@ import {
 import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
 import Toast from '../../../Components/Toast';
-import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
-import {useDispatch} from 'react-redux';
+import {
+  setSavedNuggetsCount,
+  setSavedNuggetsList,
+  setSearchedNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
+import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
@@ -66,6 +72,8 @@ const Nugget = ({
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
   const searchedNuggetsList = useSearchedNuggetsList();
+  const savedNuggetsList = useSavedNuggetsList();
+  const savedNuggetsCount = useSelector(state => state.home.savedNuggetsCount);
   const flatlistRef = useRef(null);
   const insets = useInsets();
   const token = useToken();
@@ -131,7 +139,7 @@ const Nugget = ({
       };
     });
   }
-
+  console.log(savedNuggetsCount, 'savedNuggetsCount');
   function likeAndUnlikeNuggetApiCall(status) {
     const formData = new FormData();
     formData.append('token', token);
@@ -148,7 +156,30 @@ const Nugget = ({
     formData.append('nugget_id', nuggetData.nugget_id);
     formData.append('save', status ? 1 : 2);
     saveAndUnsaveNuggetService(formData)
-      .then(res => {})
+      .then(res => {
+        console.log(res.data, 'SAVE');
+        if (res.data.status === 1) {
+          console.log(savedNuggetsCount, 'ADSRRERER');
+          if (status) {
+            dispatch(setSavedNuggetsCount(savedNuggetsCount + 1));
+            dispatch(
+              setSavedNuggetsList([
+                ...savedNuggetsList,
+                {...nuggetData, saved: status},
+              ]),
+            );
+          } else {
+            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+            dispatch(
+              setSavedNuggetsList(
+                savedNuggetsList.filter(
+                  ele => ele.nugget_id !== nuggetData.nugget_id,
+                ),
+              ),
+            );
+          }
+        }
+      })
       .catch(e => {});
   }
 

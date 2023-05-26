@@ -5,6 +5,7 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -17,6 +18,8 @@ import {
   useInsets,
   useNuggetsList,
   useProfile,
+  useSavedNuggetsCount,
+  useSavedNuggetsList,
   useToken,
   useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
@@ -43,6 +46,12 @@ import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
+import StyledText from '../../../Components/StyledText';
+import {FONTS} from '../../../Utilities/Fonts';
+import {
+  setSavedNuggetsCount,
+  setSavedNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
 const PADDING_HORIZONTAL = 10;
 
 const Profile = ({route}) => {
@@ -61,16 +70,20 @@ const Profile = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
   const myNuggetsList = useNuggetsList();
+  const savedNuggetsList = useSavedNuggetsList();
+  const savedNuggetsCount = useSavedNuggetsCount();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
+  const [isFavourites, setisFavourites] = useState(false);
   const connections = useConnectionsList();
   const flatlistRef = useRef(null);
   const [nuggetsList, setnuggetsList] = useState(
     userId ? [] : [...myNuggetsList],
   );
+  const [nuggetsCount, setnuggetsCount] = useState(0);
   const [isMuted, setisMuted] = useState(true);
   const [isLoading, setisLoading] = useState(userId ? true : false);
   const [isActionLoading, setisActionLoading] = useState(false);
@@ -143,7 +156,7 @@ const Profile = ({route}) => {
       }
       listNuggetsAPICall(1);
     }
-  }, [userId, othersProfile]);
+  }, [userId, othersProfile, isFavourites]);
 
   const getOthersProfileAPI = () => {
     if (controller) {
@@ -261,9 +274,13 @@ const Profile = ({route}) => {
     if (userId || profile?.user_id) {
       formData.append('user_id', userId ?? profile?.user_id);
     }
+    if (isFavourites) {
+      formData.append('saved', 1);
+    }
     listNuggetsService(formData)
       .then(res => {
         if (isMount) {
+          console.log(res.data.nuggets_count, 'RRRRRR');
           if (res.data.status === 1) {
             let decodedNuggetList = [...res.data.nuggets_list].map(item => {
               return {
@@ -276,19 +293,33 @@ const Profile = ({route}) => {
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-
+              if (isFavourites) {
+                dispatch(setSavedNuggetsCount(res.data.nuggets_count));
+                dispatch(setSavedNuggetsList(decodedNuggetList));
+              }
+              setnuggetsCount(res.data.nuggets_count);
               setnuggetsList(decodedNuggetList);
             } else {
+              if (isFavourites) {
+                dispatch(
+                  setSavedNuggetsList([
+                    ...savedNuggetsList,
+                    ...decodedNuggetList,
+                  ]),
+                );
+              }
               setnuggetsList(preList => [...preList, ...decodedNuggetList]);
             }
           } else if (res.data.status === 0) {
             setnuggetsList([]);
+            setnuggetsCount(0);
           }
         }
       })
       .catch(e => {
         if (isMount) {
           setnuggetsList([]);
+          setnuggetsCount(0);
         }
       })
       .finally(() => {
@@ -317,6 +348,13 @@ const Profile = ({route}) => {
       return othersProfile ?? {};
     }
     return profile ?? {};
+  };
+
+  const getNuggetList = () => {
+    if (!userId && isFavourites) {
+      return [...savedNuggetsList];
+    }
+    return [...nuggetsList];
   };
 
   const onFinishClaiming = () => {
@@ -413,7 +451,7 @@ const Profile = ({route}) => {
       </View>
     ) : null;
   };
-
+  console.log(savedNuggetsCount);
   const renderHeader = useMemo(
     () => (
       <View style={{flex: 1, backgroundColor: COLORS.white, paddingBottom: 10}}>
@@ -510,6 +548,53 @@ const Profile = ({route}) => {
           title={'Connections'}
           paddingHorizontal={PADDING_HORIZONTAL}
         />
+
+        {!userId ? (
+          <>
+            <Divider />
+            <View style={styles.nuggetFilterComponent}>
+              <TouchableOpacity
+                style={styles.nuggetFilter}
+                onPress={() => {
+                  if (isFavourites) {
+                    setisFavourites(false);
+                    setnuggetsCount(0);
+                  }
+                }}>
+                <StyledText
+                  style={[
+                    styles.nuggetFilterText,
+                    {color: !isFavourites ? COLORS.black : COLORS.grey},
+                  ]}>
+                  My Nuggets{' '}
+                  {!isFavourites || nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
+                </StyledText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.nuggetFilter}
+                onPress={() => {
+                  if (!isFavourites) {
+                    setisFavourites(true);
+                    setnuggetsCount(0);
+                  }
+                }}>
+                <SVGIcon icon="save_yellow" height={18} />
+                <StyledText
+                  style={[
+                    styles.nuggetFilterText,
+                    {color: isFavourites ? COLORS.black : COLORS.grey},
+                  ]}>
+                  Favorites{' '}
+                  {isFavourites || savedNuggetsCount > 0
+                    ? `(${savedNuggetsCount})`
+                    : ''}
+                </StyledText>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          false
+        )}
       </View>
     ),
     [
@@ -520,6 +605,9 @@ const Profile = ({route}) => {
       unclaimedAccountsList,
       connections,
       isFocused,
+      isFavourites,
+      nuggetsCount,
+      savedNuggetsCount,
     ],
   );
 
@@ -565,7 +653,6 @@ const Profile = ({route}) => {
             }}
           />
         </View>
-
         <View style={{flex: 1, display: isFocused ? 'flex' : 'none'}}>
           {isLoading ? (
             <Loader
@@ -577,7 +664,7 @@ const Profile = ({route}) => {
             <FlatList
               ref={flatlistRef}
               showsVerticalScrollIndicator={false}
-              data={nuggetsList}
+              data={getNuggetList()}
               keyExtractor={keyExtractor}
               contentContainerStyle={{
                 // paddingBottom: 20,
@@ -605,32 +692,7 @@ const Profile = ({route}) => {
               onEndReachedThreshold={0.5}
               onEndReached={onEndReached}
             />
-          ) : // <BigList
-          //   showsVerticalScrollIndicator={false}
-          //   data={[...Array(6)]}
-          //   keyExtractor={keyExtractor}
-          //   getItemLayout={getItemLayout}
-          //   renderItem={() => <View />}
-          //   // pagingEnabled
-          //   // refreshControl={
-          //   //   <RefreshControl
-          //   //     tintColor={COLORS.secondary}
-          //   //     refreshing={refreshing}
-          //   //     onRefresh={onRefresh}
-          //   //   />
-          //   // }
-          //   // onEndReachedThreshold={0.5}
-          //   // onEndReached={onEndReached}
-          //   itemHeight={insets.mediaHeight}
-          //   // renderHeader={renderHeader}
-          //   ListHeaderComponent={renderHeader}
-          //   contentContainerStyle={{flex: 1}}
-          //   // headerHeight={hei => null}
-          //   // footerHeight={50}
-          //   // onViewableItemsChanged={onViewRef.current}
-          //   // renderFooter={renderFooter}
-          // />
-          emptyText ? (
+          ) : emptyText ? (
             <View style={styles.emptyComponent}>
               <DefaultBackground centerText={emptyText} />
             </View>
@@ -667,5 +729,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primary,
+  },
+  nuggetFilterComponent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    // justifyContent: 'space-between',
+  },
+  nuggetFilter: {
+    flexDirection: 'row',
+    marginRight: 10,
+  },
+  nuggetFilterText: {
+    fontFamily: FONTS.DMSans.medium,
+    fontSize: 16,
   },
 });

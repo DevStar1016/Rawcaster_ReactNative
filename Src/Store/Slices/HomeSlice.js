@@ -19,6 +19,8 @@ export const initialState = {
   nuggetFilterType: 0,
   otherConnectionsRequestList: [],
   otherInfluencersRequestList: [],
+  savedNuggetsList: [],
+  savedNuggetsCount: 0,
 };
 
 const HomeSlice = createSlice({
@@ -58,6 +60,12 @@ const HomeSlice = createSlice({
     setOtherInfluencersRequestList: (state, action) => {
       state.otherInfluencersRequestList = action.payload;
     },
+    setSavedNuggetsList: (state, action) => {
+      state.savedNuggetsList = action.payload;
+    },
+    setSavedNuggetsCount: (state, action) => {
+      state.savedNuggetsCount = action.payload;
+    },
 
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
@@ -78,6 +86,8 @@ const HomeSlice = createSlice({
       state.nuggetFilterType = 0;
       state.otherConnectionsRequestList = [];
       state.otherInfluencersRequestList = [];
+      state.savedNuggetsList = [];
+      state.savedNuggetsCount = 0;
     },
   },
 });
@@ -94,5 +104,7 @@ export const {
   setNuggetFilterType,
   setOtherConnectionsRequestList,
   setOtherInfluencersRequestList,
+  setSavedNuggetsList,
+  setSavedNuggetsCount,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;
