@@ -17,10 +17,6 @@ function DashboardProfileTopTabNavigation() {
     setfocusedNuggetUserId,
   };
 
-  useEffect(() => {
-    console.log(focusedNuggetUserId, 'LKLKLKLK');
-  }, [focusedNuggetUserId]);
-
   return (
     <DashboardProfileContext.Provider value={value}>
       <Tab.Navigator
