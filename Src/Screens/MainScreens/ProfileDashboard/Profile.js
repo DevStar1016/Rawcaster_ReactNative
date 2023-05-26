@@ -32,8 +32,11 @@ import ProfilesListContainerWithSeeAll from './ProfilesListContainerWithSeeAll';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import Loader from '../../../Components/Loader';
-import {NuggetParentActionsContext} from '../../../Utilities/Contexts';
-import {useNavigation} from '@react-navigation/native';
+import {
+  NuggetParentActionsContext,
+  useDashboardProfile,
+} from '../../../Utilities/Contexts';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import Nugget from '../HomeScreen/Nugget';
 import SVGIcon from '../../../Components/SVGIcon';
 import {DIMENSIONS} from '../../../Utilities/Constants';
@@ -42,13 +45,19 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 const PADDING_HORIZONTAL = 10;
 
-var currentPage = 1;
-var totalPages = 1;
 const Profile = ({route}) => {
   let isMount = true;
+  let currentPage = 1;
+  let totalPages = 1;
+  let controller = undefined;
   const dispatch = useDispatch();
   const profile = useProfile();
-  const {userId} = route.params ?? {};
+  const isFocused = useIsFocused();
+  const {focusedNuggetUserId} = useDashboardProfile() ?? {};
+  const [userId, setuserId] = useState(
+    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
+  );
+
   const navigation = useNavigation();
   const token = useToken();
   const myNuggetsList = useNuggetsList();
@@ -98,10 +107,20 @@ const Profile = ({route}) => {
       isMount = false;
       currentPage = 1;
       totalPages = 1;
+      if (controller) {
+        controller.abort();
+      }
+      controller = undefined;
       // dispatch(setOtherConnectionsList([]));
       // dispatch(setOtherInfluencersList([]));
     };
   }, []);
+
+  useEffect(() => {
+    if (!route.params?.userId) {
+      setuserId(focusedNuggetUserId);
+    }
+  }, [focusedNuggetUserId]);
 
   useEffect(() => {
     if (userId) {
@@ -127,11 +146,15 @@ const Profile = ({route}) => {
   }, [userId, othersProfile]);
 
   const getOthersProfileAPI = () => {
+    if (controller) {
+      controller.abort();
+    }
+    controller = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
     formData.append('user_id', userId);
-    getOthersProfileService(formData)
+    getOthersProfileService(formData, controller.signal)
       .then(res => {
         if (res.data.status === 1) {
           setothersProfile({
@@ -143,14 +166,20 @@ const Profile = ({route}) => {
         } else if (res.data.status === 0) {
           setemptyText(res.data.msg);
         }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
         if (isMount) {
           setisLoading(false);
         }
+      })
+      .catch(e => {
+        if (e.message.includes('canceled')) {
+          setothersProfile(null);
+        } else {
+          setemptyText(e.message);
+          if (isMount) {
+            setisLoading(false);
+          }
+        }
+        console.log(e, 'ERROR OTHER PROFILE ');
       });
   };
 
@@ -485,10 +514,12 @@ const Profile = ({route}) => {
     ),
     [
       userId,
+      focusedNuggetUserId,
       getProfileData(),
       getIsEnableClaimAccount(),
       unclaimedAccountsList,
       connections,
+      isFocused,
     ],
   );
 
@@ -535,77 +566,84 @@ const Profile = ({route}) => {
           />
         </View>
 
-        {isLoading ? (
-          <Loader
-            indicatorColor={COLORS.primary}
-            loaderText={'Fetching Profile'}
-            loaderTextColor={COLORS.primary}
-          />
-        ) : isShowProfile() ? (
-          <FlatList
-            ref={flatlistRef}
-            showsVerticalScrollIndicator={false}
-            data={nuggetsList}
-            keyExtractor={keyExtractor}
-            contentContainerStyle={{
-              // paddingBottom: 20,
-              backgroundColor: COLORS.white,
-            }}
-            // pagingEnabled
-            // getItemLayout={getItemLayout}
-            renderItem={renderNuggetItem}
-            ListHeaderComponent={renderHeader}
-            ListEmptyComponent={() => {
-              return isListLoading ? (
-                <View style={{alignItems: 'center'}}>
-                  <ActivityIndicator color={COLORS.primary} size="large" />
-                </View>
-              ) : (
-                parseInt(getProfileData().lock_nugget) === 1 && (
-                  <View style={styles.lockNuggetsContainer}>
-                    <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
-                    <BlurOverlay />
+        <View style={{flex: 1, display: isFocused ? 'flex' : 'none'}}>
+          {isLoading ? (
+            <Loader
+              indicatorColor={COLORS.primary}
+              loaderText={'Fetching Profile'}
+              loaderTextColor={COLORS.primary}
+            />
+          ) : isShowProfile() ? (
+            <FlatList
+              ref={flatlistRef}
+              showsVerticalScrollIndicator={false}
+              data={nuggetsList}
+              keyExtractor={keyExtractor}
+              contentContainerStyle={{
+                // paddingBottom: 20,
+                backgroundColor: COLORS.white,
+              }}
+              // pagingEnabled
+              // getItemLayout={getItemLayout}
+              renderItem={renderNuggetItem}
+              ListHeaderComponent={renderHeader}
+              ListEmptyComponent={() => {
+                return isListLoading ? (
+                  <View style={{alignItems: 'center'}}>
+                    <ActivityIndicator color={COLORS.primary} size="large" />
                   </View>
-                )
-              );
-            }}
-            renderFooter={renderFooter}
-            onEndReachedThreshold={0.5}
-            onEndReached={onEndReached}
-          />
-        ) : // <BigList
-        //   showsVerticalScrollIndicator={false}
-        //   data={[...Array(6)]}
-        //   keyExtractor={keyExtractor}
-        //   getItemLayout={getItemLayout}
-        //   renderItem={() => <View />}
-        //   // pagingEnabled
-        //   // refreshControl={
-        //   //   <RefreshControl
-        //   //     tintColor={COLORS.secondary}
-        //   //     refreshing={refreshing}
-        //   //     onRefresh={onRefresh}
-        //   //   />
-        //   // }
-        //   // onEndReachedThreshold={0.5}
-        //   // onEndReached={onEndReached}
-        //   itemHeight={insets.mediaHeight}
-        //   // renderHeader={renderHeader}
-        //   ListHeaderComponent={renderHeader}
-        //   contentContainerStyle={{flex: 1}}
-        //   // headerHeight={hei => null}
-        //   // footerHeight={50}
-        //   // onViewableItemsChanged={onViewRef.current}
-        //   // renderFooter={renderFooter}
-        // />
-        emptyText ? (
-          <View style={styles.emptyComponent}>
-            <DefaultBackground centerText={emptyText} />
-          </View>
-        ) : null}
-        <Modal onRequestClose={() => {}} transparent visible={isActionLoading}>
-          <Loader bgColor={COLORS.transparentDimColor} />
-        </Modal>
+                ) : (
+                  parseInt(getProfileData().lock_nugget) === 1 && (
+                    <View style={styles.lockNuggetsContainer}>
+                      <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
+                      <BlurOverlay />
+                    </View>
+                  )
+                );
+              }}
+              renderFooter={renderFooter}
+              onEndReachedThreshold={0.5}
+              onEndReached={onEndReached}
+            />
+          ) : // <BigList
+          //   showsVerticalScrollIndicator={false}
+          //   data={[...Array(6)]}
+          //   keyExtractor={keyExtractor}
+          //   getItemLayout={getItemLayout}
+          //   renderItem={() => <View />}
+          //   // pagingEnabled
+          //   // refreshControl={
+          //   //   <RefreshControl
+          //   //     tintColor={COLORS.secondary}
+          //   //     refreshing={refreshing}
+          //   //     onRefresh={onRefresh}
+          //   //   />
+          //   // }
+          //   // onEndReachedThreshold={0.5}
+          //   // onEndReached={onEndReached}
+          //   itemHeight={insets.mediaHeight}
+          //   // renderHeader={renderHeader}
+          //   ListHeaderComponent={renderHeader}
+          //   contentContainerStyle={{flex: 1}}
+          //   // headerHeight={hei => null}
+          //   // footerHeight={50}
+          //   // onViewableItemsChanged={onViewRef.current}
+          //   // renderFooter={renderFooter}
+          // />
+          emptyText ? (
+            <View style={styles.emptyComponent}>
+              <DefaultBackground centerText={emptyText} />
+            </View>
+          ) : null}
+          <Modal
+            onRequestClose={() => {}}
+            transparent
+            visible={isActionLoading}>
+            <Loader bgColor={COLORS.transparentDimColor} />
+          </Modal>
+        </View>
+
+        {!isFocused && <DefaultBackground />}
       </View>
     </NuggetParentActionsContext.Provider>
   );

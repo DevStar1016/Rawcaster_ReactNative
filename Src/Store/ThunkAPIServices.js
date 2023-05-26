@@ -3,8 +3,7 @@ import {listNuggetsService} from '../Services/ApiService';
 
 export const getListNuggets = createAsyncThunk(
   'getListNuggets',
-  async (data, {dispatch, getState, fulfillWithValue, rejectWithValue}) => {
-    // dispatch(getListNuggets.pending({categoryName: data?.categoryName}));
+  async (data, {rejectWithValue}) => {
     const formData = new FormData();
     formData.append('token', data?.token ?? 'RAWCAST');
     formData.append('page_number', data?.pageNumber);

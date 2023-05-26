@@ -19,3 +19,6 @@ export const useNotications = () => useContext(NoticationsContext);
 export const DashboardCategoryTopTabContext = createContext();
 export const useDashboardTopTabCategories = () =>
   useContext(DashboardCategoryTopTabContext);
+
+export const DashboardProfileContext = createContext();
+export const useDashboardProfile = () => useContext(DashboardProfileContext);

@@ -234,8 +234,8 @@ export const unfriendService = data => {
   return axios.post('unfriend', data);
 };
 
-export const getOthersProfileService = data => {
-  return axios.post('getothersprofile', data);
+export const getOthersProfileService = (data, signal) => {
+  return axios.post('getothersprofile', data, {signal});
 };
 
 // Users services

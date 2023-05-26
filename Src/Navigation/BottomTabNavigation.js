@@ -24,6 +24,7 @@ import TalkshowStack from '../Stacks/TalkshowStack';
 import EventsStack from '../Stacks/EventsStack';
 import UsersStack from '../Stacks/UsersStack';
 import NotificationsStack from '../Stacks/NotificationsStack';
+import {useDashboardProfile} from '../Utilities/Contexts';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -34,6 +35,7 @@ export default function BottomTabNavigation() {
   const profile = useProfile();
   const isOpenLoginALert = useIsOpenLoginAlert();
   const isOpenVerifyPopup = useIsOpenVerifyPopup();
+  const {setswipeEnabled} = useDashboardProfile() ?? {};
 
   const [isOpenVerificationOptions, setisOpenVerificationOptions] =
     useState(false);
@@ -82,6 +84,14 @@ export default function BottomTabNavigation() {
         tabBar={props => <CustomBottomTabBar {...props} />}
         screenListeners={{
           focus: e => {
+            if (setswipeEnabled) {
+              if (e.target.includes('HomeStack')) {
+                setswipeEnabled(true);
+              } else {
+                setswipeEnabled(false);
+              }
+            }
+
             // if (e.target.includes('UsersStack')) {
             //   dispatch(setIsBottomTabBarAbsolute(false));
             // } else {

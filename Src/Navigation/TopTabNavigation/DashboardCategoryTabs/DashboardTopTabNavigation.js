@@ -11,6 +11,7 @@ import {
 import {DashboardCategoryTopTabContext} from '../../../Utilities/Contexts';
 import {useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
+import DefaultBackground from '../../../Components/DefaultBackground';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -74,6 +75,12 @@ function DashboardTopTabNavigation() {
           tabBarIndicatorStyle: {
             backgroundColor: COLORS.transparent,
           },
+          lazy: true,
+          lazyPlaceholder: () => (
+            <DefaultBackground
+            // centerText="Fetching Nuggets" isEnableLoading
+            />
+          ),
           tabBarScrollEnabled: true,
           tabBarActiveTintColor: COLORS.secondary,
           tabBarInactiveTintColor: COLORS.white,
