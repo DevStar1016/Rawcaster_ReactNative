@@ -114,3 +114,9 @@ export const useNuggetsListTotalPages = (categoryName = 'forYou') => {
     ? useSelector(state => state.nugget_list_data.totalPages[categoryName]) ?? 1
     : 1;
 };
+export const useSavedNuggetsList = () => {
+  return useSelector(state => state.home.savedNuggetsList);
+};
+export const useSavedNuggetsCount = () => {
+  return useSelector(state => state.home.savedNuggetsCount);
+};
