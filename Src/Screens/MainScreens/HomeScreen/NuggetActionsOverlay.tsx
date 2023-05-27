@@ -144,7 +144,6 @@ function NuggetActionsOverlay({
   const token = useToken();
   const user = useUserData();
   const profile = useProfile();
-  const settings = useSettings();
   const dispatch = useDispatch();
   const insets = useInsets();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
