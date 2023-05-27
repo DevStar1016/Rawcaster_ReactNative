@@ -49,8 +49,7 @@ function NuggetItem({
       viewableItem === mediaItem.media_id &&
       nugget.nugget_id === viewableNuggetItem &&
       isFocused &&
-      isAutoPlay &&
-      !isRepeatVideo
+      isAutoPlay
     );
   }, [
     isAppForeground,
@@ -60,7 +59,6 @@ function NuggetItem({
     mediaItem.media_id,
     isFocused,
     isAutoPlay,
-    isRepeatVideo,
   ]);
 
   useEffect(() => {
@@ -130,6 +128,7 @@ function NuggetItem({
           onPlayPauseVideo={() => {
             setpaused(pre => !pre);
           }}
+          setpaused={setpaused}
           duration={duration}
           progress={progress}
           mediaSeekUpdate={seekUpdate}
