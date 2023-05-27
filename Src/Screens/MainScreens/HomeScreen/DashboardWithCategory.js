@@ -356,7 +356,6 @@ const DashboardWithCategory = ({route}) => {
                   onRefresh={onRefresh}
                 />
               }
-              controlItemRender={false}
               onEndReachedThreshold={0.5}
               onEndReached={onEndReached}
               itemHeight={insets.mediaHeight}

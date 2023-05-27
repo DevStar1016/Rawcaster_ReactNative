@@ -1,5 +1,5 @@
 import {Pressable, StatusBar, StyleSheet, View} from 'react-native';
-import React, {useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import Video from 'react-native-video';
 import Slider from '@react-native-community/slider';
 import {COLORS} from '../../../../Utilities/Colors';
@@ -9,14 +9,26 @@ import {
   useNuggetItemActions,
   useNuggetParentActions,
 } from '../../../../Utilities/Contexts';
+import StyledText from '../../../../Components/StyledText';
+import {getMediaDurationFormat} from '../../../../Utilities/Methods';
+import MediaProgressSlider from '../../../../Components/MediaProgressSlider';
 
-function VideoNugget({videoPlayer, url, index, paused}) {
+function VideoNugget({
+  videoPlayer,
+  url,
+  index,
+  paused,
+  progress,
+  setprogress,
+  duration,
+  setisLoadingVideo,
+  setduration,
+}) {
   // const videoPlayer = useRef(null);
   const {isMuted, mediaHeight} = useNuggetParentActions();
   const {isRepeatVideo, onFinishPlaying} = useNuggetItemActions();
-  // const [progress, setProgress] = useState(0);
   const insets = useInsets();
-  // const [duration, setduration] = useState(0);
+
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
   // const [videoDimensions, setvideoDimensions] = useState({
@@ -26,40 +38,34 @@ function VideoNugget({videoPlayer, url, index, paused}) {
 
   const videoError = error => {
     console.log(error, 'ERROR VIDEO');
+    setisLoadingVideo(false);
   };
 
-  // const onLoadComplete = event => {
-  //   const naturalSize = event.naturalSize;
+  const onLoadComplete = event => {
+    setduration(event.duration * 1000);
+    setisLoadingVideo(false);
+    // const naturalSize = event.naturalSize;
 
-  //   try {
-  //     const naturalWidth = naturalSize.width;
-  //     const naturalHeight = naturalSize.height;
+    // try {
+    //   const naturalWidth = naturalSize.width;
+    //   const naturalHeight = naturalSize.height;
 
-  //     if (naturalWidth && naturalHeight && naturalWidth > naturalHeight) {
-  //       setvideoDimensions({
-  //         width: windowWidth,
-  //         height: windowWidth * (naturalHeight / naturalWidth),
-  //       });
-  //     } else if (naturalWidth && naturalHeight) {
-  //       setvideoDimensions({
-  //         width: windowHeight * (naturalWidth / naturalHeight),
-  //         height: windowHeight,
-  //       });
-  //     }
-  //     setduration(event.duration * 1000);
-  //   } catch (error) {
-  //     console.log(error, 'ONLOAD COMPLETE ERROR');
-  //   }
-  // };
-
-  // const getDurationFormat = tempDuration => {
-  //   let time = tempDuration / 1000;
-  //   let minutes = Math.floor(time / 60);
-  //   let timeForSeconds = time - minutes * 60;
-  //   let seconds = Math.floor(timeForSeconds);
-  //   let secondsReadable = seconds > 9 ? seconds : `0${seconds}`;
-  //   return `${minutes}:${secondsReadable}`;
-  // };
+    //   if (naturalWidth && naturalHeight && naturalWidth > naturalHeight) {
+    //     setvideoDimensions({
+    //       width: windowWidth,
+    //       height: windowWidth * (naturalHeight / naturalWidth),
+    //     });
+    //   } else if (naturalWidth && naturalHeight) {
+    //     setvideoDimensions({
+    //       width: windowHeight * (naturalWidth / naturalHeight),
+    //       height: windowHeight,
+    //     });
+    //   }
+    //   setduration(event.duration * 1000);
+    // } catch (error) {
+    //   console.log(error, 'ONLOAD COMPLETE ERROR');
+    // }
+  };
 
   // fuction to Go back 10 seconds
   // const onFirstHalfPress = async () => {
@@ -80,47 +86,18 @@ function VideoNugget({videoPlayer, url, index, paused}) {
   //     }
   //   } catch (error) {}
   // };
-  // const seekUpdate = useCallback(
-  //   async seekTime => {
-  //     try {
-  //       if (videoPlayer.current)
-  //         videoPlayer.current.seek((seekTime * duration) / 100 / 1000);
-  //     } catch (error) {}
-  //   },
-  //   [duration],
-  // );
 
-  // const GetSlider = useMemo(
-  //   () => (
-  //     <View style={[styles.sliderContainer, {width: windowWidth}]}>
-  //       <StyledText
-  //         style={{...styles.timeOne, color: COLORS.white, paddingVertical: 5}}>
-  //         {getDurationFormat(Math.floor((progress * duration) / 100))}
-  //       </StyledText>
-  //       <Slider
-  //         style={{height: 40, width: '100%'}}
-  //         minimumValue={0}
-  //         maximumValue={100}
-  //         value={progress}
-  //         onSlidingComplete={data => seekUpdate(data)}
-  //       />
-  //       <StyledText
-  //         style={{...styles.timeTwo, color: COLORS.white, paddingVertical: 5}}>
-  //         {getDurationFormat(duration || 0)}
-  //       </StyledText>
-  //     </View>
-  //   ),
-  //   [duration, progress],
-  // );
-
-  // const PlayBackStatusUpdate = playbackStatus => {
-  //   try {
-  //     let currentTime = Math.round(playbackStatus.currentTime);
-  //     let duration = Math.round(playbackStatus.seekableDuration);
-  //     if (currentTime)
-  //       if (duration) setProgress((currentTime / duration) * 100);
-  //   } catch (error) {}
-  // };
+  const playBackStatusUpdate = playbackStatus => {
+    try {
+      let currentTime = Math.round(playbackStatus.currentTime);
+      let duration = Math.round(playbackStatus.seekableDuration);
+      if (currentTime) {
+        if (duration) {
+          setprogress((currentTime / duration) * 100);
+        }
+      }
+    } catch (error) {}
+  };
 
   return useMemo(
     () => (
@@ -159,9 +136,14 @@ function VideoNugget({videoPlayer, url, index, paused}) {
           paused={paused}
           muted={isMuted}
           repeat={isRepeatVideo}
-          onBuffer={() => {}}
-          // onLoad={onLoadComplete}
-          // onProgress={PlayBackStatusUpdate}
+          onBuffer={() => {
+            console.log('BUFFERINg');
+          }}
+          onLoadStart={val => {
+            setisLoadingVideo(true);
+          }}
+          onLoad={onLoadComplete}
+          onProgress={playBackStatusUpdate}
           onEnd={() => {
             videoPlayer.current.seek(0);
             onFinishPlaying(index);
@@ -186,7 +168,16 @@ function VideoNugget({videoPlayer, url, index, paused}) {
         {/* {ShowOptions ? <>{GetSlider}</> : null} */}
       </View>
     ),
-    [url, index, paused, isMuted, isRepeatVideo, mediaHeight],
+    [
+      url,
+      index,
+      paused,
+      isMuted,
+      isRepeatVideo,
+      mediaHeight,
+      progress,
+      duration,
+    ],
   );
 }
 
@@ -198,27 +189,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.black,
   },
-  sliderContainer: {
-    position: 'absolute',
-    height: 55,
-    bottom: 0,
-    zIndex: 100,
-  },
-  timeOne: {
-    color: 'grey',
-    position: 'absolute',
-    left: 15,
-    fontSize: 13,
-    bottom: 5,
-  },
-  timeTwo: {
-    color: 'grey',
-    position: 'absolute',
-    right: 15,
-    fontSize: 13,
-    bottom: 5,
-  },
-
   firstHalf: {
     position: 'absolute',
     top: 0,

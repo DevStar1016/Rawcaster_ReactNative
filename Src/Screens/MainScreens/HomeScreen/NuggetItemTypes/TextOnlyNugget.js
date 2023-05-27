@@ -25,7 +25,7 @@ const TextOnlyNugget = ({
         styles.mainContainer,
         {height: windowHeight, width: windowWidth},
       ]}>
-      <DefaultBackground />
+      <DefaultBackground bgColor={COLORS.primaryDark} />
 
       <NuggetActionsOverlay
         onEditNugget={onEditNugget}

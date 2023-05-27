@@ -186,7 +186,7 @@ const PostEditNugget = ({route}) => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
-            routes: [{name: 'DashboardTopTabNavigation'}],
+            routes: [{name: 'DashboardProfileTopTabNavigation'}],
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);

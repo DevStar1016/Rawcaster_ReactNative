@@ -10,22 +10,25 @@ import {
   useNuggetParentActions,
 } from '../../../../Utilities/Contexts';
 
-function AudioNugget({url, index, paused}) {
+function AudioNugget({
+  url,
+  index,
+  paused,
+  audioPlayer,
+  progress,
+  setprogress,
+  duration,
+  setisLoadingVideo,
+  setduration,
+}) {
   const {isMuted, mediaHeight} = useNuggetParentActions();
   const {isRepeatVideo, onFinishPlaying} = useNuggetItemActions();
-  const videoPlayer = useRef(null);
-  const [progress, setProgress] = useState(0);
-  const [duration, setduration] = useState(0);
   const insets = useInsets();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
-  const [videoDimensions, setvideoDimensions] = useState({
-    width: windowWidth,
-    height: windowWidth,
-  });
 
   const videoError = error => {
-    console.log(error, 'ERROR VIDEO');
+    setisLoadingVideo(false);
   };
 
   const PlayBackStatusUpdate = playbackStatus => {
@@ -33,32 +36,13 @@ function AudioNugget({url, index, paused}) {
       let currentTime = Math.round(playbackStatus.currentTime);
       let duration = Math.round(playbackStatus.seekableDuration);
       if (currentTime)
-        if (duration) setProgress((currentTime / duration) * 100);
+        if (duration) setprogress((currentTime / duration) * 100);
     } catch (error) {}
   };
 
   const onLoadComplete = event => {
-    const naturalSize = event.naturalSize;
-
-    try {
-      const naturalWidth = naturalSize.width;
-      const naturalHeight = naturalSize.height;
-
-      if (naturalWidth && naturalHeight && naturalWidth > naturalHeight) {
-        setvideoDimensions({
-          width: windowWidth,
-          height: windowWidth * (naturalHeight / naturalWidth),
-        });
-      } else if (naturalWidth && naturalHeight) {
-        setvideoDimensions({
-          width: windowHeight * (naturalWidth / naturalHeight),
-          height: windowHeight,
-        });
-      }
-      setduration(event.duration * 1000);
-    } catch (error) {
-      console.log(error, 'ONLOAD COMPLETE ERROR');
-    }
+    setduration(event.duration * 1000);
+    setisLoadingVideo(false);
   };
 
   return useMemo(
@@ -68,9 +52,9 @@ function AudioNugget({url, index, paused}) {
           styles.mainContainer,
           {height: windowHeight, width: windowWidth},
         ]}>
-        <DefaultBackground />
+        <DefaultBackground bgColor={COLORS.primaryDark} />
         <Video
-          ref={videoPlayer}
+          ref={audioPlayer}
           source={{
             uri: url,
           }}
@@ -87,15 +71,30 @@ function AudioNugget({url, index, paused}) {
           muted={isMuted}
           repeat={isRepeatVideo}
           onLoad={onLoadComplete}
+          onBuffer={() => {
+            console.log('BUFFERINg');
+          }}
+          onLoadStart={val => {
+            setisLoadingVideo(true);
+          }}
           onProgress={PlayBackStatusUpdate}
           onEnd={() => {
-            videoPlayer.current.seek(0);
+            audioPlayer.current.seek(0);
             onFinishPlaying(index);
           }}
         />
       </View>
     ),
-    [url, index, paused, isMuted, isRepeatVideo, mediaHeight],
+    [
+      url,
+      index,
+      paused,
+      isMuted,
+      isRepeatVideo,
+      mediaHeight,
+      progress,
+      duration,
+    ],
   );
 }
 

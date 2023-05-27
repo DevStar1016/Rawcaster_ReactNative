@@ -1,5 +1,5 @@
 import {TouchableOpacity, View} from 'react-native';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import NuggetActionsOverlay from './NuggetActionsOverlay';
 import VideoNugget from './NuggetItemTypes/VideoNugget';
@@ -11,6 +11,7 @@ import {
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
+import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
 
 function NuggetItem({
   index,
@@ -29,8 +30,13 @@ function NuggetItem({
     useNuggetItemActions();
 
   const [paused, setpaused] = useState(true);
+  const [progress, setprogress] = useState(0);
+  const [duration, setduration] = useState(0);
   const isFocused = useIsFocused();
+
   const videoPlayer = useRef(null);
+
+  const [isLoadingVideo, setisLoadingVideo] = useState(false);
 
   const isAppForeground = useIsAppForeground();
 
@@ -61,18 +67,45 @@ function NuggetItem({
     setpaused(!shouldPauseVideo);
   }, [shouldPauseVideo]);
 
+  const seekUpdate = useCallback(
+    async seekTime => {
+      try {
+        if (videoPlayer.current)
+          videoPlayer.current.seek((seekTime * duration) / 100 / 1000);
+      } catch (error) {}
+    },
+    [duration],
+  );
+
   function getNuggetItem() {
     if (mediaItem.media_type.includes('video')) {
       return (
         <VideoNugget
           videoPlayer={videoPlayer}
           paused={paused}
+          setisLoadingVideo={setisLoadingVideo}
+          duration={duration}
+          setduration={setduration}
+          progress={progress}
+          setprogress={setprogress}
           url={mediaItem.path}
           index={index}
         />
       );
     } else if (mediaItem.media_type.includes('audio')) {
-      return <AudioNugget paused={paused} url={mediaItem.path} index={index} />;
+      return (
+        <AudioNugget
+          audioPlayer={videoPlayer}
+          setisLoadingVideo={setisLoadingVideo}
+          paused={paused}
+          duration={duration}
+          setduration={setduration}
+          progress={progress}
+          setprogress={setprogress}
+          url={mediaItem.path}
+          index={index}
+        />
+      );
     } else if (mediaItem.media_type.includes('image')) {
       return <ImageNugget url={mediaItem.path} mediaHeight={mediaHeight} />;
     }
@@ -87,6 +120,7 @@ function NuggetItem({
         <NuggetActionsOverlay
           nugget={nugget}
           nuggetType={mediaItem.media_type}
+          isLoadingVideo={isLoadingVideo}
           onPressShareType={onPressShareType}
           onPressShare={onPressShare}
           onEditNugget={onEditNugget}
@@ -96,6 +130,9 @@ function NuggetItem({
           onPlayPauseVideo={() => {
             setpaused(pre => !pre);
           }}
+          duration={duration}
+          progress={progress}
+          mediaSeekUpdate={seekUpdate}
           onReportAbouseNugget={onReportAbouseNugget}
         />
       </View>
@@ -109,6 +146,8 @@ function NuggetItem({
       mediaItem.path,
       index,
       nugget,
+      duration,
+      progress,
     ],
   );
 }
