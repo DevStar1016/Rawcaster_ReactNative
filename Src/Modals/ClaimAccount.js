@@ -18,7 +18,10 @@ import {
 import GooglePlacesList from '../Components/GooglePlacesList';
 import SubmitButton from '../Components/SubmitButton';
 import Toast from '../Components/Toast';
-import {addClaimAccountService} from '../Services/ApiService';
+import {
+  addClaimAccountService,
+  verifyAccountService,
+} from '../Services/ApiService';
 import {useNavigation} from '@react-navigation/native';
 import Loader from '../Components/Loader';
 
@@ -29,6 +32,7 @@ import StyledText from '../Components/StyledText';
 import {FONTS} from '../Utilities/Fonts';
 import {useDispatch} from 'react-redux';
 import {setUnclaimedAccountsList} from '../Store/Slices/HomeSlice';
+import {setMyProfile} from '../Store/Slices/AuthSlice';
 
 var isMount = true;
 
@@ -58,7 +62,7 @@ const ClaimAccount = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const navigation = useNavigation();
-  const {influencerId} = route.params ?? {};
+  const {influencerId, isVerifyAccount} = route.params ?? {};
   const [isFetchingLocation, setisFetchingLocation] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
@@ -83,7 +87,11 @@ const ClaimAccount = ({route}) => {
         if (isMount) {
           setisLoading(true);
         }
-        handleClaimAccount();
+        if (isVerifyAccount) {
+          handleVerifyAccount();
+        } else {
+          handleClaimAccount();
+        }
       },
     });
 
@@ -140,6 +148,38 @@ const ClaimAccount = ({route}) => {
       });
   }
 
+  function handleVerifyAccount() {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('first_name', values.firstName.trim());
+    formData.append('last_name', values.lastName.trim());
+    formData.append('telephone', values.mobileNumber.toString().trim());
+    formData.append('email_id', values.email.trim());
+    formData.append('dob', values.dob);
+    formData.append('location', values.location);
+    verifyAccountService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(setMyProfile({...profile, account_verify_type: 1}));
+
+          setmessageBoxData({
+            isOpen: true,
+            message: res.data.msg,
+          });
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  }
+
   const handleGetCurrentLocationAddress = () => {
     if (isMount) {
       setisFetchingLocation(true);
@@ -173,7 +213,7 @@ const ClaimAccount = ({route}) => {
   return (
     <View style={styles.mainContainer}>
       <HeaderWithBack
-        title={'Claim Account'}
+        title={`${isVerifyAccount ? 'Verify' : 'Claim'} Account`}
         isTitleCenter={true}
         isEnableSafeArea
       />
@@ -294,7 +334,7 @@ const ClaimAccount = ({route}) => {
           bottomTitleLogoProps={{height: 55, width: 55}}
           bottomLogoContainerStyle={{paddingTop: 10}}
           titleTextStyle={{color: COLORS.white}}
-          titleText="Claim Account"
+          titleText={`${isVerifyAccount ? 'Verify' : 'Claim'} Account`}
           closeIconProps={{icon: 'close_white', height: 18, width: 18}}
           contentTextStyle={{textAlign: 'center'}}
           onPressPositiveButton={() => {

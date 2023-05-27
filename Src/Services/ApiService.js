@@ -370,3 +370,15 @@ export const addClaimAccountService = data => {
 export const listUnClaimAccountService = data => {
   return axios.post('listunclaimaccount', data);
 };
+
+export const verifyAccountService = data => {
+  return axios.post('verifyaccount', data);
+};
+
+export const aiChatService = data => {
+  return axios.post('aichat', data);
+};
+
+export const nuggetContentAudioService = data => {
+  return axios.post('nuggetcontentaudio', data);
+};
