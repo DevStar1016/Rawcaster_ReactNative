@@ -111,6 +111,7 @@ import MenuHorizontalWhiteIcon from '../Assets/Svg/menu_horizontal_white.svg';
 import SettingsWhiteIcon from '../Assets/Svg/settings_white.svg';
 import MessagePrimaryIcon from '../Assets/Svg/message_primary.svg';
 import ShieldSecondaryIcon from '../Assets/Svg/shield_secondary.svg';
+import ShieldWhiteIcon from '../Assets/Svg/shield_white.svg';
 import LockWithDotWhiteIcon from '../Assets/Svg/lock_with_dot_white.svg';
 import UserListPlaceholderIcon from '../Assets/Svg/user_list_placeholder.svg';
 import AudioCallWhiteIcon from '../Assets/Svg/audio_call_white.svg';
@@ -252,6 +253,7 @@ export type IconType =
   | 'settings_white'
   | 'message_primary'
   | 'shield_secondary'
+  | 'shield_white'
   | 'lock_with_dot_white'
   | 'user_list_placeholder'
   | 'audio_call_white'
@@ -386,6 +388,7 @@ export const ICONS = {
   settings_white: SettingsWhiteIcon,
   message_primary: MessagePrimaryIcon,
   shield_secondary: ShieldSecondaryIcon,
+  shield_white: ShieldWhiteIcon,
   lock_with_dot_white: LockWithDotWhiteIcon,
   user_list_placeholder: UserListPlaceholderIcon,
   audio_call_white: AudioCallWhiteIcon,

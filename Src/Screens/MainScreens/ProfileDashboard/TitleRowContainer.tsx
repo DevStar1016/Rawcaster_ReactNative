@@ -14,6 +14,7 @@ import RoundedIconButton, {
 } from '../../../Components/RoundedIconButton';
 import {IconType} from '../../../Utilities/Icons';
 import SVGIcon from '../../../Components/SVGIcon';
+import SmallButton from '../../../Components/SmallButton';
 
 type Props = {
   title: string;
@@ -24,6 +25,10 @@ type Props = {
   onPressChat?: () => void;
   isDisplayEvent?: boolean;
   onPressEvent?: () => void;
+  isDisplayVerifyAccount?: boolean;
+  isDisableVerifyAccount?: boolean;
+  verifyAccountButtonText?: string;
+  onPressVerifyAccount?: () => void;
   buttonText?: string;
   buttonTextStyle?: TextStyle;
   roundedButtonIcon?: IconType;
@@ -39,6 +44,10 @@ const TitleRowContainer = ({
   onPressChat,
   isDisplayEvent = false,
   onPressEvent,
+  isDisplayVerifyAccount = false,
+  isDisableVerifyAccount = true,
+  verifyAccountButtonText = 'Verfiy My Account',
+  onPressVerifyAccount,
   buttonTextStyle,
   buttonText = 'See All',
   roundedButtonIconProps,
@@ -80,6 +89,21 @@ const TitleRowContainer = ({
       </View>
       {isDisplayButton && (
         <>
+          {isDisplayVerifyAccount && (
+            <SmallButton
+              buttonText={verifyAccountButtonText}
+              isEnableLeftIcon={true}
+              leftIcon="shield_white"
+              containerStyle={{
+                backgroundColor: COLORS.secondary,
+                borderRadius: 5,
+                marginRight: 5,
+              }}
+              buttonTextStyle={{color: COLORS.white}}
+              onPress={onPressVerifyAccount}
+              isDisable={isDisableVerifyAccount}
+            />
+          )}
           {buttonType === 'text' && (
             <TouchableOpacity activeOpacity={0.8} onPress={onPressButton}>
               <StyledText style={[styles.seeAllButtonText, buttonTextStyle]}>

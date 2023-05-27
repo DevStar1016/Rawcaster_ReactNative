@@ -126,6 +126,11 @@ const ProfileTopSection = ({
               profileUpdateAPICall(1, {...selectedImage});
             }
           }}
+          topRightIcon={
+            profile &&
+            parseInt(profile?.account_verify_type) === 2 &&
+            'verified_sign'
+          }
         />
         {isEnableFansList && (
           <FansProfilesContainer

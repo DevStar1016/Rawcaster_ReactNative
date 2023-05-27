@@ -13,6 +13,10 @@ const ProfileIntroContainer = ({
   profile,
   paddingHorizontal,
   onLayout,
+  isDisplayVerifyAccount = false,
+  onPressVerifyAccount,
+  verifyAccountButtonText,
+  isDisableVerifyAccount = false,
 }) => {
   const navigation = useNavigation();
   const RowContainer = ({icon, text = '', iconSize = 25}) => {
@@ -42,6 +46,10 @@ const ProfileIntroContainer = ({
         }}
         isDisplayButton={userId ? false : true}
         buttonType="rounded"
+        isDisplayVerifyAccount={isDisplayVerifyAccount}
+        onPressVerifyAccount={onPressVerifyAccount}
+        isDisableVerifyAccount={isDisableVerifyAccount}
+        verifyAccountButtonText={verifyAccountButtonText}
       />
 
       {profile?.work_at ? (
