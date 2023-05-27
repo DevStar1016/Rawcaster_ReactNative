@@ -5,7 +5,6 @@ import {
   TransitionSpecs,
   createStackNavigator,
 } from '@react-navigation/stack';
-import BottomTabNavigation from '../Navigation/BottomTabNavigation';
 import Loader from '../Components/Loader';
 import {useIsVisibleInfluencers, useToken} from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
@@ -43,6 +42,7 @@ import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
 import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
+import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
 
 const Stack = createStackNavigator();
 
@@ -166,8 +166,8 @@ const MainStack = () => {
         ) : (
           <>
             <Stack.Screen
-              name="BottomTabNavigationAfterLogin"
-              component={BottomTabNavigation}
+              name="DashboardProfileTopTabNavigation"
+              component={DashboardProfileTopTabNavigation}
             />
             <Stack.Screen name="PostEditNugget" component={PostEditNugget} />
             <Stack.Screen name="EditProfile" component={EditProfile} />

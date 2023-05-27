@@ -17,6 +17,7 @@ import {
   useNuggetType,
   useNuggetsList,
   useNuggetsListTotalPages,
+  useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
@@ -36,6 +37,7 @@ import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {
   NuggetParentActionsContext,
+  useDashboardProfile,
   useDashboardTopTabCategories,
 } from '../../../Utilities/Contexts';
 import {getListNuggets} from '../../../Store/ThunkAPIServices';
@@ -50,6 +52,8 @@ const DashboardWithCategory = ({route}) => {
   let controller = undefined;
   const navigation = useNavigation();
   const {filterType, categoryType, categoryName} = route.params ?? {};
+  const {setfocusedNuggetUserId} = useDashboardProfile() ?? {};
+  const profile = useProfile();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const insets = useInsets();
@@ -76,6 +80,17 @@ const DashboardWithCategory = ({route}) => {
 
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0) {
+      const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
+      if (
+        setfocusedNuggetUserId &&
+        token &&
+        profile &&
+        profile.user_id !== selectedNuggetUserId
+      ) {
+        setfocusedNuggetUserId(selectedNuggetUserId);
+      } else {
+        setfocusedNuggetUserId(null);
+      }
       setviewableItem({
         nugget_id: viewableItems.viewableItems[0].item.nugget_id || 0,
         viewed: viewableItems.viewableItems[0].item.viewed,
@@ -84,8 +99,6 @@ const DashboardWithCategory = ({route}) => {
   });
 
   useEffect(() => {
-    currentPage = 1;
-    dispatch(resetNuggetsTotalPages(categoryName));
     dispatch(setIsBottomTabBarAbsolute(true));
 
     return () => {
@@ -94,6 +107,23 @@ const DashboardWithCategory = ({route}) => {
       controller = undefined;
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      currentPage === 1 &&
+      !viewableItem.nugget_id &&
+      nuggetsList?.length > 0 &&
+      isFocused &&
+      token &&
+      profile
+    ) {
+      if (nuggetsList[0]?.user_id !== profile.user_id) {
+        setfocusedNuggetUserId(nuggetsList[0]?.user_id);
+      } else {
+        setfocusedNuggetUserId(null);
+      }
+    }
+  }, [nuggetsList, isFocused]);
 
   useEffect(() => {
     if (token && viewableItem.nugget_id && !viewableItem.viewed) {
@@ -314,6 +344,7 @@ const DashboardWithCategory = ({route}) => {
               ref={flatlistRef}
               showsVerticalScrollIndicator={false}
               data={nuggetsList}
+              alwaysBounceVertical={false}
               keyExtractor={keyExtractor}
               getItemLayout={getItemLayout}
               renderItem={renderNuggetItem}
@@ -325,6 +356,7 @@ const DashboardWithCategory = ({route}) => {
                   onRefresh={onRefresh}
                 />
               }
+              controlItemRender={false}
               onEndReachedThreshold={0.5}
               onEndReached={onEndReached}
               itemHeight={insets.mediaHeight}
