@@ -18,6 +18,7 @@ import {
   useGroupsList,
   useNuggetsList,
   useProfile,
+  useSavedNuggetsList,
   useSearchedNuggetsList,
   useToken,
 } from '../../../Utilities/StoreData';
@@ -58,7 +59,10 @@ import AudioRecorder from '../../../Modals/AudioRecorder';
 import PollContainer from './PollContainer';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {useDispatch} from 'react-redux';
-import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
+import {
+  setSavedNuggetsList,
+  setSearchedNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import EmojiModal from 'react-native-emoji-modal';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
@@ -79,6 +83,7 @@ const PostEditNugget = ({route}) => {
   const navigation = useNavigation();
   const profile = useProfile();
   const token = useToken();
+  const savedNuggetsList = useSavedNuggetsList();
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenCamera, setisOpenCamera] = useState(false);
@@ -273,6 +278,14 @@ const PostEditNugget = ({route}) => {
               getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
             ),
           );
+          let tempSavedList = [...savedNuggetsList];
+          let tempSavedIndex = tempSavedList.findIndex(
+            ele => ele.nugget_id === nugget.nugget_id,
+          );
+          if (tempSavedIndex !== -1) {
+            tempSavedList[tempSavedIndex] = {...res.data.nugget_detail};
+            dispatch(setSavedNuggetsList(tempSavedList));
+          }
           navigation.goBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
