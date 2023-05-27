@@ -28,6 +28,7 @@ import {
   setGroupsList,
   setInfluencerCategoryList,
   setPendingFriendRequests,
+  setSavedNuggetsCount,
   setUnclaimedAccountsList,
   setUnreadNotificationCount,
 } from '../Store/Slices/HomeSlice';
@@ -88,6 +89,7 @@ const MainStack = () => {
             bio_data: htmlDecodeText(profile?.bio_data),
           };
           dispatch(setMyProfile(profile));
+          dispatch(setSavedNuggetsCount(profile.saved_nugget_count ?? 0));
           dispatch(
             setUnreadNotificationCount(
               profile?.unread_notification_count ?? null,

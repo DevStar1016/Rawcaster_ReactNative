@@ -139,7 +139,7 @@ const Nugget = ({
       };
     });
   }
-  console.log(savedNuggetsCount, 'savedNuggetsCount');
+
   function likeAndUnlikeNuggetApiCall(status) {
     const formData = new FormData();
     formData.append('token', token);
@@ -157,11 +157,9 @@ const Nugget = ({
     formData.append('save', status ? 1 : 2);
     saveAndUnsaveNuggetService(formData)
       .then(res => {
-        console.log(res.data, 'SAVE');
         if (res.data.status === 1) {
-          console.log(savedNuggetsCount, 'ADSRRERER');
           if (status) {
-            dispatch(setSavedNuggetsCount(savedNuggetsCount + 1));
+            dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
             dispatch(
               setSavedNuggetsList([
                 ...savedNuggetsList,
@@ -169,7 +167,7 @@ const Nugget = ({
               ]),
             );
           } else {
-            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+            dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
             dispatch(
               setSavedNuggetsList(
                 savedNuggetsList.filter(
@@ -265,6 +263,18 @@ const Nugget = ({
           } else if (isFromProfile) {
             onFinishDelete(nuggetId);
           }
+          let tempSavedList = [...savedNuggetsList];
+          let tempIndex = tempSavedList.findIndex(
+            ele => ele.nugget_id === nuggetId,
+          );
+          if (tempIndex !== -1) {
+            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+            dispatch(
+              setSavedNuggetsList(
+                tempSavedList.filter(item => item.nugget_id !== nuggetId),
+              ),
+            );
+          }
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.nugget_id !== nuggetId,
           );
@@ -307,6 +317,18 @@ const Nugget = ({
               ),
             );
           }
+          let tempSavedList = [...savedNuggetsList];
+          let tempIndex = tempSavedList.findIndex(
+            ele => ele.nugget_id === nuggetId,
+          );
+          if (tempIndex !== -1) {
+            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+            dispatch(
+              setSavedNuggetsList(
+                tempSavedList.filter(item => item.nugget_id !== nuggetId),
+              ),
+            );
+          }
           const filteredNuggetsList = [...nuggetsList].filter(
             item => item.user_id !== userId,
           );
@@ -346,8 +368,6 @@ const Nugget = ({
     shareNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data.nugget_detail, 'SHARED DETAILS');
-
           dispatch(
             setNuggetsList(
               getNuggetsReduxStoreDataFormate(categoryName, [
@@ -409,6 +429,18 @@ const Nugget = ({
                 [...searchedNuggetsList].filter(
                   item => item.nugget_id !== nuggetId,
                 ),
+              ),
+            );
+          }
+          let tempSavedList = [...savedNuggetsList];
+          let tempIndex = tempSavedList.findIndex(
+            ele => ele.nugget_id === nuggetId,
+          );
+          if (tempIndex !== -1) {
+            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+            dispatch(
+              setSavedNuggetsList(
+                tempSavedList.filter(item => item.nugget_id !== nuggetId),
               ),
             );
           }

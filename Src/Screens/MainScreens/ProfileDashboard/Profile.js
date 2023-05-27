@@ -53,6 +53,7 @@ const PADDING_HORIZONTAL = 10;
 
 var currentPage = 1;
 var totalPages = 1;
+var isFirst = true;
 const Profile = ({route}) => {
   let isMount = true;
   const dispatch = useDispatch();
@@ -60,7 +61,6 @@ const Profile = ({route}) => {
   const {userId} = route.params ?? {};
   const navigation = useNavigation();
   const token = useToken();
-  const myNuggetsList = useNuggetsList();
   const savedNuggetsList = useSavedNuggetsList();
   const savedNuggetsCount = useSavedNuggetsCount();
   const unclaimedAccountsList = useUnclaimedAccountsList();
@@ -71,9 +71,7 @@ const Profile = ({route}) => {
   const [isFavourites, setisFavourites] = useState(false);
   const connections = useConnectionsList();
   const flatlistRef = useRef(null);
-  const [nuggetsList, setnuggetsList] = useState(
-    userId ? [] : [...myNuggetsList],
-  );
+  const [nuggetsList, setnuggetsList] = useState([]);
   const [nuggetsCount, setnuggetsCount] = useState(0);
   const [isMuted, setisMuted] = useState(true);
   const [isLoading, setisLoading] = useState(userId ? true : false);
@@ -129,7 +127,10 @@ const Profile = ({route}) => {
   useEffect(() => {
     if (
       (userId && othersProfile && parseInt(othersProfile.lock_nugget) === 0) ||
-      (!userId && profile)
+      (!userId &&
+        profile &&
+        ((isFavourites && (savedNuggetsList.length <= 0 || isFirst)) ||
+          (!isFavourites && nuggetsList.length <= 0)))
     ) {
       if (isMount) {
         setisListLoading(true);
@@ -251,7 +252,6 @@ const Profile = ({route}) => {
     listNuggetsService(formData)
       .then(res => {
         if (isMount) {
-          console.log(res.data.nuggets_count, 'RRRRRR');
           if (res.data.status === 1) {
             let decodedNuggetList = [...res.data.nuggets_list].map(item => {
               return {
@@ -265,11 +265,13 @@ const Profile = ({route}) => {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               if (isFavourites) {
+                isFirst = false;
                 dispatch(setSavedNuggetsCount(res.data.nuggets_count));
                 dispatch(setSavedNuggetsList(decodedNuggetList));
+              } else {
+                setnuggetsCount(res.data.nuggets_count);
+                setnuggetsList(decodedNuggetList);
               }
-              setnuggetsCount(res.data.nuggets_count);
-              setnuggetsList(decodedNuggetList);
             } else {
               if (isFavourites) {
                 dispatch(
@@ -278,19 +280,30 @@ const Profile = ({route}) => {
                     ...decodedNuggetList,
                   ]),
                 );
+              } else {
+                setnuggetsList(preList => [...preList, ...decodedNuggetList]);
               }
-              setnuggetsList(preList => [...preList, ...decodedNuggetList]);
             }
           } else if (res.data.status === 0) {
-            setnuggetsList([]);
-            setnuggetsCount(0);
+            if (isFavourites) {
+              dispatch(setSavedNuggetsList([]));
+              dispatch(setSavedNuggetsCount(0));
+            } else {
+              setnuggetsList([]);
+              setnuggetsCount(0);
+            }
           }
         }
       })
       .catch(e => {
         if (isMount) {
-          setnuggetsList([]);
-          setnuggetsCount(0);
+          if (isFavourites) {
+            dispatch(setSavedNuggetsList([]));
+            dispatch(setSavedNuggetsCount(0));
+          } else {
+            setnuggetsList([]);
+            setnuggetsCount(0);
+          }
         }
       })
       .finally(() => {
@@ -334,6 +347,17 @@ const Profile = ({route}) => {
     });
   };
   const onFinishDelete = nuggetId => {
+    let tempSavedList = [...savedNuggetsList];
+    let tempIndex = tempSavedList.findIndex(ele => ele.nugget_id === nuggetId);
+    if (tempIndex !== -1) {
+      dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
+      dispatch(
+        setSavedNuggetsList(
+          tempSavedList.filter(item => item.nugget_id !== nuggetId),
+        ),
+      );
+    }
+    setnuggetsCount(pre => pre - 1);
     setnuggetsList(preList => {
       let tempList = [...preList].filter(item => item.nugget_id !== nuggetId);
       return tempList;
@@ -422,7 +446,7 @@ const Profile = ({route}) => {
       </View>
     ) : null;
   };
-  console.log(savedNuggetsCount);
+
   const renderHeader = useMemo(
     () => (
       <View style={{flex: 1, backgroundColor: COLORS.white, paddingBottom: 10}}>
@@ -529,7 +553,6 @@ const Profile = ({route}) => {
                 onPress={() => {
                   if (isFavourites) {
                     setisFavourites(false);
-                    setnuggetsCount(0);
                   }
                 }}>
                 <StyledText
@@ -537,8 +560,7 @@ const Profile = ({route}) => {
                     styles.nuggetFilterText,
                     {color: !isFavourites ? COLORS.black : COLORS.grey},
                   ]}>
-                  My Nuggets{' '}
-                  {!isFavourites || nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
+                  My Nuggets {nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
                 </StyledText>
               </TouchableOpacity>
               <TouchableOpacity
@@ -546,7 +568,6 @@ const Profile = ({route}) => {
                 onPress={() => {
                   if (!isFavourites) {
                     setisFavourites(true);
-                    setnuggetsCount(0);
                   }
                 }}>
                 <SVGIcon icon="save_yellow" height={18} />
@@ -556,9 +577,7 @@ const Profile = ({route}) => {
                     {color: isFavourites ? COLORS.black : COLORS.grey},
                   ]}>
                   Favorites{' '}
-                  {isFavourites || savedNuggetsCount > 0
-                    ? `(${savedNuggetsCount})`
-                    : ''}
+                  {savedNuggetsCount > 0 ? `(${savedNuggetsCount})` : ''}
                 </StyledText>
               </TouchableOpacity>
             </View>
@@ -577,6 +596,7 @@ const Profile = ({route}) => {
       isFavourites,
       nuggetsCount,
       savedNuggetsCount,
+      savedNuggetsList,
     ],
   );
 
