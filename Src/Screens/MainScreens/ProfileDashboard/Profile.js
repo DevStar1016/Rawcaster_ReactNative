@@ -54,7 +54,6 @@ import {
 } from '../../../Store/Slices/HomeSlice';
 const PADDING_HORIZONTAL = 10;
 
-var isFirst = true;
 const Profile = ({route}) => {
   let isMount = true;
   let currentPage = 1;
@@ -76,6 +75,7 @@ const Profile = ({route}) => {
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
+  const [isFirst, setisFirst] = useState(true);
   const [isListLoading, setisListLoading] = useState(false);
   const [isFavourites, setisFavourites] = useState(false);
   const connections = useConnectionsList();
@@ -153,7 +153,9 @@ const Profile = ({route}) => {
     ) {
       if (isMount) {
         setisListLoading(true);
-        setnuggetsList([]);
+        if (!isFavourites) {
+          setnuggetsList([]);
+        }
       }
       listNuggetsAPICall(1);
     }
@@ -294,7 +296,7 @@ const Profile = ({route}) => {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               if (isFavourites) {
-                isFirst = false;
+                setisFirst(false);
                 dispatch(setSavedNuggetsCount(res.data.nuggets_count));
                 dispatch(setSavedNuggetsList(decodedNuggetList));
               } else {
@@ -417,14 +419,14 @@ const Profile = ({route}) => {
   }
 
   function getIsDisableVerifyAccount() {
-    if (parseInt(profile.account_verify_type) === 1) {
+    if (profile && parseInt(profile.account_verify_type) === 1) {
       return true;
     }
     return false;
   }
 
   function getVerifyAccountButtonText() {
-    if (parseInt(profile.account_verify_type) === 1) {
+    if (profile && parseInt(profile.account_verify_type) === 1) {
       return 'Verification Pending';
     }
     return 'Verify My Account';
@@ -734,13 +736,19 @@ const Profile = ({route}) => {
                     <View style={{alignItems: 'center'}}>
                       <ActivityIndicator color={COLORS.primary} size="large" />
                     </View>
+                  ) : parseInt(getProfileData().lock_nugget) === 1 ? (
+                    <View style={styles.lockNuggetsContainer}>
+                      <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
+                      <BlurOverlay />
+                    </View>
                   ) : (
-                    parseInt(getProfileData().lock_nugget) === 1 && (
-                      <View style={styles.lockNuggetsContainer}>
-                        <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />
-                        <BlurOverlay />
-                      </View>
-                    )
+                    <View style={styles.lockNuggetsContainer}>
+                      <StyledText
+                        style={{opacity: 1, zIndex: 10, color: COLORS.white}}>
+                        No Data Found
+                      </StyledText>
+                      <BlurOverlay hideLock />
+                    </View>
                   );
                 }}
                 renderFooter={renderFooter}

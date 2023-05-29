@@ -146,7 +146,44 @@ const Nugget = ({
     formData.append('nugget_id', nuggetData.nugget_id);
     formData.append('like', status ? 1 : 2);
     likeAndUnlikeNuggetService(formData)
-      .then(res => {})
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempList = [...nuggetsList];
+          let tempIndex = tempList.findIndex(
+            item => item.nugget_id === nuggetData.nugget_id,
+          );
+          let totalLikes = parseInt(tempList[tempIndex].total_likes);
+          totalLikes = status ? totalLikes + 1 : totalLikes - 1;
+          if (tempIndex !== -1) {
+            dispatch(
+              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+            );
+            tempList[tempIndex] = {
+              ...tempList[tempIndex],
+              liked: status,
+              total_likes: totalLikes,
+            };
+          }
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(categoryName, tempList),
+            ),
+          );
+          let tempSavedList = [...savedNuggetsList];
+          let tempSavedIndex = tempSavedList.findIndex(
+            ele => ele.nugget_id === nuggetData.nugget_id,
+          );
+          if (tempSavedIndex !== -1) {
+            dispatch(setSavedNuggetsList([]));
+            tempSavedList[tempSavedIndex] = {
+              ...tempSavedList[tempSavedIndex],
+              liked: status,
+              total_likes: totalLikes,
+            };
+          }
+          dispatch(setSavedNuggetsList(tempSavedList));
+        }
+      })
       .catch(e => {});
   }
 
@@ -158,6 +195,21 @@ const Nugget = ({
     saveAndUnsaveNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          let tempList = [...nuggetsList];
+          let tempIndex = tempList.findIndex(
+            item => item.nugget_id === nuggetData.nugget_id,
+          );
+          if (tempIndex !== -1) {
+            dispatch(
+              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+            );
+            tempList[tempIndex] = {...tempList[tempIndex], saved: status};
+          }
+          dispatch(
+            setNuggetsList(
+              getNuggetsReduxStoreDataFormate(categoryName, tempList),
+            ),
+          );
           if (status) {
             dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
             dispatch(
