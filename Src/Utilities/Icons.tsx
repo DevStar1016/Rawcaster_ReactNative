@@ -91,6 +91,7 @@ import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
 import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
 import MenuVerticalIcon from '../Assets/Svg/menu_vertical.svg';
 import MenuVerticalWhiteIcon from '../Assets/Svg/menu_vertical_white.svg';
+import OpenAIWhiteIcon from '../Assets/Svg/open_ai.svg';
 
 import CloseRoundedDimColorIcon from '../Assets/Svg/close_rounded_dim_color.svg';
 import CameraBlackIcon from '../Assets/Svg/camera_black.svg';
@@ -268,7 +269,8 @@ export type IconType =
   | 'verified_sign'
   | 'close_black'
   | 'claim_user'
-  | 'menu_vertical_white';
+  | 'menu_vertical_white'
+  | 'open_ai_white';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -403,4 +405,5 @@ export const ICONS = {
   close_black: CloseBlackIcon,
   claim_user: ClaimUserIcon,
   menu_vertical_white: MenuVerticalWhiteIcon,
+  open_ai_white: OpenAIWhiteIcon,
 };

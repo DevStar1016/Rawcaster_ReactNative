@@ -21,7 +21,13 @@ import {
   getUrlWithFilePrefix,
 } from '../../Utilities/Methods';
 
-const MediaPreview = ({setModal, data, onSendMedia}) => {
+const MediaPreview = ({
+  setModal,
+  data,
+  onSendMedia,
+  isEnableDone = true,
+  isEnableEdit = true,
+}) => {
   const insets = useInsets();
   const [mediaData, setmediaData] = useState(data);
   const [isOpenCrop, setisOpenCrop] = useState(false);
@@ -80,7 +86,7 @@ const MediaPreview = ({setModal, data, onSendMedia}) => {
               setModal(false);
             }}
           />
-          {mediaData.mediaType.includes('image') && (
+          {isEnableEdit && mediaData.mediaType.includes('image') && (
             <View style={styles.headerRightContainer}>
               <TopActionButton
                 icon={'crop'}
@@ -148,32 +154,34 @@ const MediaPreview = ({setModal, data, onSendMedia}) => {
             </View>
           ))}
       </View>
-      <View
-        style={[
-          styles.topBottomContainer,
-          {
-            paddingTop: 10,
-            paddingBottom: insets.bottom ? insets.bottom : 20,
-            justifyContent: 'flex-end',
-          },
-        ]}>
-        <TouchableOpacity
-          style={styles.sendButton}
-          activeOpacity={0.7}
-          onPress={() => {
-            setModal(false);
-            onSendMedia({
-              name: getFileName(mediaData.uri),
-              uri: mediaData.uri,
-              type: getMediaMimeType(mediaData.uri, mediaData.mediaType),
-            });
-          }}>
-          <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
-            Done
-          </StyledText>
-          {/* <SVGIcon icon="send" marginLeft={-4} /> */}
-        </TouchableOpacity>
-      </View>
+      {isEnableDone && (
+        <View
+          style={[
+            styles.topBottomContainer,
+            {
+              paddingTop: 10,
+              paddingBottom: insets.bottom ? insets.bottom : 20,
+              justifyContent: 'flex-end',
+            },
+          ]}>
+          <TouchableOpacity
+            style={styles.sendButton}
+            activeOpacity={0.7}
+            onPress={() => {
+              setModal(false);
+              onSendMedia({
+                name: getFileName(mediaData.uri),
+                uri: mediaData.uri,
+                type: getMediaMimeType(mediaData.uri, mediaData.mediaType),
+              });
+            }}>
+            <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
+              Done
+            </StyledText>
+            {/* <SVGIcon icon="send" marginLeft={-4} /> */}
+          </TouchableOpacity>
+        </View>
+      )}
       <Modal
         visible={isOpenCrop}
         transparent

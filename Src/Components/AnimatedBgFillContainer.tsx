@@ -79,7 +79,6 @@ export default AnimatedBgFillContainer;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    width: '100%',
     flexDirection: 'row',
     alignItems: 'flex-start',
     overflow: 'hidden',

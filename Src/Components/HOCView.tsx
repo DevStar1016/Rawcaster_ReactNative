@@ -36,7 +36,7 @@ interface Props {
   backHeaderContainerStyle?: ViewStyle;
   loaderProps?: LoaderProps;
   keyboardAwareContentContainerStyle?: ViewStyle;
-  onLayoutHeight?: (height: number) => void;
+  onLayoutHeaderHeight?: (height: number) => void;
   isEnablePrimaryColorStatusBar?: boolean;
   isEnableTopSafeAreaHomeHeader?: boolean;
 }
@@ -59,7 +59,7 @@ const HOCView = ({
   backHeaderContainerStyle = {},
   isLoading = false,
   isEnablePrimaryColorStatusBar = true,
-  onLayoutHeight,
+  onLayoutHeaderHeight,
   loaderProps = {},
   keyboardAwareContentContainerStyle,
   isEnableTopSafeAreaHomeHeader = false,
@@ -117,8 +117,8 @@ const HOCView = ({
           {isEnableHeader && headerType === 'header_with_back' && (
             <View
               onLayout={event => {
-                if (onLayoutHeight) {
-                  onLayoutHeight(
+                if (onLayoutHeaderHeight) {
+                  onLayoutHeaderHeight(
                     event.nativeEvent.layout.height +
                       (IS_IOS
                         ? insets.top
@@ -186,8 +186,8 @@ const HOCView = ({
           {isEnableHeader && headerType === 'header_with_back' && (
             <View
               onLayout={event => {
-                if (onLayoutHeight) {
-                  onLayoutHeight(
+                if (onLayoutHeaderHeight) {
+                  onLayoutHeaderHeight(
                     event.nativeEvent.layout.height +
                       (IS_IOS
                         ? insets.top

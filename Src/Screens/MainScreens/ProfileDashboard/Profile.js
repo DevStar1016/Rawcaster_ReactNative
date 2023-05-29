@@ -410,8 +410,8 @@ const Profile = ({route}) => {
     if (
       !userId &&
       profile &&
-      parseInt(profile.account_verify_type) !== 2 &&
-      parseInt(profile.user_status_id) === 4
+      parseInt(profile?.account_verify_type) !== 2 &&
+      parseInt(profile?.user_status_id) === 4
     ) {
       return true;
     }
