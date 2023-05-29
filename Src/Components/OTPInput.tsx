@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {Keyboard, StyleSheet, Text, TextInput, View} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
@@ -24,11 +24,19 @@ const OTPInput = ({
   onResendOtp,
   errorText,
 }: Props) => {
+  const [errorString, seterrorString] = useState('');
   const [timer, settimer] = useState(seconds);
+  const [otp, setotp] = useState(['', '', '', '', '', '']);
+  const inputs = useRef<any[]>([]);
+  const [forcusedIndex, setforcusedIndex] = useState(0);
 
   useEffect(() => {
     settimer(seconds);
   }, [seconds]);
+
+  useEffect(() => {
+    inputs.current[forcusedIndex]?.focus();
+  }, []);
 
   useEffect(() => {
     interval = setInterval(() => {
@@ -47,6 +55,66 @@ const OTPInput = ({
     };
   }, [seconds]);
 
+  const clearOtp = () => {
+    setotp(['', '', '', '', '', '']);
+  };
+
+  const handleOtpChange = (value: string, index: number) => {
+    seterrorString('');
+    let isInvalid = false;
+    value.split('').map(val => {
+      /* @ts-ignore */
+      if (isNaN(val) || !val.trim()) {
+        isInvalid = true;
+      }
+    });
+    if (isInvalid) {
+      seterrorString('Enter valid OTP');
+      return;
+    }
+    if (index > 0 && value === '') {
+      inputs.current[index - 1]?.focus();
+      setforcusedIndex(index - 1);
+    }
+
+    if (value.length >= 6) {
+      clearOtp();
+      let newOtp = [...otp];
+      if (value.length === 6) {
+        value.split('').map((val, ind) => (newOtp[ind] = val));
+      } else {
+        value
+          .split('')
+          .filter((_, ind) => ind !== 0)
+          .map((val, ind) => (newOtp[ind] = val));
+      }
+      setotp(newOtp);
+      inputs.current[5]?.focus();
+      setforcusedIndex(5);
+    } else if (value.length > 2) {
+      seterrorString('OTP must have 6 digits');
+      return;
+    } else {
+      const newOtp = [...otp];
+      newOtp[index] = value.charAt(0);
+      setotp(newOtp);
+      // Move focus to the next box if the current one has a value
+      if (value && index < newOtp.length - 1) {
+        inputs.current[index + 1]?.focus();
+        setforcusedIndex(index + 1);
+      }
+    }
+  };
+
+  const handleKeyPressTextInput = (index: number, key: string) => {
+    if (key === 'Backspace') {
+      if (index > 0) {
+        inputs.current[index - 1]?.focus();
+        handleOtpChange('', index);
+      }
+    }
+  };
+
   return (
     <View
       style={[
@@ -55,17 +123,44 @@ const OTPInput = ({
       ]}>
       <StyledText style={styles.titleText}>Enter OTP</StyledText>
       <View style={styles.inputContainer}>
-        <OTPInputView
+        {otp.map((digit, index) => (
+          <TextInput
+            key={index}
+            style={[
+              styles.inputField,
+              {
+                borderColor:
+                  forcusedIndex === index ? COLORS.primary : COLORS.borderColor,
+              },
+            ]}
+            onKeyPress={e => handleKeyPressTextInput(index, e.nativeEvent.key)}
+            keyboardType="numeric"
+            onChangeText={value => handleOtpChange(value, index)}
+            value={digit}
+            onFocus={() => {
+              setforcusedIndex(index);
+            }}
+            selectTextOnFocus={true}
+            textContentType="oneTimeCode"
+            ref={input => {
+              inputs.current[index] = input;
+            }}
+          />
+        ))}
+        {/* <OTPInputView
           style={{width: '100%', height: '100%'}}
           pinCount={6}
           autoFocusOnLoad
+          editable={true}
           codeInputFieldStyle={styles.inputField}
           codeInputHighlightStyle={styles.focusedField}
           onCodeChanged={onCodeChanged}
-        />
+        /> */}
       </View>
-      {errorText ? (
-        <StyledText style={styles.errorText}>{errorText}</StyledText>
+      {errorText || errorString ? (
+        <StyledText style={styles.errorText}>
+          {errorText ? errorText : errorString}
+        </StyledText>
       ) : null}
       <View style={styles.timerResendContainer}>
         <StyledText
@@ -95,8 +190,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   inputContainer: {
+    flexDirection: 'row',
     height: 60,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // backgroundColor: 'red',
   },
 
   inputField: {
@@ -107,6 +205,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderBottomWidth: 1,
     color: '#000',
+    textAlign: 'center',
   },
 
   focusedField: {
@@ -130,5 +229,14 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 14,
     paddingVertical: 5,
+  },
+  box: {
+    borderWidth: 1,
+    borderColor: 'black',
+    width: 40,
+    height: 40,
+    margin: 10,
+    textAlign: 'center',
+    fontSize: 20,
   },
 });

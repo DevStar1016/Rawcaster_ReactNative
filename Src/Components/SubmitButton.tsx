@@ -32,6 +32,7 @@ export type SubmitButtonProps = {
   rightIconSize?: number;
   iconSize?: number;
   padding?: number;
+  onLayoutHeight?: (val: number) => void;
   textPaddingVertical?: number;
   paddingVertical?: number;
   paddingHorizontal?: number;
@@ -68,10 +69,20 @@ const SubmitButton = ({
   textPaddingVertical = 2,
   paddingHorizontal,
   marginHorizontal,
+  onLayoutHeight,
   borderRadius = 6,
 }: SubmitButtonProps) => {
   return (
     <TouchableOpacity
+      onLayout={e => {
+        if (onLayoutHeight) {
+          onLayoutHeight(
+            e.nativeEvent.layout.height +
+              (marginTop ?? 0) +
+              (marginBottom ?? 0),
+          );
+        }
+      }}
       style={[
         styles.mainContainer,
         {
@@ -141,7 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
     borderWidth: 2,
     borderColor: COLORS.secondary,
-    marginTop: 20,
   },
   buttonText: {
     fontFamily: FONTS.DMSans.medium,

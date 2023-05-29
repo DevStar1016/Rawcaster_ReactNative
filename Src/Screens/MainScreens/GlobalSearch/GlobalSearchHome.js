@@ -24,7 +24,7 @@ const GlobalSearchHome = () => {
     <GlobalSearchContext.Provider value={searchContextValue}>
       <HOCView
         headerType="header_with_back"
-        onLayoutHeight={height => {
+        onLayoutHeaderHeight={height => {
           settopLayerHeight(pre => pre + height);
         }}
         isEnableSafeArea={false}

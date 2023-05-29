@@ -408,8 +408,8 @@ const Profile = ({route}) => {
     if (
       !userId &&
       profile &&
-      parseInt(profile.account_verify_type) !== 2 &&
-      parseInt(profile.user_status_id) === 4
+      parseInt(profile?.account_verify_type) !== 2 &&
+      parseInt(profile?.user_status_id) === 4
     ) {
       return true;
     }
@@ -417,14 +417,14 @@ const Profile = ({route}) => {
   }
 
   function getIsDisableVerifyAccount() {
-    if (parseInt(profile.account_verify_type) === 1) {
+    if (parseInt(profile?.account_verify_type) === 1) {
       return true;
     }
     return false;
   }
 
   function getVerifyAccountButtonText() {
-    if (parseInt(profile.account_verify_type) === 1) {
+    if (parseInt(profile?.account_verify_type) === 1) {
       return 'Verification Pending';
     }
     return 'Verify My Account';

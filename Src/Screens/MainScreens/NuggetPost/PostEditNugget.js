@@ -64,15 +64,15 @@ import {
   setSearchedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
-import EmojiModal from 'react-native-emoji-modal';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
+import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 var isMount = true;
-
+const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
 const PostEditNugget = ({route}) => {
   const {nugget, isSearchNugget, categoryName} = route.params ?? {};
   const searchedNuggetsList = useSearchedNuggetsList();
@@ -83,6 +83,11 @@ const PostEditNugget = ({route}) => {
   const navigation = useNavigation();
   const profile = useProfile();
   const token = useToken();
+  const [mainContainerHeight, setmainContainerHeight] = useState(0);
+  const [topContainerHeight, settopContainerHeight] = useState(0);
+  const [mediaListHeight, setmediaListHeight] = useState(0);
+  const [buttonHeight, setbuttonHeight] = useState(0);
+  const [isFocusedTextInput, setisFocusedTextInput] = useState(false);
   const savedNuggetsList = useSavedNuggetsList();
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
@@ -92,11 +97,16 @@ const PostEditNugget = ({route}) => {
   const [selectedMediaList, setselectedMediaList] = useState([]);
   const [shareConnectionsGroupsIdsList, setshareConnectionsGroupsIdsList] =
     useState([]);
+  const [isOpenPreview, setisOpenPreview] = useState(false);
   const [selectedShareType, setselectedShareType] = useState(
     NUGGET_SHARE_TYPE.find(
       item => item.id === (nugget ? parseInt(nugget.share_type) : 1),
     ),
   );
+  const [mediaData, setmediaData] = useState({
+    uri: '',
+    mediaType: '',
+  });
   const [preSelectdeShareTypeAndList, setpreSelectdeShareTypeAndList] =
     useState({
       shareType: {...selectedShareType},
@@ -348,6 +358,7 @@ const PostEditNugget = ({route}) => {
           }),
         )
           .then(resMediaList => {
+            console.log(resMediaList, 'YUIO');
             if (isMount) {
               setselectedMediaList(pre => [...pre, ...resMediaList]);
             }
@@ -444,6 +455,17 @@ const PostEditNugget = ({route}) => {
     ]);
   }
 
+  function resetSelectedShareType() {
+    if (isMount) {
+      setselectedShareType(
+        preSelectdeShareTypeAndList.shareType
+          ? {...preSelectdeShareTypeAndList.shareType}
+          : NUGGET_SHARE_TYPE.find(item => item.id === 1),
+      );
+      setshareConnectionsGroupsIdsList([...preSelectdeShareTypeAndList.list]);
+    }
+  }
+
   function isDisabledPostButton() {
     if (
       (selectedShareType.id === 3 || selectedShareType.id === 4) &&
@@ -464,6 +486,21 @@ const PostEditNugget = ({route}) => {
         : true;
     }
     return !typedText.trim() && selectedMediaList.length <= 0;
+  }
+
+  function getMaxHeight() {
+    let maxHeight =
+      mainContainerHeight - topContainerHeight - buttonHeight - 20;
+    if (!isPollClicked && selectedMediaList.length > 0) {
+      maxHeight = maxHeight - mediaListHeight;
+    }
+
+    if (isOpenEmojiContainer || isFocusedTextInput) {
+      maxHeight = maxHeight - EMOJI_CONTAINER_HEIGHT;
+      maxHeight = maxHeight + mediaListHeight + buttonHeight;
+    }
+
+    return maxHeight;
   }
 
   function getMediaItem(item) {
@@ -520,7 +557,16 @@ const PostEditNugget = ({route}) => {
 
         <TouchableOpacity
           style={styles.itemActionButtonsContainer}
-          activeOpacity={1}>
+          activeOpacity={1}
+          // onPress={() => {
+          //   console.log(item, 'KLKLKLK');
+          //   const type = item?.type?.split('/');
+          //   if (type) {
+          //     setmediaData({uri: item.uri, mediaType: type});
+          //     setisOpenPreview(true);
+          //   }
+          // }}
+        >
           {(item.type.includes('video') || item.type.includes('audio')) && (
             <View style={styles.playIconContainer}>
               <SVGIcon
@@ -544,17 +590,6 @@ const PostEditNugget = ({route}) => {
     );
   }
 
-  function resetSelectedShareType() {
-    if (isMount) {
-      setselectedShareType(
-        preSelectdeShareTypeAndList.shareType
-          ? {...preSelectdeShareTypeAndList.shareType}
-          : NUGGET_SHARE_TYPE.find(item => item.id === 1),
-      );
-      setshareConnectionsGroupsIdsList([...preSelectdeShareTypeAndList.list]);
-    }
-  }
-
   return (
     <HOCView
       isLoading={isLoading}
@@ -575,13 +610,21 @@ const PostEditNugget = ({route}) => {
       isEnableDefaultBackground>
       <TouchableOpacity
         activeOpacity={1}
+        onLayout={e => {
+          setmainContainerHeight(e.nativeEvent.layout.height - 10); // 10 is paddingVertical of 5
+        }}
         style={styles.mainContainer}
         onPress={() => {
-          openCloseEmojiPicker(false);
           Keyboard.dismiss();
+          openCloseEmojiPicker(false);
+          setisFocusedTextInput(false);
         }}>
         <View>
-          <View style={styles.topContainer}>
+          <View
+            style={styles.topContainer}
+            onLayout={e => {
+              settopContainerHeight(e.nativeEvent.layout.height);
+            }}>
             <View style={styles.subContainer}>
               <ProfileWithBadge
                 badge={Badges(profile?.user_status_id)}
@@ -723,13 +766,20 @@ const PostEditNugget = ({route}) => {
               }}
             />
           ) : (
-            <View style={styles.inputContainer}>
+            <View
+              style={[
+                styles.inputContainer,
+                {
+                  maxHeight: getMaxHeight(),
+                },
+              ]}>
               <TextInput
                 placeholder={`What’s on your mind, ${profile?.name}!`}
                 style={styles.textInput}
                 multiline
                 maxLength={500}
                 onFocus={() => {
+                  setisFocusedTextInput(true);
                   openCloseEmojiPicker(false);
                 }}
                 value={typedText}
@@ -746,6 +796,7 @@ const PostEditNugget = ({route}) => {
                   isButton
                   onPress={() => {
                     Keyboard.dismiss();
+                    setisFocusedTextInput(false);
                     openCloseEmojiPicker(true);
                   }}
                 />
@@ -755,7 +806,11 @@ const PostEditNugget = ({route}) => {
         </View>
         <View>
           {!isPollClicked && selectedMediaList.length > 0 && (
-            <View style={styles.selectedNuggetsContainer}>
+            <View
+              style={styles.selectedNuggetsContainer}
+              onLayout={e => {
+                setmediaListHeight(e.nativeEvent.layout.height);
+              }}>
               <FlatList
                 data={selectedMediaList}
                 renderItem={renderSelectedNuggetItem}
@@ -765,45 +820,42 @@ const PostEditNugget = ({route}) => {
               />
             </View>
           )}
-          <View>
-            <SubmitButton
-              buttonText={
-                isPollClicked
-                  ? 'Post Poll'
-                  : `${nugget ? 'Edit' : 'Post'} Nugget`
-              }
-              isDisabled={isDisabledPostButton()}
-              disabledColor={COLORS.dimColor}
-              onPress={() => {
-                if (!isDisabledPostButton()) {
-                  if (
-                    (selectedShareType.id === 3 ||
-                      selectedShareType.id === 4) &&
-                    shareConnectionsGroupsIdsList.length <= 0
-                  ) {
-                    Toast.fail(
-                      selectedShareType.id === 3
-                        ? 'Select groups'
-                        : 'Select connections',
-                    );
-                    setisOpenSelectionModal(true);
-                    return;
-                  }
-                  if (nugget) {
-                    handleEditNugget();
-                  } else {
-                    handlePostNuggets();
-                  }
+
+          <SubmitButton
+            buttonText={
+              isPollClicked ? 'Post Poll' : `${nugget ? 'Edit' : 'Post'} Nugget`
+            }
+            onLayoutHeight={setbuttonHeight}
+            isDisabled={isDisabledPostButton()}
+            disabledColor={COLORS.dimColor}
+            onPress={() => {
+              if (!isDisabledPostButton()) {
+                if (
+                  (selectedShareType.id === 3 || selectedShareType.id === 4) &&
+                  shareConnectionsGroupsIdsList.length <= 0
+                ) {
+                  Toast.fail(
+                    selectedShareType.id === 3
+                      ? 'Select groups'
+                      : 'Select connections',
+                  );
+                  setisOpenSelectionModal(true);
+                  return;
                 }
-              }}
-            />
-          </View>
+                if (nugget) {
+                  handleEditNugget();
+                } else {
+                  handlePostNuggets();
+                }
+              }
+            }}
+          />
         </View>
 
         {isOpenEmojiContainer ? (
           <View
             style={{
-              height: DIMENSIONS.window.height / 2 - 60,
+              height: EMOJI_CONTAINER_HEIGHT,
               backgroundColor: COLORS.white,
               position: 'absolute',
               bottom: 0,
@@ -957,6 +1009,22 @@ const PostEditNugget = ({route}) => {
           }
         />
       </Modal>
+
+      <Modal
+        visible={isOpenPreview}
+        transparent
+        statusBarTranslucent
+        animationType="slide"
+        onRequestClose={() => {
+          setisOpenPreview(false);
+        }}>
+        <MediaPreview
+          setModal={setisOpenPreview}
+          data={mediaData}
+          isEnableDone={false}
+          isEnableEdit={false}
+        />
+      </Modal>
     </HOCView>
   );
 };
@@ -995,8 +1063,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    maxHeight: 200,
-    minHeight: 70,
+    // maxHeight: 200,
+    // minHeight: 70,
     alignItems: 'flex-start',
   },
   textInput: {
