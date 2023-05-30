@@ -65,6 +65,7 @@ import MediaProgressSlider from '../../../Components/MediaProgressSlider';
 import AudioWaveFormImage from '../../../Assets/Png/waveform.png';
 import AudioWaveFormGif from '../../../Assets/Gif/waveform.gif';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
+import AIChat from './OpenAI/AIChat';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -167,8 +168,9 @@ function NuggetActionsOverlay({
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
-  const handlePresentModalPress = useCallback(() => {
+  const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
     }
@@ -180,6 +182,20 @@ function NuggetActionsOverlay({
     }
     commentsBottomSheetModalRef.current?.close();
   }, []);
+
+  const handlePresentAIChatModal = useCallback(() => {
+    if (setpaused) {
+      setpaused(true);
+    }
+    aiChatBottomSheetModalRef.current?.present();
+  }, []);
+  const handleCloseAIChatModal = useCallback(() => {
+    if (setpaused) {
+      setpaused(false);
+    }
+    aiChatBottomSheetModalRef.current?.close();
+  }, []);
+
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const getNuggetType = () => {
@@ -620,7 +636,9 @@ function NuggetActionsOverlay({
               iconSize={25}
               buttonSize={40}
               buttonStyle={{marginVertical: 5}}
-              onPress={() => {}}
+              onPress={() => {
+                handlePresentAIChatModal();
+              }}
             />
           )}
         </View>
@@ -771,7 +789,7 @@ function NuggetActionsOverlay({
             icon="comment"
             text={bigNumberFormater(totalComments)}
             onPress={() => {
-              handlePresentModalPress();
+              handlePresentCommentsModal();
             }}
           />
           {parseInt(nugget.share_type) === 1 &&
@@ -928,6 +946,51 @@ function NuggetActionsOverlay({
         <CommentsList
           onPressBack={() => {
             handleCloseCommentsModal();
+          }}
+          setisEnableContentPanningGesture={setisEnableContentPanningGesture}
+          id={nugget.nugget_id}
+          setTotalComments={setTotalComments}
+          totalComments={totalComments}
+        />
+      </BottomSheetModal>
+
+      <BottomSheetModal
+        ref={aiChatBottomSheetModalRef}
+        handleStyle={{display: 'none'}}
+        onDismiss={() => {
+          setisEnableContentPanningGesture(true);
+        }}
+        topInset={insets.top ? insets.top : StatusBar.currentHeight}
+        bottomInset={insets.bottom}
+        stackBehavior="push"
+        keyboardBlurBehavior={'restore'}
+        android_keyboardInputMode="adjustPan"
+        backgroundComponent={() => <View />}
+        enableContentPanningGesture={isEnableContentPanningGesture}
+        backdropComponent={props => {
+          return (
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                position: 'absolute',
+                backgroundColor: COLORS.transparentDimColor,
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+              }}
+              activeOpacity={1}
+              onPress={() => {
+                handleCloseAIChatModal();
+              }}
+            />
+          );
+        }}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}>
+        <AIChat
+          onPressBack={() => {
+            handleCloseAIChatModal();
           }}
           setisEnableContentPanningGesture={setisEnableContentPanningGesture}
           id={nugget.nugget_id}

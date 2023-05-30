@@ -625,64 +625,7 @@ const PostEditNugget = ({route}) => {
             onLayout={e => {
               settopContainerHeight(e.nativeEvent.layout.height);
             }}>
-            <View style={styles.subContainer}>
-              <ProfileWithBadge
-                badge={Badges(profile?.user_status_id)}
-                isEnableGradient={false}
-                profileImage={profile?.profile_image}
-                padding={0}
-                profileSize={38}
-                badgeSize={16}
-              />
-              <View style={styles.nameContainer}>
-                <StyledText style={styles.nameText}>
-                  {getSlicedText(profile?.name, 10)}
-                </StyledText>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <SubmitButton
-                    buttonText={getSlicedText(selectedShareType.name, 10)}
-                    marginTop={2}
-                    iconSize={9}
-                    textMarginLeftWhenIcon={2}
-                    textMarginRightWhenIcon={2}
-                    buttonTextStyle={{fontSize: 10}}
-                    paddingHorizontal={3}
-                    paddingVertical={0}
-                    marginBottom={0}
-                    rightIcon={'down_fill_white'}
-                    rightIconSize={7}
-                    icon="lock_fill_white"
-                    marginHorizontal={0}
-                    padding={0}
-                    bgColor={COLORS.orange}
-                    borderColor={COLORS.orange}
-                    onPress={() => {
-                      if (isMount) {
-                        setisOpenSharTypeList(true);
-                      }
-                    }}
-                  />
-                  {(selectedShareType.id === 3 ||
-                    selectedShareType.id === 4) && (
-                    <SVGIcon
-                      icon="edit"
-                      height={13}
-                      width={13}
-                      marginLeft={10}
-                      isButton
-                      onPress={() => {
-                        setisOpenSelectionModal(true);
-                      }}
-                    />
-                  )}
-                </View>
-              </View>
-            </View>
-            <View
-              style={[
-                styles.subContainer,
-                {justifyContent: 'flex-end', paddingLeft: 15},
-              ]}>
+            <View style={[styles.subContainer, {paddingLeft: 15, flex: 1}]}>
               {!isPollClicked && !nugget && (
                 <SVGIcon
                   icon="poll_fill_white"
@@ -750,6 +693,59 @@ const PostEditNugget = ({route}) => {
                   pickMedia('video');
                 }}
               />
+            </View>
+            <View style={styles.subContainer}>
+              {/* <ProfileWithBadge
+                badge={Badges(profile?.user_status_id)}
+                isEnableGradient={false}
+                profileImage={profile?.profile_image}
+                padding={0}
+                profileSize={38}
+                badgeSize={16}
+              /> */}
+              <View style={styles.nameContainer}>
+                {/* <StyledText style={styles.nameText}>
+                  {getSlicedText(profile?.name, 10)}
+                </StyledText> */}
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <SubmitButton
+                    buttonText={getSlicedText(selectedShareType.name, 10)}
+                    marginTop={2}
+                    iconSize={9}
+                    textMarginLeftWhenIcon={2}
+                    textMarginRightWhenIcon={2}
+                    buttonTextStyle={{fontSize: 10}}
+                    paddingHorizontal={3}
+                    paddingVertical={0}
+                    marginBottom={0}
+                    rightIcon={'down_fill_white'}
+                    rightIconSize={7}
+                    icon="lock_fill_white"
+                    marginHorizontal={0}
+                    padding={0}
+                    bgColor={COLORS.orange}
+                    borderColor={COLORS.orange}
+                    onPress={() => {
+                      if (isMount) {
+                        setisOpenSharTypeList(true);
+                      }
+                    }}
+                  />
+                  {(selectedShareType.id === 3 ||
+                    selectedShareType.id === 4) && (
+                    <SVGIcon
+                      icon="edit"
+                      height={13}
+                      width={13}
+                      marginLeft={10}
+                      isButton
+                      onPress={() => {
+                        setisOpenSelectionModal(true);
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
             </View>
           </View>
           {isPollClicked ? (
@@ -1038,7 +1034,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   subContainer: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },
