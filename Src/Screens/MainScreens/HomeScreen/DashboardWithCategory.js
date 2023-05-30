@@ -89,11 +89,13 @@ const DashboardWithCategory = ({route}) => {
       ) {
         setfocusedNuggetUserId(selectedNuggetUserId);
       } else {
-        setfocusedNuggetUserId(null);
+        if (setfocusedNuggetUserId) {
+          setfocusedNuggetUserId(null);
+        }
       }
       setviewableItem({
-        nugget_id: viewableItems.viewableItems[0].item.nugget_id || 0,
-        viewed: viewableItems.viewableItems[0].item.viewed,
+        nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
+        viewed: viewableItems?.viewableItems[0]?.item.viewed,
       });
     }
   });
