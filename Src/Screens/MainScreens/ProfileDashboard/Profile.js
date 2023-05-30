@@ -743,11 +743,10 @@ const Profile = ({route}) => {
                     </View>
                   ) : (
                     <View style={styles.lockNuggetsContainer}>
-                      <StyledText
-                        style={{opacity: 1, zIndex: 10, color: COLORS.white}}>
+                      <StyledText style={{color: COLORS.white}}>
                         No Data Found
                       </StyledText>
-                      <BlurOverlay hideLock />
+                      {/* <BlurOverlay hideLock /> */}
                     </View>
                   );
                 }}

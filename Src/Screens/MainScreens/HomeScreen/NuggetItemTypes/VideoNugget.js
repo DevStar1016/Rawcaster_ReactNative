@@ -137,7 +137,7 @@ function VideoNugget({
           muted={isMuted}
           repeat={isRepeatVideo}
           onBuffer={() => {
-            console.log('BUFFERINg');
+            // console.log('BUFFERINg');
           }}
           onLoadStart={val => {
             setisLoadingVideo(true);
