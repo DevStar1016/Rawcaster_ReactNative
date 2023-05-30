@@ -72,7 +72,7 @@ function AudioNugget({
           repeat={isRepeatVideo}
           onLoad={onLoadComplete}
           onBuffer={() => {
-            console.log('BUFFERINg');
+            // console.log('BUFFERINg');
           }}
           onLoadStart={val => {
             setisLoadingVideo(true);

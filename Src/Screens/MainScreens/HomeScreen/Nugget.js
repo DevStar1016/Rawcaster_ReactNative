@@ -72,7 +72,7 @@ const Nugget = ({
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
   const searchedNuggetsList = useSearchedNuggetsList();
-  const savedNuggetsList = useSavedNuggetsList();
+  const savedNuggetsList = useSelector(state => state.home.savedNuggetsList);
   const savedNuggetsCount = useSelector(state => state.home.savedNuggetsCount);
   const flatlistRef = useRef(null);
   const insets = useInsets();
@@ -103,11 +103,6 @@ const Nugget = ({
     lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
     [],
   );
-  const debounceOnSave = useCallback(
-    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
-    [],
-  );
-
   function updateLike() {
     setnuggetData(preNuggetData => {
       let tempNugget = {...preNuggetData};
@@ -186,23 +181,25 @@ const Nugget = ({
       })
       .catch(e => {});
   }
-
-  function saveAndUnsaveNuggetApiCall(status) {
+  console.log(savedNuggetsList.length, 'savedNuggetsList');
+  const saveAndUnsaveNuggetApiCall = status => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nuggetData.nugget_id);
     formData.append('save', status ? 1 : 2);
     saveAndUnsaveNuggetService(formData)
       .then(res => {
+        console.log(res.data, 'save res', nuggetData?.nugget_id);
         if (res.data.status === 1) {
+          let tempSavedList = savedNuggetsList;
           let tempList = [...nuggetsList];
           let tempIndex = tempList.findIndex(
             item => item.nugget_id === nuggetData.nugget_id,
           );
           if (tempIndex !== -1) {
-            dispatch(
-              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
-            );
+            // dispatch(
+            //   setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+            // );
             tempList[tempIndex] = {...tempList[tempIndex], saved: status};
           }
           dispatch(
@@ -210,28 +207,28 @@ const Nugget = ({
               getNuggetsReduxStoreDataFormate(categoryName, tempList),
             ),
           );
+          console.log(tempSavedList.length, 'before', savedNuggetsList.length);
           if (status) {
-            dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
-            dispatch(
-              setSavedNuggetsList([
-                ...savedNuggetsList,
-                {...nuggetData, saved: status},
-              ]),
-            );
+            tempSavedList = [...tempSavedList, {...nuggetData, saved: status}];
           } else {
-            dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
-            dispatch(
-              setSavedNuggetsList(
-                savedNuggetsList.filter(
-                  ele => ele.nugget_id !== nuggetData.nugget_id,
-                ),
-              ),
+            tempSavedList = tempSavedList.filter(
+              ele => ele.nugget_id !== nuggetData.nugget_id,
             );
           }
+          console.log(tempSavedList.length, 'SASASASASASA');
+          dispatch(setSavedNuggetsList(tempSavedList));
+          dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
         }
       })
-      .catch(e => {});
-  }
+      .catch(e => {
+        console.log(e, 'save err');
+      });
+  };
+
+  const debounceOnSave = useCallback(
+    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
+    [],
+  );
 
   const handleBecomeFan = () => {
     // 1 - follow, 2 - unfollow
