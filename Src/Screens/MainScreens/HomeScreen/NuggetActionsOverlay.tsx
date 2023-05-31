@@ -958,7 +958,9 @@ function NuggetActionsOverlay({
         ref={aiChatBottomSheetModalRef}
         handleStyle={{display: 'none'}}
         onDismiss={() => {
-          setisEnableContentPanningGesture(true);
+          if (setpaused) {
+            setpaused(false);
+          }
         }}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
         bottomInset={insets.bottom}
@@ -966,7 +968,6 @@ function NuggetActionsOverlay({
         keyboardBlurBehavior={'restore'}
         android_keyboardInputMode="adjustPan"
         backgroundComponent={() => <View />}
-        enableContentPanningGesture={isEnableContentPanningGesture}
         backdropComponent={props => {
           return (
             <TouchableOpacity
@@ -992,10 +993,6 @@ function NuggetActionsOverlay({
           onPressBack={() => {
             handleCloseAIChatModal();
           }}
-          setisEnableContentPanningGesture={setisEnableContentPanningGesture}
-          id={nugget.nugget_id}
-          setTotalComments={setTotalComments}
-          totalComments={totalComments}
         />
       </BottomSheetModal>
     </TouchableOpacity>

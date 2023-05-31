@@ -31,6 +31,7 @@ import {getSlicedText} from '../../../../Utilities/Methods';
 import CommentReplyFullItem from './CommentReplyFullItem';
 import Toast from '../../../../Components/Toast';
 import {EmojiKeyboard} from 'rn-emoji-keyboard';
+import RBSheetTextInput from '../../../../Components/RBSheetTextInput';
 
 var isMount = true;
 const CommentsList = ({
@@ -413,66 +414,42 @@ const CommentsList = ({
               />
             </View>
           )}
-          <View style={styles.inputContainer}>
-            <ProfileWithBadge
-              profileSize={35}
-              profileImage={profile?.profile_image}
-            />
-            <BottomSheetTextInput
-              ref={inpuFieldRef}
-              style={styles.input}
-              onChangeText={settypedText}
-              value={typedText}
-              keyboardType="twitter"
-              onFocus={() => {
-                if (isMount) {
-                  setisOpenEmojiContainer(false);
-                  setisEnableContentPanningGesture(true);
-                }
-              }}
-              placeholder={
-                replyData
-                  ? 'Add a reply...'
-                  : editData
-                  ? 'Edited comment'
-                  : 'Type your comment here...'
+          <RBSheetTextInput
+            inpuFieldRef={inpuFieldRef}
+            onFocus={() => {
+              if (isMount) {
+                setisOpenEmojiContainer(false);
+                setisEnableContentPanningGesture(true);
               }
-              placeholderTextColor={COLORS.placeHolderColor}
-            />
-            <View style={styles.actionsContainer}>
-              <SVGIcon
-                icon="emojee"
-                marginRight={5}
-                isButton
-                onPress={() => {
-                  Keyboard.dismiss();
-                  if (isMount) {
-                    setisEnableContentPanningGesture(false);
-                    setisOpenEmojiContainer(true);
-                  }
-                }}
-              />
-              <SVGIcon
-                icon="send"
-                marginRight={5}
-                isButton
-                onPress={() => {
-                  if (typedText.trim()) {
-                    Keyboard.dismiss();
-                    if (isOpenEmojiContainer && isMount) {
-                      setisEnableContentPanningGesture(true);
-                      setisOpenEmojiContainer(false);
-                    }
-                    if (editData) {
-                      onEditComment();
-                    } else {
-                      onSendComment();
-                    }
-                  }
-                }}
-              />
-            </View>
-          </View>
+            }}
+            placeholderText={
+              replyData
+                ? 'Add a reply...'
+                : editData
+                ? 'Edited comment'
+                : 'Type your comment here...'
+            }
+            onPressEmoji={() => {
+              if (isMount) {
+                setisEnableContentPanningGesture(false);
+                setisOpenEmojiContainer(true);
+              }
+            }}
+            onPressSend={() => {
+              if (isOpenEmojiContainer && isMount) {
+                setisEnableContentPanningGesture(true);
+                setisOpenEmojiContainer(false);
+              }
+              if (editData) {
+                onEditComment();
+              } else {
+                onSendComment();
+              }
+            }}
+            isInsideTextChange={false}
+            onChangeText={settypedText}
+            text={typedText}
+          />
         </View>
       )}
       {isOpenEmojiContainer ? (
@@ -540,6 +517,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.commentsBg,
+    borderTopEndRadius: 25,
+    borderTopStartRadius: 25,
   },
   titleContainer: {
     alignItems: 'center',
@@ -558,27 +537,6 @@ const styles = StyleSheet.create({
   bottomContainer: {
     paddingHorizontal: 15,
     paddingVertical: 10,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    height: 45,
-    alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  input: {
-    flex: 1,
-    height: '90%',
-    borderRadius: 20,
-    fontFamily: FONTS.DMSans.regular,
-    fontSize: 15,
-    color: COLORS.white,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 5,
   },
 
   nameText: {

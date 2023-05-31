@@ -42,6 +42,7 @@ export type ProfileWithBadgeProps = {
   cameraIconSize?: number;
   extraMargin?: number;
   padding?: number;
+  defaultProfileImage?: any;
   isEnableOnlineOfflineStatus?: boolean;
   isButton?: boolean;
   isEnableOnPressImagePicker?: boolean;
@@ -56,6 +57,7 @@ const ProfileWithBadge = ({
   profileSize = 60,
   borderRadius = profileSize / 2,
   profileImage,
+  defaultProfileImage,
   badge,
   isEnableOnlineOfflineStatus = false,
   isButton = false,
@@ -195,7 +197,7 @@ const ProfileWithBadge = ({
             />
           ) : (
             <Image
-              source={DeafaultProfile}
+              source={defaultProfileImage ?? DeafaultProfile}
               style={[styles.profileImage, {borderRadius}]}
               borderRadius={borderRadius}
             />

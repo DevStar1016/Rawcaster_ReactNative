@@ -183,6 +183,7 @@ const Nugget = ({
   }
   console.log(savedNuggetsList.length, 'savedNuggetsList');
   const saveAndUnsaveNuggetApiCall = status => {
+    console.log('SAVE UNSAVE');
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nuggetData.nugget_id);
@@ -191,7 +192,8 @@ const Nugget = ({
       .then(res => {
         console.log(res.data, 'save res', nuggetData?.nugget_id);
         if (res.data.status === 1) {
-          let tempSavedList = savedNuggetsList;
+          let tempSavedList = [...savedNuggetsList];
+          console.log(JSON.stringify(tempSavedList), 'SAVED NUGGETSSSSS');
           let tempList = [...nuggetsList];
           let tempIndex = tempList.findIndex(
             item => item.nugget_id === nuggetData.nugget_id,
@@ -215,7 +217,7 @@ const Nugget = ({
               ele => ele.nugget_id !== nuggetData.nugget_id,
             );
           }
-          console.log(tempSavedList.length, 'SASASASASASA');
+          console.log(JSON.stringify(tempSavedList), 'SAVED NUGGETS CHANGES');
           dispatch(setSavedNuggetsList(tempSavedList));
           dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
         }
