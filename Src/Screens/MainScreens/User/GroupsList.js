@@ -115,9 +115,14 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
+          // if (item.locked) {
+          //   console.log('ASDASDSADASDASADS');
+          // } else {
           navigation.navigate('CreateEditGroup', {
             groupId: item.group_id,
+            isLocked: parseInt(item.locked) === 1,
           });
+          // }
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge

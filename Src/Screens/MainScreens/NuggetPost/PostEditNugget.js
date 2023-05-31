@@ -183,7 +183,7 @@ const PostEditNugget = ({route}) => {
     if (isPollClicked) {
       formData.append(
         'poll_option',
-        JSON.stringify([...choiceList].map(item => item.value)),
+        JSON.stringify([...choiceList].map(item => item.value.trim())),
       );
       formData.append(
         'poll_duration',
@@ -481,7 +481,7 @@ const PostEditNugget = ({route}) => {
           pollLength.hours === 0 &&
           pollLength.minutes === 0
         ) &&
-        choiceList.filter(item => item.value).length >= 2
+        choiceList.filter(item => item.value.trim()).length >= 2
         ? false
         : true;
     }

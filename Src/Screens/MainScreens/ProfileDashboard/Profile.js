@@ -395,6 +395,15 @@ const Profile = ({route}) => {
     });
   };
 
+  const onFinishSave = (nuggetId, status) => {
+    let tempList = [...nuggetsList];
+    let tempIndex = tempList.findIndex(ele => ele.nugget_id === nuggetId);
+    if (tempIndex !== -1) {
+      tempList[tempIndex] = {...tempList[tempIndex], saved: status};
+    }
+    setnuggetsList(tempList);
+  };
+
   function getIsEnableClaimAccount() {
     let tempUnclaimedList = [...unclaimedAccountsList];
     const tempUnclaimedUser = tempUnclaimedList.find(
@@ -492,6 +501,7 @@ const Profile = ({route}) => {
         nuggetIndex={index}
         isFromProfile={true}
         onFinishDelete={onFinishDelete}
+        onFinishSave={onFinishSave}
       />
     );
   }
