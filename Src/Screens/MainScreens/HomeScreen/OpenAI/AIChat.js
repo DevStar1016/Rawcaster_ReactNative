@@ -12,10 +12,14 @@ import {FONTS} from '../../../../Utilities/Fonts';
 import {BottomSheetFlatList} from '@gorhom/bottom-sheet';
 import RBSheetTextInput from '../../../../Components/RBSheetTextInput';
 import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
-import {aiChatService} from '../../../../Services/ApiService';
+import {
+  aiChatService,
+  textToAudioService,
+} from '../../../../Services/ApiService';
 import {useToken} from '../../../../Utilities/StoreData';
 import moment from 'moment';
 import SVGIcon from '../../../../Components/SVGIcon';
+import AIChatItem from './AIChatItem';
 
 var isMount = true;
 const AIChat = ({onPressBack}) => {
@@ -98,72 +102,7 @@ const AIChat = ({onPressBack}) => {
   }
 
   function renderItem({item, index}) {
-    return (
-      <View>
-        <View
-          style={[
-            styles.messageContainer,
-            {alignSelf: item.isAI ? 'flex-start' : 'flex-end'},
-            item.isAI
-              ? {
-                  borderBottomStartRadius: 0,
-                  backgroundColor: 'rgba(255, 255, 255, 0.30)',
-                }
-              : {
-                  borderBottomEndRadius: 0,
-                  backgroundColor: COLORS.primary,
-                },
-          ]}>
-          {item.isAI && (
-            <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
-          )}
-          <View
-            style={[
-              {maxWidth: '80%'},
-              item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
-            ]}>
-            <StyledText style={{color: COLORS.white}}>{item.msg}</StyledText>
-            <StyledText
-              style={{
-                color: COLORS.white,
-                fontSize: 13,
-                opacity: 0.7,
-                marginTop: 5,
-              }}>
-              {item.dateTime}
-            </StyledText>
-          </View>
-          {!item.isAI && (
-            <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
-          )}
-        </View>
-        {item.isAI && (
-          <View style={styles.itemActionButtonsContainer}>
-            <TouchableOpacity activeOpacity={0.7} style={styles.button}>
-              <SVGIcon
-                icon={'mic_fill_white'}
-                width={18}
-                height={18}
-                marginRight={5}
-              />
-              <StyledText style={styles.buttonText}>Read Out</StyledText>
-            </TouchableOpacity>
-            <View
-              style={{
-                width: 1,
-                backgroundColor: COLORS.white,
-                opacity: 0.3,
-                marginHorizontal: 20,
-              }}
-            />
-            <TouchableOpacity activeOpacity={0.7} style={styles.button}>
-              <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
-              <StyledText style={styles.buttonText}>Share</StyledText>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    );
+    return <AIChatItem item={item} />;
   }
 
   return (
@@ -242,22 +181,5 @@ const styles = StyleSheet.create({
   bottomContainer: {
     paddingHorizontal: 15,
     paddingVertical: 10,
-  },
-  messageContainer: {
-    padding: 8,
-    flexDirection: 'row',
-    borderRadius: 10,
-    maxWidth: '90%',
-  },
-  itemActionButtonsContainer: {
-    paddingVertical: 10,
-    flexDirection: 'row',
-  },
-  button: {
-    flexDirection: 'row',
-  },
-
-  buttonText: {
-    color: COLORS.white,
   },
 });
