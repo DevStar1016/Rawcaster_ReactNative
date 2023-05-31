@@ -382,3 +382,7 @@ export const aiChatService = data => {
 export const nuggetContentAudioService = data => {
   return axios.post('nuggetcontentaudio', data);
 };
+
+export const textToAudioService = data => {
+  return axios.post('texttoaudio', data);
+};

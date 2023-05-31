@@ -3,6 +3,7 @@ import {
   NativeSyntheticEvent,
   StyleSheet,
   TextInputFocusEventData,
+  TextInputProps,
   View,
 } from 'react-native';
 import React, {useState} from 'react';
@@ -21,9 +22,24 @@ type Props = {
   isInsideTextChange?: boolean;
   onChangeText?: (text: string) => void;
   text?: string;
-  isEnableEmoji?: boolean;
-  isEnableVoiceRecord?: boolean;
+  isDisableSend?: boolean;
+  isVisibleEmoji?: boolean;
+  isKeyboardCloseWhenSend?: boolean;
+  isVisibleVoiceRecord?: boolean;
   onPressEmoji?: () => void;
+  isEnableOnSubmitEditing?: boolean;
+  inputProps?: Omit<
+    TextInputProps,
+    | 'ref'
+    | 'style'
+    | 'onChangeText'
+    | 'value'
+    | 'keyboardType'
+    | 'onFocus'
+    | 'placeholder'
+    | 'placeholderTextColor'
+    | 'onSubmitEditing'
+  >;
 };
 
 const RBSheetTextInput = ({
@@ -34,12 +50,34 @@ const RBSheetTextInput = ({
   isInsideTextChange = true,
   onChangeText,
   text = '',
-  isEnableEmoji = true,
+  isKeyboardCloseWhenSend = true,
+  isVisibleEmoji = true,
+  isDisableSend = false,
   onPressEmoji,
-  isEnableVoiceRecord = false,
+  isVisibleVoiceRecord = false,
+  isEnableOnSubmitEditing = false,
+  inputProps,
 }: Props) => {
   const profile = useProfile();
   const [typedText, settypedText] = useState<string>('');
+
+  function handleSubmit() {
+    if (
+      (isInsideTextChange && typedText.trim()) ||
+      (!isInsideTextChange && text.trim())
+    ) {
+      if (isKeyboardCloseWhenSend) {
+        Keyboard.dismiss();
+      }
+      if (onPressSend) {
+        onPressSend(isInsideTextChange ? typedText.trim() : text.trim());
+      }
+      if (isInsideTextChange) {
+        settypedText('');
+      }
+    }
+  }
+
   return (
     <View style={styles.inputContainer}>
       <ProfileWithBadge
@@ -55,9 +93,15 @@ const RBSheetTextInput = ({
         onFocus={onFocus}
         placeholder={placeholderText}
         placeholderTextColor={COLORS.placeHolderColor}
+        onSubmitEditing={() => {
+          if (isEnableOnSubmitEditing) {
+            handleSubmit();
+          }
+        }}
+        {...inputProps}
       />
       <View style={styles.actionsContainer}>
-        {isEnableVoiceRecord &&
+        {isVisibleVoiceRecord &&
           ((isInsideTextChange && !typedText) ||
             (!isInsideTextChange && !text)) && (
             <SVGIcon
@@ -72,7 +116,7 @@ const RBSheetTextInput = ({
             />
           )}
 
-        {isEnableEmoji && (
+        {isVisibleEmoji && (
           <SVGIcon
             icon="emojee"
             marginRight={5}
@@ -88,25 +132,10 @@ const RBSheetTextInput = ({
         <SVGIcon
           icon="send"
           marginRight={5}
-          isButton
+          isButton={!isDisableSend}
           height={27}
           width={27}
-          onPress={() => {
-            if (
-              (isInsideTextChange && typedText.trim()) ||
-              (!isInsideTextChange && text.trim())
-            ) {
-              Keyboard.dismiss();
-              if (onPressSend) {
-                onPressSend(
-                  isInsideTextChange ? typedText.trim() : text.trim(),
-                );
-              }
-              if (isInsideTextChange) {
-                settypedText('');
-              }
-            }
-          }}
+          onPress={handleSubmit}
         />
       </View>
     </View>

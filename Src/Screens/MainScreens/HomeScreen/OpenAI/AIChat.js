@@ -15,10 +15,13 @@ import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
 import {aiChatService} from '../../../../Services/ApiService';
 import {useToken} from '../../../../Utilities/StoreData';
 import moment from 'moment';
+import SVGIcon from '../../../../Components/SVGIcon';
 
+var isMount = true;
 const AIChat = ({onPressBack}) => {
   const token = useToken();
   const [chatList, setchatList] = useState([]);
+  const [isLoadingChat, setisLoadingChat] = useState(false);
   const listRef = useRef(null);
   useEffect(() => {
     isMount = true;
@@ -51,13 +54,15 @@ const AIChat = ({onPressBack}) => {
   };
 
   function aiChatAPICall(text) {
+    if (isMount) {
+      setisLoadingChat(true);
+    }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('user_query', text);
 
     aiChatService(formData)
       .then(res => {
-        console.log(res.data, 'RESPONSE');
         if (res.data.status === 1) {
           setchatList(preList => {
             return [
@@ -74,6 +79,11 @@ const AIChat = ({onPressBack}) => {
       })
       .catch(e => {
         console.log(e.message, 'ERROR');
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoadingChat(false);
+        }
       });
   }
 
@@ -89,33 +99,68 @@ const AIChat = ({onPressBack}) => {
 
   function renderItem({item, index}) {
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          {alignSelf: item.isAI ? 'flex-start' : 'flex-end'},
-          item.isAI
-            ? {
-                borderBottomStartRadius: 0,
-                backgroundColor: 'rgba(255, 255, 255, 0.30)',
-              }
-            : {
-                borderBottomEndRadius: 0,
-                backgroundColor: COLORS.primary,
-              },
-        ]}>
-        {item.isAI && (
-          <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
-        )}
+      <View>
         <View
           style={[
-            {maxWidth: '70%'},
-            item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
+            styles.messageContainer,
+            {alignSelf: item.isAI ? 'flex-start' : 'flex-end'},
+            item.isAI
+              ? {
+                  borderBottomStartRadius: 0,
+                  backgroundColor: 'rgba(255, 255, 255, 0.30)',
+                }
+              : {
+                  borderBottomEndRadius: 0,
+                  backgroundColor: COLORS.primary,
+                },
           ]}>
-          <StyledText style={{color: COLORS.white}}>{item.msg}</StyledText>
-          <StyledText style={{color: COLORS.white}}>{item.dateTime}</StyledText>
+          {item.isAI && (
+            <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
+          )}
+          <View
+            style={[
+              {maxWidth: '80%'},
+              item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
+            ]}>
+            <StyledText style={{color: COLORS.white}}>{item.msg}</StyledText>
+            <StyledText
+              style={{
+                color: COLORS.white,
+                fontSize: 13,
+                opacity: 0.7,
+                marginTop: 5,
+              }}>
+              {item.dateTime}
+            </StyledText>
+          </View>
+          {!item.isAI && (
+            <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
+          )}
         </View>
-        {!item.isAI && (
-          <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
+        {item.isAI && (
+          <View style={styles.itemActionButtonsContainer}>
+            <TouchableOpacity activeOpacity={0.7} style={styles.button}>
+              <SVGIcon
+                icon={'mic_fill_white'}
+                width={18}
+                height={18}
+                marginRight={5}
+              />
+              <StyledText style={styles.buttonText}>Read Out</StyledText>
+            </TouchableOpacity>
+            <View
+              style={{
+                width: 1,
+                backgroundColor: COLORS.white,
+                opacity: 0.3,
+                marginHorizontal: 20,
+              }}
+            />
+            <TouchableOpacity activeOpacity={0.7} style={styles.button}>
+              <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
+              <StyledText style={styles.buttonText}>Share</StyledText>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
     );
@@ -137,6 +182,12 @@ const AIChat = ({onPressBack}) => {
           data={chatList}
           keyboardShouldPersistTaps="handled"
           style={{flexGrow: 0}}
+          onLayout={() => {
+            scrollToEnd();
+          }}
+          onContentSizeChange={() => {
+            scrollToEnd();
+          }}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderItem}
           ItemSeparatorComponent={() => <View style={{height: 10}} />}
@@ -145,11 +196,19 @@ const AIChat = ({onPressBack}) => {
       </TouchableOpacity>
 
       <View style={styles.bottomContainer}>
+        {isLoadingChat && (
+          <StyledText
+            style={{color: COLORS.white, paddingVertical: 10, opacity: 0.7}}>
+            Typing...
+          </StyledText>
+        )}
         <RBSheetTextInput
           isEnableEmoji={false}
           placeholderText="Type or ask your question here..."
           onPressSend={handleSendMessage}
           isEnableVoiceRecord={true}
+          isDisableSend={isLoadingChat}
+          isKeyboardCloseWhenSend={false}
         />
       </View>
     </View>
@@ -188,6 +247,17 @@ const styles = StyleSheet.create({
     padding: 8,
     flexDirection: 'row',
     borderRadius: 10,
-    maxWidth: '80%',
+    maxWidth: '90%',
+  },
+  itemActionButtonsContainer: {
+    paddingVertical: 10,
+    flexDirection: 'row',
+  },
+  button: {
+    flexDirection: 'row',
+  },
+
+  buttonText: {
+    color: COLORS.white,
   },
 });

@@ -139,7 +139,7 @@ const CreateEditEventSecond = ({route}) => {
         JSON.stringify(tempRemovedGroupsIdsList),
       );
     }
-    console.log(formData, 'dsdfsdfsdfsdfsf');
+    console.log(JSON.stringify(formData), 'dsdfsdfsdfsdfsf');
     editEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
