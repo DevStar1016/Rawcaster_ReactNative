@@ -57,6 +57,7 @@ const Nugget = ({
   nuggetIndex,
   isFromProfile = false,
   onFinishDelete,
+  onFinishSave,
 }) => {
   const {
     scrollNuggetsListToTop,
@@ -181,27 +182,24 @@ const Nugget = ({
       })
       .catch(e => {});
   }
-  console.log(savedNuggetsList.length, 'savedNuggetsList');
+
   const saveAndUnsaveNuggetApiCall = status => {
-    console.log('SAVE UNSAVE');
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nuggetData.nugget_id);
     formData.append('save', status ? 1 : 2);
     saveAndUnsaveNuggetService(formData)
       .then(res => {
-        console.log(res.data, 'save res', nuggetData?.nugget_id);
         if (res.data.status === 1) {
           let tempSavedList = [...savedNuggetsList];
-          console.log(JSON.stringify(tempSavedList), 'SAVED NUGGETSSSSS');
           let tempList = [...nuggetsList];
           let tempIndex = tempList.findIndex(
             item => item.nugget_id === nuggetData.nugget_id,
           );
           if (tempIndex !== -1) {
-            // dispatch(
-            //   setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
-            // );
+            dispatch(
+              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+            );
             tempList[tempIndex] = {...tempList[tempIndex], saved: status};
           }
           dispatch(
@@ -209,7 +207,9 @@ const Nugget = ({
               getNuggetsReduxStoreDataFormate(categoryName, tempList),
             ),
           );
-          console.log(tempSavedList.length, 'before', savedNuggetsList.length);
+          if (isFromProfile) {
+            onFinishSave(nuggetData.nugget_id, status);
+          }
           if (status) {
             tempSavedList = [...tempSavedList, {...nuggetData, saved: status}];
           } else {
@@ -217,7 +217,6 @@ const Nugget = ({
               ele => ele.nugget_id !== nuggetData.nugget_id,
             );
           }
-          console.log(JSON.stringify(tempSavedList), 'SAVED NUGGETS CHANGES');
           dispatch(setSavedNuggetsList(tempSavedList));
           dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
         }
@@ -229,7 +228,7 @@ const Nugget = ({
 
   const debounceOnSave = useCallback(
     lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
-    [],
+    [savedNuggetsList],
   );
 
   const handleBecomeFan = () => {

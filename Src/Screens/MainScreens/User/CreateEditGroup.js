@@ -43,6 +43,7 @@ import {
 } from '../../../Services/Socket/SocketRequests';
 import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
 import UserItem from './UserItem';
+import BlurOverlay from '../../../Components/BlurOverlay';
 
 var isMount = true;
 var isOnSameGroup = true;
@@ -53,7 +54,7 @@ const GROUP_OPERATIONS = {
   exitGroup: 4,
 };
 const CreateEditGroup = ({route}) => {
-  const {groupId} = route.params ?? {};
+  const {groupId, isLocked} = route.params ?? {};
   const groupsList = useGroupsList();
   const profile = useProfile();
   const groupDetails = [...groupsList].find(item => item.group_id === groupId);
@@ -506,10 +507,12 @@ const CreateEditGroup = ({route}) => {
 
   function getList() {
     let list = [];
-    if (groupDetails) {
-      list = groupDetails.group_members_list;
-    } else {
-      list = [...connectionsList];
+    if (isLocked) {
+      if (groupDetails) {
+        list = groupDetails.group_members_list ?? [];
+      } else {
+        list = [...connectionsList];
+      }
     }
     if (searchText.trim()) {
       return list.filter(item =>
@@ -622,6 +625,38 @@ const CreateEditGroup = ({route}) => {
     );
   }
 
+  const MemberLockedView = () => {
+    return (
+      <View style={{flex: 1}}>
+        {[...Array(6)].map((_, index) => {
+          return (
+            <View
+              key={index.toString()}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 10,
+                marginVertical: 8,
+              }}>
+              <ProfileWithBadge
+                extraMargin={0}
+                isEnableGradient
+                padding={0}
+                profileSize={50}
+                containerStyle={{marginRight: 10}}
+              />
+              <View
+                style={{flex: 1, justifyContent: 'center', paddingRight: 20}}>
+                <StyledText style={{color: COLORS.white}}>Rawcaster</StyledText>
+              </View>
+            </View>
+          );
+        })}
+        <BlurOverlay />
+      </View>
+    );
+  };
   return (
     <HOCView
       headerType="header_with_back"
@@ -697,28 +732,30 @@ const CreateEditGroup = ({route}) => {
           onSearch={setsearchText}
         />
       </View>
-      {getList().length <= 0 && (
+      {isLocked ? (
+        <MemberLockedView />
+      ) : getList() && getList().length <= 0 ? (
         <DefaultBackground
           bgColor={COLORS.primaryDark}
           centerText="No user found"
         />
+      ) : (
+        <View style={{flex: 1}}>
+          <FlatList
+            bounces={false}
+            data={getList()}
+            renderItem={renderItem}
+            onScroll={onScrollEvent}
+            ItemSeparatorComponent={() => {
+              return <View style={{height: 15}} />;
+            }}
+            keyboardShouldPersistTaps={'handled'}
+            contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}
+            keyExtractor={keyExtractor}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       )}
-      <View style={{flex: 1}}>
-        <FlatList
-          bounces={false}
-          data={getList()}
-          renderItem={renderItem}
-          onScroll={onScrollEvent}
-          ItemSeparatorComponent={() => {
-            return <View style={{height: 15}} />;
-          }}
-          keyboardShouldPersistTaps={'handled'}
-          contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}
-          keyExtractor={keyExtractor}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-
       {groupId && isGroupOwner() && isOtherGroup() && isShowAddButton && (
         <RoundedPlusButton
           style={styles.addButton}

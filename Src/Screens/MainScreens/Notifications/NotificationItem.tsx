@@ -46,6 +46,10 @@ const NotificationItem = ({
     <TouchableOpacity
       style={styles.itemContainer}
       activeOpacity={0.8}
+      disabled={
+        parseInt(item.is_read) === 1 ||
+        (item.poll_option && item.poll_option.length > 0)
+      }
       onPress={() => {
         if (
           unreadNotificationCount &&
