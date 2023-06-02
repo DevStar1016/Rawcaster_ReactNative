@@ -196,6 +196,7 @@ const PostEditNugget = ({route}) => {
         });
       }
     }
+    console.log(formData, 'ADD NUGGET');
     addNuggetsService(formData)
       .then(res => {
         if (res.data.status === 1) {
