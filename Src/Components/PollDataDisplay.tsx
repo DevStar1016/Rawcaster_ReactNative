@@ -55,18 +55,22 @@ const PollDataDisplay = ({
     if (settings) {
       const [daysval, hoursval, minutesval] = pollDuration.split(':');
 
-      const userZoneTime = utcToUserTimezone(
-        createdDate,
-        settings?.time_zone,
-      ).format('YYYY-MM-DD HH:mm:ss');
-      console.log(userZoneTime, 'TIMEEE SOOOOOO');
+      // const userZoneTime = utcToUserTimezone(
+      //   createdDate,
+      //   settings?.time_zone,
+      // ).format('YYYY-MM-DD HH:mm:ss');
 
-      const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
+      // const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
+      //   .add(daysval, 'days')
+      //   .add(hoursval, 'hours')
+      //   .add(minutesval, 'minutes');
+      const utcString = moment
+        .utc(createdDate, 'YYYY-MM-DD HH:mm:ss')
         .add(daysval, 'days')
         .add(hoursval, 'hours')
         .add(minutesval, 'minutes');
 
-      const now = moment();
+      const now = moment().utc();
       let timeDiff = utcString - now;
       let dur = moment.duration(timeDiff);
       const remainingDays = dur.days();
