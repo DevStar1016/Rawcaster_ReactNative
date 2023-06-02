@@ -105,8 +105,6 @@ const PollDataDisplay = ({
   };
 
   const getPollOptions = () => {
-    console.log(JSON.stringify(pollOptions), 'POLL OPTION');
-
     let tempPollOptions = [...pollOptions].map(item => {
       let votes = item.votes;
       if (pollVotedData.votedOptionID === item.option_id) {
@@ -123,7 +121,6 @@ const PollDataDisplay = ({
               ).toFixed(2),
       };
     });
-    console.log(JSON.stringify(tempPollOptions), 'TEMP POLL OPTION');
     return [...tempPollOptions];
   };
 
