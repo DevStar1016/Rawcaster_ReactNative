@@ -183,7 +183,7 @@ const PostEditNugget = ({route}) => {
     if (isPollClicked) {
       formData.append(
         'poll_option',
-        JSON.stringify([...choiceList].map(item => item.value.trim())),
+        JSON.stringify([...choiceList].map(item => item.value)),
       );
       formData.append(
         'poll_duration',
@@ -196,6 +196,7 @@ const PostEditNugget = ({route}) => {
         });
       }
     }
+    console.log(formData, 'ADD NUGGET');
     addNuggetsService(formData)
       .then(res => {
         if (res.data.status === 1) {

@@ -191,9 +191,13 @@ const Nugget = ({
     saveAndUnsaveNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(JSON.stringify(savedNuggetsList), 'SAVE');
           let tempSavedList = [...savedNuggetsList];
           let tempList = [...nuggetsList];
           let tempIndex = tempList.findIndex(
+            item => item.nugget_id === nuggetData.nugget_id,
+          );
+          let tempSavedIndex = tempSavedList.findIndex(
             item => item.nugget_id === nuggetData.nugget_id,
           );
           if (tempIndex !== -1) {
@@ -210,13 +214,14 @@ const Nugget = ({
           if (isFromProfile) {
             onFinishSave(nuggetData.nugget_id, status);
           }
-          if (status) {
+          if (status && tempSavedIndex === -1) {
             tempSavedList = [...tempSavedList, {...nuggetData, saved: status}];
-          } else {
+          } else if (!status && tempSavedIndex !== -1) {
             tempSavedList = tempSavedList.filter(
               ele => ele.nugget_id !== nuggetData.nugget_id,
             );
           }
+          console.log(JSON.stringify(tempSavedList));
           dispatch(setSavedNuggetsList(tempSavedList));
           dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
         }
