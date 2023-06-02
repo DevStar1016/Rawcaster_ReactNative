@@ -27,6 +27,7 @@ type Props = {
   isKeyboardCloseWhenSend?: boolean;
   isVisibleVoiceRecord?: boolean;
   onPressEmoji?: () => void;
+  onSendAudio?: () => void;
   isEnableOnSubmitEditing?: boolean;
   inputProps?: Omit<
     TextInputProps,
@@ -50,6 +51,7 @@ const RBSheetTextInput = ({
   isInsideTextChange = true,
   onChangeText,
   text = '',
+  onSendAudio,
   isKeyboardCloseWhenSend = true,
   isVisibleEmoji = true,
   isDisableSend = false,

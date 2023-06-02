@@ -76,7 +76,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     const formData = new FormData();
     formData.append('token', token);
     if (text && text.trim()) {
-      // formData.append('user_query', text);
+      formData.append('user_query', text);
     }
 
     aiChatService(formData)
@@ -234,11 +234,12 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           // </StyledText>
         )}
         <RBSheetTextInput
-          isEnableEmoji={false}
+          isVisibleEmoji={false}
           placeholderText="Type or ask your question here..."
           onPressSend={handleSendMessage}
-          isEnableVoiceRecord={true}
+          isVisibleVoiceRecord={true}
           isDisableSend={isLoadingChat}
+          onSendAudio={() => {}}
           isKeyboardCloseWhenSend={false}
         />
       </View>

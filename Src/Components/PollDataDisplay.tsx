@@ -54,10 +54,13 @@ const PollDataDisplay = ({
   const getRemainingTimeOfPoll = () => {
     if (settings) {
       const [daysval, hoursval, minutesval] = pollDuration.split(':');
+
       const userZoneTime = utcToUserTimezone(
         createdDate,
         settings?.time_zone,
       ).format('YYYY-MM-DD HH:mm:ss');
+      console.log(userZoneTime, 'TIMEEE SOOOOOO');
+
       const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
         .add(daysval, 'days')
         .add(hoursval, 'hours')
