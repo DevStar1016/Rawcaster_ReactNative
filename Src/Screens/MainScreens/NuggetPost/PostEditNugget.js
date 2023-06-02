@@ -74,7 +74,7 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 var isMount = true;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
 const PostEditNugget = ({route}) => {
-  const {nugget, isSearchNugget, categoryName} = route.params ?? {};
+  const {nugget, isSearchNugget, categoryName, preContent} = route.params ?? {};
   const searchedNuggetsList = useSearchedNuggetsList();
   const dispatch = useDispatch();
   const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
@@ -115,7 +115,7 @@ const PostEditNugget = ({route}) => {
   const [isPollClicked, setisPollClicked] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [typedText, settypedText] = useState(
-    nugget ? nugget.content ?? '' : '',
+    preContent ?? (nugget ? nugget.content ?? '' : ''),
   );
 
   const [question, setquestion] = useState('');

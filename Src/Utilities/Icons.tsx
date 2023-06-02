@@ -73,6 +73,8 @@ import PlayFillPrimaryIcon from '../Assets/Svg/play_fill_primary.svg';
 import PauseFillPrimaryIcon from '../Assets/Svg/pause_fill_primary.svg';
 import StopFillPrimaryIcon from '../Assets/Svg/stop_fill_primary.svg';
 import MicFillPrimaryIcon from '../Assets/Svg/mic_fill_primary.svg';
+import MicFillSecondaryIcon from '../Assets/Svg/mic_fill_secondary.svg';
+
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
 import DeleteBlackIcon from '../Assets/Svg/delete_black.svg';
@@ -270,7 +272,8 @@ export type IconType =
   | 'close_black'
   | 'claim_user'
   | 'menu_vertical_white'
-  | 'open_ai_white';
+  | 'open_ai_white'
+  | 'mic_fill_secondary';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -352,6 +355,7 @@ export const ICONS = {
   pause_fill_primary: PauseFillPrimaryIcon,
   stop_fill_primary: StopFillPrimaryIcon,
   mic_fill_primary: MicFillPrimaryIcon,
+  mic_fill_secondary: MicFillSecondaryIcon,
   tick_black: TickBlackIcon,
   edit_black: EditBlackIcon,
   delete_black: DeleteBlackIcon,

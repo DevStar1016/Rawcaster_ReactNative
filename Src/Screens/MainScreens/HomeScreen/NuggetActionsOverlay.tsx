@@ -190,10 +190,10 @@ function NuggetActionsOverlay({
     aiChatBottomSheetModalRef.current?.present();
   }, []);
   const handleCloseAIChatModal = useCallback(() => {
+    aiChatBottomSheetModalRef.current?.close();
     if (setpaused) {
       setpaused(false);
     }
-    aiChatBottomSheetModalRef.current?.close();
   }, []);
 
   const handleSheetChanges = useCallback((index: number) => {}, []);
@@ -521,7 +521,9 @@ function NuggetActionsOverlay({
               : 0),
         }}
         onLayout={e => {
-          setmainContentContainerHeight(e.nativeEvent.layout.height);
+          if (e.nativeEvent.layout.height) {
+            setmainContentContainerHeight(e.nativeEvent.layout.height);
+          }
         }}>
         <View
           style={{
@@ -652,11 +654,15 @@ function NuggetActionsOverlay({
             marginRight: actionButtonsContainerWidth,
           }}
           onLayout={e => {
-            setnuggetDataBottomContainerHeight(e.nativeEvent.layout.height);
+            if (e.nativeEvent.layout.height) {
+              setnuggetDataBottomContainerHeight(e.nativeEvent.layout.height);
+            }
           }}>
           <View
             onLayout={e => {
-              setprofileDataContainerHeight(e.nativeEvent.layout.height);
+              if (e.nativeEvent.layout.height) {
+                setprofileDataContainerHeight(e.nativeEvent.layout.height);
+              }
             }}>
             <ProfileWithBadge
               badge={Badges(nugget.user_status_id)}
@@ -765,7 +771,9 @@ function NuggetActionsOverlay({
             bottom: 0,
           }}
           onLayout={e => {
-            setactionButtonsContainerWidth(e.nativeEvent.layout.width);
+            if (e.nativeEvent.layout.width) {
+              setactionButtonsContainerWidth(e.nativeEvent.layout.width);
+            }
           }}>
           {token && isEnableADDButton ? (
             <RoundedPlusButton
@@ -817,7 +825,9 @@ function NuggetActionsOverlay({
             left: 0,
           }}
           onLayout={e => {
-            setmediaSliderHeight(e.nativeEvent.layout.height);
+            if (e.nativeEvent.layout.height) {
+              setmediaSliderHeight(e.nativeEvent.layout.height);
+            }
           }}>
           <MediaProgressSlider
             duration={duration}
@@ -957,6 +967,8 @@ function NuggetActionsOverlay({
       <BottomSheetModal
         ref={aiChatBottomSheetModalRef}
         handleStyle={{display: 'none'}}
+        enableOverDrag={false}
+        enablePanDownToClose={false}
         onDismiss={() => {
           if (setpaused) {
             setpaused(false);
@@ -992,6 +1004,13 @@ function NuggetActionsOverlay({
         <AIChat
           onPressBack={() => {
             handleCloseAIChatModal();
+          }}
+          handleShareContent={(content: string) => {
+            handleCloseAIChatModal();
+            /* @ts-ignore */
+            navigation.navigate('PostEditNugget', {
+              preContent: content,
+            });
           }}
         />
       </BottomSheetModal>

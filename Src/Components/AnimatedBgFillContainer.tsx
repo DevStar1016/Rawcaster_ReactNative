@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     overflow: 'hidden',
     borderRadius: 10,
+    width: '75%',
     backgroundColor: 'rgba(241, 240, 240,0.1)',
     justifyContent: 'space-between',
   },
