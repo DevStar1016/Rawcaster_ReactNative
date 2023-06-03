@@ -480,7 +480,7 @@ const PostEditNugget = ({route}) => {
         !(
           pollLength.days === 0 &&
           pollLength.hours === 0 &&
-          pollLength.minutes === 0
+          pollLength.minutes < 5
         ) &&
         choiceList.filter(item => item.value.trim()).length >= 2
         ? false
