@@ -6,13 +6,16 @@ import {
   TextInputProps,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {BottomSheetTextInput} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from './ProfileWithBadge';
 import SVGIcon from './SVGIcon';
 import {useProfile} from '../Utilities/StoreData';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
+import StyledText from './StyledText';
+import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 type Props = {
   onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
@@ -60,8 +63,11 @@ const RBSheetTextInput = ({
   isEnableOnSubmitEditing = false,
   inputProps,
 }: Props) => {
+  const audioPlayer = useRef(new AudioRecorderPlayer()).current;
   const profile = useProfile();
+  const [isRecording, setisRecording] = useState<boolean>(false);
   const [typedText, settypedText] = useState<string>('');
+  const [timer, settimer] = useState<number>(0);
 
   function handleSubmit() {
     if (
@@ -80,12 +86,54 @@ const RBSheetTextInput = ({
     }
   }
 
+  // const handleAudioRecord = async () => {
+  //   const dirs = RNFetchBlob.fs.dirs;
+  //   const path = Platform.select({
+  //     ios: 'rawcaster_recorded_audio.m4a',
+  //     android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
+  //   });
+  //   try {
+  //     const audioSet = {
+  //       AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+  //       AudioSourceAndroid: AudioSourceAndroidType.MIC,
+  //       AVModeIOS: AVModeIOSOption.measurement,
+  //       AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
+  //       AVNumberOfChannelsKeyIOS: 2,
+  //       AVFormatIDKeyIOS: AVEncodingOption.aac,
+  //     };
+  //     const meteringEnabled = false;
+  //     setisPaused(false);
+  //     setisRecording(true);
+  //     const result = await audioPlayer.startRecorder(
+  //       path,
+  //       audioSet,
+  //       meteringEnabled,
+  //     );
+
+  //     setrecordedAudio(result);
+  //     audioPlayer.addRecordBackListener(e => {
+  //       if (Math.floor(e.currentPosition / 1000) >= 0) {
+  //         setrecordingSeconds(Math.floor(e.currentPosition / 1000));
+  //       }
+  //       return;
+  //     });
+  //   } catch (e) {
+  //     setisRecording(false);
+  //   }
+  // };
+
   return (
     <View style={styles.inputContainer}>
-      <ProfileWithBadge
-        profileSize={35}
-        profileImage={profile?.profile_image}
-      />
+      {isRecording ? (
+        <StyledText style={{color: COLORS.white}}>
+          {secondsToMinutesAndSeconds(timer)}
+        </StyledText>
+      ) : (
+        <ProfileWithBadge
+          profileSize={35}
+          profileImage={profile?.profile_image}
+        />
+      )}
       <BottomSheetTextInput
         ref={inpuFieldRef}
         style={styles.input}
@@ -114,6 +162,7 @@ const RBSheetTextInput = ({
               isButton
               onPress={() => {
                 Keyboard.dismiss();
+                setisRecording(true);
               }}
             />
           )}

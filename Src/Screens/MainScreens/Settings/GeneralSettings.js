@@ -122,6 +122,7 @@ const GeneralSettings = () => {
   );
   const [isLoading, setisLoading] = useState(true);
   const [languagesList, setlanguagesList] = useState([]);
+  const [readoutLanguagesList, setreadoutLanguagesList] = useState([]);
   const [timeZonesList, settimeZonesList] = useState([]);
   const [settingsData, setsettingsData] = useState({
     phone_display_status: settings?.phone_display_status,
@@ -185,6 +186,7 @@ const GeneralSettings = () => {
         if (res[0].data.status === 1) {
           if (isMount) {
             setlanguagesList(res[0].data.language_list);
+            setreadoutLanguagesList(res[0].data.read_out_language_list);
           }
         }
         return res;

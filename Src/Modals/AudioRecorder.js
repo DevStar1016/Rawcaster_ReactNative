@@ -1,12 +1,6 @@
-import {Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import AudioRecorderPlayer, {
-  AudioEncoderAndroidType,
-  AudioSourceAndroidType,
-  AVEncoderAudioQualityIOSType,
-  AVEncodingOption,
-  AVModeIOSOption,
-} from 'react-native-audio-recorder-player';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from '../Components/SVGIcon';
 import StyledText from '../Components/StyledText';
@@ -18,6 +12,7 @@ import {
 import {FONTS} from '../Utilities/Fonts';
 import BOX_SHADOW from '../Utilities/BoxShadow';
 import RNFetchBlob from 'rn-fetch-blob';
+import {handleAudioRecord} from '../Utilities/AudioPlayerProcess';
 
 const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -40,42 +35,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
       setisPlaying(false);
     }
   }, [playingSeconds]);
-
-  const handleAudioRecord = async () => {
-    const dirs = RNFetchBlob.fs.dirs;
-    const path = Platform.select({
-      ios: 'rawcaster_recorded_audio.m4a',
-      android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
-    });
-    try {
-      const audioSet = {
-        AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
-        AudioSourceAndroid: AudioSourceAndroidType.MIC,
-        AVModeIOS: AVModeIOSOption.measurement,
-        AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
-        AVNumberOfChannelsKeyIOS: 2,
-        AVFormatIDKeyIOS: AVEncodingOption.aac,
-      };
-      const meteringEnabled = false;
-      setisPaused(false);
-      setisRecording(true);
-      const result = await audioPlayer.startRecorder(
-        path,
-        audioSet,
-        meteringEnabled,
-      );
-
-      setrecordedAudio(result);
-      audioPlayer.addRecordBackListener(e => {
-        if (Math.floor(e.currentPosition / 1000) >= 0) {
-          setrecordingSeconds(Math.floor(e.currentPosition / 1000));
-        }
-        return;
-      });
-    } catch (e) {
-      setisRecording(false);
-    }
-  };
 
   const handleStopAudioRecord = () => {
     try {
@@ -238,7 +197,13 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           ) : (
             <ActionButton
               onPress={() => {
-                handleAudioRecord();
+                handleAudioRecord({
+                  audioPlayer,
+                  setisPaused,
+                  setisRecording,
+                  setrecordedAudio,
+                  setrecordingSeconds,
+                });
               }}
               icon={'mic_fill_primary'}
               iconSize={20}

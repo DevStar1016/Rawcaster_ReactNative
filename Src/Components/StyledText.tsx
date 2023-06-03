@@ -1,20 +1,11 @@
-import {
-  Linking,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {StyleProp, StyleSheet, Text, TextStyle, View} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import Hyperlink from 'react-native-hyperlink';
-import {IS_IOS} from '../Utilities/Constants';
 import {TextProps} from 'react-native';
 
-type Props = {
+export interface StyledTextProps {
   children?: JSX.Element | JSX.Element[] | string;
   textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
   numberOfLines?: number;
@@ -23,7 +14,7 @@ type Props = {
   normalTextModeTextProps?: Omit<TextProps, 'onPress' | 'style'>;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
-};
+}
 
 function StyledText({
   children,
@@ -34,7 +25,7 @@ function StyledText({
   readMoreButtonTextStyle = {},
   style,
   normalTextModeTextProps,
-}: Props) {
+}: StyledTextProps) {
   const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
 
@@ -47,7 +38,7 @@ function StyledText({
       if (Array.isArray(style)) {
         return [styles.text, ...style];
       }
-      return [styles.text, {...style}];
+      return [styles.text, style];
     }
     return styles.text;
   };
@@ -66,14 +57,14 @@ function StyledText({
         {lengthMore ? (
           <Text
             numberOfLines={isEnableFullText ? undefined : numberOfLines}
-            style={[styles.text, {...style}]}
+            style={getStyle()}
             onPress={onPress}>
             {children}
           </Text>
         ) : (
           <Text
             onTextLayout={onTextLayout}
-            style={[styles.text, {...style}]}
+            style={getStyle()}
             onPress={onPress}>
             {children}
           </Text>
