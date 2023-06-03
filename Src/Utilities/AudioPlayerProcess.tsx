@@ -14,8 +14,9 @@ export const handleAudioRecord = async ({
   setisRecording = () => {},
   setrecordedAudio = () => {},
   setrecordingSeconds = () => {},
-}) => {
-  if (isHavePermissionToRecordAudio()) {
+}: any) => {
+  const isGrantedPermission = await isHavePermissionToRecordAudio();
+  if (isGrantedPermission) {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
       ios: 'rawcaster_recorded_audio.m4a',
@@ -40,7 +41,7 @@ export const handleAudioRecord = async ({
       );
 
       setrecordedAudio(result);
-      audioPlayer?.addRecordBackListener(e => {
+      audioPlayer?.addRecordBackListener((e: any) => {
         if (Math.floor(e.currentPosition / 1000) >= 0) {
           setrecordingSeconds(Math.floor(e.currentPosition / 1000));
         }

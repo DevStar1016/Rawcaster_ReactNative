@@ -43,8 +43,10 @@ const AIChatItem = ({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('message', msg);
+    console.log(formData, 'FORMDATAA');
     textToAudioService(formData)
       .then(res => {
+        console.log(res.data, 'KL');
         if (res.data.status === 1) {
           if (isMount) {
             setaudioUrl(id, res.data.url);
