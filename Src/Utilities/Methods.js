@@ -305,26 +305,6 @@ export const compressMedia = async (mediaType, mediaPath) => {
   return result;
 };
 
-export const getMinutesSecondsFormate = seconds => {
-  let time = '';
-  let min = Math.floor(seconds / 60);
-
-  if (min < 10) {
-    time = '0';
-  }
-  time = `${time + min}:`;
-  if (Math.floor(seconds % 60) < 10) {
-    time = `${time}0`;
-  }
-  if (seconds >= 60) {
-    time = `${time + Math.floor(seconds % 60)}`;
-  } else {
-    time = `${time + seconds}`;
-  }
-
-  return time;
-};
-
 export const htmlDecodeText = text => {
   return htmldecode(text);
 };

@@ -85,6 +85,8 @@ const NotificationsList = ({
         }
         if (isMount) {
           if (res.data.status === 1) {
+            console.log(res.data.notification_list, 'LIST NOTIFICATION');
+
             seterrorText('');
             dispatch(setUnreadNotificationCount(res.data.total_unread_count));
             if (pageNumber === 1) {

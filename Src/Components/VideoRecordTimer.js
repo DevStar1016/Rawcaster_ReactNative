@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
-import {getMinutesSecondsFormate} from '../Utilities/Methods';
+import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
 
 var timerInterval = undefined;
 const VideoRecordTimer = ({onReachMaxTime, maxSeconds = 120}) => {
@@ -31,7 +31,7 @@ const VideoRecordTimer = ({onReachMaxTime, maxSeconds = 120}) => {
 
   return (
     <StyledText style={styles.timerText}>
-      {getMinutesSecondsFormate(timer)}
+      {secondsToMinutesAndSeconds(timer)}
     </StyledText>
   );
 };

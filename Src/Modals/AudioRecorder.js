@@ -7,7 +7,7 @@ import StyledText from '../Components/StyledText';
 import {
   getFileName,
   getMediaMimeType,
-  getMinutesSecondsFormate,
+  secondsToMinutesAndSeconds,
 } from '../Utilities/Methods';
 import {FONTS} from '../Utilities/Fonts';
 import BOX_SHADOW from '../Utilities/BoxShadow';
@@ -126,7 +126,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           </View>
           <View style={{flex: 1, alignItems: 'center'}}>
             <StyledText style={styles.timerText}>
-              {getMinutesSecondsFormate(
+              {secondsToMinutesAndSeconds(
                 isPlaying ? playingSeconds : recordingSeconds,
               )}
             </StyledText>

@@ -74,6 +74,9 @@ import PauseFillPrimaryIcon from '../Assets/Svg/pause_fill_primary.svg';
 import StopFillPrimaryIcon from '../Assets/Svg/stop_fill_primary.svg';
 import MicFillPrimaryIcon from '../Assets/Svg/mic_fill_primary.svg';
 import MicFillSecondaryIcon from '../Assets/Svg/mic_fill_secondary.svg';
+import StopFillWhiteIcon from '../Assets/Svg/stop_white.svg';
+import StopRoundedWhiteIcon from '../Assets/Svg/stop_rounded_white.svg';
+import PlayFillWhiteIcon from '../Assets/Svg/play_fill_white.svg';
 
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
@@ -273,7 +276,10 @@ export type IconType =
   | 'claim_user'
   | 'menu_vertical_white'
   | 'open_ai_white'
-  | 'mic_fill_secondary';
+  | 'mic_fill_secondary'
+  | 'stop_fill__white'
+  | 'stop_rounded_white'
+  | 'play_fill_white';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -410,4 +416,7 @@ export const ICONS = {
   claim_user: ClaimUserIcon,
   menu_vertical_white: MenuVerticalWhiteIcon,
   open_ai_white: OpenAIWhiteIcon,
+  stop_fill__white: StopFillWhiteIcon,
+  stop_rounded_white: StopRoundedWhiteIcon,
+  play_fill_white: PlayFillWhiteIcon,
 };
