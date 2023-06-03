@@ -57,6 +57,7 @@ import DownFillWhiteIcon from '../Assets/Svg/down_fill_white.svg';
 import LockFillWhiteIcon from '../Assets/Svg/lock_fill_white.svg';
 import CameraFillWhiteIcon from '../Assets/Svg/camera_fill_white.svg';
 import MicFillWhiteIcon from '../Assets/Svg/mic_fill_white.svg';
+import MicOffFillWhiteIcon from '../Assets/Svg/mic_off_fill_white.svg';
 import PhotoFillWhiteIcon from '../Assets/Svg/photo_fill_white.svg';
 import PollFillWhiteIcon from '../Assets/Svg/poll_fill_white.svg';
 import VideoFillWhiteIcon from '../Assets/Svg/video_fill_white.svg';
@@ -203,6 +204,7 @@ export type IconType =
   | 'logo_R'
   | 'camera_fill_white'
   | 'mic_fill_white'
+  | 'mic_off_fill_white'
   | 'photo_fill_white'
   | 'poll_fill_white'
   | 'emojee'
@@ -339,6 +341,7 @@ export const ICONS = {
   lock_fill_white: LockFillWhiteIcon,
   camera_fill_white: CameraFillWhiteIcon,
   mic_fill_white: MicFillWhiteIcon,
+  mic_off_fill_white: MicOffFillWhiteIcon,
   photo_fill_white: PhotoFillWhiteIcon,
   poll_fill_white: PollFillWhiteIcon,
   video_fill_white: VideoFillWhiteIcon,

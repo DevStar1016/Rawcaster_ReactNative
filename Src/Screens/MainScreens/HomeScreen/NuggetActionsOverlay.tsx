@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -66,6 +66,9 @@ import AudioWaveFormImage from '../../../Assets/Png/waveform.png';
 import AudioWaveFormGif from '../../../Assets/Gif/waveform.gif';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
+import LoadingDots from '../../../Components/LoadingDots';
+import {nuggetContentAudioService} from '../../../Services/ApiService';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -167,9 +170,19 @@ function NuggetActionsOverlay({
     useState(0);
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
+  const [isReadMuted, setisReadMuted] = useState(false);
+  const [isReadLoading, setisReadLoading] = useState(false);
+  const [ReadNuggetUrl, setReadNuggetUrl] = useState(null);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const snapPoints = useMemo(() => ['90%'], []);
+  useEffect(() => {
+    return () => {
+      handleStopAudio();
+    };
+  }, []);
+
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
@@ -238,6 +251,60 @@ function NuggetActionsOverlay({
         setpollVotedData({isVoted: false, votedOptionID: null});
         Toast.fail(e.message);
       });
+  };
+
+  const nuggetContentAudioAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    nuggetContentAudioService(formData)
+      .then(res => {
+        console.log(res.data, 'API');
+
+        if (res.data.status === 1) {
+          setReadNuggetUrl(res.data.file_path);
+          handlePlayAudio(res.data.file_path);
+        } else if (res.data.status === 0) {
+          setReadNuggetUrl(null);
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        setReadNuggetUrl(null);
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisReadLoading(false);
+      });
+  };
+
+  const handlePlayAudio = async (url: any) => {
+    // handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        console.log(e.currentPosition, 'play position');
+        if (Math.floor(e.currentPosition) === 0) {
+          setisReadMuted(true);
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      setisReadMuted(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+      console.log('STOP');
+    } catch (e) {
+    } finally {
+      setisReadMuted(false);
+    }
   };
 
   const getTotalVotes = () => {
@@ -556,31 +623,77 @@ function NuggetActionsOverlay({
           {nugget.content ? (
             <TouchableOpacity activeOpacity={1}>
               <ScrollView
-                contentContainerStyle={{flexGrow: 1}}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
-                <StyledText
-                  textMode="read_more_hyper_link"
-                  numberOfLines={
-                    3
-                    // nugget.media_list.length > 0 ||
-                    // (nugget.poll_option && nugget.poll_option.length > 0)
-                    //   ? isEnableHeaderContainerHeightforTopButtons
-                    //     ? 5
-                    //     : nugget.poll_option.length > 2
-                    //     ? 2
-                    //     : 5
-                    //   : textNuggetNumberOfLines ?? 15
-                  }
-                  onPressUrl={onPressUrl}
+                <View
                   style={{
-                    color: COLORS.white,
-                    fontSize: 15.5,
-                    opacity: 0.8,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    width: '80%',
+                    // flexGrow: 1,
+                    backgroundColor: 'green',
                   }}>
-                  {htmlDecodeText(nugget.content)}
-                </StyledText>
+                  {isReadLoading ? (
+                    <View style={{height: 20, alignItems: 'center'}}>
+                      <LoadingDots
+                        size={6}
+                        bounceHeight={5}
+                        dots={3}
+                        borderRadius={3}
+                      />
+                    </View>
+                  ) : (
+                    <SVGIcon
+                      icon={
+                        !isReadMuted ? 'mic_fill_white' : 'mic_off_fill_white'
+                      }
+                      height={20}
+                      isButton
+                      onPress={() => {
+                        if (!isReadMuted) {
+                          console.log('JJJJ');
+                          if (setpaused) {
+                            setpaused(true);
+                          }
+                          if (setisMuted) {
+                            setisMuted(true);
+                          }
+                          setisReadLoading(true);
+                          nuggetContentAudioAPICall();
+                        } else {
+                          handleStopAudio();
+                        }
+                      }}
+                    />
+                  )}
+                  <StyledText
+                    textMode="read_more_hyper_link"
+                    numberOfLines={
+                      3
+                      // nugget.media_list.length > 0 ||
+                      // (nugget.poll_option && nugget.poll_option.length > 0)
+                      //   ? isEnableHeaderContainerHeightforTopButtons
+                      //     ? 5
+                      //     : nugget.poll_option.length > 2
+                      //     ? 2
+                      //     : 5
+                      //   : textNuggetNumberOfLines ?? 15
+                    }
+                    onPressUrl={onPressUrl}
+                    style={{
+                      color: COLORS.white,
+                      fontSize: 15.5,
+                      opacity: 0.8,
+                      backgroundColor: 'red',
+                      width: '98%',
+                    }}>
+                    {htmlDecodeText(nugget.content)}
+                  </StyledText>
+                </View>
               </ScrollView>
             </TouchableOpacity>
           ) : null}

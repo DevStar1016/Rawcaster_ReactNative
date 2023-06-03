@@ -136,7 +136,7 @@ const GeneralSettings = () => {
     mobile_default_page: settings?.mobile_default_page,
     language_id: settings?.language_id,
     read_out_language_id: settings?.read_out_language_id,
-    default_date_format: settings?.default_date_format,
+    default_date_format: settings?.default_date_format?.toString().trim(),
     time_zone: settings?.time_zone,
     lock_fans: settings?.lock_fans,
     lock_my_connection: settings?.lock_my_connection,
