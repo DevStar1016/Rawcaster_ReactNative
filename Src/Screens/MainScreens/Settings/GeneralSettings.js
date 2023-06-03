@@ -135,6 +135,7 @@ const GeneralSettings = () => {
     account_active_inactive: settings?.account_active_inactive,
     mobile_default_page: settings?.mobile_default_page,
     language_id: settings?.language_id,
+    read_out_language_id: settings?.read_out_language_id,
     default_date_format: settings?.default_date_format,
     time_zone: settings?.time_zone,
     lock_fans: settings?.lock_fans,
@@ -259,6 +260,12 @@ const GeneralSettings = () => {
   function getSelectedLanguage() {
     return [...languagesList].find(
       item => item.id === settingsData.language_id,
+    );
+  }
+
+  function getSelectedReadOutLanguage() {
+    return [...readoutLanguagesList].find(
+      item => item.id === settingsData.read_out_language_id,
     );
   }
 
@@ -472,6 +479,18 @@ const GeneralSettings = () => {
             fieldName="name"
             onSelectItem={selectedItem => {
               handleChangeSettingsData(selectedItem.id, 'language_id');
+            }}
+          />
+          <DropDownPicker
+            title="Readout Language"
+            value={getSelectedReadOutLanguage()}
+            listTitle=""
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={readoutLanguagesList}
+            fieldName="name"
+            onSelectItem={selectedItem => {
+              handleChangeSettingsData(selectedItem.id, 'read_out_language_id');
             }}
           />
           <DropDownPicker
