@@ -107,7 +107,7 @@ function StyledText({
     return (
       <Text>
         {iconProps && <SVGIcon {...iconProps} />}
-        <View style={{flex: 1}}>{hyperLinkText(true)}</View>
+        {hyperLinkText(true)}
       </Text>
     );
   };

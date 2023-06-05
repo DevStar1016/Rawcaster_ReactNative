@@ -658,7 +658,6 @@ function NuggetActionsOverlay({
                       color: COLORS.white,
                       fontSize: 15.5,
                       opacity: 0.8,
-                      flex: 1,
                     }}>
                     {htmlDecodeText(nugget.content.trim())}
                   </StyledText>
