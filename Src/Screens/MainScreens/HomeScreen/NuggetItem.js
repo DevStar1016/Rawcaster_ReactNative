@@ -26,8 +26,13 @@ function NuggetItem({
   const {isMuted, viewableNuggetItem, mediaHeight, isAutoPlay} =
     useNuggetParentActions();
 
-  const {isRepeatVideo, nugget, viewableItem, parentNuggetIndex} =
-    useNuggetItemActions();
+  const {
+    isRepeatVideo,
+    nugget,
+    viewableItem,
+    parentNuggetIndex,
+    handleStopAudio,
+  } = useNuggetItemActions();
 
   const [paused, setpaused] = useState(true);
   const [progress, setprogress] = useState(0);
@@ -61,9 +66,32 @@ function NuggetItem({
     isAutoPlay,
   ]);
 
+  const shouldPauseReadAudio = useMemo(() => {
+    if (!viewableNuggetItem && parentNuggetIndex === 0) {
+      return true;
+    }
+    return (
+      isAppForeground &&
+      viewableItem === mediaItem.media_id &&
+      nugget.nugget_id === viewableNuggetItem &&
+      isFocused
+    );
+  }, [
+    isAppForeground,
+    viewableItem,
+    viewableNuggetItem,
+    // nugget.nugget_id,
+    mediaItem.media_id,
+    isFocused,
+  ]);
+
   useEffect(() => {
     setpaused(!shouldPauseVideo);
   }, [shouldPauseVideo]);
+
+  useEffect(() => {
+    handleStopAudio();
+  }, [shouldPauseReadAudio]);
 
   const seekUpdate = useCallback(
     async seekTime => {

@@ -1,11 +1,15 @@
 import {StyleSheet, View} from 'react-native';
-import React from 'react';
+import React, {useEffect, useMemo} from 'react';
 import NuggetActionsOverlay from '../NuggetActionsOverlay';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
 import DefaultBackground from '../../../../Components/DefaultBackground';
-import {useInsets} from '../../../../Utilities/StoreData';
-import {useNuggetParentActions} from '../../../../Utilities/Contexts';
+import {useInsets, useIsAppForeground} from '../../../../Utilities/StoreData';
+import {
+  useNuggetItemActions,
+  useNuggetParentActions,
+} from '../../../../Utilities/Contexts';
+import {useIsFocused} from '@react-navigation/native';
 
 const TextOnlyNugget = ({
   onPressShare,
@@ -15,10 +19,28 @@ const TextOnlyNugget = ({
   onBlockUser,
   onReportAbouseNugget,
 }) => {
-  const {mediaHeight} = useNuggetParentActions();
+  const {mediaHeight, viewableNuggetItem} = useNuggetParentActions();
+  const {nugget, viewableItem, parentNuggetIndex, handleStopAudio} =
+    useNuggetItemActions();
   const insets = useInsets();
+  const isAppForeground = useIsAppForeground();
+  const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+
+  const shouldPauseReadAudio = useMemo(() => {
+    if (!viewableNuggetItem && parentNuggetIndex === 0) {
+      return true;
+    }
+    return (
+      isAppForeground && nugget.nugget_id === viewableNuggetItem && isFocused
+    );
+  }, [isAppForeground, viewableItem, viewableNuggetItem, isFocused]);
+
+  useEffect(() => {
+    handleStopAudio();
+  }, [shouldPauseReadAudio]);
+
   return (
     <View
       style={[

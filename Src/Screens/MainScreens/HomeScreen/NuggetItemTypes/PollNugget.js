@@ -1,10 +1,14 @@
 import {StyleSheet, View} from 'react-native';
-import React from 'react';
-import {useInsets} from '../../../../Utilities/StoreData';
+import React, {useEffect, useMemo} from 'react';
+import {useInsets, useIsAppForeground} from '../../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import DefaultBackground from '../../../../Components/DefaultBackground';
 import NuggetActionsOverlay from '../NuggetActionsOverlay';
-import {useNuggetParentActions} from '../../../../Utilities/Contexts';
+import {
+  useNuggetItemActions,
+  useNuggetParentActions,
+} from '../../../../Utilities/Contexts';
+import {useIsFocused} from '@react-navigation/native';
 
 const PollNugget = ({
   onDeleteNugget,
@@ -14,11 +18,27 @@ const PollNugget = ({
   onBlockUser,
   onReportAbouseNugget,
 }) => {
-  const {mediaHeight, headerContainerHeight} = useNuggetParentActions();
-
+  const {mediaHeight, viewableNuggetItem} = useNuggetParentActions();
+  const {nugget, viewableItem, parentNuggetIndex, handleStopAudio} =
+    useNuggetItemActions();
   const insets = useInsets();
+  const isAppForeground = useIsAppForeground();
+  const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+
+  const shouldPauseReadAudio = useMemo(() => {
+    if (!viewableNuggetItem && parentNuggetIndex === 0) {
+      return true;
+    }
+    return (
+      isAppForeground && nugget.nugget_id === viewableNuggetItem && isFocused
+    );
+  }, [isAppForeground, viewableItem, viewableNuggetItem, isFocused]);
+
+  useEffect(() => {
+    handleStopAudio();
+  }, [shouldPauseReadAudio]);
 
   return (
     <View

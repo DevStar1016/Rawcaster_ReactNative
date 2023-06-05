@@ -2,7 +2,7 @@ import DeviceInfo from 'react-native-device-info';
 export const SALT_KEY = 'MaeRaw7sj5d@Pgk*LO7!e4ubz&8b';
 // export const BASE_URL = 'https://dev.rawcaster.com/rawadmin/webservice/'; // PHP
 // export const BASE_URL = 'https://cbe.themaestro.in:8010/rawcaster/'; // Python
-export const BASE_URL = 'http://192.168.1.108:8004/rawcaster/'; // Python Local
+export const BASE_URL = 'http://192.168.1.108:8003/rawcaster/'; // Python Local
 
 export const TERMS_CONDTION_URL = 'https://rawcaster.com/termsandconditions';
 export const GOOGLE_PLACES_API_KEY = 'AIzaSyBOEl17DNwCcE0sR9LGJh72rBGF_vDfk1c';
