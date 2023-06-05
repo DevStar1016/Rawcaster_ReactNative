@@ -12,6 +12,7 @@ import SVGIcon from '../../../../Components/SVGIcon';
 import {textToAudioService} from '../../../../Services/ApiService';
 import {useToken} from '../../../../Utilities/StoreData';
 import LoadingDots from '../../../../Components/LoadingDots';
+import MediaProgressSlider from '../../../../Components/MediaProgressSlider';
 
 var isMount = true;
 const AIChatItem = ({
@@ -26,7 +27,6 @@ const AIChatItem = ({
   onShareContent,
 }) => {
   const token = useToken();
-
   useEffect(() => {
     isMount = true;
 
@@ -140,12 +140,24 @@ const AIChatItem = ({
             {maxWidth: '80%'},
             item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
           ]}>
-          <StyledText
-            style={{
-              color: COLORS.white,
-            }}>
-            {item.msg}
-          </StyledText>
+          {item.audioUrl ? (
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <MediaProgressSlider
+                isVisiblePlayPause
+                onPlayPause={() => {
+                  handlePlayAudio(item.audioUrl, item.id);
+                }}
+                duration={item.duration ?? 0}
+              />
+            </View>
+          ) : (
+            <StyledText
+              style={{
+                color: COLORS.white,
+              }}>
+              {item.msg}
+            </StyledText>
+          )}
           <StyledText
             style={{
               color: COLORS.white,

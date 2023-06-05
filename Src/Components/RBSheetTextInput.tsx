@@ -14,10 +14,23 @@ import {useProfile} from '../Utilities/StoreData';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import StyledText from './StyledText';
-import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
+import {
+  getFileName,
+  getMediaMimeType,
+  secondsToMinutesAndSeconds,
+} from '../Utilities/Methods';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import {handleAudioRecord} from '../Utilities/AudioPlayerProcess';
+import {
+  handleAudioRecord,
+  handlePlayAudio,
+} from '../Utilities/AudioPlayerProcess';
 import OpacityAnimatedView from './OpacityAnimatedView';
+
+type FileType = {
+  uri: string;
+  name: string;
+  type: string;
+};
 
 type Props = {
   onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
@@ -32,7 +45,7 @@ type Props = {
   isKeyboardCloseWhenSend?: boolean;
   isVisibleVoiceRecord?: boolean;
   onPressEmoji?: () => void;
-  onSendAudio?: () => void;
+  onSendAudio?: (audioFile: FileType, duration: number) => void;
   isEnableOnSubmitEditing?: boolean;
   inputProps?: Omit<
     TextInputProps,
@@ -68,29 +81,63 @@ const RBSheetTextInput = ({
   const profile = useProfile();
   const [isRecording, setisRecording] = useState<boolean>(false);
   const [isPlaying, setisPlaying] = useState<boolean>(false);
-  const [recordingSeconds, setrecordingSeconds] = useState(0);
-  const [playingSeconds, setplayingSeconds] = useState(0);
-  const [recordedAudio, setrecordedAudio] = useState(null);
+  const [recordingSeconds, setrecordingSeconds] = useState<number>(0);
+  const [playingSeconds, setplayingSeconds] = useState<number>(0);
+  const [recordedAudio, setrecordedAudio] = useState<string | null>(null);
   const [typedText, settypedText] = useState<string>('');
   useEffect(() => {
     return () => {
-      handleStopRecording();
+      if (isRecording) {
+        handleStopRecording();
+      }
+      if (isPlaying) {
+        handleStopPlaying();
+      }
     };
   }, []);
 
+  useEffect(() => {
+    if (isPlaying && playingSeconds >= recordingSeconds) {
+      setisPlaying(false);
+      setplayingSeconds(recordingSeconds);
+    }
+  }, [playingSeconds]);
+
   function handleSubmit() {
-    if (
-      (isInsideTextChange && typedText.trim()) ||
-      (!isInsideTextChange && text.trim())
-    ) {
-      if (isKeyboardCloseWhenSend) {
-        Keyboard.dismiss();
+    if (recordedAudio) {
+      if (onSendAudio) {
+        onSendAudio(
+          {
+            name: getFileName(recordedAudio),
+            uri: recordedAudio,
+            type: getMediaMimeType(recordedAudio, 'audio'),
+          },
+          recordingSeconds,
+        );
+        setrecordedAudio(null);
       }
-      if (onPressSend) {
-        onPressSend(isInsideTextChange ? typedText.trim() : text.trim());
+      if (isRecording) {
+        handleStopRecording();
+        setrecordingSeconds(0);
       }
-      if (isInsideTextChange) {
-        settypedText('');
+      if (isPlaying) {
+        handleStopPlaying();
+        setplayingSeconds(0);
+      }
+    } else {
+      if (
+        (isInsideTextChange && typedText.trim()) ||
+        (!isInsideTextChange && text.trim())
+      ) {
+        if (isKeyboardCloseWhenSend) {
+          Keyboard.dismiss();
+        }
+        if (onPressSend) {
+          onPressSend(isInsideTextChange ? typedText.trim() : text.trim());
+        }
+        if (isInsideTextChange) {
+          settypedText('');
+        }
       }
     }
   }
@@ -143,7 +190,13 @@ const RBSheetTextInput = ({
           </OpacityAnimatedView>
           <StyledText style={{color: COLORS.white}}>
             {secondsToMinutesAndSeconds(
-              isRecording ? recordingSeconds : isPlaying ? playingSeconds : 0,
+              isRecording
+                ? recordingSeconds
+                : isPlaying
+                ? playingSeconds
+                : recordedAudio
+                ? recordingSeconds
+                : 0,
             )}
           </StyledText>
         </View>
@@ -181,7 +234,7 @@ const RBSheetTextInput = ({
                   isRecording || isPlaying
                     ? 'stop_rounded_white'
                     : recordedAudio
-                    ? 'play_white'
+                    ? 'play_fill_white'
                     : 'mic_fill_white'
                 }
                 marginRight={12}
@@ -194,14 +247,22 @@ const RBSheetTextInput = ({
                   } else if (isPlaying) {
                     handleStopPlaying();
                   } else {
-                    Keyboard.dismiss();
-                    setrecordingSeconds(0);
-                    handleAudioRecord({
-                      audioPlayer,
-                      setisRecording,
-                      setrecordedAudio,
-                      setrecordingSeconds,
-                    });
+                    if (recordedAudio) {
+                      handlePlayAudio({
+                        audioPlayer,
+                        setisPlaying,
+                        setplayingSeconds,
+                      });
+                    } else {
+                      Keyboard.dismiss();
+                      setrecordingSeconds(0);
+                      handleAudioRecord({
+                        audioPlayer,
+                        setisRecording,
+                        setrecordedAudio,
+                        setrecordingSeconds,
+                      });
+                    }
                   }
                 }}
               />

@@ -69,7 +69,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     }
   };
 
-  function aiChatAPICall(text = '') {
+  function aiChatAPICall(text = '', audioFile) {
     if (isMount) {
       setisLoadingChat(true);
     }
@@ -77,6 +77,9 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     formData.append('token', token);
     if (text && text.trim()) {
       formData.append('user_query', text);
+    }
+    if (audioFile) {
+      formData.append('audio_file', audioFile);
     }
 
     aiChatService(formData)
@@ -106,7 +109,8 @@ const AIChat = ({onPressBack, handleShareContent}) => {
       });
   }
 
-  function handleSendMessage(text) {
+  function handleSendMessage({text = '', audioFile, duration = 0}) {
+    console.log(duration, 'DURATION');
     setchatList(preList => {
       return [
         {
@@ -114,11 +118,13 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           msg: text,
           isAI: false,
           dateTime: moment().format('hh:mm A'),
+          audioUrl: audioFile,
+          duration,
         },
         ...preList,
       ];
     });
-    aiChatAPICall(text);
+    aiChatAPICall(text, audioFile);
   }
 
   const getUniqueId = () => {
@@ -236,10 +242,15 @@ const AIChat = ({onPressBack, handleShareContent}) => {
         <RBSheetTextInput
           isVisibleEmoji={false}
           placeholderText="Type or ask your question here..."
-          onPressSend={handleSendMessage}
+          onPressSend={text => {
+            handleSendMessage({text});
+          }}
           isVisibleVoiceRecord={true}
           isDisableSend={isLoadingChat}
-          onSendAudio={() => {}}
+          onSendAudio={(audioFile, duration) => {
+            console.log(audioFile, duration, 'DATAA');
+            handleSendMessage({audioFile, duration});
+          }}
           isKeyboardCloseWhenSend={false}
         />
       </View>

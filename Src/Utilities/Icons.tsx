@@ -78,6 +78,7 @@ import MicFillSecondaryIcon from '../Assets/Svg/mic_fill_secondary.svg';
 import StopFillWhiteIcon from '../Assets/Svg/stop_white.svg';
 import StopRoundedWhiteIcon from '../Assets/Svg/stop_rounded_white.svg';
 import PlayFillWhiteIcon from '../Assets/Svg/play_fill_white.svg';
+import PauseFillWhiteIcon from '../Assets/Svg/pause_fill_white.svg';
 
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
@@ -281,7 +282,8 @@ export type IconType =
   | 'mic_fill_secondary'
   | 'stop_fill__white'
   | 'stop_rounded_white'
-  | 'play_fill_white';
+  | 'play_fill_white'
+  | 'pause_fill_white';
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -422,4 +424,5 @@ export const ICONS = {
   stop_fill__white: StopFillWhiteIcon,
   stop_rounded_white: StopRoundedWhiteIcon,
   play_fill_white: PlayFillWhiteIcon,
+  pause_fill_white: PauseFillWhiteIcon,
 };
