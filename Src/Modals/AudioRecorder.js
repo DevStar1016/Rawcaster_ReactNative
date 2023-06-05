@@ -1,4 +1,4 @@
-import {Platform, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {COLORS} from '../Utilities/Colors';
@@ -11,8 +11,10 @@ import {
 } from '../Utilities/Methods';
 import {FONTS} from '../Utilities/Fonts';
 import BOX_SHADOW from '../Utilities/BoxShadow';
-import RNFetchBlob from 'rn-fetch-blob';
-import {handleAudioRecord} from '../Utilities/AudioPlayerProcess';
+import {
+  handleAudioRecord,
+  handlePlayAudio,
+} from '../Utilities/AudioPlayerProcess';
 
 const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -44,28 +46,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
     } finally {
       setisRecording(false);
       setisPaused(false);
-    }
-  };
-
-  const handlePlayRecordedAudio = async () => {
-    try {
-      const dirs = RNFetchBlob.fs.dirs;
-      const path = Platform.select({
-        ios: 'rawcaster_recorded_audio.m4a',
-        android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
-      });
-      setisPaused(false);
-      setisPlaying(true);
-      await audioPlayer.startPlayer(path);
-      audioPlayer.addPlayBackListener(e => {
-        if (Math.floor(e.currentPosition / 1000) >= 0) {
-          setplayingSeconds(Math.floor(e.currentPosition / 1000));
-        }
-        return;
-      });
-    } catch (e) {
-      console.log(e, 'ERROR');
-      setisPlaying(false);
     }
   };
 
@@ -189,7 +169,13 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           ) : recordedAudio ? (
             <ActionButton
               onPress={() => {
-                handlePlayRecordedAudio();
+                // handlePlayRecordedAudio();
+                handlePlayAudio({
+                  audioPlayer,
+                  setisPaused,
+                  setisPlaying,
+                  setplayingSeconds,
+                });
               }}
               icon={'play_fill_primary'}
               marginLeft={5}
