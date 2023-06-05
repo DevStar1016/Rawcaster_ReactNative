@@ -4,16 +4,23 @@ import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import Hyperlink from 'react-native-hyperlink';
 import {TextProps} from 'react-native';
+import SVGIcon, {SVGIconProps} from './SVGIcon';
 
 export interface StyledTextProps {
   children?: JSX.Element | JSX.Element[] | string;
-  textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
+  textMode?:
+    | 'read_more'
+    | 'hyper_link'
+    | 'normal'
+    | 'read_more_hyper_link'
+    | 'read_more_hyper_link_icon';
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
   readMoreButtonTextStyle?: TextStyle;
   normalTextModeTextProps?: Omit<TextProps, 'onPress' | 'style'>;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
+  iconProps?: SVGIconProps;
 }
 
 function StyledText({
@@ -25,6 +32,7 @@ function StyledText({
   readMoreButtonTextStyle = {},
   style,
   normalTextModeTextProps,
+  iconProps = {},
 }: StyledTextProps) {
   const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
@@ -95,6 +103,15 @@ function StyledText({
     );
   };
 
+  const renderHyperLinkWithIcon = () => {
+    return (
+      <Text>
+        {iconProps && <SVGIcon {...iconProps} />}
+        <View style={{flex: 1}}>{hyperLinkText(true)}</View>
+      </Text>
+    );
+  };
+
   const TextComponent = () => {
     switch (textMode) {
       case 'read_more':
@@ -103,6 +120,8 @@ function StyledText({
         return hyperLinkText();
       case 'read_more_hyper_link':
         return hyperLinkText(true);
+      case 'read_more_hyper_link_icon':
+        return renderHyperLinkWithIcon();
       default:
         return renderText();
     }

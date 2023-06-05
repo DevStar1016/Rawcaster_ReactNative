@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -66,6 +66,8 @@ import AudioWaveFormImage from '../../../Assets/Png/waveform.png';
 import AudioWaveFormGif from '../../../Assets/Gif/waveform.gif';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
+import LoadingDots from '../../../Components/LoadingDots';
+import {nuggetContentAudioService} from '../../../Services/ApiService';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -141,6 +143,9 @@ function NuggetActionsOverlay({
     updateLike,
     updateSave,
     updateIsFan,
+    handlePlayAudio,
+    handleStopAudio,
+    isReadMuted,
   } = useNuggetItemActions();
 
   const navigation = useNavigation();
@@ -167,9 +172,12 @@ function NuggetActionsOverlay({
     useState(0);
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
+  const [isReadLoading, setisReadLoading] = useState(false);
+  const [ReadNuggetUrl, setReadNuggetUrl] = useState(null);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
+
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
@@ -237,6 +245,33 @@ function NuggetActionsOverlay({
       .catch(e => {
         setpollVotedData({isVoted: false, votedOptionID: null});
         Toast.fail(e.message);
+      });
+  };
+
+  const nuggetContentAudioAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    nuggetContentAudioService(formData)
+      .then(res => {
+        console.log(res.data, 'API');
+
+        if (res.data.status === 1) {
+          setReadNuggetUrl(res.data.file_path);
+          if (handlePlayAudio) {
+            handlePlayAudio(res.data.file_path);
+          }
+        } else if (res.data.status === 0) {
+          setReadNuggetUrl(null);
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        setReadNuggetUrl(null);
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisReadLoading(false);
       });
   };
 
@@ -556,31 +591,78 @@ function NuggetActionsOverlay({
           {nugget.content ? (
             <TouchableOpacity activeOpacity={1}>
               <ScrollView
-                contentContainerStyle={{flexGrow: 1}}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                }}
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
-                <StyledText
-                  textMode="read_more_hyper_link"
-                  numberOfLines={
-                    3
-                    // nugget.media_list.length > 0 ||
-                    // (nugget.poll_option && nugget.poll_option.length > 0)
-                    //   ? isEnableHeaderContainerHeightforTopButtons
-                    //     ? 5
-                    //     : nugget.poll_option.length > 2
-                    //     ? 2
-                    //     : 5
-                    //   : textNuggetNumberOfLines ?? 15
-                  }
-                  onPressUrl={onPressUrl}
+                <View
                   style={{
-                    color: COLORS.white,
-                    fontSize: 15.5,
-                    opacity: 0.8,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
                   }}>
-                  {htmlDecodeText(nugget.content)}
-                </StyledText>
+                  {isReadLoading ? (
+                    <View style={{height: 20, alignItems: 'center'}}>
+                      <LoadingDots
+                        size={6}
+                        bounceHeight={5}
+                        dots={3}
+                        borderRadius={3}
+                      />
+                    </View>
+                  ) : (
+                    false
+                  )}
+                  <StyledText
+                    textMode="read_more_hyper_link_icon"
+                    numberOfLines={
+                      3
+                      // nugget.media_list.length > 0 ||
+                      // (nugget.poll_option && nugget.poll_option.length > 0)
+                      //   ? isEnableHeaderContainerHeightforTopButtons
+                      //     ? 5
+                      //     : nugget.poll_option.length > 2
+                      //     ? 2
+                      //     : 5
+                      //   : textNuggetNumberOfLines ?? 15
+                    }
+                    onPressUrl={onPressUrl}
+                    iconProps={{
+                      icon: !isReadLoading
+                        ? !isReadMuted
+                          ? 'mic_fill_white'
+                          : 'mic_off_fill_white'
+                        : undefined,
+                      height: 20,
+                      isButton: true,
+                      onPress: () => {
+                        if (!isReadMuted) {
+                          console.log('JJJJ');
+                          if (setpaused) {
+                            setpaused(true);
+                          }
+                          if (setisMuted) {
+                            setisMuted(true);
+                          }
+                          setisReadLoading(true);
+                          nuggetContentAudioAPICall();
+                        } else {
+                          if (handleStopAudio) {
+                            handleStopAudio();
+                          }
+                        }
+                      },
+                    }}
+                    style={{
+                      color: COLORS.white,
+                      fontSize: 15.5,
+                      opacity: 0.8,
+                      flex: 1,
+                    }}>
+                    {htmlDecodeText(nugget.content.trim())}
+                  </StyledText>
+                </View>
               </ScrollView>
             </TouchableOpacity>
           ) : null}
