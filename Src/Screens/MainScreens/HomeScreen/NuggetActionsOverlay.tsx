@@ -91,6 +91,8 @@ type ActionContainerProps = {
   text?: string;
   isEnableText?: boolean;
   onPress?: () => void;
+  isEnableTextButton?: boolean;
+  onPressText?: () => void;
 };
 
 type NuggetDetailsProps = {
@@ -386,6 +388,8 @@ function NuggetActionsOverlay({
     onPress = () => {},
     isEnableText = true,
     isMustLogin = true,
+    onPressText = () => {},
+    isEnableTextButton = false,
   }: ActionContainerProps) => {
     return (
       <View style={{alignItems: 'center', paddingTop: 5}}>
@@ -404,7 +408,13 @@ function NuggetActionsOverlay({
         />
 
         {isEnableText && (
-          <StyledText style={styles.actionButtonText}>
+          <StyledText
+            style={styles.actionButtonText}
+            onPress={() => {
+              if (isEnableTextButton) {
+                onPressText();
+              }
+            }}>
             {text ? text : ''}
           </StyledText>
         )}
@@ -597,46 +607,70 @@ function NuggetActionsOverlay({
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
-                <View
+                <StyledText
+                  textMode="read_more_hyper_link"
+                  numberOfLines={
+                    3
+                    // nugget.media_list.length > 0 ||
+                    // (nugget.poll_option && nugget.poll_option.length > 0)
+                    //   ? isEnableHeaderContainerHeightforTopButtons
+                    //     ? 5
+                    //     : nugget.poll_option.length > 2
+                    //     ? 2
+                    //     : 5
+                    //   : textNuggetNumberOfLines ?? 15
+                  }
+                  onPressUrl={onPressUrl}
+                  // iconProps={{
+                  //   icon: !isReadLoading
+                  //     ? !isReadMuted
+                  //       ? 'mic_fill_white'
+                  //       : 'mic_off_fill_white'
+                  //     : undefined,
+                  //   height: 20,
+                  //   isButton: true,
+                  //   onPress: () => {
+                  //     if (!isReadMuted) {
+                  //       console.log('JJJJ');
+                  //       if (setpaused) {
+                  //         setpaused(true);
+                  //       }
+                  //       if (setisMuted) {
+                  //         setisMuted(true);
+                  //       }
+                  //       setisReadLoading(true);
+                  //       nuggetContentAudioAPICall();
+                  //     } else {
+                  //       if (handleStopAudio) {
+                  //         handleStopAudio();
+                  //       }
+                  //     }
+                  //   },
+                  // }}
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
+                    color: COLORS.white,
+                    fontSize: 15.5,
+                    opacity: 0.8,
                   }}>
                   {isReadLoading ? (
-                    <View style={{height: 20, alignItems: 'center'}}>
-                      <LoadingDots
-                        size={6}
-                        bounceHeight={5}
-                        dots={3}
-                        borderRadius={3}
-                      />
-                    </View>
+                    <LoadingDots
+                      size={6}
+                      bounceHeight={4}
+                      dots={3}
+                      borderRadius={3}
+                    />
                   ) : (
-                    false
-                  )}
-                  <StyledText
-                    textMode="read_more_hyper_link_icon"
-                    numberOfLines={
-                      3
-                      // nugget.media_list.length > 0 ||
-                      // (nugget.poll_option && nugget.poll_option.length > 0)
-                      //   ? isEnableHeaderContainerHeightforTopButtons
-                      //     ? 5
-                      //     : nugget.poll_option.length > 2
-                      //     ? 2
-                      //     : 5
-                      //   : textNuggetNumberOfLines ?? 15
-                    }
-                    onPressUrl={onPressUrl}
-                    iconProps={{
-                      icon: !isReadLoading
-                        ? !isReadMuted
-                          ? 'mic_fill_white'
-                          : 'mic_off_fill_white'
-                        : undefined,
-                      height: 20,
-                      isButton: true,
-                      onPress: () => {
+                    <SVGIcon
+                      height={15.5}
+                      icon={
+                        !isReadLoading
+                          ? !isReadMuted
+                            ? 'mic_fill_white'
+                            : 'mic_off_fill_secondary'
+                          : undefined
+                      }
+                      isButton
+                      onPress={() => {
                         if (!isReadMuted) {
                           console.log('JJJJ');
                           if (setpaused) {
@@ -652,16 +686,11 @@ function NuggetActionsOverlay({
                             handleStopAudio();
                           }
                         }
-                      },
-                    }}
-                    style={{
-                      color: COLORS.white,
-                      fontSize: 15.5,
-                      opacity: 0.8,
-                    }}>
-                    {htmlDecodeText(nugget.content.trim())}
-                  </StyledText>
-                </View>
+                      }}
+                    />
+                  )}
+                  {htmlDecodeText(nugget.content.trim())}
+                </StyledText>
               </ScrollView>
             </TouchableOpacity>
           ) : null}
@@ -873,6 +902,19 @@ function NuggetActionsOverlay({
             icon={nugget.liked ? 'heart_pink' : 'heart_white'}
             text={bigNumberFormater(nugget.total_likes)}
             onPress={updateLike}
+            isEnableTextButton={bigNumberFormater(nugget.total_likes)}
+            onPressText={() => {
+              console.log('like');
+              navigation.navigate('ProfileStack', {
+                screen: 'ProfileSeeAllUsersList',
+                params: {
+                  initialList: [],
+                  listType: 'nugget_agreed_users',
+                  title: 'Agreed Users',
+                  nuggetId: nugget.nugget_id,
+                },
+              });
+            }}
           />
           <ActionIconContainer
             icon="comment"

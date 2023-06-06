@@ -27,6 +27,7 @@ import {
   getFollowListService,
   listAllFriendsService,
   listUnClaimAccountService,
+  nuggetAndCommentLikedUserListService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
@@ -44,8 +45,14 @@ import DefaultBackground from '../../../Components/DefaultBackground';
 type Props = {
   initialList: [];
   userId?: any;
-  listType: 'connections' | 'influencers' | 'fans' | 'unclaimed_influencers';
+  listType:
+    | 'connections'
+    | 'influencers'
+    | 'fans'
+    | 'unclaimed_influencers'
+    | 'nugget_agreed_users';
   title: string;
+  nuggetId?: any;
 };
 
 const ProfileSeeAllUsersList = ({route}: any) => {
@@ -56,7 +63,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const otherInfluencersRequestList = useOtherInfluencersRequestList();
   const otherConnectionsRequestList = useOtherConnectionsRequestList();
-  const {initialList, userId, listType, title}: Props = route.params ?? {};
+  const {initialList, userId, listType, title, nuggetId}: Props =
+    route.params ?? {};
   const [isActionLoading, setisActionLoading] = useState(false);
   const [filterData, setfilterData] = useState(null);
   const [isOpenFilterModal, setisOpenFilterModal] = useState(false);
@@ -109,9 +117,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       case 'influencers':
         fansListAPICall(pageNumber, 1, dataToFilter);
         return;
-      // case 'unclaimed_influencers':
-      //   unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
-      //   return;
+      case 'nugget_agreed_users':
+        nuggetAndCommentLikedUserListAPICall(pageNumber);
+        return;
       default:
         if (isMount) {
           setisLoading(false);
@@ -286,6 +294,39 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   };
 
+  const nuggetAndCommentLikedUserListAPICall = (pageNumber = 1) => {
+    const formData = new FormData();
+    formData.append('token', token);
+    if (nuggetId) {
+      formData.append('id', nuggetId);
+    }
+    formData.append('type', 1);
+    nuggetAndCommentLikedUserListService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          if (isMount) {
+            if (pageNumber === 1) {
+              totalPages = parseInt(res.data.total_pages);
+              setusersList(res.data.userlist);
+            } else {
+              setusersList(preList => [...preList, ...res.data.userlist]);
+            }
+          }
+        } else if (res.data.status === 0) {
+          if (isMount) {
+            setusersList([]);
+          }
+        }
+      })
+      .catch(e => {
+        if (isMount) {
+          setusersList([]);
+        }
+      })
+      .finally(() => {
+        setLoaders(false);
+      });
+  };
   const handleSendFriendRequest = (userRefId: any, user_id: any) => {
     if (isMount) {
       setisActionLoading(true);
@@ -390,6 +431,12 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
         return 'shield_secondary';
       }
+      if (
+        listType === 'nugget_agreed_users' &&
+        item.friend_request_status === 1
+      ) {
+        return 'user_plus_pink';
+      }
       if (userId) {
         if (listType === 'connections' && item.friend_status === 0) {
           return 'user_plus_pink';
@@ -409,6 +456,12 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         navigation.navigate('ClaimAccount', {
           influencerId: item.user_id,
         });
+      }
+      if (
+        listType === 'nugget_agreed_users' &&
+        item.friend_request_status === 1
+      ) {
+        handleSendFriendRequest(item.user_ref_id, item.user_id);
       }
       if (userId) {
         if (listType === 'connections' && item.friend_status === 0) {
@@ -469,13 +522,19 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         style={styles.itemContainer}
         activeOpacity={0.7}
         onPress={() => {
-          const pushAction = StackActions.push('ProfileStack', {
-            userId: item.user_id === profile?.user_id ? null : item.user_id,
-          });
-          navigation.dispatch(pushAction);
+          if (listType !== 'nugget_agreed_users') {
+            const pushAction = StackActions.push('ProfileStack', {
+              userId: item.user_id === profile?.user_id ? null : item.user_id,
+            });
+            navigation.dispatch(pushAction);
+          }
         }}>
         <ProfileWithBadge
-          profileImage={item.profile_img}
+          profileImage={
+            listType !== 'nugget_agreed_users'
+              ? item.profile_img
+              : item.profile_image
+          }
           extraMargin={0}
           isEnableGradient
           padding={0}
@@ -483,7 +542,14 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           containerStyle={{marginHorizontal: 10}}
         />
         <View style={styles.displayTextContainer}>
-          <StyledText>{getSlicedText(item.display_name.trim(), 15)}</StyledText>
+          <StyledText>
+            {getSlicedText(
+              listType !== 'nugget_agreed_users'
+                ? item.display_name?.trim()
+                : item.name?.trim(),
+              15,
+            )}
+          </StyledText>
         </View>
         {getRightIcon(item) && (
           <View style={styles.actionButtonsContainer}>
@@ -516,7 +582,10 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       <HeaderWithBack
         title={title}
         isEnableSafeArea
-        isEnableRightIcon={listType !== 'unclaimed_influencers'}
+        isEnableRightIcon={
+          listType !== 'unclaimed_influencers' &&
+          listType !== 'nugget_agreed_users'
+        }
         rightIcon="filter_line_white"
         rightIconSize={18}
         onPressRightIcon={onPressFilter}

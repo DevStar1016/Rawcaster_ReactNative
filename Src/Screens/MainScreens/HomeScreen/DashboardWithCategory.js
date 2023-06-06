@@ -146,11 +146,15 @@ const DashboardWithCategory = ({route}) => {
   }, [nuggetType]);
 
   useEffect(() => {
-    currentPage = 1;
-    dispatch(resetNuggetsTotalPages(categoryName));
-    dispatch(setNuggetsLoading({categoryName, status: true}));
-    dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
-    listNuggetsAPICall(1);
+    if (nuggetType === 1 || nuggetType === 2) {
+      currentPage = 1;
+      dispatch(resetNuggetsTotalPages(categoryName));
+      dispatch(setNuggetsLoading({categoryName, status: true}));
+      dispatch(
+        setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
+      );
+      listNuggetsAPICall(1);
+    }
   }, [token, nuggetType]);
 
   function getHeaderHeight() {

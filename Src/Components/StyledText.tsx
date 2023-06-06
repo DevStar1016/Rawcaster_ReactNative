@@ -8,12 +8,7 @@ import SVGIcon, {SVGIconProps} from './SVGIcon';
 
 export interface StyledTextProps {
   children?: JSX.Element | JSX.Element[] | string;
-  textMode?:
-    | 'read_more'
-    | 'hyper_link'
-    | 'normal'
-    | 'read_more_hyper_link'
-    | 'read_more_hyper_link_icon';
+  textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
   readMoreButtonTextStyle?: TextStyle;
@@ -103,15 +98,6 @@ function StyledText({
     );
   };
 
-  const renderHyperLinkWithIcon = () => {
-    return (
-      <Text>
-        {iconProps && <SVGIcon {...iconProps} />}
-        {hyperLinkText(true)}
-      </Text>
-    );
-  };
-
   const TextComponent = () => {
     switch (textMode) {
       case 'read_more':
@@ -120,8 +106,6 @@ function StyledText({
         return hyperLinkText();
       case 'read_more_hyper_link':
         return hyperLinkText(true);
-      case 'read_more_hyper_link_icon':
-        return renderHyperLinkWithIcon();
       default:
         return renderText();
     }
