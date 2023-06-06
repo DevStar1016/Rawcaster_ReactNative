@@ -75,6 +75,7 @@ import PauseFillPrimaryIcon from '../Assets/Svg/pause_fill_primary.svg';
 import StopFillPrimaryIcon from '../Assets/Svg/stop_fill_primary.svg';
 import MicFillPrimaryIcon from '../Assets/Svg/mic_fill_primary.svg';
 import MicFillSecondaryIcon from '../Assets/Svg/mic_fill_secondary.svg';
+import MicOffFillSecondaryIcon from '../Assets/Svg/mic_off_fill_secondary.svg';
 import StopFillWhiteIcon from '../Assets/Svg/stop_white.svg';
 import StopRoundedWhiteIcon from '../Assets/Svg/stop_rounded_white.svg';
 import PlayFillWhiteIcon from '../Assets/Svg/play_fill_white.svg';
@@ -209,6 +210,7 @@ export type IconType =
   | 'camera_fill_white'
   | 'mic_fill_white'
   | 'mic_off_fill_white'
+  | 'mic_off_fill_secondary'
   | 'photo_fill_white'
   | 'poll_fill_white'
   | 'emojee'
@@ -367,6 +369,7 @@ export const ICONS = {
   stop_fill_primary: StopFillPrimaryIcon,
   mic_fill_primary: MicFillPrimaryIcon,
   mic_fill_secondary: MicFillSecondaryIcon,
+  mic_off_fill_secondary: MicOffFillSecondaryIcon,
   tick_black: TickBlackIcon,
   edit_black: EditBlackIcon,
   delete_black: DeleteBlackIcon,
