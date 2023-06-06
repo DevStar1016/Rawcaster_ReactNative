@@ -47,6 +47,7 @@ type Props = {
   onPressEmoji?: () => void;
   onSendAudio?: (audioFile: FileType, duration: number) => void;
   isEnableOnSubmitEditing?: boolean;
+  isDisableAudioProcess?: boolean;
   inputProps?: Omit<
     TextInputProps,
     | 'ref'
@@ -76,6 +77,7 @@ const RBSheetTextInput = ({
   isVisibleVoiceRecord = false,
   isEnableOnSubmitEditing = false,
   inputProps,
+  isDisableAudioProcess,
 }: Props) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
   const profile = useProfile();
@@ -95,6 +97,17 @@ const RBSheetTextInput = ({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isDisableAudioProcess) {
+      if (isRecording) {
+        handleStopRecording();
+      }
+      if (isPlaying) {
+        handleStopPlaying();
+      }
+    }
+  }, [isDisableAudioProcess]);
 
   useEffect(() => {
     if (isPlaying && playingSeconds >= recordingSeconds) {
@@ -240,7 +253,7 @@ const RBSheetTextInput = ({
                 marginRight={12}
                 height={22}
                 width={22}
-                isButton
+                isButton={!isDisableAudioProcess}
                 onPress={() => {
                   if (isRecording) {
                     handleStopRecording();

@@ -25,6 +25,9 @@ const AIChatItem = ({
   audioList,
   setaudioUrl,
   onShareContent,
+  progress,
+  setprogress,
+  setisDisableAudioProcess,
 }) => {
   const token = useToken();
   useEffect(() => {
@@ -67,23 +70,36 @@ const AIChatItem = ({
 
   const handlePlayAudio = async (url, id) => {
     handleStopAudio();
+
     try {
       if (isMount && !isLoadingRead(id)) {
         setreadMessageLoading(id, true);
       }
       await audioPlayerRef.current?.startPlayer(url);
+
       audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition / 1000) >= 0) {
+          console.log(Math.floor(e.currentPosition / 1000), 'VALUE PROGRESS');
+          setprogress(Math.floor(e.currentPosition / 1000));
+        }
+
         if (Math.floor(e.currentPosition) === 0) {
           if (isMount) {
+            setisDisableAudioProcess(true);
+
             setreadMessageLoading(id, false);
             setplayingChatId(id);
           }
         } else if (e.currentPosition >= e.duration) {
+          if (isMount) {
+            setisDisableAudioProcess(false);
+          }
           handleStopAudio();
         }
         return;
       });
     } catch (e) {
+      console.log(e, 'ERROR');
       if (isMount) {
         setreadMessageLoading(id, false);
         setplayingChatId(null);
@@ -95,10 +111,15 @@ const AIChatItem = ({
     try {
       audioPlayerRef.current?.stopPlayer();
       audioPlayerRef.current?.removePlayBackListener();
+      if (isMount) {
+        setprogress(0);
+      }
     } catch (e) {
+      console.log(e, 'ERROR STOP');
     } finally {
       if (isMount) {
         setplayingChatId(null);
+        setisDisableAudioProcess(false);
       }
     }
   };
@@ -144,9 +165,18 @@ const AIChatItem = ({
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <MediaProgressSlider
                 isVisiblePlayPause
+                isVisibleStop
+                isEnableDurationFloor={false}
                 onPlayPause={() => {
-                  handlePlayAudio(item.audioUrl, item.id);
+                  console.log('HHHH', item.id !== playingChatId);
+                  if (item.id !== playingChatId) {
+                    handlePlayAudio(item.audioUrl, item.id);
+                  } else {
+                    handleStopAudio();
+                  }
                 }}
+                progress={item.id === playingChatId ? progress : 0}
+                isPaused={item.id !== playingChatId}
                 duration={item.duration ?? 0}
               />
             </View>

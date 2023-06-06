@@ -5,7 +5,10 @@ import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {DIMENSIONS} from '../Utilities/Constants';
 import SVGIcon from './SVGIcon';
-import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
+import {
+  getMediaDurationFormat,
+  secondsToMinutesAndSeconds,
+} from '../Utilities/Methods';
 const windowWidth = DIMENSIONS.window.width;
 
 type Props = {
@@ -14,27 +17,57 @@ type Props = {
   seekUpdate?: (value: any) => void;
   onPlayPause?: () => void;
   isPaused?: boolean;
+  isEnableDurationFloor?: boolean;
   isVisiblePlayPause?: boolean;
+  isVisibleStop?: boolean;
 };
 
 const MediaProgressSlider = ({
   progress = 0,
   duration = 0,
   seekUpdate,
+  isEnableDurationFloor = true,
   isPaused = true,
   isVisiblePlayPause = false,
   onPlayPause,
+  isVisibleStop,
 }: Props) => {
+  console.log(duration, 'GTHDUR');
+
+  function getProgressText() {
+    if (isEnableDurationFloor) {
+      return Math.floor((progress * duration) / 100) >= 120
+        ? getMediaDurationFormat(Math.floor((progress * duration) / 100))
+        : secondsToMinutesAndSeconds(Math.floor((progress * duration) / 100));
+    }
+    return progress >= 120
+      ? getMediaDurationFormat(progress)
+      : secondsToMinutesAndSeconds(progress);
+  }
+
+  function getMaxValue() {
+    if (isEnableDurationFloor) {
+      return Math.floor(duration / 1000);
+    }
+    return duration;
+  }
+
   return (
     <View style={[styles.sliderContainer, {width: '100%'}]}>
       <StyledText
         style={{...styles.timerText, left: isVisiblePlayPause ? 32 : 15}}>
-        {secondsToMinutesAndSeconds(Math.floor((progress * duration) / 100))}
+        {getProgressText()}
       </StyledText>
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         {isVisiblePlayPause && (
           <SVGIcon
-            icon={isPaused ? 'play_fill_white' : 'pause_fill_white'}
+            icon={
+              isPaused
+                ? 'play_fill_white'
+                : isVisibleStop
+                ? 'stop_rounded_white'
+                : 'pause_fill_white'
+            }
             height={20}
             width={20}
             isButton
@@ -47,7 +80,7 @@ const MediaProgressSlider = ({
             width: '100%',
           }}
           minimumValue={0}
-          maximumValue={100}
+          maximumValue={getMaxValue()}
           value={progress}
           minimumTrackTintColor={COLORS.white}
           maximumTrackTintColor={COLORS.white}
@@ -58,7 +91,9 @@ const MediaProgressSlider = ({
       </View>
       <StyledText
         style={{...styles.timerText, right: isVisiblePlayPause ? 0 : 15}}>
-        {secondsToMinutesAndSeconds(duration ?? 0)}
+        {duration && duration >= 120
+          ? getMediaDurationFormat(duration ?? 0)
+          : secondsToMinutesAndSeconds(duration ?? 0)}
       </StyledText>
     </View>
   );

@@ -34,6 +34,8 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   const [readMessageLoadingIdsList, setreadMessageLoadingIdsList] = useState(
     [],
   );
+  const [isDisableAudioProcess, setisDisableAudioProcess] = useState(false);
+  const [progress, setprogress] = useState(0);
   const [isLoadingChat, setisLoadingChat] = useState(false);
   const [audioList, setaudioList] = useState([]); //{id:1,url:''}
   const [audioUrl, setaudioUrl] = useState(null);
@@ -118,7 +120,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           msg: text,
           isAI: false,
           dateTime: moment().format('hh:mm A'),
-          audioUrl: audioFile,
+          audioUrl: audioFile?.uri,
           duration,
         },
         ...preList,
@@ -166,7 +168,10 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     return (
       <AIChatItem
         item={item}
+        progress={progress}
+        setprogress={setprogress}
         audioPlayerRef={audioPlayer}
+        setisDisableAudioProcess={setisDisableAudioProcess}
         playingChatId={playingChatId}
         setplayingChatId={setplayingChatId}
         readMessageLoadingIdsList={readMessageLoadingIdsList}
@@ -245,10 +250,10 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           onPressSend={text => {
             handleSendMessage({text});
           }}
+          isDisableAudioProcess={isDisableAudioProcess}
           isVisibleVoiceRecord={true}
           isDisableSend={isLoadingChat}
           onSendAudio={(audioFile, duration) => {
-            console.log(audioFile, duration, 'DATAA');
             handleSendMessage({audioFile, duration});
           }}
           isKeyboardCloseWhenSend={false}

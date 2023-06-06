@@ -11,7 +11,6 @@ import {
 } from '../../../../Utilities/Contexts';
 import StyledText from '../../../../Components/StyledText';
 import {getMediaDurationFormat} from '../../../../Utilities/Methods';
-import MediaProgressSlider from '../../../../Components/MediaProgressSlider';
 
 function VideoNugget({
   videoPlayer,

@@ -420,6 +420,16 @@ export const getNotificationMessage = type => {
   }
 };
 
+export const getUniqueId = (userId = '') => {
+  return (
+    userId +
+    '' +
+    moment.utc().format('x') +
+    '' +
+    Math.floor(Math.random() * 10000 + 1)
+  );
+};
+
 export const calcualteAge = dob => {
   var diff_ms = Date.now() - dob;
   var age_dt = new Date(diff_ms);

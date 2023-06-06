@@ -22,6 +22,7 @@ type AudioRecordProps = {
   setisRecording?: (val: boolean) => void;
   setrecordedAudio?: (val: string) => void;
   setrecordingSeconds?: (val: number) => void;
+  audioUniqueId?: string | number;
 };
 
 export const handleAudioRecord = async ({
@@ -30,13 +31,14 @@ export const handleAudioRecord = async ({
   setisRecording = () => {},
   setrecordedAudio = () => {},
   setrecordingSeconds = () => {},
+  audioUniqueId = '',
 }: AudioRecordProps) => {
   const isGrantedPermission = await isHavePermissionToRecordAudio();
   if (isGrantedPermission) {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
-      ios: 'rawcaster_recorded_audio.m4a',
-      android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
+      ios: `rawcaster_recorded_audio${audioUniqueId}.m4a`,
+      android: `${dirs.CacheDir}/rawcaster_recorded_audio${audioUniqueId}.mp3`,
     });
     try {
       const audioSet = {
