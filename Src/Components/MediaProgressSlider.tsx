@@ -32,7 +32,7 @@ const MediaProgressSlider = ({
   onPlayPause,
   isVisibleStop,
 }: Props) => {
-  console.log(duration, 'GTHDUR');
+  // console.log(duration, 'GTHDUR');
 
   function getProgressText() {
     if (isEnableDurationFloor) {

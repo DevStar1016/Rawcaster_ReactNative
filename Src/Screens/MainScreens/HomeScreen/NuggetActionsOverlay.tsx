@@ -43,7 +43,11 @@ import {
   useToken,
   useUserData,
 } from '../../../Utilities/StoreData';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import {
+  StackActions,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useDispatch} from 'react-redux';
 import {
@@ -149,13 +153,13 @@ function NuggetActionsOverlay({
     handleStopAudio,
     isReadMuted,
   } = useNuggetItemActions();
-
   const navigation = useNavigation();
   const token = useToken();
   const user = useUserData();
   const profile = useProfile();
   const dispatch = useDispatch();
   const insets = useInsets();
+  const isFocused = useIsFocused();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
@@ -179,10 +183,23 @@ function NuggetActionsOverlay({
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
+  const nuggetContentController = useRef<any>(null);
+
+  useEffect(() => {
+    if (!isFocused) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
+  }, [isFocused]);
 
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
+    }
+    if (handleStopAudio) {
+      handleStopAudio();
     }
     commentsBottomSheetModalRef.current?.present();
   }, []);
@@ -196,6 +213,9 @@ function NuggetActionsOverlay({
   const handlePresentAIChatModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
+    }
+    if (handleStopAudio) {
+      handleStopAudio();
     }
     aiChatBottomSheetModalRef.current?.present();
   }, []);
@@ -251,15 +271,24 @@ function NuggetActionsOverlay({
   };
 
   const nuggetContentAudioAPICall = () => {
+    if (nuggetContentController.current) {
+      nuggetContentController.current.abort();
+    }
+    nuggetContentController.current = new AbortController();
+
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
-    nuggetContentAudioService(formData)
+    nuggetContentAudioService(formData, nuggetContentController.current?.signal)
       .then(res => {
-        console.log(res.data, 'API');
-
-        if (res.data.status === 1) {
+        if (res.data.status === 1 && isFocused) {
           setReadNuggetUrl(res.data.file_path);
+          if (setpaused) {
+            setpaused(true);
+          }
+          if (setisMuted) {
+            setisMuted(true);
+          }
           if (handlePlayAudio) {
             handlePlayAudio(res.data.file_path);
           }
@@ -270,7 +299,9 @@ function NuggetActionsOverlay({
       })
       .catch(e => {
         setReadNuggetUrl(null);
-        Toast.fail(e.message);
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+        }
       })
       .finally(() => {
         setisReadLoading(false);
@@ -621,75 +652,50 @@ function NuggetActionsOverlay({
                     //   : textNuggetNumberOfLines ?? 15
                   }
                   onPressUrl={onPressUrl}
-                  // iconProps={{
-                  //   icon: !isReadLoading
-                  //     ? !isReadMuted
-                  //       ? 'mic_fill_white'
-                  //       : 'mic_off_fill_white'
-                  //     : undefined,
-                  //   height: 20,
-                  //   isButton: true,
-                  //   onPress: () => {
-                  //     if (!isReadMuted) {
-                  //       console.log('JJJJ');
-                  //       if (setpaused) {
-                  //         setpaused(true);
-                  //       }
-                  //       if (setisMuted) {
-                  //         setisMuted(true);
-                  //       }
-                  //       setisReadLoading(true);
-                  //       nuggetContentAudioAPICall();
-                  //     } else {
-                  //       if (handleStopAudio) {
-                  //         handleStopAudio();
-                  //       }
-                  //     }
-                  //   },
-                  // }}
                   style={{
                     color: COLORS.white,
                     fontSize: 15.5,
                     opacity: 0.8,
                   }}>
-                  {isReadLoading ? (
-                    <LoadingDots
-                      size={6}
-                      bounceHeight={4}
-                      dots={3}
-                      borderRadius={3}
-                    />
-                  ) : (
-                    <SVGIcon
-                      height={15.5}
-                      icon={
-                        !isReadLoading
-                          ? !isReadMuted
-                            ? 'mic_fill_white'
-                            : 'mic_off_fill_secondary'
-                          : undefined
-                      }
-                      isButton
-                      onPress={() => {
-                        if (!isReadMuted) {
-                          console.log('JJJJ');
-                          if (setpaused) {
-                            setpaused(true);
-                          }
-                          if (setisMuted) {
-                            setisMuted(true);
-                          }
-                          setisReadLoading(true);
-                          nuggetContentAudioAPICall();
-                        } else {
-                          if (handleStopAudio) {
-                            handleStopAudio();
-                          }
+                  <>
+                    {isReadLoading ? (
+                      <LoadingDots
+                        size={6}
+                        bounceHeight={4}
+                        dots={3}
+                        borderRadius={3}
+                      />
+                    ) : (
+                      <SVGIcon
+                        height={15.5}
+                        icon={
+                          !isReadLoading
+                            ? !isReadMuted
+                              ? 'mic_fill_white'
+                              : 'mic_off_fill_secondary'
+                            : undefined
                         }
-                      }}
-                    />
-                  )}
-                  {htmlDecodeText(nugget.content.trim())}
+                        isButton
+                        onPress={() => {
+                          if (!isReadMuted) {
+                            if (setpaused) {
+                              setpaused(true);
+                            }
+                            if (setisMuted) {
+                              setisMuted(true);
+                            }
+                            setisReadLoading(true);
+                            nuggetContentAudioAPICall();
+                          } else {
+                            if (handleStopAudio) {
+                              handleStopAudio();
+                            }
+                          }
+                        }}
+                      />
+                    )}
+                    {htmlDecodeText(nugget.content.trim())}
+                  </>
                 </StyledText>
               </ScrollView>
             </TouchableOpacity>
@@ -904,7 +910,7 @@ function NuggetActionsOverlay({
             onPress={updateLike}
             isEnableTextButton={bigNumberFormater(nugget.total_likes)}
             onPressText={() => {
-              console.log('like');
+              /* @ts-ignore */
               navigation.navigate('ProfileStack', {
                 screen: 'ProfileSeeAllUsersList',
                 params: {

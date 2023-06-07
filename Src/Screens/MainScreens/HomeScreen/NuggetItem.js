@@ -32,6 +32,7 @@ function NuggetItem({
     viewableItem,
     parentNuggetIndex,
     handleStopAudio,
+    isReadMuted,
   } = useNuggetItemActions();
 
   const [paused, setpaused] = useState(true);
@@ -64,6 +65,7 @@ function NuggetItem({
     mediaItem.media_id,
     isFocused,
     isAutoPlay,
+    isReadMuted,
   ]);
 
   const shouldPauseReadAudio = useMemo(() => {
@@ -154,6 +156,9 @@ function NuggetItem({
           onBlockUser={onBlockUser}
           isPaused={paused}
           onPlayPauseVideo={() => {
+            if (paused) {
+              handleStopAudio();
+            }
             setpaused(pre => !pre);
           }}
           setpaused={setpaused}
@@ -175,6 +180,7 @@ function NuggetItem({
       nugget,
       duration,
       progress,
+      isReadMuted,
     ],
   );
 }

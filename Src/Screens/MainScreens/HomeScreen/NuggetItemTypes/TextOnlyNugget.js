@@ -20,8 +20,13 @@ const TextOnlyNugget = ({
   onReportAbouseNugget,
 }) => {
   const {mediaHeight, viewableNuggetItem} = useNuggetParentActions();
-  const {nugget, viewableItem, parentNuggetIndex, handleStopAudio} =
-    useNuggetItemActions();
+  const {
+    nugget,
+    viewableItem,
+    parentNuggetIndex,
+    handleStopAudio,
+    isReadMuted,
+  } = useNuggetItemActions();
   const insets = useInsets();
   const isAppForeground = useIsAppForeground();
   const isFocused = useIsFocused();
@@ -35,9 +40,16 @@ const TextOnlyNugget = ({
     return (
       isAppForeground && nugget.nugget_id === viewableNuggetItem && isFocused
     );
-  }, [isAppForeground, viewableItem, viewableNuggetItem, isFocused]);
+  }, [
+    isAppForeground,
+    viewableItem,
+    viewableNuggetItem,
+    isFocused,
+    isReadMuted,
+  ]);
 
   useEffect(() => {
+    console.log('text nugget stop', shouldPauseReadAudio);
     handleStopAudio();
   }, [shouldPauseReadAudio]);
 
