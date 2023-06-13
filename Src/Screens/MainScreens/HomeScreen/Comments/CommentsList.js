@@ -323,16 +323,17 @@ const CommentsList = ({
           All comments ( {totalComments} )
         </StyledText>
       </View>
-      <TouchableOpacity
+      <View
         style={styles.commentsListContainer}
         activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-          if (isOpenEmojiContainer && isMount) {
-            setisOpenEmojiContainer(false);
-            setisEnableContentPanningGesture(true);
-          }
-        }}>
+        // onPress={() => {
+        //   Keyboard.dismiss();
+        //   if (isOpenEmojiContainer && isMount) {
+        //     setisOpenEmojiContainer(false);
+        //     setisEnableContentPanningGesture(true);
+        //   }
+        // }}
+      >
         {isLoading ? (
           <ActivityIndicator
             color={COLORS.white}
@@ -382,7 +383,7 @@ const CommentsList = ({
             showsVerticalScrollIndicator={false}
           />
         )}
-      </TouchableOpacity>
+      </View>
       {!isLoading && (
         <View style={styles.bottomContainer}>
           {(replyData || editData) && (

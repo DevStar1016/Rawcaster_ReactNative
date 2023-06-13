@@ -31,9 +31,9 @@ const AIChatItem = ({
   isEnableShare = true,
 }) => {
   const token = useToken();
+  console.log(item, 'AIIIIII');
   useEffect(() => {
     isMount = true;
-
     return () => {
       isMount = false;
       handleStopAudio();

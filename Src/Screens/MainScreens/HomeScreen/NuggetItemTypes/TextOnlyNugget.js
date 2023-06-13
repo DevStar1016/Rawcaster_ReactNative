@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import NuggetActionsOverlay from '../NuggetActionsOverlay';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
@@ -20,13 +20,19 @@ const TextOnlyNugget = ({
   onReportAbouseNugget,
 }) => {
   const {mediaHeight, viewableNuggetItem} = useNuggetParentActions();
-  const {nugget, viewableItem, parentNuggetIndex, handleStopAudio} =
-    useNuggetItemActions();
+  const {
+    nugget,
+    viewableItem,
+    parentNuggetIndex,
+    handleStopAudio,
+    isReadMuted,
+  } = useNuggetItemActions();
   const insets = useInsets();
   const isAppForeground = useIsAppForeground();
   const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+  const nuggetContentController = useRef(null);
 
   const shouldPauseReadAudio = useMemo(() => {
     if (!viewableNuggetItem && parentNuggetIndex === 0) {
@@ -35,10 +41,21 @@ const TextOnlyNugget = ({
     return (
       isAppForeground && nugget.nugget_id === viewableNuggetItem && isFocused
     );
-  }, [isAppForeground, viewableItem, viewableNuggetItem, isFocused]);
+  }, [
+    isAppForeground,
+    viewableItem,
+    viewableNuggetItem,
+    isFocused,
+    isReadMuted,
+  ]);
 
   useEffect(() => {
-    handleStopAudio();
+    if (!shouldPauseReadAudio) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
   }, [shouldPauseReadAudio]);
 
   return (
@@ -56,6 +73,7 @@ const TextOnlyNugget = ({
         onPressShareType={onPressShareType}
         onBlockUser={onBlockUser}
         onReportAbouseNugget={onReportAbouseNugget}
+        nuggetContentController={nuggetContentController}
       />
     </View>
   );

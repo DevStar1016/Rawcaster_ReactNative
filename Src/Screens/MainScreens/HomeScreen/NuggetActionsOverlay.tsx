@@ -613,6 +613,7 @@ function NuggetActionsOverlay({
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
+                {/* @ts-ignore */}
                 <StyledText
                   textMode="read_more_hyper_link"
                   numberOfLines={
@@ -913,6 +914,7 @@ function NuggetActionsOverlay({
             isEnableTextButton={bigNumberFormater(nugget.total_likes)}
             onPressText={() => {
               console.log('like');
+              /* @ts-ignore */
               navigation.navigate('ProfileStack', {
                 screen: 'ProfileSeeAllUsersList',
                 params: {

@@ -562,7 +562,7 @@ const Nugget = ({
   };
 
   const handlePlayAudio = async url => {
-    // handleStopAudio();
+    handleStopAudio();
     try {
       await audioPlayerRef.current?.startPlayer(url);
       audioPlayerRef.current?.addPlayBackListener(e => {
