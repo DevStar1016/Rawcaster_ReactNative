@@ -114,7 +114,7 @@ const FilterProfileSeeAllUsers = ({
           <DropDownPicker
             title="Gender"
             placeHolderText="Select Gender"
-            dataList={GENDER_LIST.filter(item => item.id > 0)}
+            dataList={GENDER_LIST}
             fieldName={'name'}
             value={filterData.gender}
             onSelectItem={selectedGender => {

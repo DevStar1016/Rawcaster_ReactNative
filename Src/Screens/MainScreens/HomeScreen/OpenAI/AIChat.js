@@ -38,7 +38,6 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   const [progress, setprogress] = useState(0);
   const [isLoadingChat, setisLoadingChat] = useState(false);
   const [audioList, setaudioList] = useState([]); //{id:1,url:''}
-  const [audioUrl, setaudioUrl] = useState(null);
   const listRef = useRef(null);
   useEffect(() => {
     isMount = true;

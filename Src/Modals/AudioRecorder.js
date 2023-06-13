@@ -15,6 +15,7 @@ import {
   handleAudioRecord,
   handlePlayAudio,
 } from '../Utilities/AudioPlayerProcess';
+import moment from 'moment';
 
 const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -183,12 +184,14 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           ) : (
             <ActionButton
               onPress={() => {
+                console.log(moment(), 'SECONDSS');
                 handleAudioRecord({
                   audioPlayer,
                   setisPaused,
                   setisRecording,
                   setrecordedAudio,
                   setrecordingSeconds,
+                  audioUniqueId: moment(),
                 });
               }}
               icon={'mic_fill_primary'}

@@ -66,6 +66,11 @@ const Nugget = ({
     mediaHeight,
     onFinishPlaying,
     categoryName,
+    readoutAudioPlayer,
+    setreadoutPlayingNuggetId,
+    readoutPlayingNuggetId,
+    readMessageLoadingIdsList,
+    setreadMessageLoading,
   } = useNuggetParentActions();
 
   const navigation = useNavigation();
@@ -98,7 +103,6 @@ const Nugget = ({
     minimumViewTime: 100,
     viewAreaCoveragePercentThreshold: 30,
   });
-  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0)
       setviewableItem(viewableItems.viewableItems[0].item.media_id || 0);
@@ -107,6 +111,7 @@ const Nugget = ({
     lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
     [],
   );
+
   function updateLike() {
     setnuggetData(preNuggetData => {
       let tempNugget = {...preNuggetData};
@@ -561,33 +566,55 @@ const Nugget = ({
     return selectedShareTypeId === 3 ? groupsList : connectionsList;
   };
 
-  const handlePlayAudio = async url => {
+  const isLoadingRead = id => {
+    return readMessageLoadingIdsList?.includes(id);
+  };
+
+  const handlePlayAudio = async (url, id) => {
     handleStopAudio();
+
     try {
-      await audioPlayerRef.current?.startPlayer(url);
-      audioPlayerRef.current?.addPlayBackListener(e => {
-        console.log(e.currentPosition, 'play position');
+      if (!isLoadingRead(id)) {
+        setreadMessageLoading(id, true);
+      }
+      await readoutAudioPlayer?.startPlayer(url);
+
+      readoutAudioPlayer?.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition) === 0) {
-          setisReadMuted(true);
+          setreadMessageLoading(id, false);
+          setreadoutPlayingNuggetId(id);
         } else if (e.currentPosition >= e.duration) {
           handleStopAudio();
         }
         return;
       });
     } catch (e) {
-      setisReadMuted(false);
+      console.log(e, 'ERROR');
+      setreadMessageLoading(id, false);
+      setreadoutPlayingNuggetId(null);
     }
   };
 
   const handleStopAudio = () => {
     try {
-      audioPlayerRef.current?.stopPlayer();
-      audioPlayerRef.current?.removePlayBackListener();
+      readoutAudioPlayer?.stopPlayer();
+      readoutAudioPlayer?.removePlayBackListener();
     } catch (e) {
+      console.log(e, 'ERROR STOP');
     } finally {
-      setisReadMuted(false);
+      setreadoutPlayingNuggetId(null);
     }
   };
+
+  // const handleStopAudio = () => {
+  //   try {
+  //     readoutAudioPlayer?.stopPlayer();
+  //     readoutAudioPlayer?.removePlayBackListener();
+  //   } catch (e) {
+  //   } finally {
+  //     setisReadMuted(false);
+  //   }
+  // };
 
   const nuggetItemActions = {
     nugget: nuggetData,

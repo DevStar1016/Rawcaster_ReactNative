@@ -254,15 +254,17 @@ const AIChatItem = ({
               </>
             )}
           </TouchableOpacity>
-          <View
-            style={{
-              width: 1,
-              height: '100%',
-              backgroundColor: COLORS.white,
-              opacity: 0.3,
-              marginHorizontal: 20,
-            }}
-          />
+          {isEnableShare && (
+            <View
+              style={{
+                width: 1,
+                height: '100%',
+                backgroundColor: COLORS.white,
+                opacity: 0.3,
+                marginHorizontal: 20,
+              }}
+            />
+          )}
           {isEnableShare && (
             <TouchableOpacity
               activeOpacity={0.7}

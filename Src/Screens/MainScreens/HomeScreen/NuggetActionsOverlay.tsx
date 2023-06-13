@@ -68,6 +68,7 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
+import moment from 'moment';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -135,6 +136,13 @@ function NuggetActionsOverlay({
     isEnableHeaderContainerHeightforTopButtons,
     isEnableTopInsetsPadding,
     textNuggetNumberOfLines,
+    isFrom,
+    searchFocused,
+    dashboardFocused,
+    profileFocused,
+    setreadMessageLoading,
+    readoutPlayingNuggetId,
+    readMessageLoadingIdsList,
   } = useNuggetParentActions();
 
   const {
@@ -180,6 +188,12 @@ function NuggetActionsOverlay({
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
 
+  useEffect(() => {
+    if (!getIsFocused()) {
+      handleStopAudio();
+    }
+  }, [getIsFocused()]);
+
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
       setpaused(true);
@@ -205,6 +219,24 @@ function NuggetActionsOverlay({
       setpaused(false);
     }
   }, []);
+
+  function getIsFocused() {
+    return (
+      (isFrom === 'search' && searchFocused) ||
+      (isFrom === 'dashboard' && dashboardFocused) ||
+      (isFrom === 'profile' && profileFocused)
+    );
+  }
+
+  const getUniqueId = () => {
+    return (
+      profile?.user_id +
+      '' +
+      moment.utc().format('x') +
+      '' +
+      Math.floor(Math.random() * 10000 + 1)
+    );
+  };
 
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
@@ -251,6 +283,7 @@ function NuggetActionsOverlay({
   };
 
   const nuggetContentAudioAPICall = () => {
+    setreadMessageLoading(nugget.nugget_id, true);
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
@@ -259,21 +292,17 @@ function NuggetActionsOverlay({
         console.log(res.data, 'API');
 
         if (res.data.status === 1) {
-          setReadNuggetUrl(res.data.file_path);
           if (handlePlayAudio) {
-            handlePlayAudio(res.data.file_path);
+            handlePlayAudio(res.data.file_path, nugget.nugget_id);
           }
         } else if (res.data.status === 0) {
-          setReadNuggetUrl(null);
+          setreadMessageLoading(nugget.nugget_id, false);
           Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
-        setReadNuggetUrl(null);
+        setreadMessageLoading(nugget.nugget_id, false);
         Toast.fail(e.message);
-      })
-      .finally(() => {
-        setisReadLoading(false);
       });
   };
 
@@ -670,29 +699,23 @@ function NuggetActionsOverlay({
                     <SVGIcon
                       height={15.5}
                       icon={
-                        !isReadLoading
-                          ? !isReadMuted
-                            ? 'mic_fill_white'
-                            : 'mic_off_fill_secondary'
-                          : undefined
+                        nugget.nugget_id === readoutPlayingNuggetId
+                          ? 'mic_off_fill_secondary'
+                          : 'mic_fill_white'
                       }
                       isButton
                       onPress={() => {
                         if (isLogin()) {
-                          if (!isReadMuted) {
-                            console.log('JJJJ');
+                          if (nugget.nugget_id === readoutPlayingNuggetId) {
+                            handleStopAudio();
+                          } else {
                             if (setpaused) {
                               setpaused(true);
                             }
                             if (setisMuted) {
                               setisMuted(true);
                             }
-                            setisReadLoading(true);
                             nuggetContentAudioAPICall();
-                          } else {
-                            if (handleStopAudio) {
-                              handleStopAudio();
-                            }
                           }
                         }
                       }}
@@ -989,9 +1012,8 @@ function NuggetActionsOverlay({
             source={
               isPaused ||
               isLoadingVideo ||
-              getMediaDurationFormat(
-                Math.floor((progress * duration) / 100),
-              ) === getMediaDurationFormat(duration)
+              getMediaDurationFormat(progress) ===
+                getMediaDurationFormat(duration)
                 ? AudioWaveFormImage
                 : AudioWaveFormGif
             }

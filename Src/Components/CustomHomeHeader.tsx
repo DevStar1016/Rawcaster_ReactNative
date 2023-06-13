@@ -181,6 +181,7 @@ const CustomHomeHeader = ({
             isButton
             onPress={() => {
               if (isLogin()) {
+                /* @ts-ignore */
                 navigation.navigate('GlobalSearchStack');
               }
             }}
@@ -193,6 +194,7 @@ const CustomHomeHeader = ({
             height={26}
             width={26}
             onPress={() => {
+              /* @ts-ignore */
               navigation.navigate('SettingsStack');
             }}
             isButton
@@ -241,6 +243,7 @@ const CustomHomeHeader = ({
             isButton
             onPressProfile={() => {
               if (isLogin()) {
+                /* @ts-ignore */
                 navigation.navigate('ProfileStack');
               }
             }}

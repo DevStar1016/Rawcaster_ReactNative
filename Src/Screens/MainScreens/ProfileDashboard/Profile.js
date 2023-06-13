@@ -52,6 +52,7 @@ import {
   setSavedNuggetsCount,
   setSavedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 const PADDING_HORIZONTAL = 10;
 
 const Profile = ({route}) => {
@@ -66,7 +67,11 @@ const Profile = ({route}) => {
   const [userId, setuserId] = useState(
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
   );
-
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
+  const [readoutPlayingNuggetId, setreadoutPlayingNuggetId] = useState(null);
+  const [readMessageLoadingIdsList, setreadMessageLoadingIdsList] = useState(
+    [],
+  );
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
@@ -122,6 +127,7 @@ const Profile = ({route}) => {
         controller.abort();
       }
       controller = undefined;
+      handleStopAudio();
       // dispatch(setOtherConnectionsList([]));
       // dispatch(setOtherInfluencersList([]));
     };
@@ -160,6 +166,16 @@ const Profile = ({route}) => {
       listNuggetsAPICall(1);
     }
   }, [userId, othersProfile, isFavourites]);
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setreadoutPlayingNuggetId(null);
+    }
+  };
 
   const getOthersProfileAPI = () => {
     if (controller) {
@@ -455,11 +471,27 @@ const Profile = ({route}) => {
     // flatlistRef.current.scrollToOffset({animated: false, offset: 0});
   }
 
+  const onLoadingReadMessage = (id, status) => {
+    setreadMessageLoadingIdsList(preList => {
+      let tempList = [...preList];
+      if (status) {
+        if (!tempList.includes(id)) {
+          tempList.push(id);
+        }
+      } else {
+        tempList = tempList.filter(itemId => itemId !== id);
+      }
+      return tempList;
+    });
+  };
+
   const nuggetActions = {
     headerContainerHeight: 0,
     isMuted: isMuted,
     setisMuted: setisMuted,
     isAutoPlay: false,
+    isFrom: 'profile',
+    profileFocused: isFocused,
     categoryName: 'forYou',
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
@@ -469,6 +501,11 @@ const Profile = ({route}) => {
     isEnableTopInsetsPadding: true,
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
+    readoutAudioPlayer: audioPlayerRef.current,
+    readoutPlayingNuggetId,
+    setreadoutPlayingNuggetId,
+    readMessageLoadingIdsList,
+    setreadMessageLoading: onLoadingReadMessage,
     onFinishPlaying: index => {
       // if (index < nuggetsList.length - 1) {
       //   flatlistRef.current.scrollToIndex({

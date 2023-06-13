@@ -31,6 +31,10 @@ const OTPInput = ({
   const [forcusedIndex, setforcusedIndex] = useState(0);
 
   useEffect(() => {
+    onCodeChanged(otp?.join(''));
+  }, [otp]);
+
+  useEffect(() => {
     settimer(seconds);
   }, [seconds]);
 

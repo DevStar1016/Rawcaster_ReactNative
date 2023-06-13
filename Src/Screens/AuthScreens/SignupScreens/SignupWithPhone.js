@@ -252,7 +252,7 @@ const SignupWithPhone = ({route}) => {
             }}
           />
           <DropDownPicker
-            dataList={GENDER_LIST.filter(item => item.id > 0)}
+            dataList={GENDER_LIST}
             title={'Gender'}
             errorText={touched.gender && errors.gender}
             value={values.gender}

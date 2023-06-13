@@ -46,10 +46,16 @@ import {
   setNuggetsList,
   setNuggetsLoading,
 } from '../../../Store/Slices/NuggetsListSlice';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 const DashboardWithCategory = ({route}) => {
   let currentPage = 1;
   let controller = undefined;
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
+  const [readoutPlayingNuggetId, setreadoutPlayingNuggetId] = useState(null);
+  const [readMessageLoadingIdsList, setreadMessageLoadingIdsList] = useState(
+    [],
+  );
   const navigation = useNavigation();
   const {filterType, categoryType, categoryName} = route.params ?? {};
   const {setfocusedNuggetUserId} = useDashboardProfile() ?? {};
@@ -259,9 +265,25 @@ const DashboardWithCategory = ({route}) => {
     getHeaderHeight(),
   ]);
 
+  const onLoadingReadMessage = (id, status) => {
+    setreadMessageLoadingIdsList(preList => {
+      let tempList = [...preList];
+      if (status) {
+        if (!tempList.includes(id)) {
+          tempList.push(id);
+        }
+      } else {
+        tempList = tempList.filter(itemId => itemId !== id);
+      }
+      return tempList;
+    });
+  };
+
   const nuggetActions = {
     headerContainerHeight: getHeaderHeight(),
     isMuted: isMuted,
+    isFrom: 'dashboard',
+    dashboardFocused: isFocused,
     setisMuted: setisMuted,
     categoryName: categoryName ?? 'forYou',
     isAutoPlay: true,
@@ -273,6 +295,11 @@ const DashboardWithCategory = ({route}) => {
     isEnableTopInsetsPadding: true,
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
+    readoutAudioPlayer: audioPlayerRef.current,
+    readoutPlayingNuggetId,
+    setreadoutPlayingNuggetId,
+    readMessageLoadingIdsList,
+    setreadMessageLoading: onLoadingReadMessage,
     onFinishPlaying: index => {
       if (index < nuggetsList.length - 1) {
         flatlistRef.current.scrollToIndex({
