@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import NuggetActionsOverlay from '../NuggetActionsOverlay';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
@@ -32,6 +32,7 @@ const TextOnlyNugget = ({
   const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+  const nuggetContentController = useRef(null);
 
   const shouldPauseReadAudio = useMemo(() => {
     if (!viewableNuggetItem && parentNuggetIndex === 0) {
@@ -49,8 +50,12 @@ const TextOnlyNugget = ({
   ]);
 
   useEffect(() => {
-    console.log('text nugget stop', shouldPauseReadAudio);
-    handleStopAudio();
+    if (!shouldPauseReadAudio) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
   }, [shouldPauseReadAudio]);
 
   return (
@@ -68,6 +73,7 @@ const TextOnlyNugget = ({
         onPressShareType={onPressShareType}
         onBlockUser={onBlockUser}
         onReportAbouseNugget={onReportAbouseNugget}
+        nuggetContentController={nuggetContentController}
       />
     </View>
   );

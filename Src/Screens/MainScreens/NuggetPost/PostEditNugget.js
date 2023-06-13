@@ -96,7 +96,7 @@ const PostEditNugget = ({route}) => {
   const [isOpenEmojiContainer, setisOpenEmojiContainer] = useState(false);
   const [selectedMediaList, setselectedMediaList] = useState([]);
   const [shareConnectionsGroupsIdsList, setshareConnectionsGroupsIdsList] =
-    useState([]);
+    useState(nugget ? nugget.shared_detail?.map(ele => ele.id) : []);
   const [isOpenPreview, setisOpenPreview] = useState(false);
   const [selectedShareType, setselectedShareType] = useState(
     NUGGET_SHARE_TYPE.find(
@@ -140,6 +140,10 @@ const PostEditNugget = ({route}) => {
 
   useEffect(() => {
     if (nugget) {
+      console.log(
+        nugget.shared_detail.map(ele => ele.id),
+        'NUGGET EDIT',
+      );
       if (nugget.media_list && nugget.media_list.length > 0) {
         const tempMediaList = [...nugget.media_list].map(item => {
           return {
@@ -183,7 +187,11 @@ const PostEditNugget = ({route}) => {
     if (isPollClicked) {
       formData.append(
         'poll_option',
-        JSON.stringify([...choiceList].map(item => item.value.trim())),
+        JSON.stringify(
+          [...choiceList]
+            .filter(item => item.value.trim() !== '')
+            .map(item => item.value),
+        ),
       );
       formData.append(
         'poll_duration',
@@ -995,6 +1003,7 @@ const PostEditNugget = ({route}) => {
           list={selectedShareType.id === 3 ? groupsList : connectionsList}
           onSelectItems={list => {
             if (isMount) {
+              console.log(list, 'SPECIFIC LIST');
               setisOpenSelectionModal(false);
               setshareConnectionsGroupsIdsList(list);
             }

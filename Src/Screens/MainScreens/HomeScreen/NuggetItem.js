@@ -41,7 +41,7 @@ function NuggetItem({
   const isFocused = useIsFocused();
 
   const videoPlayer = useRef(null);
-
+  const nuggetContentController = useRef(null);
   const [isLoadingVideo, setisLoadingVideo] = useState(false);
 
   const isAppForeground = useIsAppForeground();
@@ -92,7 +92,12 @@ function NuggetItem({
   }, [shouldPauseVideo]);
 
   useEffect(() => {
-    handleStopAudio();
+    if (!shouldPauseReadAudio) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
   }, [shouldPauseReadAudio]);
 
   const seekUpdate = useCallback(
@@ -166,6 +171,7 @@ function NuggetItem({
           progress={progress}
           mediaSeekUpdate={seekUpdate}
           onReportAbouseNugget={onReportAbouseNugget}
+          nuggetContentController={nuggetContentController}
         />
       </View>
     ),

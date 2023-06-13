@@ -88,6 +88,7 @@ type Props = {
   onReportAbouseNugget: () => void;
   duration?: number;
   progress?: number;
+  nuggetContentController: any;
 };
 type ActionContainerProps = {
   icon: IconType;
@@ -129,6 +130,7 @@ function NuggetActionsOverlay({
   onReportAbouseNugget,
   duration = 0,
   progress = 0,
+  nuggetContentController,
 }: Props) {
   const {
     headerContainerHeight,
@@ -139,6 +141,7 @@ function NuggetActionsOverlay({
     isEnableHeaderContainerHeightforTopButtons,
     isEnableTopInsetsPadding,
     textNuggetNumberOfLines,
+    viewableNuggetItem,
   } = useNuggetParentActions();
 
   const {
@@ -183,16 +186,17 @@ function NuggetActionsOverlay({
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
-  const nuggetContentController = useRef<any>(null);
 
-  useEffect(() => {
-    if (!isFocused) {
-      if (nuggetContentController.current) {
-        nuggetContentController.current.abort();
-      }
-      handleStopAudio();
-    }
-  }, [isFocused]);
+  // useEffect(() => {
+  //   console.log(isFocused, 'USEEE', nugget.nugget_id === viewableNuggetItem);
+  //   if (!isFocused || nugget.nugget_id !== viewableNuggetItem) {
+  //     console.log(nuggetContentController.current, 'ABORT');
+  //     if (nuggetContentController.current) {
+  //       nuggetContentController.current.abort();
+  //     }
+  //     handleStopAudio();
+  //   }
+  // }, [isFocused]);
 
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
@@ -275,6 +279,7 @@ function NuggetActionsOverlay({
       nuggetContentController.current.abort();
     }
     nuggetContentController.current = new AbortController();
+    console.log(nuggetContentController.current, 'aPI');
 
     const formData = new FormData();
     formData.append('token', token);
@@ -606,7 +611,8 @@ function NuggetActionsOverlay({
             position: 'absolute',
             top: 0,
             left: 10,
-            marginRight: actionButtonsContainerWidth + 10,
+            width: DIMENSIONS.screen.width - (actionButtonsContainerWidth + 20),
+            marginRight: actionButtonsContainerWidth + 20,
             maxHeight:
               mainContentContainerHeight -
               (nuggetDataBottomContainerHeight + 10),
@@ -658,42 +664,44 @@ function NuggetActionsOverlay({
                     opacity: 0.8,
                   }}>
                   <>
-                    {isReadLoading ? (
-                      <LoadingDots
-                        size={6}
-                        bounceHeight={4}
-                        dots={3}
-                        borderRadius={3}
-                      />
-                    ) : (
-                      <SVGIcon
-                        height={15.5}
-                        icon={
-                          !isReadLoading
-                            ? !isReadMuted
-                              ? 'mic_fill_white'
-                              : 'mic_off_fill_secondary'
-                            : undefined
-                        }
-                        isButton
-                        onPress={() => {
-                          if (!isReadMuted) {
-                            if (setpaused) {
-                              setpaused(true);
-                            }
-                            if (setisMuted) {
-                              setisMuted(true);
-                            }
-                            setisReadLoading(true);
-                            nuggetContentAudioAPICall();
-                          } else {
-                            if (handleStopAudio) {
-                              handleStopAudio();
-                            }
+                    {token ? (
+                      isReadLoading ? (
+                        <LoadingDots
+                          size={6}
+                          bounceHeight={3}
+                          dots={3}
+                          borderRadius={3}
+                        />
+                      ) : (
+                        <SVGIcon
+                          height={15.5}
+                          icon={
+                            !isReadLoading
+                              ? !isReadMuted
+                                ? 'mic_fill_white'
+                                : 'mic_off_fill_secondary'
+                              : undefined
                           }
-                        }}
-                      />
-                    )}
+                          isButton
+                          onPress={() => {
+                            if (!isReadMuted) {
+                              if (setpaused) {
+                                setpaused(true);
+                              }
+                              if (setisMuted) {
+                                setisMuted(true);
+                              }
+                              setisReadLoading(true);
+                              nuggetContentAudioAPICall();
+                            } else {
+                              if (handleStopAudio) {
+                                handleStopAudio();
+                              }
+                            }
+                          }}
+                        />
+                      )
+                    ) : null}
                     {htmlDecodeText(nugget.content.trim())}
                   </>
                 </StyledText>
@@ -747,18 +755,21 @@ function NuggetActionsOverlay({
             />
           )}
 
-          {token && isEnableADDButton && (
-            <RoundedIconButton
-              icon="open_ai_white"
-              bgColor={COLORS.transparentDimColor}
-              iconSize={25}
-              buttonSize={40}
-              buttonStyle={{marginVertical: 5}}
-              onPress={() => {
-                handlePresentAIChatModal();
-              }}
-            />
-          )}
+          {token &&
+            isEnableADDButton &&
+            profile &&
+            profile?.user_status_id !== 1 && (
+              <RoundedIconButton
+                icon="open_ai_white"
+                bgColor={COLORS.transparentDimColor}
+                iconSize={25}
+                buttonSize={40}
+                buttonStyle={{marginVertical: 5}}
+                onPress={() => {
+                  handlePresentAIChatModal();
+                }}
+              />
+            )}
         </View>
 
         <View
@@ -800,6 +811,13 @@ function NuggetActionsOverlay({
               badgeSize={18}
               badgeContainerStyle={{right: 7}}
               containerStyle={{alignItems: 'flex-start'}}
+              topRightIcon={
+                nugget &&
+                parseInt(nugget?.account_verify_type) === 1 &&
+                'verified_sign'
+              }
+              topRightIconSize={18}
+              topRightIconContainerStyle={{right: 0}}
             />
             <View style={styles.userDetailsContainer}>
               <TouchableOpacity

@@ -30,9 +30,9 @@ const AIChatItem = ({
   setisDisableAudioProcess,
 }) => {
   const token = useToken();
+  console.log(item, 'AIIIIII');
   useEffect(() => {
     isMount = true;
-
     return () => {
       isMount = false;
       handleStopAudio();
@@ -248,24 +248,32 @@ const AIChatItem = ({
               </>
             )}
           </TouchableOpacity>
-          <View
-            style={{
-              width: 1,
-              height: '100%',
-              backgroundColor: COLORS.white,
-              opacity: 0.3,
-              marginHorizontal: 20,
-            }}
-          />
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.button}
-            onPress={() => {
-              onShareContent(item.msg);
-            }}>
-            <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
-            <StyledText style={styles.buttonText}>Share</StyledText>
-          </TouchableOpacity>
+          {!item.isIntro ? (
+            <View
+              style={{
+                width: 1,
+                height: '100%',
+                backgroundColor: COLORS.white,
+                opacity: 0.3,
+                marginHorizontal: 20,
+              }}
+            />
+          ) : (
+            false
+          )}
+          {!item.isIntro ? (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.button}
+              onPress={() => {
+                onShareContent(item.msg);
+              }}>
+              <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
+              <StyledText style={styles.buttonText}>Share</StyledText>
+            </TouchableOpacity>
+          ) : (
+            false
+          )}
         </View>
       )}
     </View>

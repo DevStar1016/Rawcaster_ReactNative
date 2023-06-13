@@ -94,6 +94,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
                 msg: res.data.msg,
                 isAI: true,
                 dateTime: moment().format('hh:mm A'),
+                isIntro: !((text && text.trim()) || audioFile),
               },
               ...preList,
             ];
@@ -201,12 +202,13 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           />
         </View>
       </View>
-      <TouchableOpacity
+      <View
         style={styles.commentsListContainer}
         activeOpacity={1}
-        onPress={() => {
-          Keyboard.dismiss();
-        }}>
+        // onPress={() => {
+        //   Keyboard.dismiss();
+        // }}
+      >
         <BottomSheetFlatList
           ref={listRef}
           data={chatList}
@@ -232,7 +234,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           ItemSeparatorComponent={() => <View style={{height: 10}} />}
           showsVerticalScrollIndicator={false}
         />
-      </TouchableOpacity>
+      </View>
 
       <View style={styles.bottomContainer}>
         {isLoadingChat && (
@@ -257,6 +259,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
             handleSendMessage({audioFile, duration});
           }}
           isKeyboardCloseWhenSend={false}
+          inputProps={{maxLength: 100}}
         />
       </View>
     </View>

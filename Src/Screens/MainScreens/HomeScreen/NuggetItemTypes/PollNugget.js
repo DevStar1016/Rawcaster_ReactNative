@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {useInsets, useIsAppForeground} from '../../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import DefaultBackground from '../../../../Components/DefaultBackground';
@@ -9,6 +9,7 @@ import {
   useNuggetParentActions,
 } from '../../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
+import moment from 'moment';
 
 const PollNugget = ({
   onDeleteNugget,
@@ -31,6 +32,7 @@ const PollNugget = ({
   const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+  const nuggetContentController = useRef(null);
 
   const shouldPauseReadAudio = useMemo(() => {
     if (!viewableNuggetItem && parentNuggetIndex === 0) {
@@ -48,7 +50,12 @@ const PollNugget = ({
   ]);
 
   useEffect(() => {
-    handleStopAudio();
+    if (!shouldPauseReadAudio) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
   }, [shouldPauseReadAudio]);
 
   return (
@@ -65,6 +72,7 @@ const PollNugget = ({
         onDeleteNugget={onDeleteNugget}
         onBlockUser={onBlockUser}
         onReportAbouseNugget={onReportAbouseNugget}
+        nuggetContentController={nuggetContentController}
       />
     </View>
   );
