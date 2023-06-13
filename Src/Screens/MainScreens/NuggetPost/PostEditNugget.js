@@ -140,6 +140,7 @@ const PostEditNugget = ({route}) => {
 
   useEffect(() => {
     if (nugget) {
+      console.log(JSON.stringify(nugget, 'NUGGET'));
       if (nugget.media_list && nugget.media_list.length > 0) {
         const tempMediaList = [...nugget.media_list].map(item => {
           return {
@@ -151,6 +152,11 @@ const PostEditNugget = ({route}) => {
         });
 
         setselectedMediaList(tempMediaList);
+      }
+      if (nugget.shared_detail && nugget.shared_detail.length > 0) {
+        setshareConnectionsGroupsIdsList(
+          [...nugget.shared_detail].map(item => item.id),
+        );
       }
     }
   }, []);
@@ -644,7 +650,7 @@ const PostEditNugget = ({route}) => {
                 icon="mic_fill_white"
                 height={21}
                 width={21}
-                marginLeft={8}
+                marginLeft={!isPollClicked && !nugget ? 8 : 0}
                 isButton
                 onPress={() => {
                   if (isMount) {

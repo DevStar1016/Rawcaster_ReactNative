@@ -112,7 +112,6 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   }
 
   function handleSendMessage({text = '', audioFile, duration = 0}) {
-    console.log(duration, 'DURATION');
     setchatList(preList => {
       return [
         {
@@ -167,6 +166,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   function renderItem({item, index}) {
     return (
       <AIChatItem
+        isEnableShare={index !== chatList.length - 1}
         item={item}
         progress={progress}
         setprogress={setprogress}
@@ -249,6 +249,9 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           placeholderText="Type or ask your question here..."
           onPressSend={text => {
             handleSendMessage({text});
+          }}
+          inputProps={{
+            maxLength: 200,
           }}
           isDisableAudioProcess={isDisableAudioProcess}
           isVisibleVoiceRecord={true}

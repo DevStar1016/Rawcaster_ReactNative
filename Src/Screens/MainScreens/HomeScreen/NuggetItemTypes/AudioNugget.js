@@ -33,15 +33,18 @@ function AudioNugget({
 
   const PlayBackStatusUpdate = playbackStatus => {
     try {
-      let currentTime = Math.round(playbackStatus.currentTime);
-      let duration = Math.round(playbackStatus.seekableDuration);
-      if (currentTime)
-        if (duration) setprogress((currentTime / duration) * 100);
+      let currentTime = playbackStatus.currentTime;
+      let duration = playbackStatus.seekableDuration;
+      if (currentTime) {
+        if (duration) {
+          setprogress(currentTime);
+        }
+      }
     } catch (error) {}
   };
 
   const onLoadComplete = event => {
-    setduration(event.duration * 1000);
+    setduration(event.duration);
     setisLoadingVideo(false);
   };
 

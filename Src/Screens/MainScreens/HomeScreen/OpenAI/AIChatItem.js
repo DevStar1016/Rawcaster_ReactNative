@@ -28,6 +28,7 @@ const AIChatItem = ({
   progress,
   setprogress,
   setisDisableAudioProcess,
+  isEnableShare = true,
 }) => {
   const token = useToken();
   useEffect(() => {
@@ -79,7 +80,6 @@ const AIChatItem = ({
 
       audioPlayerRef.current?.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition / 1000) >= 0) {
-          console.log(Math.floor(e.currentPosition / 1000), 'VALUE PROGRESS');
           setprogress(Math.floor(e.currentPosition / 1000));
         }
 
@@ -168,11 +168,17 @@ const AIChatItem = ({
                 isVisibleStop
                 isEnableDurationFloor={false}
                 onPlayPause={() => {
-                  console.log('HHHH', item.id !== playingChatId);
                   if (item.id !== playingChatId) {
                     handlePlayAudio(item.audioUrl, item.id);
                   } else {
                     handleStopAudio();
+                  }
+                }}
+                seekUpdate={value => {
+                  if (item.id === playingChatId) {
+                    try {
+                      audioPlayerRef?.current?.seekToPlayer(value * 1000);
+                    } catch (e) {}
                   }
                 }}
                 progress={item.id === playingChatId ? progress : 0}
@@ -257,15 +263,17 @@ const AIChatItem = ({
               marginHorizontal: 20,
             }}
           />
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.button}
-            onPress={() => {
-              onShareContent(item.msg);
-            }}>
-            <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
-            <StyledText style={styles.buttonText}>Share</StyledText>
-          </TouchableOpacity>
+          {isEnableShare && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.button}
+              onPress={() => {
+                onShareContent(item.msg);
+              }}>
+              <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
+              <StyledText style={styles.buttonText}>Share</StyledText>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>

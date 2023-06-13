@@ -32,22 +32,18 @@ const MediaProgressSlider = ({
   onPlayPause,
   isVisibleStop,
 }: Props) => {
-  console.log(duration, 'GTHDUR');
-
   function getProgressText() {
-    if (isEnableDurationFloor) {
-      return Math.floor((progress * duration) / 100) >= 120
-        ? getMediaDurationFormat(Math.floor((progress * duration) / 100))
-        : secondsToMinutesAndSeconds(Math.floor((progress * duration) / 100));
-    }
-    return progress >= 120
-      ? getMediaDurationFormat(progress)
-      : secondsToMinutesAndSeconds(progress);
+    // if (isEnableDurationFloor) {
+    //   return Math.floor((progress * duration) / 100) >= 120
+    //     ? getMediaDurationFormat(Math.floor((progress * duration) / 100))
+    //     : secondsToMinutesAndSeconds(Math.floor((progress * duration) / 100));
+    // }
+    return secondsToMinutesAndSeconds(progress);
   }
 
   function getMaxValue() {
     if (isEnableDurationFloor) {
-      return Math.floor(duration / 1000);
+      return Math.floor(duration);
     }
     return duration;
   }
@@ -91,9 +87,7 @@ const MediaProgressSlider = ({
       </View>
       <StyledText
         style={{...styles.timerText, right: isVisiblePlayPause ? 0 : 15}}>
-        {duration && duration >= 120
-          ? getMediaDurationFormat(duration ?? 0)
-          : secondsToMinutesAndSeconds(duration ?? 0)}
+        {secondsToMinutesAndSeconds(duration ?? 0)}
       </StyledText>
     </View>
   );

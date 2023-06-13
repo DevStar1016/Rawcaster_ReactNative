@@ -41,7 +41,7 @@ function VideoNugget({
   };
 
   const onLoadComplete = event => {
-    setduration(event.duration * 1000);
+    setduration(event.duration);
     setisLoadingVideo(false);
     // const naturalSize = event.naturalSize;
 
@@ -88,11 +88,11 @@ function VideoNugget({
 
   const playBackStatusUpdate = playbackStatus => {
     try {
-      let currentTime = Math.round(playbackStatus.currentTime);
-      let duration = Math.round(playbackStatus.seekableDuration);
+      let currentTime = playbackStatus.currentTime;
+      let duration = playbackStatus.seekableDuration;
       if (currentTime) {
         if (duration) {
-          setprogress((currentTime / duration) * 100);
+          setprogress(currentTime);
         }
       }
     } catch (error) {}

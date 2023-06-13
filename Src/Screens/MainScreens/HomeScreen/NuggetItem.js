@@ -96,8 +96,7 @@ function NuggetItem({
   const seekUpdate = useCallback(
     async seekTime => {
       try {
-        if (videoPlayer.current)
-          videoPlayer.current.seek((seekTime * duration) / 100 / 1000);
+        if (videoPlayer.current) videoPlayer.current.seek(seekTime);
       } catch (error) {}
     },
     [duration],

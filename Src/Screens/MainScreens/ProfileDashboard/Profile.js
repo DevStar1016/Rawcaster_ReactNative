@@ -470,11 +470,11 @@ const Profile = ({route}) => {
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
     onFinishPlaying: index => {
-      if (index < nuggetsList.length - 1) {
-        flatlistRef.current.scrollToIndex({
-          index: index + 1,
-        });
-      }
+      // if (index < nuggetsList.length - 1) {
+      //   flatlistRef.current.scrollToIndex({
+      //     index: index + 1,
+      //   });
+      // }
     },
   };
 

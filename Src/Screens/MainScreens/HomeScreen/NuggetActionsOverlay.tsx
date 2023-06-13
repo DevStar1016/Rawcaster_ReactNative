@@ -353,6 +353,9 @@ function NuggetActionsOverlay({
     if (user && user.acc_verify_status === 1) {
       return true;
     }
+    if (setpaused) {
+      setpaused(true);
+    }
     dispatch(setIsOpenVerifyPopup(true));
     return false;
   };
@@ -360,6 +363,9 @@ function NuggetActionsOverlay({
   const isLogin = () => {
     if (token) {
       return true;
+    }
+    if (setpaused) {
+      setpaused(true);
     }
     dispatch(setIsOpenLoginAlert(true));
     return false;
@@ -671,19 +677,21 @@ function NuggetActionsOverlay({
                       }
                       isButton
                       onPress={() => {
-                        if (!isReadMuted) {
-                          console.log('JJJJ');
-                          if (setpaused) {
-                            setpaused(true);
-                          }
-                          if (setisMuted) {
-                            setisMuted(true);
-                          }
-                          setisReadLoading(true);
-                          nuggetContentAudioAPICall();
-                        } else {
-                          if (handleStopAudio) {
-                            handleStopAudio();
+                        if (isLogin()) {
+                          if (!isReadMuted) {
+                            console.log('JJJJ');
+                            if (setpaused) {
+                              setpaused(true);
+                            }
+                            if (setisMuted) {
+                              setisMuted(true);
+                            }
+                            setisReadLoading(true);
+                            nuggetContentAudioAPICall();
+                          } else {
+                            if (handleStopAudio) {
+                              handleStopAudio();
+                            }
                           }
                         }
                       }}

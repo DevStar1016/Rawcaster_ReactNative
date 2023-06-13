@@ -211,7 +211,6 @@ const CreateEditEvent = ({route}) => {
     viewEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data.event_detail, 'HHHH');
           let tempData = {...selectedValues};
           if (res.data.event_detail.banner_image) {
             tempData = {
