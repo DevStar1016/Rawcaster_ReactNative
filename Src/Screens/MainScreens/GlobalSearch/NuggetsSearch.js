@@ -26,17 +26,11 @@ import {useDispatch} from 'react-redux';
 import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
 import BigList from 'react-native-big-list';
 import {useIsFocused} from '@react-navigation/native';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const NuggetsSearch = () => {
-  const audioPlayerRef = useRef(new AudioRecorderPlayer());
-  const [readoutPlayingNuggetId, setreadoutPlayingNuggetId] = useState(null);
-  const [readMessageLoadingIdsList, setreadMessageLoadingIdsList] = useState(
-    [],
-  );
   const {searchText, topLayerHeight} = useGlobalSearch();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
@@ -142,20 +136,6 @@ const NuggetsSearch = () => {
     }
   };
 
-  const onLoadingReadMessage = (id, status) => {
-    setreadMessageLoadingIdsList(preList => {
-      let tempList = [...preList];
-      if (status) {
-        if (!tempList.includes(id)) {
-          tempList.push(id);
-        }
-      } else {
-        tempList = tempList.filter(itemId => itemId !== id);
-      }
-      return tempList;
-    });
-  };
-
   const nuggetActions = {
     headerContainerHeight: topLayerHeight,
     isMuted: isMuted,
@@ -171,11 +151,6 @@ const NuggetsSearch = () => {
     textNuggetNumberOfLines: 12,
     mediaHeight: insets.mediaHeight - topLayerHeight,
     isEnableHeaderContainerHeightforTopButtons: false,
-    readoutAudioPlayer: audioPlayerRef.current,
-    readoutPlayingNuggetId,
-    setreadoutPlayingNuggetId,
-    readMessageLoadingIdsList,
-    setreadMessageLoading: onLoadingReadMessage,
     onFinishPlaying: index => {
       if (index < searchedNuggetsList.length - 1) {
         flatlistRef.current.scrollToIndex({

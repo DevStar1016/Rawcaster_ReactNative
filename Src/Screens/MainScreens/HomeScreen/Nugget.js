@@ -52,6 +52,10 @@ import InputPopup from '../../../Modals/InputPopup';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import {
+  likeAndUnlikeNugget,
+  saveAndUnsaveNugget,
+} from '../../../Store/ThunkAPIServices';
 
 const Nugget = ({
   nugget,
@@ -66,13 +70,9 @@ const Nugget = ({
     mediaHeight,
     onFinishPlaying,
     categoryName,
-    readoutAudioPlayer,
-    setreadoutPlayingNuggetId,
-    readoutPlayingNuggetId,
-    readMessageLoadingIdsList,
-    setreadMessageLoading,
   } = useNuggetParentActions();
-
+  let likeUnlikeController = undefined;
+  let saveUnsaveController = undefined;
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const nuggetsList = useNuggetsList();
@@ -103,34 +103,61 @@ const Nugget = ({
     minimumViewTime: 100,
     viewAreaCoveragePercentThreshold: 30,
   });
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0)
       setviewableItem(viewableItems.viewableItems[0].item.media_id || 0);
   });
-  const debounceOnLike = useCallback(
-    lodash.debounce(likeAndUnlikeNuggetApiCall, 300),
+
+  useEffect(() => {
+    return () => {
+      likeUnlikeController = undefined;
+      saveUnsaveController = undefined;
+    };
+  }, []);
+
+  const updateLike = useCallback(
+    lodash.debounce(() => {
+      if (likeUnlikeController) {
+        likeUnlikeController.abort();
+      }
+      likeUnlikeController = new AbortController();
+      dispatch(
+        likeAndUnlikeNugget({
+          nugget_id: nuggetData.nugget_id,
+          total_likes: nuggetData.total_likes,
+          signal: likeUnlikeController.signal,
+        }),
+      );
+    }, 100),
     [],
   );
 
-  function updateLike() {
-    setnuggetData(preNuggetData => {
-      let tempNugget = {...preNuggetData};
-      const isLiked = !tempNugget.liked;
-      let totalLikes = parseInt(tempNugget.total_likes);
-      totalLikes = isLiked ? totalLikes + 1 : totalLikes - 1;
-      debounceOnLike(isLiked);
-      return {...preNuggetData, liked: isLiked, total_likes: totalLikes};
-    });
-  }
+  const updateSave = useCallback(
+    lodash.debounce(() => {
+      if (saveUnsaveController) {
+        saveUnsaveController.abort();
+      }
+      saveUnsaveController = new AbortController();
+      dispatch(
+        saveAndUnsaveNugget({
+          nugget_id: nuggetData.nugget_id,
+          signal: saveUnsaveController.signal,
+        }),
+      );
+    }, 100),
+    [],
+  );
 
-  function updateSave() {
-    setnuggetData(preNuggetData => {
-      let tempNugget = {...preNuggetData};
-      const isSaved = !tempNugget.saved;
-      debounceOnSave(isSaved);
-      return {...preNuggetData, saved: isSaved};
-    });
-  }
+  // function updateSave() {
+
+  //   setnuggetData(preNuggetData => {
+  //     let tempNugget = {...preNuggetData};
+  //     const isSaved = !tempNugget.saved;
+  //     debounceOnSave(isSaved);
+  //     return {...preNuggetData, saved: isSaved};
+  //   });
+  // }
 
   function updateIsFan() {
     setnuggetData(preNuggetData => {
@@ -142,53 +169,6 @@ const Nugget = ({
         follow_count: parseInt(tempNugget.follow_count) + 1,
       };
     });
-  }
-
-  function likeAndUnlikeNuggetApiCall(status) {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nuggetData.nugget_id);
-    formData.append('like', status ? 1 : 2);
-    likeAndUnlikeNuggetService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          let tempList = [...nuggetsList];
-          let tempIndex = tempList.findIndex(
-            item => item.nugget_id === nuggetData.nugget_id,
-          );
-          let totalLikes = parseInt(tempList[tempIndex].total_likes);
-          totalLikes = status ? totalLikes + 1 : totalLikes - 1;
-          if (tempIndex !== -1) {
-            dispatch(
-              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
-            );
-            tempList[tempIndex] = {
-              ...tempList[tempIndex],
-              liked: status,
-              total_likes: totalLikes,
-            };
-          }
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(categoryName, tempList),
-            ),
-          );
-          let tempSavedList = [...savedNuggetsList];
-          let tempSavedIndex = tempSavedList.findIndex(
-            ele => ele.nugget_id === nuggetData.nugget_id,
-          );
-          if (tempSavedIndex !== -1) {
-            dispatch(setSavedNuggetsList([]));
-            tempSavedList[tempSavedIndex] = {
-              ...tempSavedList[tempSavedIndex],
-              liked: status,
-              total_likes: totalLikes,
-            };
-          }
-          dispatch(setSavedNuggetsList(tempSavedList));
-        }
-      })
-      .catch(e => {});
   }
 
   const saveAndUnsaveNuggetApiCall = status => {
@@ -238,11 +218,6 @@ const Nugget = ({
         console.log(e, 'save err');
       });
   };
-
-  const debounceOnSave = useCallback(
-    lodash.debounce(saveAndUnsaveNuggetApiCall, 300),
-    [savedNuggetsList],
-  );
 
   const handleBecomeFan = () => {
     // 1 - follow, 2 - unfollow
@@ -566,55 +541,32 @@ const Nugget = ({
     return selectedShareTypeId === 3 ? groupsList : connectionsList;
   };
 
-  const isLoadingRead = id => {
-    return readMessageLoadingIdsList?.includes(id);
-  };
-
-  const handlePlayAudio = async (url, id) => {
+  const handlePlayAudio = async url => {
     handleStopAudio();
-
     try {
-      if (!isLoadingRead(id)) {
-        setreadMessageLoading(id, true);
-      }
-      await readoutAudioPlayer?.startPlayer(url);
-
-      readoutAudioPlayer?.addPlayBackListener(e => {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition) === 0) {
-          setreadMessageLoading(id, false);
-          setreadoutPlayingNuggetId(id);
+          setisReadMuted(true);
         } else if (e.currentPosition >= e.duration) {
           handleStopAudio();
         }
         return;
       });
     } catch (e) {
-      console.log(e, 'ERROR');
-      setreadMessageLoading(id, false);
-      setreadoutPlayingNuggetId(null);
+      setisReadMuted(false);
     }
   };
 
   const handleStopAudio = () => {
     try {
-      readoutAudioPlayer?.stopPlayer();
-      readoutAudioPlayer?.removePlayBackListener();
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
     } catch (e) {
-      console.log(e, 'ERROR STOP');
     } finally {
-      setreadoutPlayingNuggetId(null);
+      setisReadMuted(false);
     }
   };
-
-  // const handleStopAudio = () => {
-  //   try {
-  //     readoutAudioPlayer?.stopPlayer();
-  //     readoutAudioPlayer?.removePlayBackListener();
-  //   } catch (e) {
-  //   } finally {
-  //     setisReadMuted(false);
-  //   }
-  // };
 
   const nuggetItemActions = {
     nugget: nuggetData,

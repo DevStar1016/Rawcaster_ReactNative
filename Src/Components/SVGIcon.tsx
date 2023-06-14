@@ -1,4 +1,4 @@
-import {TouchableOpacity} from 'react-native';
+import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
 import React from 'react';
 import {ICONS, IconType} from '../Utilities/Icons';
 

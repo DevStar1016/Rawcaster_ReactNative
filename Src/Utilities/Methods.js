@@ -92,7 +92,9 @@ export const getMediaMimeType = (url, type) => {
 
 export const getFilteredDuplicatesList = (dataList = [], fieldName) => {
   return dataList.reduce((acc, current) => {
-    const x = acc.find(item => item[fieldName] === current[fieldName]);
+    const x = acc.find(item =>
+      fieldName ? item[fieldName] === current[fieldName] : item === current,
+    );
     if (!x) {
       return acc.concat([current]);
     } else {

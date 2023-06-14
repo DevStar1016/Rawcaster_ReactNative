@@ -36,7 +36,7 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
 import {
   useInsets,
-  useLikedNuggetsIds,
+  useLikedNuggets,
   useProfile,
   useSavedNuggetsIds,
   useSettings,
@@ -68,7 +68,6 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
-import moment from 'moment';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -140,9 +139,6 @@ function NuggetActionsOverlay({
     searchFocused,
     dashboardFocused,
     profileFocused,
-    setreadMessageLoading,
-    readoutPlayingNuggetId,
-    readMessageLoadingIdsList,
   } = useNuggetParentActions();
 
   const {
@@ -164,6 +160,8 @@ function NuggetActionsOverlay({
   const profile = useProfile();
   const dispatch = useDispatch();
   const insets = useInsets();
+  const likedNuggets = useLikedNuggets();
+  const savedNuggetsIds = useSavedNuggetsIds();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
   const [profileDataContainerHeight, setprofileDataContainerHeight] =
@@ -228,16 +226,6 @@ function NuggetActionsOverlay({
     );
   }
 
-  const getUniqueId = () => {
-    return (
-      profile?.user_id +
-      '' +
-      moment.utc().format('x') +
-      '' +
-      Math.floor(Math.random() * 10000 + 1)
-    );
-  };
-
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
   const getNuggetType = () => {
@@ -283,7 +271,6 @@ function NuggetActionsOverlay({
   };
 
   const nuggetContentAudioAPICall = () => {
-    setreadMessageLoading(nugget.nugget_id, true);
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
@@ -292,17 +279,23 @@ function NuggetActionsOverlay({
         console.log(res.data, 'API');
 
         if (res.data.status === 1) {
-          if (handlePlayAudio) {
-            handlePlayAudio(res.data.file_path, nugget.nugget_id);
+          if (getIsFocused()) {
+            setReadNuggetUrl(res.data.file_path);
+            if (handlePlayAudio) {
+              handlePlayAudio(res.data.file_path);
+            }
           }
         } else if (res.data.status === 0) {
-          setreadMessageLoading(nugget.nugget_id, false);
+          setReadNuggetUrl(null);
           Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
-        setreadMessageLoading(nugget.nugget_id, false);
+        setReadNuggetUrl(null);
         Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisReadLoading(false);
       });
   };
 
@@ -415,6 +408,28 @@ function NuggetActionsOverlay({
       return mediaSliderHeight + 60;
     }
     return 85;
+  };
+
+  const getTotalLikes = () => {
+    if (isNuggetLiked()) {
+      let tempLikedNuggets = [...likedNuggets];
+      const tempLikedNuggetData = tempLikedNuggets.find(
+        item => item.id === nugget.nugget_id,
+      );
+      return tempLikedNuggetData.total_likes;
+    }
+    return nugget.total_likes;
+  };
+
+  const isNuggetLiked = () => {
+    let tempLikedNuggets = [...likedNuggets];
+    return tempLikedNuggets.find(item => item.id === nugget.nugget_id)
+      ? true
+      : false;
+  };
+
+  const isNuggetSaved = () => {
+    return [...savedNuggetsIds].includes(nugget.nugget_id);
   };
 
   const ActionIconContainer = ({
@@ -699,23 +714,29 @@ function NuggetActionsOverlay({
                     <SVGIcon
                       height={15.5}
                       icon={
-                        nugget.nugget_id === readoutPlayingNuggetId
-                          ? 'mic_off_fill_secondary'
-                          : 'mic_fill_white'
+                        !isReadLoading
+                          ? !isReadMuted
+                            ? 'mic_fill_white'
+                            : 'mic_off_fill_secondary'
+                          : undefined
                       }
                       isButton
                       onPress={() => {
                         if (isLogin()) {
-                          if (nugget.nugget_id === readoutPlayingNuggetId) {
-                            handleStopAudio();
-                          } else {
+                          if (!isReadMuted) {
                             if (setpaused) {
                               setpaused(true);
                             }
                             if (setisMuted) {
                               setisMuted(true);
                             }
+
+                            setisReadLoading(true);
                             nuggetContentAudioAPICall();
+                          } else {
+                            if (handleStopAudio) {
+                              handleStopAudio();
+                            }
                           }
                         }
                       }}
@@ -911,6 +932,7 @@ function NuggetActionsOverlay({
             position: 'absolute',
             right: 10,
             bottom: 0,
+            zIndex: 10,
           }}
           onLayout={e => {
             if (e.nativeEvent.layout.width) {
@@ -931,12 +953,11 @@ function NuggetActionsOverlay({
             />
           ) : null}
           <ActionIconContainer
-            icon={nugget.liked ? 'heart_pink' : 'heart_white'}
-            text={bigNumberFormater(nugget.total_likes)}
+            icon={isNuggetLiked() ? 'heart_pink' : 'heart_white'}
+            text={bigNumberFormater(getTotalLikes())}
             onPress={updateLike}
-            isEnableTextButton={bigNumberFormater(nugget.total_likes)}
+            isEnableTextButton={bigNumberFormater(getTotalLikes())}
             onPressText={() => {
-              console.log('like');
               /* @ts-ignore */
               navigation.navigate('ProfileStack', {
                 screen: 'ProfileSeeAllUsersList',
@@ -962,7 +983,7 @@ function NuggetActionsOverlay({
               <ActionIconContainer icon="share" onPress={onPressShare} />
             )}
           <ActionIconContainer
-            icon={nugget.saved ? 'save_pink' : 'save_white'}
+            icon={isNuggetSaved() ? 'save_pink' : 'save_white'}
             isEnableText={false}
             onPress={updateSave}
           />
@@ -1010,10 +1031,7 @@ function NuggetActionsOverlay({
           }}>
           <Image
             source={
-              isPaused ||
-              isLoadingVideo ||
-              getMediaDurationFormat(progress) ===
-                getMediaDurationFormat(duration)
+              isPaused || isLoadingVideo || progress === duration
                 ? AudioWaveFormImage
                 : AudioWaveFormGif
             }

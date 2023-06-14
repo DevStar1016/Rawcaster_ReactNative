@@ -64,8 +64,8 @@ export const useInfluencerCategoryList = () => {
 export const useUnclaimedAccountsList = () => {
   return useSelector(state => state.home.unclaimedAccountsList);
 };
-export const useLikedNuggetsIds = () => {
-  return useSelector(state => state.nugget_actions.likedNuggetsIds);
+export const useLikedNuggets = () => {
+  return useSelector(state => state.nugget_actions.likedNuggets);
 };
 export const useSavedNuggetsIds = () => {
   return useSelector(state => state.nugget_actions.savedNuggetsIds);
