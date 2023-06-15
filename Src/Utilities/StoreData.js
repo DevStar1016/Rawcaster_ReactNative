@@ -67,6 +67,11 @@ export const useUnclaimedAccountsList = () => {
 export const useLikedNuggets = () => {
   return useSelector(state => state.nugget_actions.likedNuggets);
 };
+export const useUnLikedNuggetsFromLikedNuggets = () => {
+  return useSelector(
+    state => state.nugget_actions.unLikedNuggetsFromLikedNuggets,
+  );
+};
 export const useSavedNuggetsIds = () => {
   return useSelector(state => state.nugget_actions.savedNuggetsIds);
 };

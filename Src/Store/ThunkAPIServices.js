@@ -30,11 +30,9 @@ export const getListNuggets = createAsyncThunk(
           id: item.nugget_id,
           total_likes: item.total_likes,
         }));
-      console.log(JSON.stringify(res.data.nuggets_list[0]), 'NUGGET');
       const tempSavedNuggetsIds = [...res.data.nuggets_list]
         .filter(item => item.saved)
         .map(item => item.nugget_id);
-      console.log(tempSavedNuggetsIds, 'SAVEDNUGGETSSSS');
       dispatch(
         setLikedSavedNuggets({
           likedNuggets: [...tempLikedNuggets],

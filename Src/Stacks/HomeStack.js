@@ -23,14 +23,15 @@ const HomeStack = () => {
       screenOptions={{headerShown: false, ...StackAnimation}}
       screenListeners={{
         focus: e => {
+          console.log('SCREEN CHANGEEEEE', e.target);
           if (
             e.target.includes('DashboardTopTabNavigation') ||
             e.target.includes('DashboardWithCategory')
           ) {
-            dispatch(setNuggetType(1));
+            // dispatch(setNuggetType(1));
             dispatch(setIsBottomTabBarAbsolute(true));
           } else {
-            dispatch(setNuggetType(0));
+            // dispatch(setNuggetType(0));
             dispatch(setIsBottomTabBarAbsolute(false));
           }
         },

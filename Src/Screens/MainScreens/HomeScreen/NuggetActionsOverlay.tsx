@@ -41,6 +41,7 @@ import {
   useSavedNuggetsIds,
   useSettings,
   useToken,
+  useUnLikedNuggetsFromLikedNuggets,
   useUserData,
 } from '../../../Utilities/StoreData';
 import {StackActions, useNavigation} from '@react-navigation/native';
@@ -161,6 +162,7 @@ function NuggetActionsOverlay({
   const dispatch = useDispatch();
   const insets = useInsets();
   const likedNuggets = useLikedNuggets();
+  const unLikedNuggetsFromLikedNuggets = useUnLikedNuggetsFromLikedNuggets();
   const savedNuggetsIds = useSavedNuggetsIds();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
@@ -412,17 +414,24 @@ function NuggetActionsOverlay({
 
   const getTotalLikes = () => {
     if (isNuggetLiked()) {
-      let tempLikedNuggets = [...likedNuggets];
+      const tempLikedNuggets = [...likedNuggets];
       const tempLikedNuggetData = tempLikedNuggets.find(
         item => item.id === nugget.nugget_id,
       );
       return tempLikedNuggetData.total_likes;
     }
+    const tempUnlikedNuggets = [...unLikedNuggetsFromLikedNuggets];
+    const tempUnLikedNuggetData = tempUnlikedNuggets.find(
+      item => item.id === nugget.nugget_id,
+    );
+    if (tempUnLikedNuggetData) {
+      return tempUnLikedNuggetData.total_likes;
+    }
     return nugget.total_likes;
   };
 
   const isNuggetLiked = () => {
-    let tempLikedNuggets = [...likedNuggets];
+    const tempLikedNuggets = [...likedNuggets];
     return tempLikedNuggets.find(item => item.id === nugget.nugget_id)
       ? true
       : false;

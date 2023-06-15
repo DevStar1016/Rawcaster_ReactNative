@@ -16,8 +16,6 @@ import {
   useGroupsList,
   useInsets,
   useNuggetsList,
-  useSavedNuggetsCount,
-  useSavedNuggetsList,
   useSearchedNuggetsList,
   useToken,
 } from '../../../Utilities/StoreData';
@@ -26,7 +24,6 @@ import {
   blockUnblockUserService,
   deleteNuggetService,
   followAndUnfollowService,
-  likeAndUnlikeNuggetService,
   nuggetAbuseReportService,
   saveAndUnsaveNuggetService,
   shareNuggetService,

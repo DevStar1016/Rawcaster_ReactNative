@@ -16,7 +16,6 @@ import {COLORS} from '../../../Utilities/Colors';
 import {
   useConnectionsList,
   useInsets,
-  useNuggetsList,
   useProfile,
   useSavedNuggetsCount,
   useSavedNuggetsList,
@@ -75,11 +74,11 @@ const Profile = ({route}) => {
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
-  const [isFirst, setisFirst] = useState(true);
   const [isListLoading, setisListLoading] = useState(false);
   const [isFavourites, setisFavourites] = useState(false);
   const connections = useConnectionsList();
   const flatlistRef = useRef(null);
+
   const [nuggetsList, setnuggetsList] = useState([]);
   const [nuggetsCount, setnuggetsCount] = useState(0);
   const [isMuted, setisMuted] = useState(true);
@@ -146,10 +145,7 @@ const Profile = ({route}) => {
   useEffect(() => {
     if (
       (userId && othersProfile && parseInt(othersProfile.lock_nugget) === 0) ||
-      (!userId &&
-        profile &&
-        ((isFavourites && (savedNuggetsList.length <= 0 || isFirst)) ||
-          (!isFavourites && nuggetsList.length <= 0)))
+      (!userId && profile)
     ) {
       if (isMount) {
         setisListLoading(true);
@@ -296,7 +292,6 @@ const Profile = ({route}) => {
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               if (isFavourites) {
-                setisFirst(false);
                 dispatch(setSavedNuggetsCount(res.data.nuggets_count));
                 dispatch(setSavedNuggetsList(decodedNuggetList));
               } else {

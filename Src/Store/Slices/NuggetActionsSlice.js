@@ -4,6 +4,7 @@ import {getFilteredDuplicatesList} from '../../Utilities/Methods';
 export const initialState = {
   likedNuggets: [], //{ id:nugget_id,total_likes:TOTAL_LIKES}
   savedNuggetsIds: [],
+  unLikedNuggetsFromLikedNuggets: [],
 };
 
 const NuggetActionsSlice = createSlice({
@@ -16,14 +17,37 @@ const NuggetActionsSlice = createSlice({
         item => item.id === action.payload.nugget_id,
       );
       if (tempIndex === -1) {
+        let total_likes = parseInt(action.payload.total_likes);
+        const unlikedNuggetData = [
+          ...state.unLikedNuggetsFromLikedNuggets,
+        ].find(item => item.id === action.payload.nugget_id);
+
+        if (unlikedNuggetData) {
+          total_likes = unlikedNuggetData.total_likes;
+        }
         tempLikedNuggets.push({
           id: action.payload.nugget_id,
-          total_likes: parseInt(action.payload.total_likes) + 1,
+          total_likes: total_likes + 1,
         });
+        state.unLikedNuggetsFromLikedNuggets = [
+          ...state.unLikedNuggetsFromLikedNuggets,
+        ].filter(item => item.id !== action.payload.nugget_id);
       } else {
+        const tempUnlikedNuggetData = tempLikedNuggets.find(
+          item => item.id === action.payload.nugget_id,
+        );
         tempLikedNuggets = tempLikedNuggets.filter(
           item => item.id !== action.payload.nugget_id,
         );
+        if (tempUnlikedNuggetData) {
+          state.unLikedNuggetsFromLikedNuggets = [
+            ...state.unLikedNuggetsFromLikedNuggets,
+            {
+              ...tempUnlikedNuggetData,
+              total_likes: tempUnlikedNuggetData.total_likes - 1,
+            },
+          ];
+        }
       }
       state.likedNuggets = [...tempLikedNuggets];
     },
@@ -51,7 +75,7 @@ const NuggetActionsSlice = createSlice({
           ...state.savedNuggetsIds,
           ...action.payload.savedNuggetsIds,
         ];
-        console.log(tempSavedNuggetsIds, 'SAVEDDDDDD REDUX IDS');
+
         state.savedNuggetsIds = getFilteredDuplicatesList(tempSavedNuggetsIds);
       }
     },
