@@ -26,6 +26,7 @@ import StyledText from '../../../Components/StyledText';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
+import {becomeFan} from '../../../Store/ThunkAPIServices';
 
 var isMount = true;
 var currentPage = 1;
@@ -104,44 +105,52 @@ const ProfileSearch = () => {
       });
   };
 
-  const handleBecomeFan = userRefId => {
+  const handleBecomeFan = (userId, userRefId, followCount) => {
+    dispatch(
+      becomeFan({
+        user_id: userId,
+        follow_count: followCount,
+        user_ref_id: userRefId,
+      }),
+    );
+
     // 1 - follow, 2 - unfollow
-    if (isMount) {
-      setisActionLoading(true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('follow_userid', userRefId);
-    formData.append('type', 1);
-    followAndUnfollowService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          setprofileList(preList => {
-            let tempProfileList = [...preList];
-            let tempIndex = [...preList].findIndex(
-              item => item.user_ref_id === userRefId,
-            );
-            if (tempIndex !== -1) {
-              tempProfileList[tempIndex] = {
-                ...tempProfileList[tempIndex],
-                follow: 1,
-              };
-            }
-            return tempProfileList;
-          });
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
+    // if (isMount) {
+    //   setisActionLoading(true);
+    // }
+    // const formData = new FormData();
+    // formData.append('token', token);
+    // formData.append('follow_userid', userRefId);
+    // formData.append('type', 1);
+    // followAndUnfollowService(formData)
+    //   .then(res => {
+    //     if (res.data.status === 1) {
+    //       Toast.success(res.data.msg);
+    //       setprofileList(preList => {
+    //         let tempProfileList = [...preList];
+    //         let tempIndex = [...preList].findIndex(
+    //           item => item.user_ref_id === userRefId,
+    //         );
+    //         if (tempIndex !== -1) {
+    //           tempProfileList[tempIndex] = {
+    //             ...tempProfileList[tempIndex],
+    //             follow: 1,
+    //           };
+    //         }
+    //         return tempProfileList;
+    //       });
+    //     } else if (res.data.status === 0) {
+    //       Toast.fail(res.data.msg);
+    //     }
+    //   })
+    //   .catch(e => {
+    //     Toast.fail(e.message);
+    //   })
+    //   .finally(() => {
+    //     if (isMount) {
+    //       setisActionLoading(false);
+    //     }
+    //   });
   };
 
   const handleSendFriendRequest = (userRefId, user_id) => {
@@ -253,7 +262,12 @@ const ProfileSearch = () => {
               <SearchProfileItem
                 item={item}
                 onBecomeFan={() => {
-                  handleBecomeFan(item.user_ref_id);
+                  console.log(item, 'ITEM');
+                  handleBecomeFan(
+                    item.user_id,
+                    item.user_ref_id,
+                    item.follow_count,
+                  );
                 }}
                 onPressItem={() => {
                   navigation.navigate('ProfileStack', {

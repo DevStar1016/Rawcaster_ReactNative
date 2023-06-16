@@ -14,7 +14,6 @@ import {
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
 import {
-  getFollowListService,
   getInfluencerCategoryService,
   getMyProfileService,
   getUserSettingsService,
@@ -74,11 +73,6 @@ const MainStack = () => {
     formData.append('allfriends', 1);
     return formData;
   }
-  function getFollowingFormData() {
-    const formData = getCommonFormData();
-    formData.append('type', 2);
-    return formData;
-  }
 
   function initialAPICall() {
     Promise.all([
@@ -89,7 +83,6 @@ const MainStack = () => {
       listAllFriendRequestsService(getCommonFormData()),
       getInfluencerCategoryService(getCommonFormData()),
       listUnClaimAccountService(getCommonFormData()),
-      getFollowListService(getFollowingFormData()),
     ])
       .then(res => {
         if (res[0].data.status === 1) {

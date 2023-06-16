@@ -23,10 +23,7 @@ import {
 import PollNugget from './NuggetItemTypes/PollNugget';
 import {
   blockUnblockUserService,
-  deleteNuggetService,
-  followAndUnfollowService,
   nuggetAbuseReportService,
-  saveAndUnsaveNuggetService,
   shareNuggetService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
@@ -140,8 +137,13 @@ const Nugget = ({nugget, nuggetIndex}) => {
   );
 
   function updateIsFan() {
-    console.log('CALLING FAN');
-    dispatch(becomeFan(nugget));
+    dispatch(
+      becomeFan({
+        user_id: nugget.user_id,
+        follow_count: nugget.follow_count,
+        user_ref_id: nugget.user_ref_id,
+      }),
+    );
   }
 
   const deleteButtonAlert = () =>

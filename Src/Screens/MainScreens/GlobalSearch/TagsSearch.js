@@ -1,27 +1,16 @@
 import {
   ActivityIndicator,
   FlatList,
-  processColor,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
-import SearchProfileItem from './SearchProfileItem';
 import {useGlobalSearch} from '../../../Utilities/Contexts';
 import {useToken} from '../../../Utilities/StoreData';
-import {
-  getAuthCode,
-  getFilteredDuplicatesList,
-  htmlDecodeText,
-} from '../../../Utilities/Methods';
-import {
-  searchRawcasterUsersService,
-  followAndUnfollowService,
-  tagListService,
-} from '../../../Services/ApiService';
-import Toast from '../../../Components/Toast';
+import {getAuthCode} from '../../../Utilities/Methods';
+import {tagListService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
 import SVGIcon from '../../../Components/SVGIcon';

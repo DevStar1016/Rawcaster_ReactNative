@@ -323,6 +323,7 @@ const ProfilesListContainerWithSeeAll = ({
         title={getTitle()}
         isDisplayButton={getIsShowButton()}
         onPressButton={() => {
+          /* @ts-ignore */
           navigation.navigate('ProfileSeeAllUsersList', {
             initialList: [...getList()],
             userId: userId,
@@ -408,6 +409,7 @@ const ProfilesListContainerWithSeeAll = ({
                         topRightIconAsButton
                         onPressTopRightIcon={() => {
                           if (listType === 'unclaimed_influencers') {
+                            /* @ts-ignore */
                             navigation.navigate('ClaimAccount', {
                               influencerId: item.user_id,
                             });

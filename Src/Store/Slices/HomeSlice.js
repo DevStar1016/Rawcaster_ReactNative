@@ -1,4 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {getFilteredDuplicatesList} from '../../Utilities/Methods';
 
 export const initialState = {
   searchedNuggetsList: [],
@@ -22,6 +23,7 @@ export const initialState = {
   otherInfluencersRequestList: [],
   savedNuggetsList: [],
   savedNuggetsCount: 0,
+  followingUsersList: [], // {user_id:userId,follow_count:followCount}
 };
 
 const HomeSlice = createSlice({
@@ -70,7 +72,20 @@ const HomeSlice = createSlice({
     setSavedNuggetsCount: (state, action) => {
       state.savedNuggetsCount = action.payload;
     },
-
+    setFollowingUsersList: (state, action) => {
+      state.followingUsersList = getFilteredDuplicatesList(
+        [...state.followingUsersList, ...action.payload],
+        'user_id',
+      );
+    },
+    addFollowingUser: (state, action) => {
+      if (!state.followingUsersList.includes(action.payload)) {
+        state.followingUsersList = getFilteredDuplicatesList(
+          [...state.followingUsersList, {...action.payload}],
+          'user_id',
+        );
+      }
+    },
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
       state.searchedNuggetsList = [];
@@ -111,5 +126,7 @@ export const {
   setOtherInfluencersRequestList,
   setSavedNuggetsList,
   setSavedNuggetsCount,
+  setFollowingUsersList,
+  addFollowingUser,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

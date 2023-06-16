@@ -46,6 +46,10 @@ export const useEditedNuggetsList = () => {
   return useSelector(state => state.nugget_actions.editedNuggets);
 };
 
+export const useFollowingUsersList = () => {
+  return useSelector(state => state.home.followingUsersList);
+};
+
 export const useIsVisibleInfluencers = () => {
   return useSelector(state => state.utility.isVisibleInfluencers);
 };
