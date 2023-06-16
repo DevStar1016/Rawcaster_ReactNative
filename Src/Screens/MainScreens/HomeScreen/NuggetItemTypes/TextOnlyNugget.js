@@ -19,20 +19,19 @@ const TextOnlyNugget = ({
   onBlockUser,
   onReportAbouseNugget,
 }) => {
-  const {mediaHeight, viewableNuggetItem} = useNuggetParentActions();
   const {
-    nugget,
-    viewableItem,
-    parentNuggetIndex,
+    mediaHeight,
+    viewableNuggetItem,
     handleStopAudio,
     isReadMuted,
-  } = useNuggetItemActions();
+    nuggetContentController,
+  } = useNuggetParentActions();
+  const {nugget, viewableItem, parentNuggetIndex} = useNuggetItemActions();
   const insets = useInsets();
   const isAppForeground = useIsAppForeground();
   const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
-  const nuggetContentController = useRef(null);
 
   const shouldPauseReadAudio = useMemo(() => {
     if (!viewableNuggetItem && parentNuggetIndex === 0) {

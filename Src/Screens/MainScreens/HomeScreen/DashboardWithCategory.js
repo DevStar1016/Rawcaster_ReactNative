@@ -49,6 +49,7 @@ import {
   setNuggetsList,
   setNuggetsLoading,
 } from '../../../Store/Slices/NuggetsListSlice';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 const DashboardWithCategory = ({route}) => {
   let currentPage = 1;
@@ -75,6 +76,8 @@ const DashboardWithCategory = ({route}) => {
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
+  const [isReadMuted, setisReadMuted] = useState(false);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const viewConfigRef = useRef({
     waitForInteraction: false,
     minimumViewTime: 500,
@@ -102,6 +105,7 @@ const DashboardWithCategory = ({route}) => {
       });
     }
   });
+  const nuggetContentController = useRef(null);
 
   useEffect(() => {
     dispatch(setIsBottomTabBarAbsolute(true));
@@ -139,6 +143,10 @@ const DashboardWithCategory = ({route}) => {
   useEffect(() => {
     if (isFocused) {
       AvoidSoftInput.setAdjustPan();
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
     }
   }, [isFocused]);
 
@@ -218,6 +226,33 @@ const DashboardWithCategory = ({route}) => {
     });
   };
 
+  const handlePlayAudio = async url => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition) === 0) {
+          setisReadMuted(true);
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      setisReadMuted(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setisReadMuted(false);
+    }
+  };
+
   function handleViewNugget(nuggetId) {
     const formData = new FormData();
     formData.append('token', token);
@@ -279,6 +314,10 @@ const DashboardWithCategory = ({route}) => {
     isEnableTopInsetsPadding: true,
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
+    nuggetContentController: nuggetContentController,
+    isReadMuted: isReadMuted,
+    handlePlayAudio: handlePlayAudio,
+    handleStopAudio: handleStopAudio,
     onFinishPlaying: index => {
       if (index < nuggetsList.length - 1) {
         flatlistRef.current.scrollToIndex({

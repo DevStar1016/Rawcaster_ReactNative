@@ -85,6 +85,7 @@ type Props = {
   onReportAbouseNugget: () => void;
   duration?: number;
   progress?: number;
+  nuggetContentController?: any;
 };
 type ActionContainerProps = {
   icon: IconType;
@@ -126,6 +127,7 @@ function NuggetActionsOverlay({
   onReportAbouseNugget,
   duration = 0,
   progress = 0,
+  nuggetContentController,
 }: Props) {
   const {
     headerContainerHeight,
@@ -140,6 +142,9 @@ function NuggetActionsOverlay({
     searchFocused,
     dashboardFocused,
     profileFocused,
+    handlePlayAudio,
+    handleStopAudio,
+    isReadMuted,
   } = useNuggetParentActions();
 
   const {
@@ -150,9 +155,6 @@ function NuggetActionsOverlay({
     updateLike,
     updateSave,
     updateIsFan,
-    handlePlayAudio,
-    handleStopAudio,
-    isReadMuted,
   } = useNuggetItemActions();
 
   const navigation = useNavigation();
@@ -188,11 +190,13 @@ function NuggetActionsOverlay({
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
 
-  useEffect(() => {
-    if (!getIsFocused()) {
-      handleStopAudio();
-    }
-  }, [getIsFocused()]);
+  const getIsFocused = useMemo(() => {
+    return (
+      (isFrom === 'search' && searchFocused) ||
+      (isFrom === 'dashboard' && dashboardFocused) ||
+      (isFrom === 'profile' && profileFocused)
+    );
+  }, [isFrom, searchFocused, dashboardFocused, profileFocused]);
 
   const handlePresentCommentsModal = useCallback(() => {
     if (setpaused) {
@@ -219,14 +223,6 @@ function NuggetActionsOverlay({
       setpaused(false);
     }
   }, []);
-
-  function getIsFocused() {
-    return (
-      (isFrom === 'search' && searchFocused) ||
-      (isFrom === 'dashboard' && dashboardFocused) ||
-      (isFrom === 'profile' && profileFocused)
-    );
-  }
 
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
@@ -273,15 +269,17 @@ function NuggetActionsOverlay({
   };
 
   const nuggetContentAudioAPICall = () => {
+    if (nuggetContentController && nuggetContentController.current) {
+      nuggetContentController.current.abort();
+    }
+    nuggetContentController.current = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
-    nuggetContentAudioService(formData)
+    nuggetContentAudioService(formData, nuggetContentController.current.signal)
       .then(res => {
-        console.log(res.data, 'API');
-
         if (res.data.status === 1) {
-          if (getIsFocused()) {
+          if (getIsFocused) {
             setReadNuggetUrl(res.data.file_path);
             if (handlePlayAudio) {
               handlePlayAudio(res.data.file_path);
@@ -681,32 +679,6 @@ function NuggetActionsOverlay({
                     //   : textNuggetNumberOfLines ?? 15
                   }
                   onPressUrl={onPressUrl}
-                  // iconProps={{
-                  //   icon: !isReadLoading
-                  //     ? !isReadMuted
-                  //       ? 'mic_fill_white'
-                  //       : 'mic_off_fill_white'
-                  //     : undefined,
-                  //   height: 20,
-                  //   isButton: true,
-                  //   onPress: () => {
-                  //     if (!isReadMuted) {
-                  //       console.log('JJJJ');
-                  //       if (setpaused) {
-                  //         setpaused(true);
-                  //       }
-                  //       if (setisMuted) {
-                  //         setisMuted(true);
-                  //       }
-                  //       setisReadLoading(true);
-                  //       nuggetContentAudioAPICall();
-                  //     } else {
-                  //       if (handleStopAudio) {
-                  //         handleStopAudio();
-                  //       }
-                  //     }
-                  //   },
-                  // }}
                   style={{
                     color: COLORS.white,
                     fontSize: 15.5,
@@ -739,7 +711,16 @@ function NuggetActionsOverlay({
                             if (setisMuted) {
                               setisMuted(true);
                             }
-
+                            console.log(
+                              nuggetContentController.current,
+                              'before',
+                            );
+                            if (
+                              nuggetContentController &&
+                              nuggetContentController.current
+                            ) {
+                              nuggetContentController.current.abort();
+                            }
                             setisReadLoading(true);
                             nuggetContentAudioAPICall();
                           } else {

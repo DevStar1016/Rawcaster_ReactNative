@@ -51,6 +51,7 @@ import {
   setSavedNuggetsCount,
   setSavedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 const PADDING_HORIZONTAL = 10;
 
 const Profile = ({route}) => {
@@ -90,6 +91,8 @@ const Profile = ({route}) => {
     nugget_id: '',
     viewed: false,
   });
+  const [isReadMuted, setisReadMuted] = useState(false);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const viewConfigRef = useRef({
     waitForInteraction: false,
     minimumViewTime: 500,
@@ -103,10 +106,19 @@ const Profile = ({route}) => {
       });
     }
   });
+  const nuggetContentController = useRef(null);
 
   const Divider = () => {
     return <View style={styles.divider} />;
   };
+  useEffect(() => {
+    if (!isFocused) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     currentPage = 1;
@@ -450,6 +462,33 @@ const Profile = ({route}) => {
     // flatlistRef.current.scrollToOffset({animated: false, offset: 0});
   }
 
+  const handlePlayAudio = async url => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition) === 0) {
+          setisReadMuted(true);
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      setisReadMuted(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setisReadMuted(false);
+    }
+  };
+
   const nuggetActions = {
     headerContainerHeight: 0,
     isMuted: isMuted,
@@ -466,6 +505,10 @@ const Profile = ({route}) => {
     isEnableTopInsetsPadding: true,
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
+    nuggetContentController: nuggetContentController,
+    isReadMuted: isReadMuted,
+    handlePlayAudio: handlePlayAudio,
+    handleStopAudio: handleStopAudio,
     onFinishPlaying: index => {
       // if (index < nuggetsList.length - 1) {
       //   flatlistRef.current.scrollToIndex({
