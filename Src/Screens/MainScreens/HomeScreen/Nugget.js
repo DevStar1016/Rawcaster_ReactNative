@@ -15,6 +15,7 @@ import {
   useConnectionsList,
   useGroupsList,
   useInsets,
+  useIsDeletingNugget,
   useNuggetsList,
   useSearchedNuggetsList,
   useToken,
@@ -44,23 +45,19 @@ import {
   NuggetItemActionsContext,
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
-import BigList from 'react-native-big-list';
 import InputPopup from '../../../Modals/InputPopup';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {
+  becomeFan,
+  deleteNugget,
   likeAndUnlikeNugget,
   saveAndUnsaveNugget,
 } from '../../../Store/ThunkAPIServices';
+import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 
-const Nugget = ({
-  nugget,
-  nuggetIndex,
-  isFromProfile = false,
-  onFinishDelete,
-  onFinishSave,
-}) => {
+const Nugget = ({nugget, nuggetIndex}) => {
   const {
     scrollNuggetsListToTop,
     isFromGlobalSearch,
@@ -88,10 +85,9 @@ const Nugget = ({
   const [isReadMuted, setisReadMuted] = useState(false);
   const [selectedShareTypeId, setselectedShareTypeId] = useState(null);
 
-  const [nuggetData, setnuggetData] = useState({...nugget});
   const [isActionLoading, setisActionLoading] = useState(false);
   const [loaderText, setloaderText] = useState('');
-  const [totalComments, settotalComments] = useState(nuggetData.total_comments);
+  const [totalComments, settotalComments] = useState(nugget.total_comments);
   const [isRepeatVideo, setisRepeatVideo] = useState(false);
   const [viewableItem, setviewableItem] = useState('');
   const [isOpenReportModal, setisOpenReportModal] = useState(false);
@@ -121,8 +117,8 @@ const Nugget = ({
       likeUnlikeController = new AbortController();
       dispatch(
         likeAndUnlikeNugget({
-          nugget_id: nuggetData.nugget_id,
-          total_likes: nuggetData.total_likes,
+          nugget_id: nugget.nugget_id,
+          total_likes: nugget.total_likes,
           signal: likeUnlikeController.signal,
         }),
       );
@@ -138,7 +134,7 @@ const Nugget = ({
       saveUnsaveController = new AbortController();
       dispatch(
         saveAndUnsaveNugget({
-          nugget_id: nuggetData.nugget_id,
+          nugget_id: nugget.nugget_id,
           signal: saveUnsaveController.signal,
         }),
       );
@@ -146,86 +142,10 @@ const Nugget = ({
     [],
   );
 
-  // function updateSave() {
-
-  //   setnuggetData(preNuggetData => {
-  //     let tempNugget = {...preNuggetData};
-  //     const isSaved = !tempNugget.saved;
-  //     debounceOnSave(isSaved);
-  //     return {...preNuggetData, saved: isSaved};
-  //   });
-  // }
-
   function updateIsFan() {
-    setnuggetData(preNuggetData => {
-      let tempNugget = {...preNuggetData};
-      handleBecomeFan();
-      return {
-        ...preNuggetData,
-        following: true,
-        follow_count: parseInt(tempNugget.follow_count) + 1,
-      };
-    });
+    console.log('CALLING FAN');
+    dispatch(becomeFan(nugget));
   }
-
-  const saveAndUnsaveNuggetApiCall = status => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nuggetData.nugget_id);
-    formData.append('save', status ? 1 : 2);
-    saveAndUnsaveNuggetService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          console.log(JSON.stringify(savedNuggetsList), 'SAVE');
-          let tempSavedList = [...savedNuggetsList];
-          let tempList = [...nuggetsList];
-          let tempIndex = tempList.findIndex(
-            item => item.nugget_id === nuggetData.nugget_id,
-          );
-          let tempSavedIndex = tempSavedList.findIndex(
-            item => item.nugget_id === nuggetData.nugget_id,
-          );
-          if (tempIndex !== -1) {
-            dispatch(
-              setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
-            );
-            tempList[tempIndex] = {...tempList[tempIndex], saved: status};
-          }
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(categoryName, tempList),
-            ),
-          );
-          if (isFromProfile) {
-            onFinishSave(nuggetData.nugget_id, status);
-          }
-          if (status && tempSavedIndex === -1) {
-            tempSavedList = [...tempSavedList, {...nuggetData, saved: status}];
-          } else if (!status && tempSavedIndex !== -1) {
-            tempSavedList = tempSavedList.filter(
-              ele => ele.nugget_id !== nuggetData.nugget_id,
-            );
-          }
-          console.log(JSON.stringify(tempSavedList));
-          dispatch(setSavedNuggetsList(tempSavedList));
-          dispatch(setSavedNuggetsCount(res.data.saved_nugget_count));
-        }
-      })
-      .catch(e => {
-        console.log(e, 'save err');
-      });
-  };
-
-  const handleBecomeFan = () => {
-    // 1 - follow, 2 - unfollow
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('follow_userid', nuggetData.user_ref_id);
-    formData.append('type', 1);
-    followAndUnfollowService(formData)
-      .then(res => {})
-      .catch(e => {});
-  };
 
   const deleteButtonAlert = () =>
     Alert.alert(
@@ -240,9 +160,10 @@ const Nugget = ({
         {
           text: 'OK',
           onPress: () => {
-            setloaderText('Deleting Nugget...');
-            setisActionLoading(true);
-            handleDeleteNugget(nuggetData.nugget_id);
+            // setloaderText('Deleting Nugget...');
+            // setisActionLoading(true);
+            // handleDeleteNugget(nugget.nugget_id);
+            dispatch(deleteNugget({nugget_id: nugget.nugget_id}));
           },
         },
       ],
@@ -264,7 +185,7 @@ const Nugget = ({
           onPress: () => {
             setloaderText('Blocking User...');
             setisActionLoading(true);
-            handleBlockUser(nuggetData.user_id);
+            handleBlockUser(nugget.user_id);
           },
         },
       ],
@@ -273,65 +194,10 @@ const Nugget = ({
 
   const onEditNugget = () => {
     navigation.navigate('PostEditNugget', {
-      nugget: nuggetData,
+      nugget: nugget,
       isSearchNugget: isFromGlobalSearch,
       categoryName: categoryName ?? 'forYou',
     });
-  };
-
-  const handleDeleteNugget = nuggetId => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nuggetId);
-    deleteNuggetService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          if (isFromGlobalSearch) {
-            dispatch(
-              setSearchedNuggetsList(
-                [...searchedNuggetsList].filter(
-                  item => item.nugget_id !== nuggetId,
-                ),
-              ),
-            );
-          } else if (isFromProfile) {
-            onFinishDelete(nuggetId);
-          }
-          let tempSavedList = [...savedNuggetsList];
-          let tempIndex = tempSavedList.findIndex(
-            ele => ele.nugget_id === nuggetId,
-          );
-          if (tempIndex !== -1) {
-            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
-            dispatch(
-              setSavedNuggetsList(
-                tempSavedList.filter(item => item.nugget_id !== nuggetId),
-              ),
-            );
-          }
-          const filteredNuggetsList = [...nuggetsList].filter(
-            item => item.nugget_id !== nuggetId,
-          );
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(
-                categoryName,
-                filteredNuggetsList,
-              ),
-            ),
-          );
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        setloaderText('');
-        setisActionLoading(false);
-      });
   };
 
   const handleBlockUser = userId => {
@@ -393,7 +259,7 @@ const Nugget = ({
     setisActionLoading(true);
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('nugget_id', nuggetData.nugget_id);
+    formData.append('nugget_id', nugget.nugget_id);
     formData.append('share_type', type);
     if (type === 3) {
       formData.append('share_with', JSON.stringify({groups: sharedList}));
@@ -511,18 +377,18 @@ const Nugget = ({
 
   const onPressShareType = () => {
     if (
-      (nuggetData.share_type === 3 || nuggetData.share_type === 4) &&
-      nuggetData?.shared_detail &&
-      nuggetData?.shared_detail.length > 0
+      (nugget.share_type === 3 || nugget.share_type === 4) &&
+      nugget?.shared_detail &&
+      nugget?.shared_detail.length > 0
     ) {
-      setselectedShareTypeId(parseInt(nuggetData.share_type));
+      setselectedShareTypeId(parseInt(nugget.share_type));
       setisOpenViewOnlySelectionModal(true);
     }
   };
 
   const getSelectionList = () => {
     if (isOpenViewOnlySelectionModal) {
-      return nuggetData?.shared_detail?.map(item => {
+      return nugget?.shared_detail?.map(item => {
         if (selectedShareTypeId === 3) {
           return {
             group_name: item.name,
@@ -566,12 +432,12 @@ const Nugget = ({
   };
 
   const nuggetItemActions = {
-    nugget: nuggetData,
+    nugget: nugget,
     parentNuggetIndex: nuggetIndex,
     updateLike: updateLike,
     updateSave: updateSave,
     updateIsFan: updateIsFan,
-    totalViews: nuggetData.total_views,
+    totalViews: nugget.total_views,
     totalComments: totalComments,
     setTotalComments: settotalComments,
     isRepeatVideo: isRepeatVideo,
@@ -582,7 +448,7 @@ const Nugget = ({
     handlePlayAudio: handlePlayAudio,
     handleStopAudio: handleStopAudio,
     onFinishPlaying: index => {
-      if (index < nuggetData?.media_list?.length - 1) {
+      if (index < nugget?.media_list?.length - 1) {
         flatlistRef.current.scrollToIndex({
           index: index + 1,
         });
@@ -618,7 +484,7 @@ const Nugget = ({
   return (
     <NuggetItemActionsContext.Provider value={nuggetItemActions}>
       <View style={styles.mainContainer}>
-        {nuggetData?.media_list?.length > 0 ? (
+        {nugget?.media_list?.length > 0 ? (
           // <BigList
           //   ref={flatlistRef}
           //   showsHorizontalScrollIndicator={false}
@@ -626,7 +492,7 @@ const Nugget = ({
           //     styles.listContainer,
           //     {height: mediaHeight ?? insets.mediaHeight},
           //   ]}
-          //   data={nuggetData.media_list ?? []}
+          //   data={nugget.media_list ?? []}
           //   horizontal
           //   bounces={false}
           //   keyExtractor={keyExtractor}
@@ -643,7 +509,7 @@ const Nugget = ({
               styles.listContainer,
               {height: mediaHeight ?? insets.mediaHeight},
             ]}
-            data={nuggetData.media_list ?? []}
+            data={nugget.media_list ?? []}
             horizontal
             bounces={false}
             keyExtractor={item => item.media_id.toString()}
@@ -653,7 +519,7 @@ const Nugget = ({
             onViewableItemsChanged={onViewRef.current}
             viewabilityConfig={viewConfigRef.current}
           />
-        ) : nuggetData.poll_option && nuggetData.poll_option.length > 0 ? (
+        ) : nugget.poll_option && nugget.poll_option.length > 0 ? (
           <PollNugget
             onEditNugget={onEditNugget}
             onDeleteNugget={() => {
@@ -782,7 +648,7 @@ const Nugget = ({
             }}
             onSubmit={message => {
               setisOpenReportModal(false);
-              handleReportNugget(nuggetData.nugget_id, message);
+              handleReportNugget(nugget.nugget_id, message);
             }}
           />
         </Modal>

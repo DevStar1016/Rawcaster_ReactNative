@@ -4,6 +4,7 @@ import {
   Keyboard,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
@@ -61,7 +62,20 @@ const CommentsList = ({
 
   useEffect(() => {
     const backAction = () => {
-      onPressBack();
+      let tempIsOpenedEmoji;
+      setisOpenEmojiContainer(pre => {
+        tempIsOpenedEmoji = pre;
+        return pre;
+      });
+
+      if (tempIsOpenedEmoji) {
+        if (isMount) {
+          setisEnableContentPanningGesture(true);
+          setisOpenEmojiContainer(false);
+        }
+      } else {
+        onPressBack();
+      }
       return true;
     };
 
@@ -317,178 +331,191 @@ const CommentsList = ({
   };
 
   return (
-    <View style={styles.mainContainer}>
-      <View style={styles.titleContainer}>
-        <StyledText style={styles.title}>
-          All comments ( {totalComments} )
-        </StyledText>
-      </View>
-      <View
-        style={styles.commentsListContainer}
-        activeOpacity={1}
-        // onPress={() => {
-        //   Keyboard.dismiss();
-        //   if (isOpenEmojiContainer && isMount) {
-        //     setisOpenEmojiContainer(false);
-        //     setisEnableContentPanningGesture(true);
-        //   }
-        // }}
-      >
-        {isLoading ? (
-          <ActivityIndicator
-            color={COLORS.white}
-            size={'large'}
-            style={{marginTop: 20}}
-          />
-        ) : (
-          <BottomSheetFlatList
-            data={commentsList}
-            keyboardShouldPersistTaps="handled"
-            style={{flexGrow: 0}}
-            keyExtractor={item => item.comment_id?.toString()}
-            renderItem={({item}) => {
-              return (
-                <CommentReplyFullItem
-                  item={item}
-                  replyData={replyData}
-                  onDeleteComment={(deleteItem, isReply) => {
-                    onDeleteComment(item, deleteItem, isReply);
-                  }}
-                  onPressEdit={(editItem, isReply) => {
-                    if (isMount) {
-                      setreplyData(null);
-                      settypedText(editItem.comment);
-                      seteditData({
-                        parentCommentId: item.comment_id,
-                        ...editItem,
-                        isReply: isReply,
-                      });
-                    }
-                    inpuFieldRef.current.focus();
-                  }}
-                  onPressReply={clickedCommentItem => {
+    <TouchableWithoutFeedback
+      style={{flex: 1}}
+      onPress={() => {
+        if (isOpenEmojiContainer) {
+          if (isMount) {
+            setisEnableContentPanningGesture(true);
+            setisOpenEmojiContainer(false);
+          }
+        }
+        Keyboard.dismiss();
+      }}>
+      <View style={styles.mainContainer}>
+        <View style={styles.titleContainer}>
+          <StyledText style={styles.title}>
+            All comments ( {totalComments} )
+          </StyledText>
+        </View>
+        <View
+          style={styles.commentsListContainer}
+          activeOpacity={1}
+          // onPress={() => {
+          //   Keyboard.dismiss();
+          //   if (isOpenEmojiContainer && isMount) {
+          //     setisOpenEmojiContainer(false);
+          //     setisEnableContentPanningGesture(true);
+          //   }
+          // }}
+        >
+          {isLoading ? (
+            <ActivityIndicator
+              color={COLORS.white}
+              size={'large'}
+              style={{marginTop: 20}}
+            />
+          ) : (
+            <BottomSheetFlatList
+              data={commentsList}
+              keyboardShouldPersistTaps="handled"
+              style={{flexGrow: 0}}
+              keyExtractor={item => item.comment_id?.toString()}
+              renderItem={({item}) => {
+                return (
+                  <CommentReplyFullItem
+                    item={item}
+                    replyData={replyData}
+                    onDeleteComment={(deleteItem, isReply) => {
+                      onDeleteComment(item, deleteItem, isReply);
+                    }}
+                    onPressEdit={(editItem, isReply) => {
+                      if (isMount) {
+                        setreplyData(null);
+                        settypedText(editItem.comment);
+                        seteditData({
+                          parentCommentId: item.comment_id,
+                          ...editItem,
+                          isReply: isReply,
+                        });
+                      }
+                      inpuFieldRef.current.focus();
+                    }}
+                    onPressReply={clickedCommentItem => {
+                      if (isMount) {
+                        settypedText('');
+                        seteditData(null);
+                        setreplyData({
+                          ...clickedCommentItem,
+                          parent_comment_id: item.comment_id,
+                        });
+                      }
+                      inpuFieldRef.current.focus();
+                    }}
+                  />
+                );
+              }}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+        </View>
+        {!isLoading && (
+          <View style={styles.bottomContainer}>
+            {(replyData || editData) && (
+              <View style={styles.replyDataContainer}>
+                <View style={{flex: 1}}>
+                  {replyData && (
+                    <StyledText style={styles.replyDataText}>
+                      Replying to {getSlicedText(replyData.name, 20)}
+                    </StyledText>
+                  )}
+                  {editData && (
+                    <StyledText style={styles.replyDataText}>
+                      Edit your Comment
+                    </StyledText>
+                  )}
+                </View>
+                <SVGIcon
+                  icon="close_rounded_dim_color"
+                  height={22}
+                  width={22}
+                  isButton
+                  onPress={() => {
                     if (isMount) {
                       settypedText('');
                       seteditData(null);
-                      setreplyData({
-                        ...clickedCommentItem,
-                        parent_comment_id: item.comment_id,
-                      });
+                      setreplyData(null);
                     }
-                    inpuFieldRef.current.focus();
                   }}
                 />
-              );
-            }}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
-      {!isLoading && (
-        <View style={styles.bottomContainer}>
-          {(replyData || editData) && (
-            <View style={styles.replyDataContainer}>
-              <View style={{flex: 1}}>
-                {replyData && (
-                  <StyledText style={styles.replyDataText}>
-                    Replying to {getSlicedText(replyData.name, 20)}
-                  </StyledText>
-                )}
-                {editData && (
-                  <StyledText style={styles.replyDataText}>
-                    Edit your Comment
-                  </StyledText>
-                )}
               </View>
-              <SVGIcon
-                icon="close_rounded_dim_color"
-                height={22}
-                width={22}
-                isButton
-                onPress={() => {
-                  if (isMount) {
-                    settypedText('');
-                    seteditData(null);
-                    setreplyData(null);
-                  }
-                }}
-              />
-            </View>
-          )}
-          <RBSheetTextInput
-            inpuFieldRef={inpuFieldRef}
-            onFocus={() => {
-              if (isMount) {
-                setisOpenEmojiContainer(false);
-                setisEnableContentPanningGesture(true);
-              }
-            }}
-            placeholderText={
-              replyData
-                ? 'Add a reply...'
-                : editData
-                ? 'Edited comment'
-                : 'Type your comment here...'
-            }
-            onPressEmoji={() => {
-              if (isMount) {
-                setisEnableContentPanningGesture(false);
-                setisOpenEmojiContainer(true);
-              }
-            }}
-            onPressSend={() => {
-              if (isOpenEmojiContainer && isMount) {
-                setisEnableContentPanningGesture(true);
-                setisOpenEmojiContainer(false);
-              }
-              if (editData) {
-                onEditComment();
-              } else {
-                onSendComment();
-              }
-            }}
-            isInsideTextChange={false}
-            onChangeText={settypedText}
-            text={typedText}
-          />
-        </View>
-      )}
-      {isOpenEmojiContainer ? (
-        <TouchableOpacity
-          activeOpacity={1}
-          style={{
-            height: DIMENSIONS.window.height / 2 - 60,
-            backgroundColor: COLORS.white,
-            // position: 'absolute',
-            // bottom: 0,
-            // left: 0,
-            // right: 0,
-            borderTopStartRadius: 10,
-            borderTopEndRadius: 10,
-          }}>
-          <BottomSheetView style={{flex: 1}}>
-            <EmojiKeyboard
-              onEmojiSelected={res => {
+            )}
+            <RBSheetTextInput
+              inpuFieldRef={inpuFieldRef}
+              onFocus={() => {
                 if (isMount) {
-                  settypedText(pre => {
-                    if (pre.length < 500) {
-                      return pre + res.emoji;
-                    }
-                    return pre;
+                  setisOpenEmojiContainer(false);
+                  setisEnableContentPanningGesture(true);
+                }
+              }}
+              placeholderText={
+                replyData
+                  ? 'Add a reply...'
+                  : editData
+                  ? 'Edited comment'
+                  : 'Type your comment here...'
+              }
+              onPressEmoji={() => {
+                if (isMount) {
+                  setisOpenEmojiContainer(pre => {
+                    setisEnableContentPanningGesture(pre);
+                    return !pre;
                   });
                 }
               }}
-              disabledCategories={['people_body', 'flags']}
-              categoryPosition="bottom"
-              enableCategoryChangeGesture={false}
-              defaultHeight={DIMENSIONS.window.height / 2 + 10}
-              styles={{
-                header: {fontFamily: FONTS.DMSans.medium},
-                // container
-                // container: {width: },
+              onPressSend={() => {
+                if (isOpenEmojiContainer && isMount) {
+                  setisEnableContentPanningGesture(true);
+                  setisOpenEmojiContainer(false);
+                }
+                if (editData) {
+                  onEditComment();
+                } else {
+                  onSendComment();
+                }
               }}
+              isInsideTextChange={false}
+              onChangeText={settypedText}
+              text={typedText}
             />
-            {/* <EmojiSelector
+          </View>
+        )}
+        {isOpenEmojiContainer ? (
+          <TouchableOpacity
+            activeOpacity={1}
+            style={{
+              height: DIMENSIONS.window.height / 2 - 60,
+              backgroundColor: COLORS.white,
+              // position: 'absolute',
+              // bottom: 0,
+              // left: 0,
+              // right: 0,
+              borderTopStartRadius: 10,
+              borderTopEndRadius: 10,
+            }}>
+            <BottomSheetView style={{flex: 1}}>
+              <EmojiKeyboard
+                onEmojiSelected={res => {
+                  if (isMount) {
+                    settypedText(pre => {
+                      if (pre.length < 500) {
+                        return pre + res.emoji;
+                      }
+                      return pre;
+                    });
+                  }
+                }}
+                disabledCategories={['people_body', 'flags']}
+                categoryPosition="bottom"
+                enableCategoryChangeGesture={false}
+                defaultHeight={DIMENSIONS.window.height / 2 + 10}
+                styles={{
+                  header: {fontFamily: FONTS.DMSans.medium},
+                  // container
+                  // container: {width: },
+                }}
+              />
+              {/* <EmojiSelector
               showSearchBar={false}
               showSectionTitles={false}
               columns="8"
@@ -505,10 +532,11 @@ const CommentsList = ({
                 }
               }}
             /> */}
-          </BottomSheetView>
-        </TouchableOpacity>
-      ) : null}
-    </View>
+            </BottomSheetView>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

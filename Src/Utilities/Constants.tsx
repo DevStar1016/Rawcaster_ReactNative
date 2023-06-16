@@ -169,10 +169,10 @@ export const SOCIAL_SIGN_IN_LIST = [
 ];
 
 export const GENDER_LIST = [
-  {
-    id: 0,
-    name: 'Transgender',
-  },
+  // {
+  //   id: 0,
+  //   name: 'Transgender',
+  // },
   {
     id: 1,
     name: 'Male',

@@ -5,6 +5,9 @@ export const initialState = {
   likedNuggets: [], //{ id:nugget_id,total_likes:TOTAL_LIKES}
   savedNuggetsIds: [],
   unLikedNuggetsFromLikedNuggets: [],
+  editedNuggets: [],
+  deletedNuggetsIds: [],
+  isDeletingNugget: false,
 };
 
 const NuggetActionsSlice = createSlice({
@@ -79,8 +82,39 @@ const NuggetActionsSlice = createSlice({
         state.savedNuggetsIds = getFilteredDuplicatesList(tempSavedNuggetsIds);
       }
     },
+    addEditedNugget: (state, action) => {
+      const editedNugget = {...action.payload};
+      let tempEditedNuggetsList = [...state.editedNuggets];
+      const tempIndex = [...tempEditedNuggetsList].findIndex(
+        item => item.nugget_id === editedNugget.nugget_id,
+      );
+      if (tempIndex === -1) {
+        tempEditedNuggetsList = [{...editedNugget}, ...tempEditedNuggetsList];
+      } else {
+        tempEditedNuggetsList[tempIndex] = {...editedNugget};
+      }
+      state.editedNuggets = getFilteredDuplicatesList(
+        tempEditedNuggetsList,
+        'nugget_id',
+      );
+    },
+    addDeletedNuggetId: (state, action) => {
+      state.deletedNuggetsIds = getFilteredDuplicatesList([
+        ...state.deletedNuggetsIds,
+        action.payload,
+      ]);
+    },
+    setIsDeletingNugget: (state, action) => {
+      state.isDeletingNugget = action.payload;
+    },
   },
 });
-export const {likeUnlikeNugget, saveUnSaveNugget, setLikedSavedNuggets} =
-  NuggetActionsSlice.actions;
+export const {
+  likeUnlikeNugget,
+  saveUnSaveNugget,
+  setLikedSavedNuggets,
+  addDeletedNuggetId,
+  addEditedNugget,
+  setIsDeletingNugget,
+} = NuggetActionsSlice.actions;
 export default NuggetActionsSlice.reducer;

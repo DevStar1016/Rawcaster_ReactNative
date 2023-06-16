@@ -7,11 +7,10 @@ import {
 } from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import BigList from 'react-native-big-list';
+import {addNuggetViewService} from '../../../Services/ApiService';
 import {
-  addNuggetViewService,
-  listNuggetsService,
-} from '../../../Services/ApiService';
-import {
+  useDeletedNuggetsIds,
+  useEditedNuggetsList,
   useInsets,
   useIsNuggetsLoading,
   useNuggetType,
@@ -29,10 +28,7 @@ import {COLORS} from '../../../Utilities/Colors';
 
 import Loader from '../../../Components/Loader';
 import {setIsBottomTabBarAbsolute} from '../../../Store/Slices/UtilitySlice';
-import {
-  getNuggetsReduxStoreDataFormate,
-  htmlDecodeText,
-} from '../../../Utilities/Methods';
+import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {
@@ -40,10 +36,7 @@ import {
   useDashboardProfile,
   useDashboardTopTabCategories,
 } from '../../../Utilities/Contexts';
-import {
-  getListNuggets,
-  likeAndUnlikeNugget,
-} from '../../../Store/ThunkAPIServices';
+import {getListNuggets} from '../../../Store/ThunkAPIServices';
 import {
   resetNuggetsTotalPages,
   setNuggetsList,
@@ -60,6 +53,8 @@ const DashboardWithCategory = ({route}) => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const insets = useInsets();
+  const editedNuggetsList = useEditedNuggetsList();
+  const deletedNuggetsIds = useDeletedNuggetsIds();
   const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
@@ -114,23 +109,6 @@ const DashboardWithCategory = ({route}) => {
   }, []);
 
   useEffect(() => {
-    if (
-      currentPage === 1 &&
-      !viewableItem.nugget_id &&
-      nuggetsList?.length > 0 &&
-      isFocused &&
-      token &&
-      profile
-    ) {
-      if (nuggetsList[0]?.user_id !== profile.user_id) {
-        setfocusedNuggetUserId(nuggetsList[0]?.user_id);
-      } else {
-        setfocusedNuggetUserId(null);
-      }
-    }
-  }, [nuggetsList, isFocused]);
-
-  useEffect(() => {
     if (token && viewableItem.nugget_id && !viewableItem.viewed) {
       onViewNugget(viewableItem.nugget_id);
     }
@@ -159,6 +137,23 @@ const DashboardWithCategory = ({route}) => {
       listNuggetsAPICall(1);
     }
   }, [token, nuggetType]);
+
+  useEffect(() => {
+    if (
+      currentPage === 1 &&
+      !viewableItem.nugget_id &&
+      nuggetsList?.length > 0 &&
+      isFocused &&
+      token &&
+      profile
+    ) {
+      if (nuggetsList[0]?.user_id !== profile.user_id) {
+        setfocusedNuggetUserId(nuggetsList[0]?.user_id);
+      } else {
+        setfocusedNuggetUserId(null);
+      }
+    }
+  }, [nuggetsList, isFocused]);
 
   function getHeaderHeight() {
     return headerContainerHeight ?? headerHeight;
@@ -189,7 +184,7 @@ const DashboardWithCategory = ({route}) => {
   }
 
   function onViewNugget(nuggetId) {
-    let tempNuggetsList = [...nuggetsList];
+    let tempNuggetsList = [...getNuggetsList()];
 
     tempNuggetsList = tempNuggetsList.map(item => {
       if (item.nugget_id === nuggetId && !item.viewed) {
@@ -203,6 +198,7 @@ const DashboardWithCategory = ({route}) => {
         ...item,
       };
     });
+    // dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
     dispatch(
       setNuggetsList(
         getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
@@ -227,6 +223,30 @@ const DashboardWithCategory = ({route}) => {
       .catch(e => {
         console.log(e, 'Nugget VIEW ERRORRRR');
       });
+  }
+
+  function getNuggetsList() {
+    let tempNuggetsList = [...nuggetsList];
+    if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !deletedNuggetsIds.includes(item.nugget_id),
+      );
+    }
+    if (editedNuggetsList && editedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempEditedItem = [...editedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempEditedItem) {
+          resultList.push(tempEditedItem);
+        } else {
+          resultList.push(item);
+        }
+
+        return [...resultList];
+      }, []);
+    }
+    return tempNuggetsList;
   }
 
   function onRefresh() {
@@ -257,7 +277,8 @@ const DashboardWithCategory = ({route}) => {
   );
 
   const renderNuggetItem = useCallback(renderItem, [
-    nuggetsList,
+    editedNuggetsList,
+    deletedNuggetsIds,
     isMuted,
     viewableItem,
     getHeaderHeight(),
@@ -280,7 +301,7 @@ const DashboardWithCategory = ({route}) => {
     textNuggetNumberOfLines: 15,
     isEnableHeaderContainerHeightforTopButtons: true,
     onFinishPlaying: index => {
-      if (index < nuggetsList.length - 1) {
+      if (index < getNuggetsList().length - 1) {
         flatlistRef.current.scrollToIndex({
           index: index + 1,
         });
@@ -310,11 +331,11 @@ const DashboardWithCategory = ({route}) => {
       <View style={styles.mainContainer}>
         <DefaultBackground
           centerText={
-            nuggetsList && nuggetsList.length > 0
+            getNuggetsList() && getNuggetsList().length > 0
               ? 'Loading...'
               : 'No data found'
           }
-          isEnableLoading={nuggetsList && nuggetsList.length > 0}
+          isEnableLoading={getNuggetsList() && getNuggetsList().length > 0}
         />
         {!token && (
           <View
@@ -355,7 +376,7 @@ const DashboardWithCategory = ({route}) => {
             <BigList
               ref={flatlistRef}
               showsVerticalScrollIndicator={false}
-              data={nuggetsList}
+              data={getNuggetsList()}
               alwaysBounceVertical={false}
               keyExtractor={keyExtractor}
               getItemLayout={getItemLayout}

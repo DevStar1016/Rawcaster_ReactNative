@@ -3,7 +3,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import {
   setIsBottomTabBarAbsolute,
-  setNuggetType,
+  setTabNuggetType,
 } from '../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
@@ -23,15 +23,24 @@ const HomeStack = () => {
       screenOptions={{headerShown: false, ...StackAnimation}}
       screenListeners={{
         focus: e => {
-          console.log('SCREEN CHANGEEEEE', e.target);
           if (
             e.target.includes('DashboardTopTabNavigation') ||
             e.target.includes('DashboardWithCategory')
           ) {
-            // dispatch(setNuggetType(1));
+            dispatch(
+              setTabNuggetType({
+                tab_type: 1,
+              }),
+            );
+
             dispatch(setIsBottomTabBarAbsolute(true));
           } else {
-            // dispatch(setNuggetType(0));
+            dispatch(
+              setTabNuggetType({
+                tab_type: 2,
+              }),
+            );
+
             dispatch(setIsBottomTabBarAbsolute(false));
           }
         },

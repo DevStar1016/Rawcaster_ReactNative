@@ -10,7 +10,8 @@ export const initialState = {
   },
   locationDetails: null,
   isBottomTabBarAbsolute: false,
-  nugget_type: 1,
+  nugget_type: 1, // 1 - video, 2 - audio
+  bottomHomeButtonType: 1, //1 - video or other_nuggets, 2 - rawcaster Logo
   isVisibleInfluencers: false,
   isAppForeground: true,
   isOpenLoginAlert: false,
@@ -33,6 +34,9 @@ const UtilitySlice = createSlice({
     setNuggetType: (state, action) => {
       state.nugget_type = action.payload;
     },
+    setBottomHomeButtonType: (state, action) => {
+      state.bottomHomeButtonType = action.payload;
+    },
     setIsVisibleInfluencers: (state, action) => {
       state.isVisibleInfluencers = action.payload;
     },
@@ -45,6 +49,18 @@ const UtilitySlice = createSlice({
     setIsOpenVerifyPopup: (state, action) => {
       state.isOpenVerifyPopup = action.payload;
     },
+    setTabNuggetType: (state, action) => {
+      if (action.payload.tab_type) {
+        if (action.payload.tab_type !== state.bottomHomeButtonType) {
+          state.bottomHomeButtonType = action.payload.tab_type;
+        }
+      }
+      if (action.payload.nugget_type) {
+        if (action.payload.nugget_type !== state.nugget_type) {
+          state.nugget_type = action.payload.nugget_type;
+        }
+      }
+    },
   },
 });
 export const {
@@ -52,6 +68,8 @@ export const {
   setLocationDetails,
   setIsBottomTabBarAbsolute,
   setNuggetType,
+  setTabNuggetType,
+  setBottomHomeButtonType,
   setIsVisibleInfluencers,
   setIsAppForeground,
   setIsOpenLoginAlert,

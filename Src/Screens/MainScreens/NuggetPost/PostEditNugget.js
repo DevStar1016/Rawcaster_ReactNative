@@ -23,10 +23,7 @@ import {
   useToken,
 } from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
-import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {COLORS} from '../../../Utilities/Colors';
-import Badges from '../../../Utilities/Badges';
-import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import SubmitButton from '../../../Components/SubmitButton';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -45,7 +42,6 @@ import {
   compressMedia,
   getFileName,
   getMediaMimeType,
-  getNuggetsReduxStoreDataFormate,
   getSlicedText,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
@@ -66,6 +62,7 @@ import {
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
+import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -205,7 +202,7 @@ const PostEditNugget = ({route}) => {
         });
       }
     }
-    console.log(formData, 'ADD NUGGET');
+
     addNuggetsService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -272,40 +269,7 @@ const PostEditNugget = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          if (isSearchNugget) {
-            let tempSearchedNuggetsList = [...searchedNuggetsList];
-            const tempIndex = tempSearchedNuggetsList.findIndex(
-              item => item.nugget_id === nugget.nugget_id,
-            );
-            if (tempIndex !== -1) {
-              tempSearchedNuggetsList[tempIndex] = {...res.data.nugget_detail};
-            }
-            dispatch(setSearchedNuggetsList(tempSearchedNuggetsList));
-          }
-
-          let tempNuggetsList = [...nuggetsList];
-          const tempIndex = tempNuggetsList.findIndex(
-            item => item.nugget_id === nugget.nugget_id,
-          );
-          if (tempIndex !== -1) {
-            tempNuggetsList[tempIndex] = {...res.data.nugget_detail};
-          }
-          dispatch(
-            setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
-          );
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
-            ),
-          );
-          let tempSavedList = [...savedNuggetsList];
-          let tempSavedIndex = tempSavedList.findIndex(
-            ele => ele.nugget_id === nugget.nugget_id,
-          );
-          if (tempSavedIndex !== -1) {
-            tempSavedList[tempSavedIndex] = {...res.data.nugget_detail};
-            dispatch(setSavedNuggetsList(tempSavedList));
-          }
+          dispatch(addEditedNugget(res.data.nugget_detail));
           navigation.goBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);

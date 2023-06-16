@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {Modal, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
   CardStyleInterpolators,
@@ -6,10 +6,15 @@ import {
   createStackNavigator,
 } from '@react-navigation/stack';
 import Loader from '../Components/Loader';
-import {useIsVisibleInfluencers, useToken} from '../Utilities/StoreData';
+import {
+  useIsDeletingNugget,
+  useIsVisibleInfluencers,
+  useToken,
+} from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
 import {
+  getFollowListService,
   getInfluencerCategoryService,
   getMyProfileService,
   getUserSettingsService,
@@ -43,6 +48,7 @@ import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
 import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
+import {COLORS} from '../Utilities/Colors';
 
 const Stack = createStackNavigator();
 
@@ -51,6 +57,7 @@ const MainStack = () => {
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
   const dispatch = useDispatch();
+  const isDeletingNugget = useIsDeletingNugget();
 
   useEffect(() => {
     initialAPICall();
@@ -67,6 +74,11 @@ const MainStack = () => {
     formData.append('allfriends', 1);
     return formData;
   }
+  function getFollowingFormData() {
+    const formData = getCommonFormData();
+    formData.append('type', 2);
+    return formData;
+  }
 
   function initialAPICall() {
     Promise.all([
@@ -77,6 +89,7 @@ const MainStack = () => {
       listAllFriendRequestsService(getCommonFormData()),
       getInfluencerCategoryService(getCommonFormData()),
       listUnClaimAccountService(getCommonFormData()),
+      getFollowListService(getFollowingFormData()),
     ])
       .then(res => {
         if (res[0].data.status === 1) {
@@ -195,6 +208,14 @@ const MainStack = () => {
           </>
         )}
       </Stack.Navigator>
+      {isDeletingNugget && (
+        <Modal transparent visible={isDeletingNugget}>
+          <Loader
+            bgColor={COLORS.transparentDimColor}
+            loaderText={'Deleting Nugget...'}
+          />
+        </Modal>
+      )}
     </>
   );
 };

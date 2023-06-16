@@ -9,6 +9,8 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
 import Nugget from '../HomeScreen/Nugget';
 import {
+  useDeletedNuggetsIds,
+  useEditedNuggetsList,
   useInsets,
   useSearchedNuggetsList,
   useToken,
@@ -34,12 +36,14 @@ const NuggetsSearch = () => {
   const {searchText, topLayerHeight} = useGlobalSearch();
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const deletedNuggetsIds = useDeletedNuggetsIds();
   const [isListLoading, setisListLoading] = useState(false);
   const searchedNuggetsList = useSearchedNuggetsList();
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
   const [isRefreshing, setisRefreshing] = useState(false);
   const flatlistRef = useRef(null);
+  const editedNuggetsList = useEditedNuggetsList();
   const token = useToken();
   const insets = useInsets();
   const [viewableItem, setviewableItem] = useState('');
@@ -89,11 +93,12 @@ const NuggetsSearch = () => {
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
+              console.log(decodedNuggetList, 'FORMDATA RESPONSE');
               dispatch(setSearchedNuggetsList(decodedNuggetList));
             } else {
               dispatch(
                 setSearchedNuggetsList([
-                  ...searchedNuggetsList,
+                  ...getNuggetsList(),
                   ...decodedNuggetList,
                 ]),
               );
@@ -152,7 +157,7 @@ const NuggetsSearch = () => {
     mediaHeight: insets.mediaHeight - topLayerHeight,
     isEnableHeaderContainerHeightforTopButtons: false,
     onFinishPlaying: index => {
-      if (index < searchedNuggetsList.length - 1) {
+      if (index < getNuggetsList()?.length - 1) {
         flatlistRef.current.scrollToIndex({
           index: index + 1,
         });
@@ -160,12 +165,6 @@ const NuggetsSearch = () => {
     },
   };
 
-  const renderNuggetItem = useCallback(renderItem, [
-    searchedNuggetsList,
-    isMuted,
-    viewableItem,
-    topLayerHeight,
-  ]);
   const keyExtractor = useCallback(item => item.nugget_id.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
@@ -175,6 +174,37 @@ const NuggetsSearch = () => {
     }),
     [topLayerHeight],
   );
+
+  const getNuggetsList = () => {
+    let tempNuggetsList = [...searchedNuggetsList];
+    if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
+      return [...tempNuggetsList].filter(
+        item => !deletedNuggetsIds.includes(item.nugget_id),
+      );
+    }
+    if (editedNuggetsList && editedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempEditedItem = [...editedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempEditedItem) {
+          resultList.push(tempEditedItem);
+        } else {
+          resultList.push(item);
+        }
+
+        return [...resultList];
+      }, []);
+    }
+    return [...tempNuggetsList];
+  };
+
+  const renderNuggetItem = useCallback(renderItem, [
+    getNuggetsList(),
+    isMuted,
+    viewableItem,
+    topLayerHeight,
+  ]);
 
   function renderItem({item, index}) {
     return <Nugget nugget={item} nuggetIndex={index} />;
@@ -212,7 +242,7 @@ const NuggetsSearch = () => {
           <BigList
             ref={flatlistRef}
             showsVerticalScrollIndicator={false}
-            data={searchedNuggetsList}
+            data={getNuggetsList()}
             keyExtractor={keyExtractor}
             getItemLayout={getItemLayout}
             renderItem={renderNuggetItem}

@@ -71,6 +71,7 @@ function DashboardTopTabNavigation() {
       )}
       <Tab.Navigator
         initialRouteName="ForYou"
+        backBehavior="initialRoute"
         screenOptions={{
           tabBarIndicatorStyle: {
             backgroundColor: COLORS.transparent,

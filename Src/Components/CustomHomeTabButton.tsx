@@ -12,7 +12,7 @@ import SVGIcon from './SVGIcon';
 import StyledText from './StyledText';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
-import {useNuggetType} from '../Utilities/StoreData';
+import {useNuggetType, useTabType} from '../Utilities/StoreData';
 
 type ButtonContentProps = {
   icon?: IconType;
@@ -27,6 +27,7 @@ const CustomHomeTabButton = ({
   isLoading = false,
 }: CustomHomeTabButtonProps) => {
   const nuggetType = useNuggetType();
+  const tabType = useTabType();
 
   const ButtonContent = ({icon = 'app_logo_white'}: ButtonContentProps) => {
     return (
@@ -87,7 +88,7 @@ const CustomHomeTabButton = ({
         activeOpacity={0.9}>
         {isLoading ? (
           <LoadingButton />
-        ) : nuggetType === 1 || nuggetType === 2 ? (
+        ) : tabType === 1 ? (
           <ImageVideoHomeButton />
         ) : (
           <GradientHomeButton />

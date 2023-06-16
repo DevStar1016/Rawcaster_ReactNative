@@ -30,6 +30,21 @@ export const useInsets = () => {
 export const useNuggetType = () => {
   return useSelector(state => state.utility.nugget_type);
 };
+export const useTabType = () => {
+  return useSelector(state => state.utility.bottomHomeButtonType);
+};
+
+export const useIsDeletingNugget = () => {
+  return useSelector(state => state.nugget_actions.isDeletingNugget);
+};
+
+export const useDeletedNuggetsIds = () => {
+  return useSelector(state => state.nugget_actions.deletedNuggetsIds);
+};
+
+export const useEditedNuggetsList = () => {
+  return useSelector(state => state.nugget_actions.editedNuggets);
+};
 
 export const useIsVisibleInfluencers = () => {
   return useSelector(state => state.utility.isVisibleInfluencers);
@@ -41,6 +56,10 @@ export const useNuggetFilterType = () => {
 
 export const useSearchedNuggetsList = () => {
   return useSelector(state => state.home.searchedNuggetsList);
+};
+
+export const useProfileNuggets = () => {
+  return useSelector(state => state.home.profileNuggets);
 };
 
 export const useConnectionsList = () => {

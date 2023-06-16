@@ -1,14 +1,20 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import {
+  deleteNuggetService,
+  followAndUnfollowService,
   likeAndUnlikeNuggetService,
   listNuggetsService,
   saveAndUnsaveNuggetService,
 } from '../Services/ApiService';
 import {
+  addDeletedNuggetId,
+  addEditedNugget,
   likeUnlikeNugget,
   saveUnSaveNugget,
+  setIsDeletingNugget,
   setLikedSavedNuggets,
 } from './Slices/NuggetActionsSlice';
+import Toast from '../Components/Toast';
 
 export const getListNuggets = createAsyncThunk(
   'getListNuggets',
@@ -67,16 +73,11 @@ export const likeAndUnlikeNugget = createAsyncThunk(
       'like',
       likedNuggetsList.find(item => item.id === data.nugget_id) ? 2 : 1,
     );
-
     try {
       const res = await likeAndUnlikeNuggetService(formData, data?.signal);
       console.log(res.data, 'LIKED RESPONSE');
-      // return {
-      //   data: res.data,
-      // };
     } catch (error) {
       console.log(error, 'LIKED_ERROR');
-      // return rejectWithValue({categoryName: data?.categoryName});
     }
   },
 );
@@ -94,12 +95,57 @@ export const saveAndUnsaveNugget = createAsyncThunk(
     try {
       const res = await saveAndUnsaveNuggetService(formData, data?.signal);
       console.log(res.data, 'SAVED RESPONSE');
-      // return {
-      //   data: res.data,
-      // };
     } catch (error) {
       console.log(error, 'SAVED_ERROR');
-      // return rejectWithValue({categoryName: data?.categoryName});
     }
+  },
+);
+
+export const deleteNugget = createAsyncThunk(
+  'deleteNugget',
+  async (data, {rejectWithValue, getState, dispatch, fulfillWithValue}) => {
+    dispatch(setIsDeletingNugget(true));
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('nugget_id', data.nugget_id);
+    console.log(formData, 'FORMDATAAA');
+    try {
+      const res = await deleteNuggetService(formData);
+      if (res.data.status === 1) {
+        Toast.success(res.data.msg);
+        dispatch(addDeletedNuggetId(data.nugget_id));
+      } else if (res.data.status === 0) {
+        Toast.fail(res.data.msg);
+        // return rejectWithValue({errorMsg: res.data.msg});
+      }
+    } catch (e) {
+      Toast.fail(e.message);
+      // return rejectWithValue({errorMsg: error.message});
+    } finally {
+      dispatch(setIsDeletingNugget(false));
+    }
+  },
+);
+
+export const becomeFan = createAsyncThunk(
+  'becomeFan',
+  async (nuggetData, {rejectWithValue, getState, dispatch}) => {
+    dispatch(
+      addEditedNugget({
+        ...nuggetData,
+        following: true,
+        follow_count: parseInt(nuggetData.follow_count) + 1,
+      }),
+    );
+    // const formData = new FormData();
+    // formData.append('token', getState().auth.token);
+    // formData.append('follow_userid', nuggetData.user_ref_id);
+    // formData.append('type', 1);
+    // try {
+    //   const res = await followAndUnfollowService(formData);
+    //   console.log(res.nuggetData, 'FOLLOW RESPONSE');
+    // } catch (error) {
+    //   console.log(error, 'FOLLOW');
+    // }
   },
 );

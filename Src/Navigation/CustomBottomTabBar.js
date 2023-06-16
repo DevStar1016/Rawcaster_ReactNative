@@ -12,6 +12,7 @@ import {
   useNuggetType,
   useToken,
   useUnreadNotificationCount,
+  useTabType,
 } from '../Utilities/StoreData';
 import CustomHomeTabButton from '../Components/CustomHomeTabButton';
 import {useDispatch} from 'react-redux';
@@ -25,6 +26,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const token = useToken();
   const dispatch = useDispatch();
   const nuggetType = useNuggetType();
+  const tabType = useTabType();
   const unreadNotificationCount = useUnreadNotificationCount();
   const isAllNuggetsLoading = useIsNuggetsLoading();
 
@@ -79,17 +81,14 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           const isFocused = state.index === index;
 
           const handleChangeNuggetType = () => {
-            if (index === 2) {
-              let tempNuggetType = 1;
-              if (nuggetType !== 1) {
-                tempNuggetType = 1;
-              } else {
+            if (tabType === 1) {
+              let tempNuggetType = nuggetType;
+              if (nuggetType === 1) {
                 tempNuggetType = 2;
+              } else {
+                tempNuggetType = 1;
               }
               dispatch(setNuggetType(tempNuggetType));
-              // listNuggetsAPICall(tempNuggetType);
-            } else {
-              dispatch(setNuggetType(0));
             }
           };
 
@@ -98,7 +97,9 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
               dispatch(setIsOpenLoginAlert(true));
               return;
             }
-            handleChangeNuggetType(index);
+            if (index === 2) {
+              handleChangeNuggetType();
+            }
 
             const event = navigation.emit({
               type: 'tabPress',

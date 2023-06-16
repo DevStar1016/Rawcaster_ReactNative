@@ -2,6 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 
 export const initialState = {
   searchedNuggetsList: [],
+  profileNuggets: [],
   connectionsList: [],
   groupsList: [],
   pendingFriendRequests: [],
@@ -29,6 +30,9 @@ const HomeSlice = createSlice({
   reducers: {
     setSearchedNuggetsList: (state, action) => {
       state.searchedNuggetsList = action.payload;
+    },
+    setProfileNuggets: (state, action) => {
+      state.profileNuggets = action.payload;
     },
     setConnectionsList: (state, action) => {
       state.connectionsList = action.payload;
@@ -93,6 +97,7 @@ const HomeSlice = createSlice({
 });
 export const {
   setSearchedNuggetsList,
+  setProfileNuggets,
   setConnectionsList,
   setGroupsList,
   setPendingFriendRequests,

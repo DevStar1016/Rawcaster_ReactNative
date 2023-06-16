@@ -15,8 +15,11 @@ import ProfileIntroContainer from './ProfileIntroContainer';
 import {COLORS} from '../../../Utilities/Colors';
 import {
   useConnectionsList,
+  useDeletedNuggetsIds,
+  useEditedNuggetsList,
   useInsets,
   useProfile,
+  useProfileNuggets,
   useSavedNuggetsCount,
   useSavedNuggetsList,
   useToken,
@@ -48,6 +51,7 @@ import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import {
+  setProfileNuggets,
   setSavedNuggetsCount,
   setSavedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
@@ -57,10 +61,13 @@ const Profile = ({route}) => {
   let isMount = true;
   let currentPage = 1;
   let totalPages = 1;
-  let controller = undefined;
+  let profileController = undefined;
+  let nuggetsController = undefined;
   const dispatch = useDispatch();
   const profile = useProfile();
   const isFocused = useIsFocused();
+  const deletedNuggetsIds = useDeletedNuggetsIds();
+  const editedNuggetsList = useEditedNuggetsList();
   const {focusedNuggetUserId} = useDashboardProfile() ?? {};
   const [userId, setuserId] = useState(
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
@@ -75,11 +82,11 @@ const Profile = ({route}) => {
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
-  const [isFavourites, setisFavourites] = useState(false);
+  const [selectedTab, setselectedTab] = useState(1); // 1 - my nuggets, 2 - favorites
   const connections = useConnectionsList();
+  const [nuggetsList, setnuggetsList] = useState([]);
   const flatlistRef = useRef(null);
 
-  const [nuggetsList, setnuggetsList] = useState([]);
   const [nuggetsCount, setnuggetsCount] = useState(0);
   const [isMuted, setisMuted] = useState(true);
   const [isLoading, setisLoading] = useState(userId ? true : false);
@@ -117,12 +124,12 @@ const Profile = ({route}) => {
       isMount = false;
       currentPage = 1;
       totalPages = 1;
-      if (controller) {
-        controller.abort();
+      if (profileController) {
+        profileController.abort();
       }
-      controller = undefined;
-      // dispatch(setOtherConnectionsList([]));
-      // dispatch(setOtherInfluencersList([]));
+      if (nuggetsController) {
+        nuggetsController.abort();
+      }
     };
   }, []);
 
@@ -149,24 +156,23 @@ const Profile = ({route}) => {
     ) {
       if (isMount) {
         setisListLoading(true);
-        if (!isFavourites) {
-          setnuggetsList([]);
-        }
+        setnuggetsCount(0);
+        setnuggetsList([]);
       }
       listNuggetsAPICall(1);
     }
-  }, [userId, othersProfile, isFavourites]);
+  }, [userId, othersProfile]);
 
   const getOthersProfileAPI = () => {
-    if (controller) {
-      controller.abort();
+    if (profileController) {
+      profileController.abort();
     }
-    controller = new AbortController();
+    profileController = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
     formData.append('user_id', userId);
-    getOthersProfileService(formData, controller.signal)
+    getOthersProfileService(formData, profileController.signal)
       .then(res => {
         if (res.data.status === 1) {
           setothersProfile({
@@ -266,17 +272,21 @@ const Profile = ({route}) => {
       });
   }
 
-  const listNuggetsAPICall = (pageNumber = 1) => {
+  const listNuggetsAPICall = (pageNumber = 1, tab = 1) => {
+    if (nuggetsController) {
+      nuggetsController.abort();
+    }
+    nuggetsController = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('page_number', pageNumber);
     if (userId || profile?.user_id) {
       formData.append('user_id', userId ?? profile?.user_id);
     }
-    if (isFavourites) {
+    if (tab === 2) {
       formData.append('saved', 1);
     }
-    listNuggetsService(formData)
+    listNuggetsService(formData, nuggetsController.signal)
       .then(res => {
         if (isMount) {
           if (res.data.status === 1) {
@@ -291,52 +301,41 @@ const Profile = ({route}) => {
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              if (isFavourites) {
-                dispatch(setSavedNuggetsCount(res.data.nuggets_count));
-                dispatch(setSavedNuggetsList(decodedNuggetList));
-              } else {
-                setnuggetsCount(res.data.nuggets_count);
-                setnuggetsList(decodedNuggetList);
-              }
+              setnuggetsList(decodedNuggetList);
+              setnuggetsCount(res.data.nuggets_count);
             } else {
-              if (isFavourites) {
-                dispatch(
-                  setSavedNuggetsList([
-                    ...savedNuggetsList,
-                    ...decodedNuggetList,
-                  ]),
-                );
-              } else {
-                setnuggetsList(preList => [...preList, ...decodedNuggetList]);
-              }
+              setnuggetsList(preList => [...preList, ...decodedNuggetList]);
+            }
+            if (isMount) {
+              setisLoadMore(false);
+              setisRefreshing(false);
+              setisListLoading(false);
             }
           } else if (res.data.status === 0) {
-            if (isFavourites) {
-              dispatch(setSavedNuggetsList([]));
-              dispatch(setSavedNuggetsCount(0));
-            } else {
-              setnuggetsList([]);
+            if (isMount) {
               setnuggetsCount(0);
+            }
+            setnuggetsList([]);
+            if (isMount) {
+              setisLoadMore(false);
+              setisRefreshing(false);
+              setisListLoading(false);
             }
           }
         }
       })
       .catch(e => {
+        console.log(e, 'ERROR');
         if (isMount) {
-          if (isFavourites) {
-            dispatch(setSavedNuggetsList([]));
-            dispatch(setSavedNuggetsCount(0));
-          } else {
-            setnuggetsList([]);
-            setnuggetsCount(0);
-          }
+          setnuggetsCount(0);
         }
-      })
-      .finally(() => {
-        if (isMount) {
-          setisLoadMore(false);
-          setisRefreshing(false);
-          setisListLoading(false);
+        setnuggetsList([]);
+        if (!e.message.includes('cancel')) {
+          if (isMount) {
+            setisLoadMore(false);
+            setisRefreshing(false);
+            setisListLoading(false);
+          }
         }
       });
   };
@@ -361,42 +360,27 @@ const Profile = ({route}) => {
   };
 
   const getNuggetList = () => {
-    if (!userId && isFavourites) {
-      return [...savedNuggetsList];
-    }
-    return [...nuggetsList];
-  };
-
-  const onFinishClaiming = () => {
-    setothersProfile(pre => {
-      return {...pre, unclaimed_status: 1};
-    });
-  };
-  const onFinishDelete = nuggetId => {
-    let tempSavedList = [...savedNuggetsList];
-    let tempIndex = tempSavedList.findIndex(ele => ele.nugget_id === nuggetId);
-    if (tempIndex !== -1) {
-      dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
-      dispatch(
-        setSavedNuggetsList(
-          tempSavedList.filter(item => item.nugget_id !== nuggetId),
-        ),
+    let tempNuggetsList = [...nuggetsList];
+    if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
+      tempNuggetsList = [...nuggetsList].filter(
+        item => !deletedNuggetsIds.includes(item.nugget_id),
       );
     }
-    setnuggetsCount(pre => pre - 1);
-    setnuggetsList(preList => {
-      let tempList = [...preList].filter(item => item.nugget_id !== nuggetId);
-      return tempList;
-    });
-  };
+    if (editedNuggetsList && editedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempEditedItem = [...editedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempEditedItem) {
+          resultList.push(tempEditedItem);
+        } else {
+          resultList.push(item);
+        }
 
-  const onFinishSave = (nuggetId, status) => {
-    let tempList = [...nuggetsList];
-    let tempIndex = tempList.findIndex(ele => ele.nugget_id === nuggetId);
-    if (tempIndex !== -1) {
-      tempList[tempIndex] = {...tempList[tempIndex], saved: status};
+        return [...resultList];
+      }, []);
     }
-    setnuggetsList(tempList);
+    return [...tempNuggetsList];
   };
 
   function getIsEnableClaimAccount() {
@@ -486,21 +470,13 @@ const Profile = ({route}) => {
   };
 
   const renderNuggetItem = useCallback(renderItem, [
-    nuggetsList,
+    getNuggetList(),
     isMuted,
     viewableItem,
   ]);
 
   function renderItem({item, index}) {
-    return (
-      <Nugget
-        nugget={item}
-        nuggetIndex={index}
-        isFromProfile={true}
-        onFinishDelete={onFinishDelete}
-        onFinishSave={onFinishSave}
-      />
-    );
+    return <Nugget nugget={item} nuggetIndex={index} />;
   }
 
   const renderFooter = () => {
@@ -623,33 +599,48 @@ const Profile = ({route}) => {
               <TouchableOpacity
                 style={styles.nuggetFilter}
                 onPress={() => {
-                  if (isFavourites) {
-                    setisFavourites(false);
+                  if (isMount) {
+                    setselectedTab(1);
+                    setisListLoading(true);
+
+                    setnuggetsCount(0);
+                    setnuggetsList([]);
                   }
+                  listNuggetsAPICall(1, 1);
                 }}>
                 <StyledText
                   style={[
                     styles.nuggetFilterText,
-                    {color: !isFavourites ? COLORS.black : COLORS.grey},
+                    {color: selectedTab === 1 ? COLORS.black : COLORS.grey},
                   ]}>
-                  My Nuggets {nuggetsCount > 0 ? `(${nuggetsCount})` : ''}
+                  My Nuggets{' '}
+                  {selectedTab === 1 && nuggetsCount > 0
+                    ? `(${nuggetsCount})`
+                    : ''}
                 </StyledText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.nuggetFilter}
                 onPress={() => {
-                  if (!isFavourites) {
-                    setisFavourites(true);
+                  if (isMount) {
+                    setselectedTab(2);
+                    setisListLoading(true);
+
+                    setnuggetsCount(0);
+                    setnuggetsList([]);
                   }
+                  listNuggetsAPICall(1, 2);
                 }}>
                 <SVGIcon icon="save_yellow" height={18} />
                 <StyledText
                   style={[
                     styles.nuggetFilterText,
-                    {color: isFavourites ? COLORS.black : COLORS.grey},
+                    {color: selectedTab === 2 ? COLORS.black : COLORS.grey},
                   ]}>
                   Favorites{' '}
-                  {savedNuggetsCount > 0 ? `(${savedNuggetsCount})` : ''}
+                  {selectedTab === 2 && nuggetsCount > 0
+                    ? `(${nuggetsCount})`
+                    : ''}
                 </StyledText>
               </TouchableOpacity>
             </View>
@@ -667,7 +658,7 @@ const Profile = ({route}) => {
       unclaimedAccountsList,
       connections,
       isFocused,
-      isFavourites,
+      selectedTab,
       nuggetsCount,
       savedNuggetsCount,
       savedNuggetsList,
@@ -716,7 +707,7 @@ const Profile = ({route}) => {
             }}
           />
         </View>
-        {isFocused && (
+        {((focusedNuggetUserId && isFocused) || !focusedNuggetUserId) && (
           <>
             {isLoading ? (
               <Loader
@@ -729,6 +720,7 @@ const Profile = ({route}) => {
                 ref={flatlistRef}
                 showsVerticalScrollIndicator={false}
                 data={getNuggetList()}
+                extraData={{editedNuggetsList, deletedNuggetsIds}}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={{
                   // paddingBottom: 20,

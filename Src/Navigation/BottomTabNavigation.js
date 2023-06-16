@@ -19,6 +19,7 @@ import {
   setIsBottomTabBarAbsolute,
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
+  setTabNuggetType,
 } from '../Store/Slices/UtilitySlice';
 import TalkshowStack from '../Stacks/TalkshowStack';
 import EventsStack from '../Stacks/EventsStack';
@@ -86,8 +87,19 @@ export default function BottomTabNavigation() {
           focus: e => {
             if (setswipeEnabled) {
               if (e.target.includes('HomeStack')) {
+                dispatch(
+                  setTabNuggetType({
+                    tab_type: 1,
+                  }),
+                );
+
                 setswipeEnabled(true);
               } else {
+                dispatch(
+                  setTabNuggetType({
+                    tab_type: 2,
+                  }),
+                );
                 setswipeEnabled(false);
               }
             }
