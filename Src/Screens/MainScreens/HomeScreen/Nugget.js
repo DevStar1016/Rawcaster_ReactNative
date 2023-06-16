@@ -48,7 +48,6 @@ import {
 import InputPopup from '../../../Modals/InputPopup';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
-import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {
   becomeFan,
   deleteNugget,
@@ -82,7 +81,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
-  const [isReadMuted, setisReadMuted] = useState(false);
   const [selectedShareTypeId, setselectedShareTypeId] = useState(null);
 
   const [isActionLoading, setisActionLoading] = useState(false);
@@ -96,7 +94,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     minimumViewTime: 100,
     viewAreaCoveragePercentThreshold: 30,
   });
-  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0)
       setviewableItem(viewableItems.viewableItems[0].item.media_id || 0);
@@ -404,33 +401,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     return selectedShareTypeId === 3 ? groupsList : connectionsList;
   };
 
-  const handlePlayAudio = async url => {
-    handleStopAudio();
-    try {
-      await audioPlayerRef.current?.startPlayer(url);
-      audioPlayerRef.current?.addPlayBackListener(e => {
-        if (Math.floor(e.currentPosition) === 0) {
-          setisReadMuted(true);
-        } else if (e.currentPosition >= e.duration) {
-          handleStopAudio();
-        }
-        return;
-      });
-    } catch (e) {
-      setisReadMuted(false);
-    }
-  };
-
-  const handleStopAudio = () => {
-    try {
-      audioPlayerRef.current?.stopPlayer();
-      audioPlayerRef.current?.removePlayBackListener();
-    } catch (e) {
-    } finally {
-      setisReadMuted(false);
-    }
-  };
-
   const nuggetItemActions = {
     nugget: nugget,
     parentNuggetIndex: nuggetIndex,
@@ -443,10 +413,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     isRepeatVideo: isRepeatVideo,
     setisRepeatVideo: setisRepeatVideo,
     viewableItem: viewableItem,
-    isReadMuted: isReadMuted,
-    setisReadMuted: setisReadMuted,
-    handlePlayAudio: handlePlayAudio,
-    handleStopAudio: handleStopAudio,
     onFinishPlaying: index => {
       if (index < nugget?.media_list?.length - 1) {
         flatlistRef.current.scrollToIndex({

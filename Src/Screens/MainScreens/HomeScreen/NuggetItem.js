@@ -23,17 +23,18 @@ function NuggetItem({
   onBlockUser,
   onReportAbouseNugget,
 }) {
-  const {isMuted, viewableNuggetItem, mediaHeight, isAutoPlay} =
-    useNuggetParentActions();
-
   const {
-    isRepeatVideo,
-    nugget,
-    viewableItem,
-    parentNuggetIndex,
+    isMuted,
+    viewableNuggetItem,
+    mediaHeight,
+    isAutoPlay,
+    nuggetContentController,
     handleStopAudio,
     isReadMuted,
-  } = useNuggetItemActions();
+  } = useNuggetParentActions();
+
+  const {isRepeatVideo, nugget, viewableItem, parentNuggetIndex} =
+    useNuggetItemActions();
 
   const [paused, setpaused] = useState(true);
   const [progress, setprogress] = useState(0);
@@ -41,7 +42,6 @@ function NuggetItem({
   const isFocused = useIsFocused();
 
   const videoPlayer = useRef(null);
-  const nuggetContentController = useRef(null);
   const [isLoadingVideo, setisLoadingVideo] = useState(false);
 
   const isAppForeground = useIsAppForeground();

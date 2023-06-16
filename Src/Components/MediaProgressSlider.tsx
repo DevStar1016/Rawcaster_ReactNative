@@ -1,6 +1,6 @@
 import {StyleSheet, View} from 'react-native';
 import React from 'react';
-import Slider from '@react-native-community/slider';
+// import Slider from '@react-native-community/slider';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {DIMENSIONS} from '../Utilities/Constants';
@@ -9,6 +9,7 @@ import {
   getMediaDurationFormat,
   secondsToMinutesAndSeconds,
 } from '../Utilities/Methods';
+import {Slider} from '@miblanchard/react-native-slider';
 const windowWidth = DIMENSIONS.window.width;
 
 type Props = {
@@ -70,7 +71,7 @@ const MediaProgressSlider = ({
             onPress={onPlayPause}
           />
         )}
-        <Slider
+        {/* <Slider
           style={{
             height: 40,
             width: '100%',
@@ -83,7 +84,33 @@ const MediaProgressSlider = ({
           thumbTintColor={COLORS.white}
           onValueChange={seekUpdate}
           // onSlidingComplete={seekUpdate}
-        />
+        /> */}
+        <View style={{alignItems: 'center', width: '100%'}}>
+          <Slider
+            containerStyle={{
+              height: 40,
+              width: '95%',
+            }}
+            minimumValue={0}
+            maximumValue={getMaxValue()}
+            value={progress}
+            minimumTrackTintColor={COLORS.white}
+            maximumTrackTintColor={COLORS.white}
+            thumbTintColor={COLORS.white}
+            onValueChange={val => {
+              if (seekUpdate) {
+                seekUpdate(val[0]);
+              }
+            }}
+            // onSlidingComplete={seekUpdate}
+            trackClickable={true}
+            thumbStyle={{
+              height: 15,
+              width: 15,
+              borderRadius: 9,
+            }}
+          />
+        </View>
       </View>
       <StyledText
         style={{...styles.timerText, right: isVisiblePlayPause ? 0 : 15}}>

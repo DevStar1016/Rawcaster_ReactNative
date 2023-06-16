@@ -28,6 +28,7 @@ import {useDispatch} from 'react-redux';
 import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
 import BigList from 'react-native-big-list';
 import {useIsFocused} from '@react-navigation/native';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 var isMount = true;
 var currentPage = 1;
@@ -48,6 +49,9 @@ const NuggetsSearch = () => {
   const insets = useInsets();
   const [viewableItem, setviewableItem] = useState('');
   const [listContainerHeight, setlistContainerHeight] = useState(undefined);
+  const [isReadMuted, setisReadMuted] = useState(false);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
+  const nuggetContentController = useRef(null);
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0)
       setviewableItem(viewableItems.viewableItems[0].item.nugget_id || 0);
@@ -71,6 +75,14 @@ const NuggetsSearch = () => {
       nuggetsSearchAPICall(1);
     }
   }, [searchText]);
+  useEffect(() => {
+    if (!isFocused) {
+      if (nuggetContentController.current) {
+        nuggetContentController.current.abort();
+      }
+      handleStopAudio();
+    }
+  }, [isFocused]);
 
   const nuggetsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
@@ -122,6 +134,33 @@ const NuggetsSearch = () => {
       });
   };
 
+  const handlePlayAudio = async url => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition) === 0) {
+          setisReadMuted(true);
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      setisReadMuted(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setisReadMuted(false);
+    }
+  };
+
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -156,6 +195,10 @@ const NuggetsSearch = () => {
     textNuggetNumberOfLines: 12,
     mediaHeight: insets.mediaHeight - topLayerHeight,
     isEnableHeaderContainerHeightforTopButtons: false,
+    nuggetContentController: nuggetContentController,
+    isReadMuted: isReadMuted,
+    handlePlayAudio: handlePlayAudio,
+    handleStopAudio: handleStopAudio,
     onFinishPlaying: index => {
       if (index < getNuggetsList()?.length - 1) {
         flatlistRef.current.scrollToIndex({
