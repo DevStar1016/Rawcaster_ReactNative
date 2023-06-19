@@ -316,6 +316,7 @@ const ProfilesListContainerWithSeeAll = ({
     }
     return undefined;
   }
+  console.log(getList(), 'LIST');
 
   return (
     <View style={[styles.mainContainer, {paddingHorizontal}]}>

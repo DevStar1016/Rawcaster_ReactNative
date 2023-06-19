@@ -162,7 +162,12 @@ const AIChatItem = ({
             item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
           ]}>
           {item.audioUrl ? (
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                maxWidth: '95%',
+              }}>
               <MediaProgressSlider
                 isVisiblePlayPause
                 isVisibleStop

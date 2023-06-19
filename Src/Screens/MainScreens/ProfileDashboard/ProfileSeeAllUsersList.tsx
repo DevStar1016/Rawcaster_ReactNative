@@ -453,6 +453,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   function getRightIconAction(item: any) {
     if (item.user_id !== profile.user_id) {
       if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
+        //@ts-ignore
         navigation.navigate('ClaimAccount', {
           influencerId: item.user_id,
         });
@@ -635,6 +636,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           onSubmit={onApplyFilter}
           setModal={setisOpenFilterModal}
           preFilterData={filterData}
+          //@ts-ignore
           listType={listType}
         />
       </Modal>

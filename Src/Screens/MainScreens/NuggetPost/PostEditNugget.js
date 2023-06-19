@@ -735,7 +735,7 @@ const PostEditNugget = ({route}) => {
                 }
               }}
             />
-          ) : (
+          ) : profile.nugget_content_length > 0 ? (
             <View
               style={[
                 styles.inputContainer,
@@ -747,7 +747,7 @@ const PostEditNugget = ({route}) => {
                 placeholder={`What’s on your mind, ${profile?.name}!`}
                 style={styles.textInput}
                 multiline
-                maxLength={500}
+                maxLength={profile.nugget_content_length || 0}
                 onFocus={() => {
                   setisFocusedTextInput(true);
                   openCloseEmojiPicker(false);
@@ -772,7 +772,7 @@ const PostEditNugget = ({route}) => {
                 />
               </View>
             </View>
-          )}
+          ) : null}
         </View>
         <View>
           {!isPollClicked && selectedMediaList.length > 0 && (

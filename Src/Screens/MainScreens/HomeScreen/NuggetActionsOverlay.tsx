@@ -784,7 +784,7 @@ function NuggetActionsOverlay({
             />
           )}
 
-          {token && isEnableADDButton && (
+          {token && profile && parseInt(profile?.user_status_id) >= 1 ? (
             <RoundedIconButton
               icon="open_ai_white"
               bgColor={COLORS.transparentDimColor}
@@ -795,7 +795,7 @@ function NuggetActionsOverlay({
                 handlePresentAIChatModal();
               }}
             />
-          )}
+          ) : null}
         </View>
 
         <View
