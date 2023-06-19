@@ -4,31 +4,27 @@ import {
   Keyboard,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
-import {
-  useConnectionsList,
-  useGroupsList,
-  useProfile,
-  useToken,
-} from '../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
 import SearchInput from '../../../Components/SearchInput';
-import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
-  followAndUnfollowService,
+  getAuthCode,
+  getFilteredDuplicatesList,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
+import {
   searchRawcasterUsersService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
-import DefaultBackground from '../../../Components/DefaultBackground';
-import axios from 'axios';
 import UserItem from './UserItem';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
+import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
+import {becomeFan} from '../../../Store/ThunkAPIServices';
 
 var isMount = true;
 var currentPage = 1;
@@ -36,6 +32,7 @@ var totalPages = 1;
 const AddNewConnection = () => {
   const token = useToken();
   const profile = useProfile();
+  const dispatch = useDispatch();
   const [isActionLoading, setisActionLoading] = useState(false);
   const [actionLoaderText, setactionLoaderText] = useState('');
   const [usersList, setusersList] = useState([]);
@@ -105,6 +102,17 @@ const AddNewConnection = () => {
               };
             });
 
+            const tempFollowingUsersList = getFilteredDuplicatesList(
+              [...decodedUsersList],
+              'user_id',
+            )
+              .filter(item => item.follow)
+              .map(item => ({
+                user_id: item.user_id,
+                follow_count: item.follow_count,
+              }));
+            dispatch(setFollowingUsersList([...tempFollowingUsersList]));
+
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               setusersList(decodedUsersList);
@@ -130,44 +138,14 @@ const AddNewConnection = () => {
       });
   };
 
-  const handleBecomeFan = userRefId => {
-    // 1 - follow, 2 - unfollow
-    if (isMount) {
-      setisActionLoading(true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('follow_userid', userRefId);
-    formData.append('type', 1);
-    followAndUnfollowService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          setusersList(preList => {
-            let tempUserList = [...preList];
-            let tempIndex = [...preList].findIndex(
-              item => item.user_ref_id === userRefId,
-            );
-            if (tempIndex !== -1) {
-              tempUserList[tempIndex] = {
-                ...tempUserList[tempIndex],
-                follow: 1,
-              };
-            }
-            return tempUserList;
-          });
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
+  const handleBecomeFan = (userId, userRefId, followCount) => {
+    dispatch(
+      becomeFan({
+        user_id: userId,
+        follow_count: followCount,
+        user_ref_id: userRefId,
+      }),
+    );
   };
 
   const handleSendFriendRequest = (userRefId, user_id) => {
@@ -253,7 +231,7 @@ const AddNewConnection = () => {
           handleSelectUnselectUser(item.user_id);
         }}
         onBecomeFan={() => {
-          handleBecomeFan(item.user_ref_id);
+          handleBecomeFan(item.user_id, item.user_ref_id, item.follow_count);
         }}
         onConnectionRequest={() => {
           handleSendFriendRequest(item.user_ref_id, item.user_id);

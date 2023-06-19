@@ -10,6 +10,7 @@ import {
   getIsEnableFriendRequest,
   getSlicedText,
 } from '../../../Utilities/Methods';
+import {useFollowingUsersList} from '../../../Utilities/StoreData';
 
 const SearchProfileItem = ({
   item,
@@ -17,6 +18,13 @@ const SearchProfileItem = ({
   onConnectionRequest,
   onPressItem,
 }) => {
+  const followingUsersList = useFollowingUsersList();
+  const isFan = () => {
+    const tempFollowingUsersList = [...followingUsersList];
+    return tempFollowingUsersList.find(ele => ele.user_id === item.user_id)
+      ? true
+      : false;
+  };
   return (
     <TouchableOpacity
       style={styles.mainContainer}
@@ -41,7 +49,7 @@ const SearchProfileItem = ({
             </StyledText>
           </View>
           <View style={styles.buttonsContainer}>
-            {!item.follow && (
+            {!isFan() && (
               <SubmitButton
                 buttonText="Become a fan"
                 marginBottom={0}

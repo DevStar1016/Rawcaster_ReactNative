@@ -11,6 +11,7 @@ import {addNuggetViewService} from '../../../Services/ApiService';
 import {
   useDeletedNuggetsIds,
   useEditedNuggetsList,
+  useFollowingUsersList,
   useInsets,
   useIsNuggetsLoading,
   useNuggetType,
@@ -56,6 +57,7 @@ const DashboardWithCategory = ({route}) => {
   const insets = useInsets();
   const editedNuggetsList = useEditedNuggetsList();
   const deletedNuggetsIds = useDeletedNuggetsIds();
+  const followingUsersList = useFollowingUsersList();
   const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
@@ -314,6 +316,7 @@ const DashboardWithCategory = ({route}) => {
   const renderNuggetItem = useCallback(renderItem, [
     editedNuggetsList,
     deletedNuggetsIds,
+    followingUsersList,
     isMuted,
     viewableItem,
     getHeaderHeight(),

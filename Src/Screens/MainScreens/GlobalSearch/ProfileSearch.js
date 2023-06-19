@@ -27,11 +27,14 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
+import {useDispatch} from 'react-redux';
+import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const ProfileSearch = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const {searchText, setisActionLoading} = useGlobalSearch();
   const token = useToken();
@@ -71,7 +74,7 @@ const ProfileSearch = () => {
       .then(res => {
         if (isMount) {
           if (res.data.status === 1) {
-            let decodedNuggetList = [...res.data.users_list].map(item => {
+            let decodedUsersList = [...res.data.users_list].map(item => {
               return {
                 ...item,
                 display_name: htmlDecodeText(item.display_name),
@@ -79,12 +82,23 @@ const ProfileSearch = () => {
                 last_name: htmlDecodeText(item.last_name),
               };
             });
+            const tempFollowingUsersList = getFilteredDuplicatesList(
+              [...decodedUsersList],
+              'user_id',
+            )
+              .filter(item => item.follow)
+              .map(item => ({
+                user_id: item.user_id,
+                follow_count: item.follow_count,
+              }));
+
+            dispatch(setFollowingUsersList([...tempFollowingUsersList]));
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              setprofileList(decodedNuggetList);
+              setprofileList(decodedUsersList);
             } else {
-              setprofileList(preList => [...preList, ...decodedNuggetList]);
+              setprofileList(preList => [...preList, ...decodedUsersList]);
             }
           } else if (res.data.status === 0) {
             setprofileList([]);
@@ -262,7 +276,6 @@ const ProfileSearch = () => {
               <SearchProfileItem
                 item={item}
                 onBecomeFan={() => {
-                  console.log(item, 'ITEM');
                   handleBecomeFan(
                     item.user_id,
                     item.user_ref_id,

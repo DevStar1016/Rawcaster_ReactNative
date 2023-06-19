@@ -73,18 +73,38 @@ const HomeSlice = createSlice({
       state.savedNuggetsCount = action.payload;
     },
     setFollowingUsersList: (state, action) => {
+      console.log(
+        getFilteredDuplicatesList(
+          [...state.followingUsersList, ...action.payload],
+          'user_id',
+        ),
+        'FOLLOWED USERSS',
+      );
       state.followingUsersList = getFilteredDuplicatesList(
         [...state.followingUsersList, ...action.payload],
         'user_id',
       );
     },
     addFollowingUser: (state, action) => {
-      if (!state.followingUsersList.includes(action.payload)) {
-        state.followingUsersList = getFilteredDuplicatesList(
-          [...state.followingUsersList, {...action.payload}],
-          'user_id',
+      let tempFollowingUsersList = [...state.followingUsersList];
+      let tempIndex = tempFollowingUsersList.findIndex(
+        item => item.id === action.payload.user_id,
+      );
+
+      if (tempIndex === -1) {
+        tempFollowingUsersList = [
+          ...tempFollowingUsersList,
+          {...action.payload},
+        ];
+      } else {
+        tempFollowingUsersList = [...tempFollowingUsersList].filter(
+          item => item.user_id !== action.payload.user_id,
         );
       }
+      state.followingUsersList = getFilteredDuplicatesList(
+        [...tempFollowingUsersList],
+        'user_id',
+      );
     },
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];

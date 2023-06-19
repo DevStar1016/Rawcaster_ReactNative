@@ -1,14 +1,12 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import {
   deleteNuggetService,
-  followAndUnfollowService,
   likeAndUnlikeNuggetService,
   listNuggetsService,
   saveAndUnsaveNuggetService,
 } from '../Services/ApiService';
 import {
   addDeletedNuggetId,
-  addEditedNugget,
   likeUnlikeNugget,
   saveUnSaveNugget,
   setIsDeletingNugget,
@@ -48,7 +46,7 @@ export const getListNuggets = createAsyncThunk(
         }),
       );
 
-      const tempFollowingUsersIdsList = getFilteredDuplicatesList(
+      const tempFollowingUsersList = getFilteredDuplicatesList(
         [...res.data.nuggets_list],
         'user_id',
       )
@@ -57,7 +55,7 @@ export const getListNuggets = createAsyncThunk(
           user_id: item.user_id,
           follow_count: item.follow_count,
         }));
-      dispatch(setFollowingUsersList([...tempFollowingUsersIdsList]));
+      dispatch(setFollowingUsersList([...tempFollowingUsersList]));
 
       return {
         data: res.data,
@@ -151,15 +149,15 @@ export const becomeFan = createAsyncThunk(
       }),
     );
 
-    const formData = new FormData();
-    formData.append('token', getState().auth.token);
-    formData.append('follow_userid', data.user_ref_id);
-    formData.append('type', 1);
-    try {
-      const res = await followAndUnfollowService(formData);
-      console.log(res.data, 'FOLLOW RESPONSE');
-    } catch (error) {
-      console.log(error, 'FOLLOW');
-    }
+    // const formData = new FormData();
+    // formData.append('token', getState().auth.token);
+    // formData.append('follow_userid', data.user_ref_id);
+    // formData.append('type', 1);
+    // try {
+    //   const res = await followAndUnfollowService(formData);
+    //   console.log(res.data, 'FOLLOW RESPONSE');
+    // } catch (error) {
+    //   console.log(error, 'FOLLOW');
+    // }
   },
 );

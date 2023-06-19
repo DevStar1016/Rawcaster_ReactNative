@@ -35,6 +35,7 @@ import {
 import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
 import {
+  useFollowingUsersList,
   useInsets,
   useLikedNuggets,
   useProfile,
@@ -164,6 +165,7 @@ function NuggetActionsOverlay({
   const dispatch = useDispatch();
   const insets = useInsets();
   const likedNuggets = useLikedNuggets();
+  const followingUsersList = useFollowingUsersList();
   const unLikedNuggetsFromLikedNuggets = useUnLikedNuggetsFromLikedNuggets();
   const savedNuggetsIds = useSavedNuggetsIds();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
@@ -435,8 +437,25 @@ function NuggetActionsOverlay({
       : false;
   };
 
+  const isFan = () => {
+    const tempFollowingUsersList = [...followingUsersList];
+    return tempFollowingUsersList.find(item => item.user_id === nugget.user_id)
+      ? true
+      : false;
+  };
+
   const isNuggetSaved = () => {
     return [...savedNuggetsIds].includes(nugget.nugget_id);
+  };
+
+  const getFansCount = () => {
+    if (isFan()) {
+      const tempFollowingUsersList = [...followingUsersList];
+      return tempFollowingUsersList.find(
+        item => item.user_id === nugget.user_id,
+      ).follow_count;
+    }
+    return nugget.follow_count;
   };
 
   const ActionIconContainer = ({
@@ -887,7 +906,7 @@ function NuggetActionsOverlay({
                   <StyledText style={{color: COLORS.white}}>Nugget</StyledText>
                 </>
               )}
-              {token && !nugget.following ? (
+              {token && !isFan() ? (
                 <SubmitButton
                   buttonText="Become a Fan"
                   marginTop={0}
@@ -912,7 +931,7 @@ function NuggetActionsOverlay({
                 <UserNuggetDetail value={getNuggetType()} />
               </TouchableOpacity>
               <Dot />
-              <UserNuggetDetail value={`${nugget.follow_count} Fans`} />
+              <UserNuggetDetail value={`${getFansCount()} Fans`} />
             </View>
           </View>
         </View>
