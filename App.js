@@ -21,14 +21,15 @@ import axios from 'axios';
 import {removeToken} from './Src/Utilities/Methods';
 import Toast from './Src/Components/Toast';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {
-  GOOGLE_PLACES_API_KEY,
-  GOOGLE_SIGNIN_IOS_CLIENT_ID,
-} from './Src/Services/ServiceConstants';
+
 import {createStackNavigator} from '@react-navigation/stack';
 import {setInsets, setIsAppForeground} from './Src/Store/Slices/UtilitySlice';
 import {IS_IOS} from './Src/Utilities/Constants';
 import AsyncFetchIntro from './Src/Screens/IntroScreens.js/AsyncFetchIntro';
+import {
+  GOOGLE_PLACES_API_KEY,
+  GOOGLE_SIGNIN_IOS_CLIENT_ID,
+} from './Src/Services/APIKeysIds';
 
 const Stack = createStackNavigator();
 var tokenFetchingTimer = undefined;

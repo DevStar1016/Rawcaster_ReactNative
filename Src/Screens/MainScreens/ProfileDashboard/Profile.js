@@ -2,8 +2,6 @@ import {
   ActivityIndicator,
   FlatList,
   Modal,
-  RefreshControl,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -14,20 +12,18 @@ import ProfileNameBioContainer from './ProfileNameBioContainer';
 import ProfileIntroContainer from './ProfileIntroContainer';
 import {COLORS} from '../../../Utilities/Colors';
 import {
+  useBlockedUserIds,
   useConnectionsList,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
   useInsets,
   useProfile,
-  useProfileNuggets,
-  useSavedNuggetsCount,
   useSavedNuggetsList,
   useToken,
   useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
-  followAndUnfollowService,
   getOthersProfileService,
   listNuggetsService,
   sendFriendRequestsService,
@@ -50,12 +46,7 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import {
-  setFollowingUsersList,
-  setProfileNuggets,
-  setSavedNuggetsCount,
-  setSavedNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
+import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 const PADDING_HORIZONTAL = 10;
@@ -79,7 +70,7 @@ const Profile = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
-  const savedNuggetsCount = useSavedNuggetsCount();
+  const blockedUserIds = useBlockedUserIds();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -360,8 +351,13 @@ const Profile = ({route}) => {
     return profile ?? {};
   };
 
-  const getNuggetList = () => {
+  const getNuggetsList = () => {
     let tempNuggetsList = [...nuggetsList];
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
     if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
       tempNuggetsList = [...nuggetsList].filter(
         item => !deletedNuggetsIds.includes(item.nugget_id),
@@ -502,7 +498,7 @@ const Profile = ({route}) => {
   };
 
   const renderNuggetItem = useCallback(renderItem, [
-    getNuggetList(),
+    getNuggetsList(),
     isMuted,
     viewableItem,
   ]);
@@ -696,7 +692,6 @@ const Profile = ({route}) => {
       isFocused,
       selectedTab,
       nuggetsCount,
-      savedNuggetsCount,
       savedNuggetsList,
     ],
   );
@@ -755,7 +750,7 @@ const Profile = ({route}) => {
               <FlatList
                 ref={flatlistRef}
                 showsVerticalScrollIndicator={false}
-                data={getNuggetList()}
+                data={getNuggetsList()}
                 extraData={{editedNuggetsList, deletedNuggetsIds}}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={{

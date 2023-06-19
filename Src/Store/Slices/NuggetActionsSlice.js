@@ -7,7 +7,6 @@ export const initialState = {
   unLikedNuggetsFromLikedNuggets: [],
   editedNuggets: [],
   deletedNuggetsIds: [],
-  isDeletingNugget: false,
 };
 
 const NuggetActionsSlice = createSlice({
@@ -104,9 +103,6 @@ const NuggetActionsSlice = createSlice({
         action.payload,
       ]);
     },
-    setIsDeletingNugget: (state, action) => {
-      state.isDeletingNugget = action.payload;
-    },
   },
 });
 export const {
@@ -115,6 +111,5 @@ export const {
   setLikedSavedNuggets,
   addDeletedNuggetId,
   addEditedNugget,
-  setIsDeletingNugget,
 } = NuggetActionsSlice.actions;
 export default NuggetActionsSlice.reducer;

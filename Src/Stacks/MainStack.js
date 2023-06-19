@@ -1,13 +1,9 @@
 import {Modal, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {
-  CardStyleInterpolators,
-  TransitionSpecs,
-  createStackNavigator,
-} from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import Loader from '../Components/Loader';
 import {
-  useIsDeletingNugget,
+  useGlobalLoaderData,
   useIsVisibleInfluencers,
   useToken,
 } from '../Utilities/StoreData';
@@ -31,7 +27,6 @@ import {
   setGroupsList,
   setInfluencerCategoryList,
   setPendingFriendRequests,
-  setSavedNuggetsCount,
   setUnclaimedAccountsList,
   setUnreadNotificationCount,
 } from '../Store/Slices/HomeSlice';
@@ -56,7 +51,7 @@ const MainStack = () => {
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
   const dispatch = useDispatch();
-  const isDeletingNugget = useIsDeletingNugget();
+  const globalLoaderData = useGlobalLoaderData();
 
   useEffect(() => {
     initialAPICall();
@@ -95,7 +90,6 @@ const MainStack = () => {
             bio_data: htmlDecodeText(profile?.bio_data),
           };
           dispatch(setMyProfile(profile));
-          dispatch(setSavedNuggetsCount(profile.saved_nugget_count ?? 0));
           dispatch(
             setUnreadNotificationCount(
               profile?.unread_notification_count ?? null,
@@ -201,11 +195,11 @@ const MainStack = () => {
           </>
         )}
       </Stack.Navigator>
-      {isDeletingNugget && (
-        <Modal transparent visible={isDeletingNugget}>
+      {globalLoaderData?.status && (
+        <Modal transparent visible={globalLoaderData?.status}>
           <Loader
             bgColor={COLORS.transparentDimColor}
-            loaderText={'Deleting Nugget...'}
+            loaderText={globalLoaderData?.text}
           />
         </Modal>
       )}

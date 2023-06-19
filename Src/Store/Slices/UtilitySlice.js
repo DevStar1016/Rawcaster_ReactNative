@@ -1,5 +1,4 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {COLORS} from '../../Utilities/Colors';
 
 export const initialState = {
   insets: {
@@ -16,6 +15,10 @@ export const initialState = {
   isAppForeground: true,
   isOpenLoginAlert: false,
   isOpenVerifyPopup: false,
+  globalLoaderData: {
+    status: false,
+    text: '',
+  },
 };
 
 const UtilitySlice = createSlice({
@@ -49,6 +52,13 @@ const UtilitySlice = createSlice({
     setIsOpenVerifyPopup: (state, action) => {
       state.isOpenVerifyPopup = action.payload;
     },
+    setGlobalLoaderData: (state, action) => {
+      state.globalLoaderData = {
+        status: action.payload.status ?? false,
+        text: action.payload.text ?? '',
+      };
+    },
+
     setTabNuggetType: (state, action) => {
       if (action.payload.tab_type) {
         if (action.payload.tab_type !== state.bottomHomeButtonType) {
@@ -74,5 +84,6 @@ export const {
   setIsAppForeground,
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
+  setGlobalLoaderData,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

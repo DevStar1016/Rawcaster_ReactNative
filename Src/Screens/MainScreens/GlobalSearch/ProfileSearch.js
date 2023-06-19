@@ -17,7 +17,6 @@ import {
 } from '../../../Utilities/Methods';
 import {
   searchRawcasterUsersService,
-  followAndUnfollowService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
@@ -127,44 +126,6 @@ const ProfileSearch = () => {
         user_ref_id: userRefId,
       }),
     );
-
-    // 1 - follow, 2 - unfollow
-    // if (isMount) {
-    //   setisActionLoading(true);
-    // }
-    // const formData = new FormData();
-    // formData.append('token', token);
-    // formData.append('follow_userid', userRefId);
-    // formData.append('type', 1);
-    // followAndUnfollowService(formData)
-    //   .then(res => {
-    //     if (res.data.status === 1) {
-    //       Toast.success(res.data.msg);
-    //       setprofileList(preList => {
-    //         let tempProfileList = [...preList];
-    //         let tempIndex = [...preList].findIndex(
-    //           item => item.user_ref_id === userRefId,
-    //         );
-    //         if (tempIndex !== -1) {
-    //           tempProfileList[tempIndex] = {
-    //             ...tempProfileList[tempIndex],
-    //             follow: 1,
-    //           };
-    //         }
-    //         return tempProfileList;
-    //       });
-    //     } else if (res.data.status === 0) {
-    //       Toast.fail(res.data.msg);
-    //     }
-    //   })
-    //   .catch(e => {
-    //     Toast.fail(e.message);
-    //   })
-    //   .finally(() => {
-    //     if (isMount) {
-    //       setisActionLoading(false);
-    //     }
-    //   });
   };
 
   const handleSendFriendRequest = (userRefId, user_id) => {

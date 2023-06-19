@@ -1,5 +1,7 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import {
+  blockMultipleUserService,
+  blockUnblockUserService,
   deleteNuggetService,
   likeAndUnlikeNuggetService,
   listNuggetsService,
@@ -9,12 +11,18 @@ import {
   addDeletedNuggetId,
   likeUnlikeNugget,
   saveUnSaveNugget,
-  setIsDeletingNugget,
   setLikedSavedNuggets,
 } from './Slices/NuggetActionsSlice';
 import Toast from '../Components/Toast';
 import {getFilteredDuplicatesList} from '../Utilities/Methods';
-import {addFollowingUser, setFollowingUsersList} from './Slices/HomeSlice';
+import {
+  addFollowingUser,
+  blockUsers,
+  setConnectionsList,
+  setFollowingUsersList,
+  unBlockUser,
+} from './Slices/HomeSlice';
+import {setGlobalLoaderData} from './Slices/UtilitySlice';
 
 export const getListNuggets = createAsyncThunk(
   'getListNuggets',
@@ -116,7 +124,13 @@ export const saveAndUnsaveNugget = createAsyncThunk(
 export const deleteNugget = createAsyncThunk(
   'deleteNugget',
   async (data, {rejectWithValue, getState, dispatch, fulfillWithValue}) => {
-    dispatch(setIsDeletingNugget(true));
+    dispatch(
+      setGlobalLoaderData({
+        status: true,
+        text: 'Deleting Nugget...',
+      }),
+    );
+
     const formData = new FormData();
     formData.append('token', getState().auth.token);
     formData.append('nugget_id', data.nugget_id);
@@ -134,7 +148,12 @@ export const deleteNugget = createAsyncThunk(
       Toast.fail(e.message);
       // return rejectWithValue({errorMsg: error.message});
     } finally {
-      dispatch(setIsDeletingNugget(false));
+      dispatch(
+        setGlobalLoaderData({
+          status: false,
+          text: '',
+        }),
+      );
     }
   },
 );
@@ -148,16 +167,97 @@ export const becomeFan = createAsyncThunk(
         follow_count: data.follow_count + 1,
       }),
     );
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('follow_userid', data.user_ref_id);
+    formData.append('type', 1);
+    try {
+      const res = await followAndUnfollowService(formData);
+      console.log(res.data, 'FOLLOW RESPONSE');
+    } catch (error) {
+      console.log(error, 'FOLLOW ERROR');
+    }
+  },
+);
 
-    // const formData = new FormData();
-    // formData.append('token', getState().auth.token);
-    // formData.append('follow_userid', data.user_ref_id);
-    // formData.append('type', 1);
-    // try {
-    //   const res = await followAndUnfollowService(formData);
-    //   console.log(res.data, 'FOLLOW RESPONSE');
-    // } catch (error) {
-    //   console.log(error, 'FOLLOW');
-    // }
+export const blockUnblockUser = createAsyncThunk(
+  'blockUnblockUser',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    dispatch(
+      setGlobalLoaderData({
+        status: true,
+        text: `${data.action === 1 ? '' : 'Un'}Blocking User`,
+      }),
+    );
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('user_id', data.user_id);
+    formData.append('action', data.action); // 1 - block, 2 - unblock
+    try {
+      const res = await blockUnblockUserService(formData);
+      if (res.data.status === 1) {
+        Toast.success(res.data.msg);
+        if (data.action === 1) {
+          dispatch(blockUsers([data.user_id]));
+
+          let tempConnectionsList = [...getState().home.connectionsList];
+          tempConnectionsList = [...tempConnectionsList].filter(
+            item => item.user_id !== data.user_id,
+          );
+          dispatch(setConnectionsList(tempConnectionsList));
+        } else {
+          dispatch(unBlockUser(data.user_id));
+        }
+      } else if (res.data.status === 0) {
+        Toast.fail(res.data.msg);
+      }
+    } catch (error) {
+      Toast.fail(error.message);
+    } finally {
+      dispatch(
+        setGlobalLoaderData({
+          status: false,
+          text: '',
+        }),
+      );
+    }
+  },
+);
+
+export const blockMultipleUsers = createAsyncThunk(
+  'blockMultipleUsers',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    dispatch(
+      setGlobalLoaderData({
+        status: true,
+        text: `Blocking Users`,
+      }),
+    );
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('user_id', JSON.stringify(data.user_id));
+    try {
+      const res = await blockMultipleUserService(formData);
+      if (res.data.status === 1) {
+        Toast.success(res.data.msg);
+        dispatch(blockUsers([...data.user_id]));
+        let tempConnectionsList = [...getState().home.connectionsList];
+        tempConnectionsList = [...tempConnectionsList].filter(
+          item => !data.user_id.includes(item.user_id),
+        );
+        dispatch(setConnectionsList(tempConnectionsList));
+      } else if (res.data.status === 0) {
+        Toast.fail(res.data.msg);
+      }
+    } catch (error) {
+      Toast.fail(error.message);
+    } finally {
+      dispatch(
+        setGlobalLoaderData({
+          status: false,
+          text: '',
+        }),
+      );
+    }
   },
 );

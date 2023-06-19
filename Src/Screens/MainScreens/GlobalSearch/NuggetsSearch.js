@@ -9,6 +9,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
 import Nugget from '../HomeScreen/Nugget';
 import {
+  useBlockedUserIds,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
   useInsets,
@@ -44,6 +45,7 @@ const NuggetsSearch = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const deletedNuggetsIds = useDeletedNuggetsIds();
+  const blockedUserIds = useBlockedUserIds();
   const [isListLoading, setisListLoading] = useState(false);
   const searchedNuggetsList = useSearchedNuggetsList();
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -236,6 +238,11 @@ const NuggetsSearch = () => {
 
   const getNuggetsList = () => {
     let tempNuggetsList = [...searchedNuggetsList];
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
     if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
       return [...tempNuggetsList].filter(
         item => !deletedNuggetsIds.includes(item.nugget_id),

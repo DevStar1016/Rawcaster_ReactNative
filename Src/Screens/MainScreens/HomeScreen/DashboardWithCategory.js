@@ -9,6 +9,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import BigList from 'react-native-big-list';
 import {addNuggetViewService} from '../../../Services/ApiService';
 import {
+  useBlockedUserIds,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
   useFollowingUsersList,
@@ -57,6 +58,7 @@ const DashboardWithCategory = ({route}) => {
   const insets = useInsets();
   const editedNuggetsList = useEditedNuggetsList();
   const deletedNuggetsIds = useDeletedNuggetsIds();
+  const blockedUserIds = useBlockedUserIds();
   const followingUsersList = useFollowingUsersList();
   const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
@@ -264,6 +266,13 @@ const DashboardWithCategory = ({route}) => {
 
   function getNuggetsList() {
     let tempNuggetsList = [...nuggetsList];
+
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
+
     if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
       tempNuggetsList = [...tempNuggetsList].filter(
         item => !deletedNuggetsIds.includes(item.nugget_id),

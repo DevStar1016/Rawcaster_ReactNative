@@ -16,21 +16,28 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import SearchInput from '../../../Components/SearchInput';
 import SVGIcon from '../../../Components/SVGIcon';
-import {useConnectionsList, useToken} from '../../../Utilities/StoreData';
+import {
+  useBlockedUserIds,
+  useConnectionsList,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {
   blockMultipleUserService,
-  blockUnblockUserService,
   listAllBlockedUsersService,
 } from '../../../Services/ApiService';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import Loader from '../../../Components/Loader';
-import {setConnectionsList} from '../../../Store/Slices/HomeSlice';
+import {blockUsers, setConnectionsList} from '../../../Store/Slices/HomeSlice';
 import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {getSlicedText} from '../../../Utilities/Methods';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import SubmitButton from '../../../Components/SubmitButton';
 import TitleDescriptionContainer from '../../../Components/TitleDescriptionContainer';
+import {
+  blockMultipleUsers,
+  blockUnblockUser,
+} from '../../../Store/ThunkAPIServices';
 var currentPage = 1;
 var totalPages = 1;
 var isMount = true;
@@ -38,6 +45,7 @@ const Blocking = () => {
   const token = useToken();
   const connectionsList = useConnectionsList();
   const dispatch = useDispatch();
+  const blockedUserIds = useBlockedUserIds();
   const [blockedUsersList, setblockedUsersList] = useState([]);
   const [isLoading, setisLoading] = useState(true);
   const [isActionLoading, setisActionLoading] = useState(false);
@@ -65,10 +73,13 @@ const Blocking = () => {
     listAllBlockedUsersService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          dispatch(
+            blockUsers([...res.data.blocked_list].map(item => item.user_id)),
+          );
           if (isMount) {
             if (pageNumber === 1) {
-              console.log(res.data.blocked_list, 'IOP');
               totalPages = parseInt(res.data.total_pages);
+
               setblockedUsersList(res.data.blocked_list);
             } else {
               setblockedUsersList(preList => [
@@ -123,70 +134,31 @@ const Blocking = () => {
   }
 
   function handleBlockUsers(list) {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('user_id', JSON.stringify(list));
-
-    blockMultipleUserService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          let tempConnectionsList = [...connectionsList];
-          let tempFilteredConnectionsList = [...tempConnectionsList].filter(
-            item => {
-              return !list.includes(item.user_id);
-            },
-          );
-          dispatch(setConnectionsList(tempFilteredConnectionsList));
-          let tempBlockedUsersList = [...tempConnectionsList].reduce(
-            (result, item) => {
-              if (list.includes(item.user_id)) {
-                result.push(item);
-              }
-              return result;
-            },
-            [],
-          );
-
-          setblockedUsersList(preList => [...preList, ...tempBlockedUsersList]);
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
+    let tempConnectionsList = [...connectionsList];
+    let tempBlockedUsersList = [...tempConnectionsList].reduce(
+      (result, item) => {
+        if (list.includes(item.user_id)) {
+          result.push(item);
         }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
+        return result;
+      },
+      [],
+    );
+    setblockedUsersList(preList => [...preList, ...tempBlockedUsersList]);
+    dispatch(
+      blockMultipleUsers({
+        user_id: list,
+      }),
+    );
   }
 
   function handleUnBlockUser(userId) {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('user_id', userId);
-    formData.append('action', 2);
-    blockUnblockUserService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          setblockedUsersList(preList =>
-            [...preList].filter(item => item.user_id !== userId),
-          );
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
+    dispatch(
+      blockUnblockUser({
+        user_id: userId,
+        action: 2, // 1 - block, 2 - unblock
+      }),
+    );
   }
 
   function onBlockusers(list) {
@@ -203,10 +175,10 @@ const Blocking = () => {
         {
           text: 'OK',
           onPress: () => {
-            if (isMount) {
-              setloaderText('Blocking Selected Users');
-              setisActionLoading(true);
-            }
+            // if (isMount) {
+            //   setloaderText('Blocking Selected Users');
+            //   setisActionLoading(true);
+            // }
             handleBlockUsers(list);
           },
         },
@@ -228,10 +200,6 @@ const Blocking = () => {
         {
           text: 'OK',
           onPress: () => {
-            if (isMount) {
-              setloaderText(`UnBlocking ${getSlicedText(name, 20)}`);
-              setisActionLoading(true);
-            }
             handleUnBlockUser(userId);
           },
         },
@@ -239,6 +207,14 @@ const Blocking = () => {
       {cancelable: false},
     );
   }
+
+  const getBlockedUsersList = () => {
+    console.log(blockedUserIds, 'IDSSSS');
+
+    return [...blockedUsersList].filter(item =>
+      [...blockedUserIds].includes(item.user_id),
+    );
+  };
 
   function renderBlockedUser({item}) {
     return (
@@ -334,7 +310,7 @@ const Blocking = () => {
               </View>
             ) : (
               <FlatList
-                data={blockedUsersList}
+                data={getBlockedUsersList()}
                 renderItem={renderBlockedUser}
                 keyboardShouldPersistTaps="handled"
                 keyExtractor={keyExtractor}

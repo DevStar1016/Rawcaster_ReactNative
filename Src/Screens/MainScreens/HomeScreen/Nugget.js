@@ -15,14 +15,12 @@ import {
   useConnectionsList,
   useGroupsList,
   useInsets,
-  useIsDeletingNugget,
   useNuggetsList,
   useSearchedNuggetsList,
   useToken,
 } from '../../../Utilities/StoreData';
 import PollNugget from './NuggetItemTypes/PollNugget';
 import {
-  blockUnblockUserService,
   nuggetAbuseReportService,
   shareNuggetService,
 } from '../../../Services/ApiService';
@@ -30,7 +28,6 @@ import Loader from '../../../Components/Loader';
 import {COLORS} from '../../../Utilities/Colors';
 import Toast from '../../../Components/Toast';
 import {
-  setSavedNuggetsCount,
   setSavedNuggetsList,
   setSearchedNuggetsList,
 } from '../../../Store/Slices/HomeSlice';
@@ -47,11 +44,11 @@ import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
 import {
   becomeFan,
+  blockUnblockUser,
   deleteNugget,
   likeAndUnlikeNugget,
   saveAndUnsaveNugget,
 } from '../../../Store/ThunkAPIServices';
-import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 
 const Nugget = ({nugget, nuggetIndex}) => {
   const {
@@ -70,7 +67,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
   const groupsList = useGroupsList();
   const searchedNuggetsList = useSearchedNuggetsList();
   const savedNuggetsList = useSelector(state => state.home.savedNuggetsList);
-  const savedNuggetsCount = useSelector(state => state.home.savedNuggetsCount);
   const flatlistRef = useRef(null);
   const insets = useInsets();
   const token = useToken();
@@ -182,8 +178,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
         {
           text: 'OK',
           onPress: () => {
-            setloaderText('Blocking User...');
-            setisActionLoading(true);
             handleBlockUser(nugget.user_id);
           },
         },
@@ -200,57 +194,12 @@ const Nugget = ({nugget, nuggetIndex}) => {
   };
 
   const handleBlockUser = userId => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('user_id', userId);
-    formData.append('action', 1);
-    blockUnblockUserService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          if (isFromGlobalSearch) {
-            dispatch(
-              setSearchedNuggetsList(
-                [...searchedNuggetsList].filter(
-                  item => item.user_id !== userId,
-                ),
-              ),
-            );
-          }
-          let tempSavedList = [...savedNuggetsList];
-          let tempIndex = tempSavedList.findIndex(
-            ele => ele.nugget_id === nuggetId,
-          );
-          if (tempIndex !== -1) {
-            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
-            dispatch(
-              setSavedNuggetsList(
-                tempSavedList.filter(item => item.nugget_id !== nuggetId),
-              ),
-            );
-          }
-          const filteredNuggetsList = [...nuggetsList].filter(
-            item => item.user_id !== userId,
-          );
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(
-                categoryName,
-                filteredNuggetsList,
-              ),
-            ),
-          );
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        setloaderText('');
-        setisActionLoading(false);
-      });
+    dispatch(
+      blockUnblockUser({
+        user_id: userId,
+        action: 1, // 1 - block, 2 - unblock
+      }),
+    );
   };
 
   const handleSharNugget = (type, sharedList) => {
@@ -337,7 +286,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
             ele => ele.nugget_id === nuggetId,
           );
           if (tempIndex !== -1) {
-            dispatch(setSavedNuggetsCount(savedNuggetsCount - 1));
             dispatch(
               setSavedNuggetsList(
                 tempSavedList.filter(item => item.nugget_id !== nuggetId),
