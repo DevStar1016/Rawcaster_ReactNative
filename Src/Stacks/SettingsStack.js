@@ -5,7 +5,6 @@ import ChangePassword from '../Screens/MainScreens/Settings/ChangePassword';
 import EventSettings from '../Screens/MainScreens/Settings/EventSettings';
 import GeneralSettings from '../Screens/MainScreens/Settings/GeneralSettings';
 import NotificationsSettings from '../Screens/MainScreens/Settings/NotificationsSettings';
-import Refer from '../Screens/MainScreens/Settings/Refer';
 import SettingsHome from '../Screens/MainScreens/Settings/SettingsHome';
 import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 import StackAnimation from '../Utilities/StackAnimation';
@@ -24,7 +23,6 @@ const SettingsStack = () => {
       <Stack.Screen name="Blocking" component={Blocking} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
       <Stack.Screen name="EventSettings" component={EventSettings} />
-      <Stack.Screen name="Refer" component={Refer} />
       <Stack.Screen name="ReferalContacts" component={ReferalContactsList} />
     </Stack.Navigator>
   );

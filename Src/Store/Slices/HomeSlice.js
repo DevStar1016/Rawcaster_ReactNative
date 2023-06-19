@@ -3,7 +3,6 @@ import {getFilteredDuplicatesList} from '../../Utilities/Methods';
 
 export const initialState = {
   searchedNuggetsList: [],
-  profileNuggets: [],
   connectionsList: [],
   groupsList: [],
   pendingFriendRequests: [],
@@ -18,12 +17,11 @@ export const initialState = {
     nuggets: 0,
     poll_results: 0,
   },
-  nuggetFilterType: 0,
   otherConnectionsRequestList: [],
   otherInfluencersRequestList: [],
   savedNuggetsList: [],
-  savedNuggetsCount: 0,
   followingUsersList: [], // {user_id:userId,follow_count:followCount}
+  blockedUserIds: [],
 };
 
 const HomeSlice = createSlice({
@@ -32,9 +30,6 @@ const HomeSlice = createSlice({
   reducers: {
     setSearchedNuggetsList: (state, action) => {
       state.searchedNuggetsList = action.payload;
-    },
-    setProfileNuggets: (state, action) => {
-      state.profileNuggets = action.payload;
     },
     setConnectionsList: (state, action) => {
       state.connectionsList = action.payload;
@@ -57,9 +52,6 @@ const HomeSlice = createSlice({
     setTypeWiseNotificationCount: (state, action) => {
       state.typeWiseNotificationCount = action.payload;
     },
-    setNuggetFilterType: (state, action) => {
-      state.nuggetFilterType = action.payload;
-    },
     setOtherConnectionsRequestList: (state, action) => {
       state.otherConnectionsRequestList = action.payload;
     },
@@ -69,9 +61,18 @@ const HomeSlice = createSlice({
     setSavedNuggetsList: (state, action) => {
       state.savedNuggetsList = action.payload;
     },
-    setSavedNuggetsCount: (state, action) => {
-      state.savedNuggetsCount = action.payload;
+    blockUsers: (state, action) => {
+      state.blockedUserIds = getFilteredDuplicatesList([
+        ...state.blockedUserIds,
+        ...action.payload,
+      ]);
     },
+    unBlockUser: (state, action) => {
+      state.blockedUserIds = [...state.blockedUserIds].filter(
+        id => id !== action.payload,
+      );
+    },
+
     setFollowingUsersList: (state, action) => {
       state.followingUsersList = getFilteredDuplicatesList(
         [...state.followingUsersList, ...action.payload],
@@ -79,12 +80,25 @@ const HomeSlice = createSlice({
       );
     },
     addFollowingUser: (state, action) => {
-      if (!state.followingUsersList.includes(action.payload)) {
-        state.followingUsersList = getFilteredDuplicatesList(
-          [...state.followingUsersList, {...action.payload}],
-          'user_id',
+      let tempFollowingUsersList = [...state.followingUsersList];
+      let tempIndex = tempFollowingUsersList.findIndex(
+        item => item.id === action.payload.user_id,
+      );
+
+      if (tempIndex === -1) {
+        tempFollowingUsersList = [
+          ...tempFollowingUsersList,
+          {...action.payload},
+        ];
+      } else {
+        tempFollowingUsersList = [...tempFollowingUsersList].filter(
+          item => item.user_id !== action.payload.user_id,
         );
       }
+      state.followingUsersList = getFilteredDuplicatesList(
+        [...tempFollowingUsersList],
+        'user_id',
+      );
     },
     clearHomeReduxData: (state, action) => {
       state.nuggetsList = [];
@@ -102,17 +116,14 @@ const HomeSlice = createSlice({
         fans: 0,
         poll_results: 0,
       };
-      state.nuggetFilterType = 0;
       state.otherConnectionsRequestList = [];
       state.otherInfluencersRequestList = [];
       state.savedNuggetsList = [];
-      state.savedNuggetsCount = 0;
     },
   },
 });
 export const {
   setSearchedNuggetsList,
-  setProfileNuggets,
   setConnectionsList,
   setGroupsList,
   setPendingFriendRequests,
@@ -121,12 +132,12 @@ export const {
   setUnreadNotificationCount,
   setTypeWiseNotificationCount,
   clearHomeReduxData,
-  setNuggetFilterType,
   setOtherConnectionsRequestList,
   setOtherInfluencersRequestList,
   setSavedNuggetsList,
-  setSavedNuggetsCount,
   setFollowingUsersList,
   addFollowingUser,
+  blockUsers,
+  unBlockUser,
 } = HomeSlice.actions;
 export default HomeSlice.reducer;

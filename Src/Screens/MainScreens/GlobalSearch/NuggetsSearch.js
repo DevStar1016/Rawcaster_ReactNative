@@ -9,6 +9,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
 import Nugget from '../HomeScreen/Nugget';
 import {
+  useBlockedUserIds,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
   useInsets,
@@ -23,9 +24,15 @@ import {listNuggetsService} from '../../../Services/ApiService';
 import StyledText from '../../../Components/StyledText';
 import Loader from '../../../Components/Loader';
 import DefaultBackground from '../../../Components/DefaultBackground';
-import {htmlDecodeText} from '../../../Utilities/Methods';
+import {
+  getFilteredDuplicatesList,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
 import {useDispatch} from 'react-redux';
-import {setSearchedNuggetsList} from '../../../Store/Slices/HomeSlice';
+import {
+  setFollowingUsersList,
+  setSearchedNuggetsList,
+} from '../../../Store/Slices/HomeSlice';
 import BigList from 'react-native-big-list';
 import {useIsFocused} from '@react-navigation/native';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -38,6 +45,7 @@ const NuggetsSearch = () => {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
   const deletedNuggetsIds = useDeletedNuggetsIds();
+  const blockedUserIds = useBlockedUserIds();
   const [isListLoading, setisListLoading] = useState(false);
   const searchedNuggetsList = useSearchedNuggetsList();
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -103,9 +111,19 @@ const NuggetsSearch = () => {
               };
             });
 
+            const tempFollowingUsersList = getFilteredDuplicatesList(
+              [...res.data.nuggets_list],
+              'user_id',
+            )
+              .filter(item => item.following)
+              .map(item => ({
+                user_id: item.user_id,
+                follow_count: item.follow_count,
+              }));
+            dispatch(setFollowingUsersList([...tempFollowingUsersList]));
+
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              console.log(decodedNuggetList, 'FORMDATA RESPONSE');
               dispatch(setSearchedNuggetsList(decodedNuggetList));
             } else {
               dispatch(
@@ -220,6 +238,11 @@ const NuggetsSearch = () => {
 
   const getNuggetsList = () => {
     let tempNuggetsList = [...searchedNuggetsList];
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
     if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
       return [...tempNuggetsList].filter(
         item => !deletedNuggetsIds.includes(item.nugget_id),

@@ -50,22 +50,6 @@ function DashboardTopTabNavigation() {
             bgColor={COLORS.transparent}
             onLeftContainerLayout={setheaderLeftButtonContainerWidth}
             onRightContainerLayout={setheaderRightButtonsContainerWidth}
-            // isEnableNuggetFilterTabs
-            // selectedTab={selectedFilterTab === 1 ? 'first' : 'second'}
-            // onPressFirstFilterTab={() => {
-            //   if (selectedFilterTab !== 1) {
-            //     setselectedFilterTab(1);
-            //     dispatch(setNuggetFilterType(1));
-            //     resetViewabilityItem();
-            //   }
-            // }}
-            // onPressSecondFilterTab={() => {
-            //   if (selectedFilterTab !== 0) {
-            //     setselectedFilterTab(0);
-            //     dispatch(setNuggetFilterType(0));
-            //     resetViewabilityItem();
-            //   }
-            // }}
           />
         </View>
       )}

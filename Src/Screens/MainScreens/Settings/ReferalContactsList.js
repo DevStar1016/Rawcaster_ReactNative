@@ -28,12 +28,6 @@ import {
   TWITTER_REFERAL_MESSAGE,
 } from '../../../Utilities/Constants';
 import {
-  FIREBASE_APP_ID,
-  GOOGLE_CONTACTS_SERVER_CLIENT_ID,
-  GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
-  GOOGLE_SIGNIN_IOS_CLIENT_ID,
-} from '../../../Services/ServiceConstants';
-import {
   getAuthCode,
   getSlicedText,
   isAlphabet,
@@ -50,6 +44,12 @@ import {inviteToRawcasterService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import SubmitButton from '../../../Components/SubmitButton';
+import {
+  FIREBASE_APP_ID,
+  GOOGLE_CONTACTS_SERVER_CLIENT_ID,
+  GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
+  GOOGLE_SIGNIN_IOS_CLIENT_ID,
+} from '../../../Services/APIKeysIds';
 
 var isMount = true;
 var currentPage = 1;

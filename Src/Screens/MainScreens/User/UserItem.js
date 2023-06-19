@@ -8,6 +8,7 @@ import RadioButton from '../../../Components/RadioButton';
 import SubmitButton from '../../../Components/SubmitButton';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {getIsEnableFriendRequest} from '../../../Utilities/Methods';
+import {useFollowingUsersList} from '../../../Utilities/StoreData';
 
 const UserItem = ({
   item,
@@ -22,6 +23,15 @@ const UserItem = ({
   isMe,
   isGroup = true,
 }) => {
+  const followingUsersList = useFollowingUsersList();
+
+  const isFan = () => {
+    const tempFollowingUsersList = [...followingUsersList];
+    return tempFollowingUsersList.find(ele => ele.user_id === item.user_id)
+      ? true
+      : false;
+  };
+
   function getItemRightComponent() {
     if (isGroup) {
       if (groupId) {
@@ -55,7 +65,7 @@ const UserItem = ({
     }
     return (
       <View style={styles.requestActionButtonsContainer}>
-        {!item.follow && (
+        {!isFan() && (
           <SubmitButton
             buttonText="Become a fan"
             marginTop={0}

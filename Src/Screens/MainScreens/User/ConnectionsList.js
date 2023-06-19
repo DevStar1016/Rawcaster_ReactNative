@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  useBlockedUserIds,
   useConnectionsList,
   usePendingFriendRequests,
   useToken,
@@ -43,6 +44,7 @@ const ConnectionsList = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
+  const blockedUserIds = useBlockedUserIds();
   const pendingConnectionRequests = usePendingFriendRequests();
   const connectionsList = useConnectionsList();
   const {searchText} = useMyConnections();
@@ -173,12 +175,22 @@ const ConnectionsList = () => {
   };
 
   function getList() {
+    let tempConnectionsList = [
+      ...pendingConnectionRequests,
+      ...connectionsList,
+    ];
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempConnectionsList = [...tempConnectionsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
+
     if (searchText && searchText.trim()) {
-      return [...pendingConnectionRequests, ...connectionsList].filter(item =>
+      return [...tempConnectionsList].filter(item =>
         item.display_name.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
-    return [...pendingConnectionRequests, ...connectionsList];
+    return [...tempConnectionsList];
   }
 
   function keyExtractor(item, index) {

@@ -735,7 +735,7 @@ const PostEditNugget = ({route}) => {
                 }
               }}
             />
-          ) : profile.nugget_content_length > 0 ? (
+          ) : profile?.nugget_content_length > 0 ? (
             <View
               style={[
                 styles.inputContainer,
@@ -747,7 +747,7 @@ const PostEditNugget = ({route}) => {
                 placeholder={`What’s on your mind, ${profile?.name}!`}
                 style={styles.textInput}
                 multiline
-                maxLength={profile.nugget_content_length || 0}
+                maxLength={profile?.nugget_content_length}
                 onFocus={() => {
                   setisFocusedTextInput(true);
                   openCloseEmojiPicker(false);

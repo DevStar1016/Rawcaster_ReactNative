@@ -2,8 +2,6 @@ import {
   ActivityIndicator,
   FlatList,
   Modal,
-  RefreshControl,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -14,20 +12,18 @@ import ProfileNameBioContainer from './ProfileNameBioContainer';
 import ProfileIntroContainer from './ProfileIntroContainer';
 import {COLORS} from '../../../Utilities/Colors';
 import {
+  useBlockedUserIds,
   useConnectionsList,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
   useInsets,
   useProfile,
-  useProfileNuggets,
-  useSavedNuggetsCount,
   useSavedNuggetsList,
   useToken,
   useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
-  followAndUnfollowService,
   getOthersProfileService,
   listNuggetsService,
   sendFriendRequestsService,
@@ -50,12 +46,9 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import {
-  setProfileNuggets,
-  setSavedNuggetsCount,
-  setSavedNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
+import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import {becomeFan} from '../../../Store/ThunkAPIServices';
 const PADDING_HORIZONTAL = 10;
 
 const Profile = ({route}) => {
@@ -77,7 +70,7 @@ const Profile = ({route}) => {
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
-  const savedNuggetsCount = useSavedNuggetsCount();
+  const blockedUserIds = useBlockedUserIds();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -187,12 +180,23 @@ const Profile = ({route}) => {
     getOthersProfileService(formData, profileController.signal)
       .then(res => {
         if (res.data.status === 1) {
-          setothersProfile({
+          const tempProfile = {
             ...res.data.profile,
             first_name: htmlDecodeText(res.data.profile?.first_name),
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
-          });
+          };
+          setothersProfile({...tempProfile});
+          if (tempProfile.follow) {
+            dispatch(
+              setFollowingUsersList([
+                {
+                  user_id: tempProfile.user_id,
+                  follow_count: parseInt(tempProfile.followers_count),
+                },
+              ]),
+            );
+          }
         } else if (res.data.status === 0) {
           setemptyText(res.data.msg);
         }
@@ -209,7 +213,6 @@ const Profile = ({route}) => {
             setisLoading(false);
           }
         }
-        console.log(e, 'ERROR OTHER PROFILE ');
       });
   };
 
@@ -251,37 +254,14 @@ const Profile = ({route}) => {
       });
   };
 
-  function handleBecomeFan() {
-    // 1 - follow, 2 - unfollow
-    if (isMount) {
-      setisActionLoading(true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('follow_userid', othersProfile.user_ref_id);
-    formData.append('type', 1);
-    followAndUnfollowService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          setothersProfile(preData => {
-            return {
-              ...preData,
-              follow: true,
-            };
-          });
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
+  function handleBecomeFan(userId, userRefId, followCount) {
+    dispatch(
+      becomeFan({
+        user_id: userId,
+        follow_count: followCount,
+        user_ref_id: userRefId,
+      }),
+    );
   }
 
   const listNuggetsAPICall = (pageNumber = 1, tab = 1) => {
@@ -371,8 +351,13 @@ const Profile = ({route}) => {
     return profile ?? {};
   };
 
-  const getNuggetList = () => {
+  const getNuggetsList = () => {
     let tempNuggetsList = [...nuggetsList];
+    if (blockedUserIds && blockedUserIds.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].filter(
+        item => !blockedUserIds.includes(item.user_id),
+      );
+    }
     if (deletedNuggetsIds && deletedNuggetsIds.length > 0) {
       tempNuggetsList = [...nuggetsList].filter(
         item => !deletedNuggetsIds.includes(item.nugget_id),
@@ -513,7 +498,7 @@ const Profile = ({route}) => {
   };
 
   const renderNuggetItem = useCallback(renderItem, [
-    getNuggetList(),
+    getNuggetsList(),
     isMuted,
     viewableItem,
   ]);
@@ -547,7 +532,11 @@ const Profile = ({route}) => {
           paddingHorizontal={PADDING_HORIZONTAL}
           isEnableClaimAccount={getIsEnableClaimAccount()}
           onPressBecomeFan={() => {
-            handleBecomeFan();
+            handleBecomeFan(
+              othersProfile.user_id,
+              othersProfile.user_ref_id,
+              othersProfile.followers_count,
+            );
           }}
           onPressClaimAccount={() => {
             navigation.navigate('ClaimAccount', {
@@ -703,7 +692,6 @@ const Profile = ({route}) => {
       isFocused,
       selectedTab,
       nuggetsCount,
-      savedNuggetsCount,
       savedNuggetsList,
     ],
   );
@@ -762,7 +750,7 @@ const Profile = ({route}) => {
               <FlatList
                 ref={flatlistRef}
                 showsVerticalScrollIndicator={false}
-                data={getNuggetList()}
+                data={getNuggetsList()}
                 extraData={{editedNuggetsList, deletedNuggetsIds}}
                 keyExtractor={keyExtractor}
                 contentContainerStyle={{

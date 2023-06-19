@@ -15,6 +15,7 @@ import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPi
 import SVGIcon from '../../../Components/SVGIcon';
 import StyledText from '../../../Components/StyledText';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {useProfile} from '../../../Utilities/StoreData';
 
 const PollContainer = ({
   onPressRemovePoll,
@@ -24,6 +25,8 @@ const PollContainer = ({
   setchoiceList,
   setpollLength,
 }) => {
+  const profile = useProfile();
+
   useEffect(() => {
     AvoidSoftInput.setAdjustResize();
     return () => {
@@ -90,7 +93,7 @@ const PollContainer = ({
           numberOfLines={2}
           textAlignVertical={'top'}
           placeholderTextColor={COLORS.white}
-          maxLength={150}
+          maxLength={profile?.nugget_content_length}
         />
         {choiceList.length < 4 && (
           <View style={styles.addPollOptionsButton}>

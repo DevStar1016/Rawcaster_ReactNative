@@ -1,14 +1,12 @@
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {
-  GOOGLE_SERACH_ANDROID,
-  GOOGLE_SERACH_IOS,
-} from '../Services/ServiceConstants';
+
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import HeaderWithBack from './HeaderWithBack';
+import {GOOGLE_SERACH_ANDROID, GOOGLE_SERACH_IOS} from '../Services/APIKeysIds';
 
 const GooglePlacesList = ({setOpenModal, onSelect}) => {
   return (

@@ -5,6 +5,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import {COLORS} from '../../../Utilities/Colors';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {
+  useFollowingUsersList,
   useInfluencerCategoryList,
   useSettings,
   useToken,
@@ -44,6 +45,15 @@ const ProfileNameBioContainer = ({
   const [isOpenBioCategoryEditor, setisOpenBioCategoryEditor] = useState(false);
   const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
     useState(false);
+
+  const followingUsersList = useFollowingUsersList();
+
+  const isFan = () => {
+    const tempFollowingUsersList = [...followingUsersList];
+    return tempFollowingUsersList.find(ele => ele.user_id === profile.user_id)
+      ? true
+      : false;
+  };
 
   const getBioData = () => {
     if (profile?.bio_data && profile?.bio_data.trim()) {
@@ -233,7 +243,7 @@ const ProfileNameBioContainer = ({
       <View style={styles.bioContainer}>
         <StyledText>{getBioData()}</StyledText>
       </View>
-      {userId && !profile?.follow && (
+      {userId && !isFan() && (
         <GradientButton
           buttonText={'Become a Fan'}
           rightIcon="right_arrow_white"

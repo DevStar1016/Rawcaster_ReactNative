@@ -17,7 +17,6 @@ import {
 } from '../../../Utilities/Methods';
 import {
   searchRawcasterUsersService,
-  followAndUnfollowService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
@@ -27,11 +26,14 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
+import {useDispatch} from 'react-redux';
+import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const ProfileSearch = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const {searchText, setisActionLoading} = useGlobalSearch();
   const token = useToken();
@@ -71,7 +73,7 @@ const ProfileSearch = () => {
       .then(res => {
         if (isMount) {
           if (res.data.status === 1) {
-            let decodedNuggetList = [...res.data.users_list].map(item => {
+            let decodedUsersList = [...res.data.users_list].map(item => {
               return {
                 ...item,
                 display_name: htmlDecodeText(item.display_name),
@@ -79,12 +81,23 @@ const ProfileSearch = () => {
                 last_name: htmlDecodeText(item.last_name),
               };
             });
+            const tempFollowingUsersList = getFilteredDuplicatesList(
+              [...decodedUsersList],
+              'user_id',
+            )
+              .filter(item => item.follow)
+              .map(item => ({
+                user_id: item.user_id,
+                follow_count: item.follow_count,
+              }));
+
+            dispatch(setFollowingUsersList([...tempFollowingUsersList]));
 
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              setprofileList(decodedNuggetList);
+              setprofileList(decodedUsersList);
             } else {
-              setprofileList(preList => [...preList, ...decodedNuggetList]);
+              setprofileList(preList => [...preList, ...decodedUsersList]);
             }
           } else if (res.data.status === 0) {
             setprofileList([]);
@@ -113,44 +126,6 @@ const ProfileSearch = () => {
         user_ref_id: userRefId,
       }),
     );
-
-    // 1 - follow, 2 - unfollow
-    // if (isMount) {
-    //   setisActionLoading(true);
-    // }
-    // const formData = new FormData();
-    // formData.append('token', token);
-    // formData.append('follow_userid', userRefId);
-    // formData.append('type', 1);
-    // followAndUnfollowService(formData)
-    //   .then(res => {
-    //     if (res.data.status === 1) {
-    //       Toast.success(res.data.msg);
-    //       setprofileList(preList => {
-    //         let tempProfileList = [...preList];
-    //         let tempIndex = [...preList].findIndex(
-    //           item => item.user_ref_id === userRefId,
-    //         );
-    //         if (tempIndex !== -1) {
-    //           tempProfileList[tempIndex] = {
-    //             ...tempProfileList[tempIndex],
-    //             follow: 1,
-    //           };
-    //         }
-    //         return tempProfileList;
-    //       });
-    //     } else if (res.data.status === 0) {
-    //       Toast.fail(res.data.msg);
-    //     }
-    //   })
-    //   .catch(e => {
-    //     Toast.fail(e.message);
-    //   })
-    //   .finally(() => {
-    //     if (isMount) {
-    //       setisActionLoading(false);
-    //     }
-    //   });
   };
 
   const handleSendFriendRequest = (userRefId, user_id) => {
@@ -262,7 +237,6 @@ const ProfileSearch = () => {
               <SearchProfileItem
                 item={item}
                 onBecomeFan={() => {
-                  console.log(item, 'ITEM');
                   handleBecomeFan(
                     item.user_id,
                     item.user_ref_id,

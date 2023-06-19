@@ -34,10 +34,6 @@ export const useTabType = () => {
   return useSelector(state => state.utility.bottomHomeButtonType);
 };
 
-export const useIsDeletingNugget = () => {
-  return useSelector(state => state.nugget_actions.isDeletingNugget);
-};
-
 export const useDeletedNuggetsIds = () => {
   return useSelector(state => state.nugget_actions.deletedNuggetsIds);
 };
@@ -54,16 +50,8 @@ export const useIsVisibleInfluencers = () => {
   return useSelector(state => state.utility.isVisibleInfluencers);
 };
 
-export const useNuggetFilterType = () => {
-  return useSelector(state => state.home.nuggetFilterType);
-};
-
 export const useSearchedNuggetsList = () => {
   return useSelector(state => state.home.searchedNuggetsList);
-};
-
-export const useProfileNuggets = () => {
-  return useSelector(state => state.home.profileNuggets);
 };
 
 export const useConnectionsList = () => {
@@ -145,6 +133,11 @@ export const useNuggetsListTotalPages = (categoryName = 'forYou') => {
 export const useSavedNuggetsList = () => {
   return useSelector(state => state.home.savedNuggetsList);
 };
-export const useSavedNuggetsCount = () => {
-  return useSelector(state => state.home.savedNuggetsCount);
+
+export const useBlockedUserIds = () => {
+  return useSelector(state => state.home.blockedUserIds);
+};
+
+export const useGlobalLoaderData = () => {
+  return useSelector(state => state.utility.globalLoaderData);
 };
