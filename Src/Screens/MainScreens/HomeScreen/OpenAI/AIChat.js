@@ -290,7 +290,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
             handleSendMessage({text});
           }}
           inputProps={{
-            maxLength: 200,
+            maxLength: profile?.ai_content_length ?? 0,
           }}
           isDisableAudioProcess={isDisableAudioProcess}
           isVisibleVoiceRecord={true}

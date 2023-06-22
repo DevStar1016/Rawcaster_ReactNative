@@ -25,6 +25,7 @@ import {
   handlePlayAudio,
 } from '../Utilities/AudioPlayerProcess';
 import OpacityAnimatedView from './OpacityAnimatedView';
+import moment from 'moment';
 
 type FileType = {
   uri: string;
@@ -186,6 +187,16 @@ const RBSheetTextInput = ({
     setrecordedAudio(null);
   }
 
+  const getUniqueId = () => {
+    return (
+      profile?.user_id +
+      '' +
+      moment.utc().format('x') +
+      '' +
+      Math.floor(Math.random() * 10000 + 1)
+    );
+  };
+
   return (
     <View style={styles.inputContainer}>
       {recordedAudio || isRecording || isPlaying ? (
@@ -276,6 +287,7 @@ const RBSheetTextInput = ({
                         setrecordingSeconds,
                         maxRecordingTimeInSeconds: 119,
                         onLimitReached: handleStopRecording,
+                        audioUniqueId: getUniqueId(),
                       });
                     }
                   }

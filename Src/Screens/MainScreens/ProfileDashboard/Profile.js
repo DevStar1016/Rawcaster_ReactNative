@@ -50,11 +50,11 @@ import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 const PADDING_HORIZONTAL = 10;
+var isMount = true;
+var currentPage = 1;
+var totalPages = 1;
 
 const Profile = ({route}) => {
-  let isMount = true;
-  let currentPage = 1;
-  let totalPages = 1;
   let profileController = undefined;
   let nuggetsController = undefined;
   const dispatch = useDispatch();
@@ -265,6 +265,7 @@ const Profile = ({route}) => {
   }
 
   const listNuggetsAPICall = (pageNumber = 1, tab = 1) => {
+    console.log(pageNumber, 'page', tab, 'tab');
     if (nuggetsController) {
       nuggetsController.abort();
     }
@@ -298,21 +299,16 @@ const Profile = ({route}) => {
             } else {
               setnuggetsList(preList => [...preList, ...decodedNuggetList]);
             }
-            if (isMount) {
-              setisLoadMore(false);
-              setisRefreshing(false);
-              setisListLoading(false);
-            }
           } else if (res.data.status === 0) {
             if (isMount) {
               setnuggetsCount(0);
             }
             setnuggetsList([]);
-            if (isMount) {
-              setisLoadMore(false);
-              setisRefreshing(false);
-              setisListLoading(false);
-            }
+          }
+          if (isMount) {
+            setisLoadMore(false);
+            setisRefreshing(false);
+            setisListLoading(false);
           }
         }
       })
@@ -780,7 +776,7 @@ const Profile = ({route}) => {
                     </View>
                   );
                 }}
-                renderFooter={renderFooter}
+                ListFooterComponent={renderFooter}
                 onEndReachedThreshold={0.5}
                 onEndReached={onEndReached}
               />
