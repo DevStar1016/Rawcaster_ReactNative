@@ -15,6 +15,9 @@ import InstagramRoundedFillIcon from '../Assets/Svg/instagram_rounded_fill.svg';
 import ContactRoundedFillOrangeIcon from '../Assets/Svg/contact_rounded_fill_orange.svg';
 import ShareRoundedFillBlueIcon from '../Assets/Svg/share_rounded_fill_blue.svg';
 import GmailRoundedIcon from '../Assets/Svg/gmail_rounded.svg';
+import EmojiDarkIcon from '../Assets/Svg/emoji_dark.svg';
+import MessageSymbolIcon from '../Assets/Svg/message_symbol.svg';
+import QRScannerIcon from '../Assets/Svg/qr_scanner.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -285,7 +288,11 @@ export type IconType =
   | 'stop_fill__white'
   | 'stop_rounded_white'
   | 'play_fill_white'
-  | 'pause_fill_white';
+  | 'pause_fill_white'
+  | 'emoji_dark'
+  | 'message_symbol'
+  | 'qr_scanner';
+
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
   visibility_off: VisibilityOffIcon,
@@ -428,4 +435,7 @@ export const ICONS = {
   stop_rounded_white: StopRoundedWhiteIcon,
   play_fill_white: PlayFillWhiteIcon,
   pause_fill_white: PauseFillWhiteIcon,
+  emoji_dark: EmojiDarkIcon,
+  message_symbol: MessageSymbolIcon,
+  qr_scanner: QRScannerIcon,
 };

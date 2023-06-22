@@ -63,6 +63,8 @@ import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
+import EmojiContainer from 'react-native-emoji-container';
+import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -71,7 +73,7 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 var isMount = true;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
 const PostEditNugget = ({route}) => {
-  const {nugget, isSearchNugget, categoryName, preContent} = route.params ?? {};
+  const {nugget, categoryName, preContent} = route.params ?? {};
   const searchedNuggetsList = useSearchedNuggetsList();
   const dispatch = useDispatch();
   const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
@@ -822,25 +824,43 @@ const PostEditNugget = ({route}) => {
           />
         </View>
 
-        {isOpenEmojiContainer ? (
-          <View
-            style={{
-              height: EMOJI_CONTAINER_HEIGHT,
-              backgroundColor: COLORS.white,
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              borderTopStartRadius: 10,
-              borderTopEndRadius: 10,
-            }}>
-            {/* <EmojiModal
+        <View
+          style={{
+            display: isOpenEmojiContainer ? 'flex' : 'none',
+            height: EMOJI_CONTAINER_HEIGHT,
+            backgroundColor: COLORS.white,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            borderTopStartRadius: 10,
+            borderTopEndRadius: 10,
+          }}>
+          {/* <EmojiModal
               onEmojiSelected={emoji => {}}
               containerStyle={{width: '100%'}}
               columns={8}
 
             /> */}
-            <EmojiKeyboard
+          <EmojiContainer
+            emojisContainerWidth={WINDOW_WIDTH - 10}
+            titleTextStyle={{
+              fontFamily: FONTS.DMSans.medium,
+              fontSize: 14,
+              color: COLORS.black,
+            }}
+            onPressEmoji={emojiItem => {
+              if (isMount) {
+                settypedText(pre => {
+                  if (pre.length < 500) {
+                    return pre + emojiItem.emoji;
+                  }
+                  return pre;
+                });
+              }
+            }}
+          />
+          {/* <EmojiKeyboard
               onEmojiSelected={res => {
                 if (isMount) {
                   settypedText(pre => {
@@ -858,9 +878,8 @@ const PostEditNugget = ({route}) => {
               styles={{
                 header: {fontFamily: FONTS.DMSans.medium},
               }}
-            />
-          </View>
-        ) : null}
+            /> */}
+        </View>
       </TouchableOpacity>
 
       <Modal

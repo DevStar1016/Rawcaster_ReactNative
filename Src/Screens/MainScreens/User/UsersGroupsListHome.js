@@ -1,4 +1,12 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import {useNavigation} from '@react-navigation/native';
@@ -11,6 +19,8 @@ import {FONTS} from '../../../Utilities/Fonts';
 import {MyConnectionsContext} from '../../../Utilities/Contexts';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import ConnectionsGroupsTopTabNavigation from '../../../Navigation/TopTabNavigation/ConnectionsGroups/ConnectionsGroupsTopTabNavigation';
+import SVGIcon from '../../../Components/SVGIcon';
+import QRCodeScanner from '../../../Modals/QRCodeScanner';
 
 const UsersGroupsListHome = () => {
   const navigation = useNavigation();
@@ -18,6 +28,7 @@ const UsersGroupsListHome = () => {
   const [focusedTab, setfocusedTab] = useState(1); //1 - user, 2- group
   const [searchText, setsearchText] = useState('');
   const [headerHeight, setheaderHeight] = useState(0);
+  const [isOpenScanner, setisOpenScanner] = useState(false);
 
   const myConnectionsContextValue = {
     searchText: searchText,
@@ -66,17 +77,27 @@ const UsersGroupsListHome = () => {
         <DefaultBackground isEnableRLogo={false} bgColor={COLORS.primaryDark} />
         <View style={styles.contentContainer}>
           <View onLayout={onLayout}>
-            <SearchInput
-              placeHolderText={`Search ${
-                focusedTab === 2 ? 'Group' : 'Connection'
-              }`}
-              searchWhenClickedButton={false}
-              onSearch={setsearchText}
-              marginTop={15}
-              marginBottom={10}
-              searchButtonColor={COLORS.secondary}
-              marginHorizontal={10}
-            />
+            <View style={styles.searchInputContainer}>
+              <SearchInput
+                placeHolderText={`Search ${
+                  focusedTab === 2 ? 'Group' : 'Connection'
+                }`}
+                containerStyle={{flex: 1}}
+                searchWhenClickedButton={false}
+                onSearch={setsearchText}
+                searchButtonColor={COLORS.secondary}
+              />
+              <SVGIcon
+                icon="qr_scanner"
+                marginLeft={10}
+                height={28}
+                width={28}
+                isButton
+                onPress={() => {
+                  setisOpenScanner(true);
+                }}
+              />
+            </View>
             <View style={{paddingBottom: 10}}>
               <FlatList
                 data={getList()}
@@ -96,6 +117,16 @@ const UsersGroupsListHome = () => {
           </View>
         </View>
       </View>
+      <Modal
+        visible={isOpenScanner}
+        onRequestClose={() => {
+          setisOpenScanner(false);
+        }}
+        style={{backgroundColor: COLORS.white}}>
+        <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
+          <QRCodeScanner />
+        </SafeAreaView>
+      </Modal>
     </MyConnectionsContext.Provider>
   );
 };
@@ -124,5 +155,12 @@ const styles = StyleSheet.create({
   },
   topTabContainer: {
     flex: 1,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    alignItems: 'center',
   },
 });
