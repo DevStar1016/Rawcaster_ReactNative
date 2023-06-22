@@ -205,7 +205,7 @@ const ConnectionsList = () => {
         activeOpacity={0.8}
         disabled={typeof item.online === typeof undefined}
         onPress={() => {
-          navigation.navigate('UserChat');
+          // navigation.navigate('UserChat');
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge

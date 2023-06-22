@@ -88,7 +88,6 @@
     "rn-fetch-blob": "^0.12.0",
     "sha1": "^1.1.1",
     "socket.io-client": "^4.6.1",
-    "vision-camera-code-scanner": "^0.2.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {

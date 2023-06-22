@@ -94,7 +94,7 @@ const UsersGroupsListHome = () => {
                 width={28}
                 isButton
                 onPress={() => {
-                  setisOpenScanner(true);
+                  // setisOpenScanner(true);
                 }}
               />
             </View>

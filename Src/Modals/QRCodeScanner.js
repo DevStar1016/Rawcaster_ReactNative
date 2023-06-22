@@ -1,6 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {useScanBarcodes, BarcodeFormat} from 'vision-camera-code-scanner';
 import {Camera, useCameraDevices} from 'react-native-vision-camera';
 import {CameraScreen} from 'react-native-camera-kit';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
@@ -12,21 +11,9 @@ const QRCodeScanner = () => {
   const devices = useCameraDevices();
   const device = devices.back;
 
-  const [frameProcessor, barcodes] = useScanBarcodes([BarcodeFormat.QR_CODE], {
-    checkInverted: true,
-  });
-
   useEffect(() => {
     checkAndSetPermission();
   }, []);
-
-  useEffect(() => {
-    if (barcodes && barcodes.length > 0) {
-      console.log(barcodes, 'BARCODESSS');
-    }
-  }, [barcodes]);
-
-  console.log(barcodes, 'BARCODESSS');
 
   const checkAndSetPermission = async () => {
     const status = await Camera.requestCameraPermission();
