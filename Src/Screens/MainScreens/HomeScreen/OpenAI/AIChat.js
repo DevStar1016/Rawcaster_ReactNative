@@ -87,6 +87,13 @@ const AIChat = ({onPressBack, handleShareContent}) => {
       .then(res => {
         if (res.data.status === 1) {
           setchatList(preList => {
+            let tempList = [...preList];
+            if (audioFile && res.data.query) {
+              tempList[0] = {
+                ...tempList[0],
+                translatedMsg: res.data.query,
+              };
+            }
             return [
               {
                 id: getUniqueId(),
@@ -95,7 +102,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
                 dateTime: moment().format('hh:mm A'),
                 isIntro: !((text && text.trim()) || audioFile),
               },
-              ...preList,
+              ...tempList,
             ];
           });
         } else if (res.data.status === 0) {
@@ -252,7 +259,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
             handleSendMessage({text});
           }}
           inputProps={{
-            maxLength: 200,
+            maxLength: profile?.ai_content_length ?? 0,
           }}
           isDisableAudioProcess={isDisableAudioProcess}
           isVisibleVoiceRecord={true}

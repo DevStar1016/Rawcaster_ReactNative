@@ -6,6 +6,8 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -683,6 +685,17 @@ function NuggetActionsOverlay({
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
+                {/* <Text
+                  style={{
+                    color: COLORS.white,
+                    backgroundColor: 'pink',
+                    width: '100%',
+                    height: 250,
+                    fontSize: 15.5,
+                    opacity: 0.8,
+                  }}>
+                  {htmlDecodeText(nugget.content.trim())}
+                </Text> */}
                 {/* @ts-ignore */}
                 <StyledText
                   textMode="read_more_hyper_link"
@@ -702,6 +715,13 @@ function NuggetActionsOverlay({
                     color: COLORS.white,
                     fontSize: 15.5,
                     opacity: 0.8,
+                    width: '100%',
+                    // height: '200%',
+                    // height:
+                    //   mainContentContainerHeight -
+                    //   (nuggetDataBottomContainerHeight + 90),
+                    // backgroundColor: 'lavender',
+                    // paddingBottom: 5,
                   }}>
                   {isReadLoading ? (
                     <LoadingDots

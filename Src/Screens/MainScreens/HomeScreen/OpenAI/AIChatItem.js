@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -31,7 +32,7 @@ const AIChatItem = ({
   isEnableShare = true,
 }) => {
   const token = useToken();
-  console.log(item, 'AIIIIII');
+  // console.log(item, 'AIIIIII');
   useEffect(() => {
     isMount = true;
     return () => {
@@ -197,6 +198,14 @@ const AIChatItem = ({
                 color: COLORS.white,
               }}>
               {item.msg}
+            </StyledText>
+          )}
+          {item.translatedMsg && (
+            <StyledText
+              style={{
+                color: COLORS.white,
+              }}>
+              {item.translatedMsg}
             </StyledText>
           )}
           <StyledText

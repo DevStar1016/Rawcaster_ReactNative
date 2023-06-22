@@ -25,6 +25,7 @@ import {
   handlePlayAudio,
 } from '../Utilities/AudioPlayerProcess';
 import OpacityAnimatedView from './OpacityAnimatedView';
+import moment from 'moment';
 
 type FileType = {
   uri: string;
@@ -274,6 +275,7 @@ const RBSheetTextInput = ({
                         setisRecording,
                         setrecordedAudio,
                         setrecordingSeconds,
+                        audioUniqueId: moment() ?? '',
                       });
                     }
                   }
