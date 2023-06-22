@@ -134,7 +134,6 @@ export const deleteNugget = createAsyncThunk(
     const formData = new FormData();
     formData.append('token', getState().auth.token);
     formData.append('nugget_id', data.nugget_id);
-    console.log(formData, 'FORMDATAAA');
     try {
       const res = await deleteNuggetService(formData);
       if (res.data.status === 1) {

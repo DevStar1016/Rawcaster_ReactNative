@@ -192,6 +192,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
                   setrecordedAudio,
                   setrecordingSeconds,
                   audioUniqueId: moment(),
+                  onLimitReached: handleStopAudioRecord,
                 });
               }}
               icon={'mic_fill_primary'}

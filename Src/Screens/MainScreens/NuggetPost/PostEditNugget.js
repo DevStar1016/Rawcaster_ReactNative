@@ -987,7 +987,6 @@ const PostEditNugget = ({route}) => {
           list={selectedShareType.id === 3 ? groupsList : connectionsList}
           onSelectItems={list => {
             if (isMount) {
-              console.log(list, 'SPECIFIC LIST');
               setisOpenSelectionModal(false);
               setshareConnectionsGroupsIdsList(list);
             }

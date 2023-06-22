@@ -131,6 +131,7 @@ const ProfileTopSection = ({
             parseInt(profile?.account_verify_type) === 2 &&
             'verified_sign'
           }
+          topRightIconAsButton={false}
         />
         {isEnableFansList && (
           <FansProfilesContainer

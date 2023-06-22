@@ -274,6 +274,8 @@ const RBSheetTextInput = ({
                         setisRecording,
                         setrecordedAudio,
                         setrecordingSeconds,
+                        maxRecordingTimeInSeconds: 119,
+                        onLimitReached: handleStopRecording,
                       });
                     }
                   }

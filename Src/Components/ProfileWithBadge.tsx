@@ -176,7 +176,7 @@ const ProfileWithBadge = ({
               alternateProfileImageComponent(undefined)
             ) : (
               <Image
-                source={DeafaultProfile}
+                source={defaultProfileImage ?? DeafaultProfile}
                 style={styles.profileImage}
                 borderRadius={borderRadius}
               />

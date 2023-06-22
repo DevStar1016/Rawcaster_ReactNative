@@ -10,9 +10,10 @@ import StyledText from '../../../../Components/StyledText';
 import {COLORS} from '../../../../Utilities/Colors';
 import SVGIcon from '../../../../Components/SVGIcon';
 import {textToAudioService} from '../../../../Services/ApiService';
-import {useToken} from '../../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import LoadingDots from '../../../../Components/LoadingDots';
 import MediaProgressSlider from '../../../../Components/MediaProgressSlider';
+import AppLogoBgWhite from '../../../../Assets/Png/app_logo_bg_white.png';
 
 var isMount = true;
 const AIChatItem = ({
@@ -31,7 +32,7 @@ const AIChatItem = ({
   isEnableShare = true,
 }) => {
   const token = useToken();
-  console.log(item, 'AIIIIII');
+  const profile = useProfile();
   useEffect(() => {
     isMount = true;
     return () => {
@@ -154,7 +155,12 @@ const AIChatItem = ({
               },
         ]}>
         {item.isAI && (
-          <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
+          <ProfileWithBadge
+            defaultProfileImage={AppLogoBgWhite}
+            extraMargin={0}
+            padding={0}
+            profileSize={35}
+          />
         )}
         <View
           style={[
@@ -162,34 +168,47 @@ const AIChatItem = ({
             item.isAI ? {paddingLeft: 10} : {paddingRight: 10},
           ]}>
           {item.audioUrl ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                maxWidth: '95%',
-              }}>
-              <MediaProgressSlider
-                isVisiblePlayPause
-                isVisibleStop
-                isEnableDurationFloor={false}
-                onPlayPause={() => {
-                  if (item.id !== playingChatId) {
-                    handlePlayAudio(item.audioUrl, item.id);
-                  } else {
-                    handleStopAudio();
-                  }
-                }}
-                seekUpdate={value => {
-                  if (item.id === playingChatId) {
-                    try {
-                      audioPlayerRef?.current?.seekToPlayer(value * 1000);
-                    } catch (e) {}
-                  }
-                }}
-                progress={item.id === playingChatId ? progress : 0}
-                isPaused={item.id !== playingChatId}
-                duration={item.duration ?? 0}
-              />
+            <View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  maxWidth: '95%',
+                }}>
+                <MediaProgressSlider
+                  isVisiblePlayPause
+                  isVisibleStop
+                  isEnableDurationFloor={false}
+                  onPlayPause={() => {
+                    if (item.id !== playingChatId) {
+                      handlePlayAudio(item.audioUrl, item.id);
+                    } else {
+                      handleStopAudio();
+                    }
+                  }}
+                  seekUpdate={value => {
+                    if (item.id === playingChatId) {
+                      try {
+                        audioPlayerRef?.current?.seekToPlayer(value * 1000);
+                      } catch (e) {}
+                    }
+                  }}
+                  progress={item.id === playingChatId ? progress : 0}
+                  isPaused={item.id !== playingChatId}
+                  duration={item.duration ?? 0}
+                />
+              </View>
+
+              {item.audioText ? (
+                <StyledText
+                  style={{
+                    color: COLORS.white,
+                  }}>
+                  {item.audioText}
+                </StyledText>
+              ) : (
+                false
+              )}
             </View>
           ) : (
             <StyledText
@@ -210,7 +229,12 @@ const AIChatItem = ({
           </StyledText>
         </View>
         {!item.isAI && (
-          <ProfileWithBadge extraMargin={0} padding={0} profileSize={35} />
+          <ProfileWithBadge
+            profileImage={profile.profile_image}
+            extraMargin={0}
+            padding={0}
+            profileSize={35}
+          />
         )}
       </View>
       {item.isAI && (

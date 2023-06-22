@@ -294,7 +294,9 @@ function NuggetActionsOverlay({
       })
       .catch(e => {
         setReadNuggetUrl(null);
-        Toast.fail(e.message);
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+        }
       })
       .finally(() => {
         setisReadLoading(false);

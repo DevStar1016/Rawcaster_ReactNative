@@ -25,6 +25,7 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import LoadingDots from '../../../../Components/LoadingDots';
 
 var isMount = true;
+var timer = undefined;
 const AIChat = ({onPressBack, handleShareContent}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer());
   const token = useToken();
@@ -44,6 +45,9 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     aiChatAPICall();
     return () => {
       isMount = false;
+      if (timer) {
+        clearTimeout(timer);
+      }
     };
   }, []);
 
@@ -70,7 +74,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     }
   };
 
-  function aiChatAPICall(text = '', audioFile) {
+  function aiChatAPICall(text = '', audioFile, existingUniqueId) {
     if (isMount) {
       setisLoadingChat(true);
     }
@@ -86,36 +90,70 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     aiChatService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          setchatList(preList => {
-            return [
-              {
-                id: getUniqueId(),
-                msg: res.data.msg,
-                isAI: true,
-                dateTime: moment().format('hh:mm A'),
-                isIntro: !((text && text.trim()) || audioFile),
-              },
-              ...preList,
-            ];
-          });
+          const responseChatData = {
+            id: getUniqueId(),
+            msg: res.data.msg,
+            isAI: true,
+            dateTime: moment().format('hh:mm A'),
+            isIntro: !((text && text.trim()) || audioFile),
+          };
+          if (audioFile && existingUniqueId && res.data.query) {
+            setchatList(preList => {
+              let tempChatList = [...preList];
+              const tempIndex = tempChatList.findIndex(
+                item => item.id === existingUniqueId,
+              );
+              if (tempIndex !== -1) {
+                tempChatList[tempIndex] = {
+                  ...tempChatList[tempIndex],
+                  audioText: res.data.query,
+                };
+              }
+              return [...tempChatList];
+            });
+            timer = setTimeout(() => {
+              if (isMount) {
+                setchatList(preList => {
+                  return [{...responseChatData}, ...preList];
+                });
+                setisLoadingChat(false);
+              }
+              clearTimeout(timer);
+            }, 1000);
+          } else {
+            if (isMount) {
+              setchatList(preList => {
+                return [{...responseChatData}, ...preList];
+              });
+              setisLoadingChat(false);
+            }
+          }
         } else if (res.data.status === 0) {
+          if (isMount) {
+            setisLoadingChat(false);
+          }
+          console.log(res.data.msg, 'ERROR MESSAGE');
         }
       })
       .catch(e => {
-        console.log(e.message, 'ERROR');
-      })
-      .finally(() => {
         if (isMount) {
           setisLoadingChat(false);
         }
+        console.log(e.message, 'ERROR');
       });
+    // .finally(() => {
+    //   if (isMount) {
+    //     setisLoadingChat(false);
+    //   }
+    // });
   }
 
   function handleSendMessage({text = '', audioFile, duration = 0}) {
+    const uniqueId = getUniqueId();
     setchatList(preList => {
       return [
         {
-          id: getUniqueId(),
+          id: uniqueId,
           msg: text,
           isAI: false,
           dateTime: moment().format('hh:mm A'),
@@ -125,7 +163,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
         ...preList,
       ];
     });
-    aiChatAPICall(text, audioFile);
+    aiChatAPICall(text, audioFile, uniqueId);
   }
 
   const getUniqueId = () => {

@@ -22,7 +22,9 @@ type AudioRecordProps = {
   setisRecording?: (val: boolean) => void;
   setrecordedAudio?: (val: string) => void;
   setrecordingSeconds?: (val: number) => void;
+  onLimitReached?: () => void;
   audioUniqueId?: string | number;
+  maxRecordingTimeInSeconds?: number;
 };
 
 export const handleAudioRecord = async ({
@@ -31,6 +33,8 @@ export const handleAudioRecord = async ({
   setisRecording = () => {},
   setrecordedAudio = () => {},
   setrecordingSeconds = () => {},
+  maxRecordingTimeInSeconds = 150,
+  onLimitReached,
   audioUniqueId = '',
 }: AudioRecordProps) => {
   const isGrantedPermission = await isHavePermissionToRecordAudio();
@@ -60,7 +64,14 @@ export const handleAudioRecord = async ({
 
       setrecordedAudio(result);
       audioPlayer?.addRecordBackListener((e: any) => {
-        if (Math.floor(e.currentPosition / 1000) >= 0) {
+        if (
+          maxRecordingTimeInSeconds &&
+          Math.floor(e.currentPosition / 1000) > maxRecordingTimeInSeconds
+        ) {
+          if (onLimitReached) {
+            onLimitReached();
+          }
+        } else if (Math.floor(e.currentPosition / 1000) >= 0) {
           setrecordingSeconds(Math.floor(e.currentPosition / 1000));
         }
         return;
