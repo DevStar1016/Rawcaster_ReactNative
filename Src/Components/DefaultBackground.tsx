@@ -10,6 +10,7 @@ export type DefaultBgProps = {
   bgColor?: string;
   isEnableLoading?: boolean;
   isEnableRLogo?: boolean;
+  isEnableGradient?: boolean;
 };
 
 const DefaultBackground = ({
@@ -17,41 +18,46 @@ const DefaultBackground = ({
   isEnableLoading = false,
   bgColor = COLORS.primary,
   isEnableRLogo = true,
+  isEnableGradient = true,
 }: DefaultBgProps) => {
   return (
     <View style={[styles.mainContainer, {backgroundColor: bgColor}]}>
-      <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 170,
-        }}>
-        <LinearGradient
-          colors={['rgba(0,0,0,0.5)', COLORS.transparent]}
-          // colors={['red', 'red']}
-          start={{x: 1, y: 0}}
-          end={{x: 1, y: 1}}
-          style={styles.linearGradient}
-        />
-      </View>
-      <View
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 170,
-        }}>
-        <LinearGradient
-          colors={[COLORS.transparent, 'rgba(0,0,0,0.5)']}
-          // colors={['red', 'blue']}
-          start={{x: 1, y: 0}}
-          end={{x: 1, y: 1}}
-          style={[styles.linearGradient]}
-        />
-      </View>
+      {isEnableGradient && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 170,
+          }}>
+          <LinearGradient
+            colors={['rgba(0,0,0,0.5)', COLORS.transparent]}
+            // colors={['red', 'red']}
+            start={{x: 1, y: 0}}
+            end={{x: 1, y: 1}}
+            style={styles.linearGradient}
+          />
+        </View>
+      )}
+      {isEnableGradient && (
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 170,
+          }}>
+          <LinearGradient
+            colors={[COLORS.transparent, 'rgba(0,0,0,0.5)']}
+            // colors={['red', 'blue']}
+            start={{x: 1, y: 0}}
+            end={{x: 1, y: 1}}
+            style={[styles.linearGradient]}
+          />
+        </View>
+      )}
       {isEnableRLogo && <SVGIcon icon="logo_R" width={'50%'} height={'50%'} />}
       {centerText.trim() || isEnableLoading ? (
         <View

@@ -33,6 +33,7 @@ import CommentReplyFullItem from './CommentReplyFullItem';
 import Toast from '../../../../Components/Toast';
 import {EmojiKeyboard} from 'rn-emoji-keyboard';
 import RBSheetTextInput from '../../../../Components/RBSheetTextInput';
+import EmojiContainer from 'react-native-emoji-container';
 
 var isMount = true;
 const CommentsList = ({
@@ -494,7 +495,24 @@ const CommentsList = ({
               borderTopEndRadius: 10,
             }}>
             <BottomSheetView style={{flex: 1}}>
-              <EmojiKeyboard
+              <EmojiContainer
+                titleTextStyle={{
+                  fontFamily: FONTS.DMSans.medium,
+                  fontSize: 14,
+                  color: COLORS.black,
+                }}
+                onPressEmoji={emojiItem => {
+                  if (isMount) {
+                    settypedText(pre => {
+                      if (pre.length < 500) {
+                        return pre + emojiItem.emoji;
+                      }
+                      return pre;
+                    });
+                  }
+                }}
+              />
+              {/* <EmojiKeyboard
                 onEmojiSelected={res => {
                   if (isMount) {
                     settypedText(pre => {
@@ -514,7 +532,7 @@ const CommentsList = ({
                   // container
                   // container: {width: },
                 }}
-              />
+              /> */}
               {/* <EmojiSelector
               showSearchBar={false}
               showSectionTitles={false}

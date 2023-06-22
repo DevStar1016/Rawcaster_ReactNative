@@ -21,7 +21,6 @@ const TimerText = ({
   isPlayTimer = false,
   endTimeSeconds,
   onEndTime,
-  isResetOnEnd = false,
 }: Props) => {
   const [timer, settimer] = useState<number>(startSeconds);
   useEffect(() => {

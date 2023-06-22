@@ -200,12 +200,20 @@ const ConnectionsList = () => {
 
   function renderItem({item, index}) {
     return (
-      <TouchableOpacity style={styles.itemContainer} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.itemContainer}
+        activeOpacity={0.8}
+        disabled={typeof item.online === typeof undefined}
+        onPress={() => {
+          navigation.navigate('UserChat');
+        }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge
             profileImage={item.profile_img}
             padding={0}
-            isEnableOnlineOfflineStatus
+            isEnableOnlineOfflineStatus={
+              typeof item.online !== typeof undefined
+            }
             isOnline={parseInt(item.online) === 1}
             topRightIconContainerStyle={{
               top: 2,
@@ -226,7 +234,7 @@ const ConnectionsList = () => {
         </View>
 
         <View style={styles.actionIconsContainer}>
-          {item.online == undefined ? (
+          {typeof item.online === typeof undefined ? (
             <>
               <RoundedIconButton
                 buttonSize={23}
