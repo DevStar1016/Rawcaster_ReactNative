@@ -65,6 +65,8 @@ import RLogoIcon from '../Assets/Svg/logo_R.svg';
 import DownFillWhiteIcon from '../Assets/Svg/down_fill_white.svg';
 import LockFillWhiteIcon from '../Assets/Svg/lock_fill_white.svg';
 import CameraFillWhiteIcon from '../Assets/Svg/camera_fill_white.svg';
+import CameraFillPrimaryIcon from '../Assets/Svg/camera_fill_primary.svg';
+import UploadFillOrangeIcon from '../Assets/Svg/upload_fill_orange.svg';
 import MicFillWhiteIcon from '../Assets/Svg/mic_fill_white.svg';
 import MicOffFillWhiteIcon from '../Assets/Svg/mic_off_fill_white.svg';
 import PhotoFillWhiteIcon from '../Assets/Svg/photo_fill_white.svg';
@@ -217,6 +219,8 @@ export type IconType =
   | 'lock_fill_white'
   | 'logo_R'
   | 'camera_fill_white'
+  | 'camera_fill_primary'
+  | 'upload_fill_orange'
   | 'mic_fill_white'
   | 'mic_off_fill_white'
   | 'mic_off_fill_secondary'
@@ -369,6 +373,8 @@ export const ICONS = {
   down_fill_white: DownFillWhiteIcon,
   lock_fill_white: LockFillWhiteIcon,
   camera_fill_white: CameraFillWhiteIcon,
+  camera_fill_primary: CameraFillPrimaryIcon,
+  upload_fill_orange: UploadFillOrangeIcon,
   mic_fill_white: MicFillWhiteIcon,
   mic_off_fill_white: MicOffFillWhiteIcon,
   photo_fill_white: PhotoFillWhiteIcon,

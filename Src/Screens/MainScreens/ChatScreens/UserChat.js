@@ -99,7 +99,7 @@ const UserChat = ({route}) => {
       onLayoutHeaderHeight={setheaderHeight}
       backHeaderProps={{
         bgColor: COLORS.transparent,
-        title: getSlicedText(userData?.display_name),
+        title: getSlicedText(userData?.display_name, 25),
         isEnableProfileImage: true,
         titlePaddingHorizontal: 5,
         profileImageProps: {
@@ -107,7 +107,9 @@ const UserChat = ({route}) => {
           extraMargin: 0,
           padding: 0,
         },
-
+        isEnableBackButton: false,
+        isEnableRightIcon: true,
+        rightIcon: 'close_white',
         profileContainer: {marginVertical: 2, marginLeft: 5},
       }}>
       <KeyboardAvoidingView
