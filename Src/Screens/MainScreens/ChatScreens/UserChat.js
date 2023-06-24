@@ -125,10 +125,12 @@ const UserChat = ({route}) => {
             keyExtractor={(_, index) => index.toString()}
             ItemSeparatorComponent={() => <View style={{height: 10}} />}
             style={{flexGrow: 0}}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
           />
         </View>
 
-        <ChatTextInput />
+        <ChatTextInput onPressSend={() => {}} />
       </KeyboardAvoidingView>
     </HOCView>
   );
