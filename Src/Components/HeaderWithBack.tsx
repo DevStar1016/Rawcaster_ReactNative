@@ -131,8 +131,8 @@ const HeaderWithBack = ({
           style={[
             styles.titleContainer,
             {
-              alignItems: isTitleCenter ? 'center' : 'flex-start',
-              paddingHorizontal: isTitleCenter ? 0 : 15,
+              alignItems: 'center',
+              paddingHorizontal: 0,
             },
           ]}>
           <StyledText style={styles.title}>{title}</StyledText>
@@ -140,6 +140,24 @@ const HeaderWithBack = ({
       )}
       {rightButtonType === 'icon' ? (
         <View style={[styles.iconContainer, {alignItems: 'flex-end'}]}>
+          {isEnableRightIcon && (
+            <SVGIcon
+              icon={'audio_call_fill_white'}
+              height={rightIconSize}
+              width={rightIconSize}
+              isButton
+              onPress={onPressRightIcon}
+            />
+          )}
+          {isEnableRightIcon && (
+            <SVGIcon
+              icon={'video_call_fill_white'}
+              height={rightIconSize}
+              width={rightIconSize}
+              isButton
+              onPress={onPressRightIcon}
+            />
+          )}
           {isEnableRightIcon && (
             <SVGIcon
               icon={rightIcon}
@@ -180,6 +198,8 @@ const styles = StyleSheet.create({
     width: '10%',
     justifyContent: 'center',
     alignItems: 'flex-start',
+    backgroundColor: 'red',
+    flexDirection: 'row',
   },
   titleContainer: {
     paddingHorizontal: 10,
