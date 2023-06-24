@@ -1,30 +1,64 @@
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {FlatList, KeyboardAvoidingView, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import DefaultBackground from '../../../Components/DefaultBackground';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
-import SVGIcon from '../../../Components/SVGIcon';
-import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
 import EncryptedMessageContainer from './EncryptedMessageContainer';
 import {IS_IOS} from '../../../Utilities/Constants';
-import {useInsets} from '../../../Utilities/StoreData';
-import TextBox from '../../../Components/TextBox';
+import {useInsets, useProfile} from '../../../Utilities/StoreData';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import ChatTextInput from './ChatTextInput';
-import HeaderWithBack from '../../../Components/HeaderWithBack';
 import {getSlicedText} from '../../../Utilities/Methods';
+import ProfileWithBadge from '../../../Components/ProfileWithBadge';
+import StyledText from '../../../Components/StyledText';
 
 var isMount = true;
 const UserChat = ({route}) => {
   const insets = useInsets();
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
+  const profile = useProfile();
+  const [chatList, setchatList] = useState([
+    {
+      date: '2023-06-23',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Eppudiiii',
+      user_id: 2,
+    },
+
+    {
+      date: '2023-06-23',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Nee Thani Oruvan na Naan Evano Oruvan da',
+      user_id: 2,
+    },
+
+    {
+      date: '2023-06-22',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: "It's me Thani Oruvan",
+      user_id: 1,
+    },
+
+    {
+      date: '2023-06-22',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Hiii',
+      user_id: 2,
+    },
+
+    {
+      date: '2023-06-22',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Hiii',
+      user_id: 1,
+    },
+  ]);
+
   useEffect(() => {
     isMount = true;
     AvoidSoftInput.setAdjustResize();
@@ -33,6 +67,29 @@ const UserChat = ({route}) => {
       isMount = false;
     };
   }, []);
+
+  const renderChatItem = ({item}) => {
+    return (
+      <View
+        style={{
+          alignItems: item.user_id === 1 ? 'flex-start' : 'flex-end',
+        }}>
+        <View
+          style={[
+            {padding: 5, borderRadius: 10},
+            item.user_id === 1
+              ? {borderTopStartRadius: 0, backgroundColor: COLORS.lightGrey}
+              : {borderTopEndRadius: 0, backgroundColor: COLORS.primaryLight},
+          ]}>
+          <StyledText
+            style={{color: item.user_id === 1 ? COLORS.black : COLORS.white}}>
+            {item.content}
+          </StyledText>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <HOCView
       isEnableDefaultBackground
@@ -59,7 +116,14 @@ const UserChat = ({route}) => {
         style={{flex: 1}}>
         <EncryptedMessageContainer />
         <View style={styles.chatListContainer}>
-          <FlatList data={[]} />
+          <FlatList
+            data={chatList}
+            inverted
+            renderItem={renderChatItem}
+            keyExtractor={(_, index) => index.toString()}
+            ItemSeparatorComponent={() => <View style={{height: 10}} />}
+            style={{flexGrow: 0}}
+          />
         </View>
 
         <ChatTextInput />
@@ -89,5 +153,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     paddingVertical: 5,
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: 20,
+    marginVertical: 8,
+  },
+  header: {
+    fontSize: 32,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
   },
 });
