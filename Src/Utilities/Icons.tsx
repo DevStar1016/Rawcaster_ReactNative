@@ -135,6 +135,8 @@ import LockWithDotWhiteIcon from '../Assets/Svg/lock_with_dot_white.svg';
 import UserListPlaceholderIcon from '../Assets/Svg/user_list_placeholder.svg';
 import AudioCallWhiteIcon from '../Assets/Svg/audio_call_white.svg';
 import VideoCallWhiteIcon from '../Assets/Svg/video_call_white.svg';
+import AudioCallFillWhiteIcon from '../Assets/Svg/audio_call_fill_white.svg';
+import VideoCallFillWhiteIcon from '../Assets/Svg/video_call_fill_white.svg';
 import ChatWhiteIcon from '../Assets/Svg/chat_white.svg';
 import TalkshowWhiteIcon from '../Assets/Svg/talkshow_white.svg';
 import TalkshowSecondaryIcon from '../Assets/Svg/talkshow_secondary.svg';
@@ -281,6 +283,8 @@ export type IconType =
   | 'user_list_placeholder'
   | 'audio_call_white'
   | 'video_call_white'
+  | 'audio_call_fill_white'
+  | 'video_call_fill_white'
   | 'chat_white'
   | 'talkshow_white'
   | 'talkshow_secondary'
@@ -436,6 +440,8 @@ export const ICONS = {
   user_list_placeholder: UserListPlaceholderIcon,
   audio_call_white: AudioCallWhiteIcon,
   video_call_white: VideoCallWhiteIcon,
+  audio_call_fill_white: AudioCallFillWhiteIcon,
+  video_call_fill_white: VideoCallFillWhiteIcon,
   chat_white: ChatWhiteIcon,
   talkshow_white: TalkshowWhiteIcon,
   talkshow_secondary: TalkshowSecondaryIcon,

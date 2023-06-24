@@ -10,10 +10,12 @@ import ChatTextInput from './ChatTextInput';
 import {getSlicedText} from '../../../Utilities/Methods';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 const UserChat = ({route}) => {
   const insets = useInsets();
+  const navigation = useNavigation();
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
@@ -90,6 +92,10 @@ const UserChat = ({route}) => {
     );
   };
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <HOCView
       isEnableDefaultBackground
@@ -110,6 +116,7 @@ const UserChat = ({route}) => {
         isEnableBackButton: false,
         isEnableRightIcon: true,
         rightIcon: 'close_white',
+        onPressRightIcon: handleGoBack,
         profileContainer: {marginVertical: 2, marginLeft: 5},
       }}>
       <KeyboardAvoidingView
