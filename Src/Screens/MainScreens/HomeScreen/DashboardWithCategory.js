@@ -112,7 +112,9 @@ const DashboardWithCategory = ({route}) => {
     return () => {
       currentPage = 1;
       dispatch(resetNuggetsTotalPages(categoryName));
-      controller = undefined;
+      if (controller) {
+        controller.abort();
+      }
     };
   }, []);
 
@@ -426,6 +428,7 @@ const DashboardWithCategory = ({route}) => {
           ) : (
             <BigList
               ref={flatlistRef}
+              nestedScrollEnabled
               showsVerticalScrollIndicator={false}
               data={getNuggetsList()}
               alwaysBounceVertical={false}

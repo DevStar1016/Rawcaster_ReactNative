@@ -19,37 +19,37 @@ import {
 } from 'react-native-google-contact-api';
 import Contacts from 'react-native-contacts';
 import lodash from 'lodash';
-import HOCView from '../../../Components/HOCView';
-import {COLORS} from '../../../Utilities/Colors';
+import HOCView from '../../../../Components/HOCView';
+import {COLORS} from '../../../../Utilities/Colors';
 import {
   IS_IOS,
   REFERAL_MESSAGE,
   SHARE_OPTION,
   TWITTER_REFERAL_MESSAGE,
-} from '../../../Utilities/Constants';
+} from '../../../../Utilities/Constants';
 import {
   getAuthCode,
   getSlicedText,
   isAlphabet,
-} from '../../../Utilities/Methods';
-import {FONTS} from '../../../Utilities/Fonts';
-import ProfileIcon from '../../../Assets/Png/user.png';
+} from '../../../../Utilities/Methods';
+import {FONTS} from '../../../../Utilities/Fonts';
 import Share from 'react-native-share';
-import StyledText from '../../../Components/StyledText';
-import Loader from '../../../Components/Loader';
-import SVGIcon from '../../../Components/SVGIcon';
-import {useProfile, useToken} from '../../../Utilities/StoreData';
-import InviteFanModal from '../../../Modals/InviteFanModal';
-import {inviteToRawcasterService} from '../../../Services/ApiService';
-import Toast from '../../../Components/Toast';
-import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import SubmitButton from '../../../Components/SubmitButton';
+import StyledText from '../../../../Components/StyledText';
+import Loader from '../../../../Components/Loader';
+import SVGIcon from '../../../../Components/SVGIcon';
+import {useProfile, useToken} from '../../../../Utilities/StoreData';
+import InviteFanModal from '../../../../Modals/InviteFanModal';
+import {inviteToRawcasterService} from '../../../../Services/ApiService';
+import Toast from '../../../../Components/Toast';
+import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
+import SubmitButton from '../../../../Components/SubmitButton';
 import {
   FIREBASE_APP_ID,
   GOOGLE_CONTACTS_SERVER_CLIENT_ID,
   GOOGLE_CONTACTS_SERVER_CLIENT_SECRET,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
-} from '../../../Services/APIKeysIds';
+} from '../../../../Services/APIKeysIds';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 var currentPage = 1;
@@ -107,9 +107,10 @@ const APPSTORE_WHATSAPP_LINK =
   'https://apps.apple.com/us/app/whatsapp-messenger/id310633997';
 const PLAYSTORE_WHATSAPP_LINK =
   'https://play.google.com/store/apps/details?id=com.whatsapp&hl=en&gl=US&pli=1';
-const ReferalContactsList = ({navigation}) => {
+const ReferalSocialList = () => {
   const profile = useProfile();
   const token = useToken();
+  const navigation = useNavigation();
   const [contactList, setcontactList] = useState([]);
   const [contactToken, setcontactToken] = useState(null);
   const [contactsListType, setcontactsListType] = useState(0); // 1 - mobile, 2 - email, 0 - nothing
@@ -590,9 +591,13 @@ const ReferalContactsList = ({navigation}) => {
         title: 'Invite Fans & Contacts',
         onPressBack: () => navigation.goBack(),
         bgColor: COLORS.transparent,
+        isEnableReward: true,
         isEnableSearch: false,
         isEnableLive: false,
         isEnableProfile: false,
+        onPressRewardButton: () => {
+          navigation.navigate('ReferalDashboard');
+        },
       }}>
       <StyledText style={{color: COLORS.white, opacity: 0.7, paddingTop: 10}}>
         Invite via
@@ -643,7 +648,7 @@ const ReferalContactsList = ({navigation}) => {
   );
 };
 
-export default ReferalContactsList;
+export default ReferalSocialList;
 
 const styles = StyleSheet.create({
   profileContainer: {

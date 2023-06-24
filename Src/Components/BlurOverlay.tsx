@@ -10,7 +10,6 @@ import React from 'react';
 import {BlurView} from '@react-native-community/blur';
 import SVGIcon from './SVGIcon';
 import {COLORS} from '../Utilities/Colors';
-import BgBlur from '../Assets/Png/blur_overlay.png';
 
 type Props = {
   containerStyle?: ImageStyle;

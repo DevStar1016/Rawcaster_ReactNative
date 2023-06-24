@@ -420,6 +420,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
 
           <FlatList
             ref={flatlistRef}
+            nestedScrollEnabled
             showsHorizontalScrollIndicator={false}
             style={[
               styles.listContainer,

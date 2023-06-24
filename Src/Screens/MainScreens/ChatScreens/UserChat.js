@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
@@ -17,11 +17,14 @@ import {useInsets} from '../../../Utilities/StoreData';
 import TextBox from '../../../Components/TextBox';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import ChatTextInput from './ChatTextInput';
+import HeaderWithBack from '../../../Components/HeaderWithBack';
+import {getSlicedText} from '../../../Utilities/Methods';
 
 var isMount = true;
-const UserChat = () => {
+const UserChat = ({route}) => {
   const insets = useInsets();
-
+  const {userData} = route.params ?? {};
+  const [headerHeight, setheaderHeight] = useState(20);
   useEffect(() => {
     isMount = true;
     AvoidSoftInput.setAdjustResize();
@@ -35,19 +38,28 @@ const UserChat = () => {
       isEnableDefaultBackground
       isEnableRLogo={false}
       paddingHorizontal={0}
-      isEnableHeader={false}>
+      headerType="header_with_back"
+      onLayoutHeaderHeight={setheaderHeight}
+      backHeaderProps={{
+        title: getSlicedText(userData?.display_name),
+        isEnableProfileImage: true,
+        titlePaddingHorizontal: 5,
+        profileImageProps: {
+          profileSize: 30,
+          extraMargin: 0,
+          padding: 0,
+        },
+
+        profileContainer: {marginVertical: 2, marginLeft: 5},
+      }}>
       <KeyboardAvoidingView
-        keyboardVerticalOffset={!IS_IOS ? 0 : insets.bottom > 20 ? 50 : 20}
+        keyboardVerticalOffset={!IS_IOS ? 0 : headerHeight}
         behavior={IS_IOS ? 'padding' : null}
         style={{flex: 1}}>
-        <ReplaceStatusBar />
-        <View style={styles.headerContainer}>
-          <View style={styles.leftContainer}>
-            <SVGIcon icon="back" height={20} width={20} />
-          </View>
-        </View>
         <EncryptedMessageContainer />
-        <View style={styles.chatListContainer}>{/* <FlatList  /> */}</View>
+        <View style={styles.chatListContainer}>
+          <FlatList data={[]} />
+        </View>
 
         <ChatTextInput />
       </KeyboardAvoidingView>

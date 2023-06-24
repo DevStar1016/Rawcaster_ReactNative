@@ -18,6 +18,12 @@ import GmailRoundedIcon from '../Assets/Svg/gmail_rounded.svg';
 import EmojiDarkIcon from '../Assets/Svg/emoji_dark.svg';
 import MessageSymbolIcon from '../Assets/Svg/message_symbol.svg';
 import QRScannerIcon from '../Assets/Svg/qr_scanner.svg';
+import RewardIcon from '../Assets/Svg/reward.svg';
+import LikeColoredIcon from '../Assets/Svg/like_colored.svg';
+import LockColoredIcon from '../Assets/Svg/lock_colored.svg';
+import RocketColoredIcon from '../Assets/Svg/rocket_colored.svg';
+import ValidateColoredIcon from '../Assets/Svg/validate_colored.svg';
+import ClockOrangeIcon from '../Assets/Svg/clock_orange.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -291,7 +297,13 @@ export type IconType =
   | 'pause_fill_white'
   | 'emoji_dark'
   | 'message_symbol'
-  | 'qr_scanner';
+  | 'qr_scanner'
+  | 'reward'
+  | 'like_colored'
+  | 'lock_colored'
+  | 'rocket_colored'
+  | 'validate_colored'
+  | 'clock_orange';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -438,4 +450,10 @@ export const ICONS = {
   emoji_dark: EmojiDarkIcon,
   message_symbol: MessageSymbolIcon,
   qr_scanner: QRScannerIcon,
+  reward: RewardIcon,
+  like_colored: LikeColoredIcon,
+  lock_colored: LockColoredIcon,
+  rocket_colored: RocketColoredIcon,
+  validate_colored: ValidateColoredIcon,
+  clock_orange: ClockOrangeIcon,
 };

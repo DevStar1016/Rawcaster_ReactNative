@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
 import {useInsets} from '../Utilities/StoreData';
+import ProfileWithBadge, {ProfileWithBadgeProps} from './ProfileWithBadge';
 
 export type BackHeaderProps = {
   title?: string;
@@ -32,6 +33,10 @@ export type BackHeaderProps = {
   rightButtonTextStyle?: TextStyle;
   isEnableBackButton?: boolean;
   bgColor?: string;
+  profileContainer?: ViewStyle;
+  titlePaddingHorizontal?: number;
+  isEnableProfileImage?: boolean;
+  profileImageProps?: ProfileWithBadgeProps;
 };
 
 const HeaderWithBack = ({
@@ -51,6 +56,10 @@ const HeaderWithBack = ({
   bgColor = COLORS.primary,
   rightTextButtonStyle,
   rightButtonTextStyle,
+  profileImageProps,
+  profileContainer,
+  titlePaddingHorizontal = 15,
+  isEnableProfileImage = false,
 }: BackHeaderProps) => {
   const navigation = useNavigation();
   const insets = useInsets();
@@ -99,13 +108,18 @@ const HeaderWithBack = ({
             />
           )}
         </View>
+        {isEnableProfileImage && (
+          <View style={profileContainer}>
+            <ProfileWithBadge profileSize={40} {...profileImageProps} />
+          </View>
+        )}
         {!isTitleCenter && (
           <View
             style={[
               styles.titleContainer,
               {
                 alignItems: 'flex-start',
-                paddingHorizontal: 15,
+                paddingHorizontal: titlePaddingHorizontal,
               },
             ]}>
             <StyledText style={styles.title}>{title}</StyledText>

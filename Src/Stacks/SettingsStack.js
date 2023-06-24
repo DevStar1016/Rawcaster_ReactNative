@@ -6,8 +6,9 @@ import EventSettings from '../Screens/MainScreens/Settings/EventSettings';
 import GeneralSettings from '../Screens/MainScreens/Settings/GeneralSettings';
 import NotificationsSettings from '../Screens/MainScreens/Settings/NotificationsSettings';
 import SettingsHome from '../Screens/MainScreens/Settings/SettingsHome';
-import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 import StackAnimation from '../Utilities/StackAnimation';
+import ReferalDashboard from '../Screens/MainScreens/Settings/Referal/ReferalDashboard';
+import ReferalSocialList from '../Screens/MainScreens/Settings/Referal/ReferalSocialList';
 
 const Stack = createStackNavigator();
 
@@ -23,7 +24,8 @@ const SettingsStack = () => {
       <Stack.Screen name="Blocking" component={Blocking} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} />
       <Stack.Screen name="EventSettings" component={EventSettings} />
-      <Stack.Screen name="ReferalContacts" component={ReferalContactsList} />
+      <Stack.Screen name="ReferalSocialList" component={ReferalSocialList} />
+      <Stack.Screen name="ReferalDashboard" component={ReferalDashboard} />
     </Stack.Navigator>
   );
 };

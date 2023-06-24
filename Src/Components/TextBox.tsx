@@ -2,6 +2,7 @@ import {
   KeyboardTypeOptions,
   NativeSyntheticEvent,
   ReturnKeyTypeOptions,
+  ScrollView,
   StyleSheet,
   TextInput,
   TextInputProps,
@@ -23,6 +24,7 @@ type AppendedListProps = {
   list?: [];
   fieldName?: string;
   onRemoveItem?: (item: any) => void;
+  listContainerMaxHeight?: number;
 };
 
 export type TextBoxProps = {
@@ -32,6 +34,7 @@ export type TextBoxProps = {
   innerRef?: LegacyRef<TextInput> | undefined;
   isSecure?: boolean;
   errorText?: string;
+  borderWidth?: number;
   icon?: IconType;
   iconHeight?: number;
   iconWidth?: number;
@@ -103,6 +106,7 @@ const TextBox = ({
   isEnablePasswordConditionText = false,
   value = '',
   errorText = '',
+  borderWidth = 1,
   isEditable = true,
   keyboardType,
   maxLength,
@@ -157,27 +161,36 @@ const TextBox = ({
         </StyledText>
       )}
       {isEnableListAppend && (
-        <View style={styles.listContainer}>
-          {appendedListProps?.list?.map((item, index) => {
-            return (
-              <View key={index.toString()} style={styles.listItemContainer}>
-                <StyledText>{getListItemText(item)}</StyledText>
-                <SVGIcon
-                  icon="close_rounded_pink"
-                  height={18}
-                  isButton
-                  onPress={() => {
-                    if (appendedListProps && appendedListProps.onRemoveItem) {
-                      appendedListProps?.onRemoveItem(item);
-                    }
-                  }}
-                  width={18}
-                  marginLeft={5}
-                />
-              </View>
-            );
-          })}
-        </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled
+          keyboardShouldPersistTaps="handled"
+          style={{
+            flexGrow: 0,
+            maxHeight: appendedListProps?.listContainerMaxHeight ?? 150,
+          }}>
+          <View style={styles.listContainer}>
+            {appendedListProps?.list?.map((item, index) => {
+              return (
+                <View key={index.toString()} style={styles.listItemContainer}>
+                  <StyledText>{getListItemText(item)}</StyledText>
+                  <SVGIcon
+                    icon="close_rounded_pink"
+                    height={18}
+                    isButton
+                    onPress={() => {
+                      if (appendedListProps && appendedListProps.onRemoveItem) {
+                        appendedListProps?.onRemoveItem(item);
+                      }
+                    }}
+                    width={18}
+                    marginLeft={5}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
       )}
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <View
@@ -188,6 +201,7 @@ const TextBox = ({
               marginVertical: inputContainerMarginVertical,
               backgroundColor,
               height: inputContainerHeight,
+              borderWidth,
             },
           ]}>
           <TextInput

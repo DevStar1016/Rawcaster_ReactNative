@@ -9,7 +9,10 @@ import {
 } from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {
+  KeyboardAwareScrollView,
+  KeyboardAwareScrollViewProps,
+} from 'react-native-keyboard-aware-scroll-view';
 import CustomHomeHeader, {CustomHomeHeaderProps} from './CustomHomeHeader';
 import HeaderWithBack, {BackHeaderProps} from './HeaderWithBack';
 import DefaultBackground, {DefaultBgProps} from './DefaultBackground';
@@ -39,6 +42,7 @@ interface Props {
   onLayoutHeaderHeight?: (height: number) => void;
   isEnablePrimaryColorStatusBar?: boolean;
   isEnableTopSafeAreaHomeHeader?: boolean;
+  keyBoardAwareScrollViewProps?: KeyboardAwareScrollViewProps;
 }
 
 const HOCView = ({
@@ -63,6 +67,7 @@ const HOCView = ({
   loaderProps = {},
   keyboardAwareContentContainerStyle,
   isEnableTopSafeAreaHomeHeader = false,
+  keyBoardAwareScrollViewProps,
 }: Props) => {
   const insets = useInsets();
 
@@ -149,7 +154,8 @@ const HOCView = ({
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps={'handled'}
               // contentContainerStyle={{flex: 1}}
-              scrollEnabled={true}>
+              scrollEnabled={true}
+              {...keyBoardAwareScrollViewProps}>
               {children}
             </KeyboardAwareScrollView>
           ) : (

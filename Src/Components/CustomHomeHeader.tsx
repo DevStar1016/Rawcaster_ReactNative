@@ -25,17 +25,20 @@ export type CustomHomeHeaderProps = {
   paddingTop?: number;
   isEnableSafeArea?: boolean;
   isEnableSearch?: boolean;
+  isEnableReward?: boolean;
   title?: string;
   onLeftContainerLayout?: (width: number) => void;
   onRightContainerLayout?: (width: number) => void;
   isEnableLive?: boolean;
   isEnableBack?: boolean;
+  isTitleAlignCenter?: boolean;
   isEnableNuggetFilterTabs?: boolean;
   selectedTab?: 'first' | 'second';
   onPressFirstFilterTab?: () => void;
   onPressBack?: () => void;
   onPressSecondFilterTab?: () => void;
   onPressAddUserButton?: () => void;
+  onPressRewardButton?: () => void;
 };
 
 const CustomHomeHeader = ({
@@ -44,6 +47,7 @@ const CustomHomeHeader = ({
   isEnableProfile = true,
   isEnableSearch = true,
   isEnableSettings = false,
+  isEnableReward = false,
   paddingTop = 0,
   title = '',
   onPressBack,
@@ -56,6 +60,8 @@ const CustomHomeHeader = ({
   onPressFirstFilterTab,
   onPressSecondFilterTab,
   onPressAddUserButton,
+  onPressRewardButton,
+  isTitleAlignCenter,
   selectedTab = 'second',
 }: CustomHomeHeaderProps) => {
   const navigation = useNavigation();
@@ -106,7 +112,6 @@ const CustomHomeHeader = ({
           <TouchableOpacity
             disabled={true}
             onPress={() => {
-              // navigation.navigate('ReferalContacts');
               // navigation.navigate('PlansAndPrice');
             }}>
             <SVGIcon icon="app_logo_white" height={30} width={30} />
@@ -233,6 +238,15 @@ const CustomHomeHeader = ({
           />
         )}
 
+        {isEnableReward && (
+          <SVGIcon
+            icon="reward"
+            onPress={onPressRewardButton}
+            marginLeft={5}
+            isButton
+          />
+        )}
+
         {isEnableProfile && (
           <ProfileWithBadge
             profileImage={profile?.profile_image}
@@ -249,6 +263,8 @@ const CustomHomeHeader = ({
             }}
           />
         )}
+
+        {isTitleAlignCenter && <View style={{height: 18, width: 18}} />}
       </View>
     </View>
   );

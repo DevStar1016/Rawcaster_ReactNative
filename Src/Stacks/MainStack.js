@@ -34,7 +34,6 @@ import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ProfileStack from './ProfileStack';
-import ReferalContactsList from '../Screens/MainScreens/Settings/ReferalContactsList';
 import SocketListener from '../Components/SocketListener';
 import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
@@ -189,11 +188,6 @@ const MainStack = () => {
             <Stack.Screen
               name="AddNewConnection"
               component={AddNewConnection}
-            />
-
-            <Stack.Screen
-              name="ReferalContacts"
-              component={ReferalContactsList}
             />
           </>
         )}

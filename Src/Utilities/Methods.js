@@ -57,11 +57,14 @@ export const getSlicedText = (
   sliceValue = 40,
   isEnableDots = true,
 ) => {
-  let tempSlicedValue = value.slice(0, sliceValue);
-  if (value.length > sliceValue && isEnableDots) {
-    tempSlicedValue = tempSlicedValue.trim() + '...';
+  if (value) {
+    let tempSlicedValue = value.slice(0, sliceValue);
+    if (value.length > sliceValue && isEnableDots) {
+      tempSlicedValue = tempSlicedValue.trim() + '...';
+    }
+    return tempSlicedValue;
   }
-  return tempSlicedValue;
+  return '';
 };
 
 export function getyears({startingYear = 1900, decreasedYears = 0}) {
