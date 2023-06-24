@@ -41,6 +41,7 @@ const UserChat = ({route}) => {
       headerType="header_with_back"
       onLayoutHeaderHeight={setheaderHeight}
       backHeaderProps={{
+        bgColor: COLORS.transparent,
         title: getSlicedText(userData?.display_name),
         isEnableProfileImage: true,
         titlePaddingHorizontal: 5,

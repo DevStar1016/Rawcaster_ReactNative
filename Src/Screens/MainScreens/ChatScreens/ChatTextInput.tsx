@@ -12,7 +12,7 @@ type Props = {};
 
 const ChatTextInput = ({}: Props) => {
   const [message, setmessage] = useState<string>('');
-  const [isOpenEmoji, setisOpenEmoji] = useState(false);
+  const [isOpenEmoji, setisOpenEmoji] = useState<boolean>(false);
   return (
     <>
       <View style={styles.mainContainer}>
@@ -33,29 +33,34 @@ const ChatTextInput = ({}: Props) => {
             value={message}
             onChangeText={setmessage}
             placeholder="Message"
+            onFocus={() => {
+              setisOpenEmoji(false);
+            }}
           />
         </View>
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             style={styles.sendButtonContainer}
             activeOpacity={0.8}>
-            <SVGIcon icon="message_symbol" />
+            {message.length > 0 ? (
+              <SVGIcon icon="send" />
+            ) : (
+              <SVGIcon icon="mic_fill_white" height={20} width={20} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
-      <View
-        style={[
-          styles.emojiContainer,
-          {display: isOpenEmoji ? 'flex' : 'none'},
-        ]}>
-        <EmojiContainer
-          enableTitle={false}
-          onPressEmoji={emojiData => {
-            setmessage(preMsg => preMsg + emojiData.emoji);
-            console.log(emojiData, 'EMOJIII');
-          }}
-        />
-      </View>
+      {isOpenEmoji && (
+        <View style={[styles.emojiContainer]}>
+          <EmojiContainer
+            enableTitle={false}
+            numColumns={7}
+            onPressEmoji={emojiData => {
+              setmessage(preMsg => preMsg + emojiData.emoji);
+            }}
+          />
+        </View>
+      )}
     </>
   );
 };
@@ -96,7 +101,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emojiContainer: {
-    height: WINDOW_HEIGHT / 2 - 80,
+    height: WINDOW_HEIGHT / 2 - 120,
     backgroundColor: COLORS.white,
   },
 });
