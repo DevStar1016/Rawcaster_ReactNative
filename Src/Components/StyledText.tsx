@@ -4,7 +4,6 @@ import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import Hyperlink from 'react-native-hyperlink';
 import {TextProps} from 'react-native';
-import SVGIcon, {SVGIconProps} from './SVGIcon';
 
 export interface StyledTextProps {
   children?: JSX.Element | JSX.Element[] | string;
@@ -15,7 +14,6 @@ export interface StyledTextProps {
   normalTextModeTextProps?: Omit<TextProps, 'onPress' | 'style'>;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
-  iconProps?: SVGIconProps;
 }
 
 function StyledText({
@@ -27,12 +25,13 @@ function StyledText({
   readMoreButtonTextStyle = {},
   style,
   normalTextModeTextProps,
-  iconProps = {},
 }: StyledTextProps) {
   const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
+  const [textLength, settextLength] = useState(1);
 
   const onTextLayout = useCallback((e: any) => {
+    settextLength(e.nativeEvent.lines.length);
     setLengthMore(e.nativeEvent.lines.length > numberOfLines);
   }, []);
 
@@ -58,12 +57,21 @@ function StyledText({
     return (
       <View>
         {lengthMore ? (
-          <Text
-            numberOfLines={isEnableFullText ? undefined : numberOfLines}
-            style={getStyle()}
-            onPress={onPress}>
-            {children}
-          </Text>
+          isEnableFullText ? (
+            <Text
+              textBreakStrategy="simple"
+              style={[getStyle(), {height: 22 * textLength}]}
+              onPress={onPress}>
+              {children}
+            </Text>
+          ) : (
+            <Text
+              numberOfLines={numberOfLines}
+              style={getStyle()}
+              onPress={onPress}>
+              {children}
+            </Text>
+          )
         ) : (
           <Text
             onTextLayout={onTextLayout}

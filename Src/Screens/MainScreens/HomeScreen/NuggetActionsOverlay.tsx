@@ -221,9 +221,9 @@ function NuggetActionsOverlay({
     }
     aiChatBottomSheetModalRef.current?.present();
   }, []);
-  const handleCloseAIChatModal = useCallback(() => {
+  const handleCloseAIChatModal = useCallback((val = false) => {
     aiChatBottomSheetModalRef.current?.close();
-    if (setpaused) {
+    if (setpaused && !val) {
       setpaused(false);
     }
   }, []);
@@ -717,6 +717,7 @@ function NuggetActionsOverlay({
                     color: COLORS.white,
                     fontSize: 15.5,
                     opacity: 0.8,
+                    lineHeight: 22,
                     width: '100%',
                     // height: '200%',
                     // height:
@@ -1173,11 +1174,6 @@ function NuggetActionsOverlay({
         handleStyle={{display: 'none'}}
         enableOverDrag={false}
         enablePanDownToClose={false}
-        onDismiss={() => {
-          if (setpaused) {
-            setpaused(false);
-          }
-        }}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
         bottomInset={insets.bottom}
         stackBehavior="push"
@@ -1210,7 +1206,7 @@ function NuggetActionsOverlay({
             handleCloseAIChatModal();
           }}
           handleShareContent={(content: string) => {
-            handleCloseAIChatModal();
+            handleCloseAIChatModal(true);
             /* @ts-ignore */
             navigation.navigate('PostEditNugget', {
               preContent: content,
