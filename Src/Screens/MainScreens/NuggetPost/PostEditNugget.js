@@ -334,7 +334,6 @@ const PostEditNugget = ({route}) => {
           }),
         )
           .then(resMediaList => {
-            console.log(resMediaList, 'YUIO');
             if (isMount) {
               setselectedMediaList(pre => [...pre, ...resMediaList]);
             }

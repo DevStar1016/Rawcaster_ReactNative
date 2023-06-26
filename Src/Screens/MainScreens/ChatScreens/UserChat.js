@@ -126,62 +126,6 @@ const UserChat = ({route}) => {
     };
   }, []);
 
-  function pickDocument() {
-    pick({allowMultiSelection: true})
-      .then(mediaList => {
-        console.log(mediaList, 'ASASASASAS');
-        Promise.all(
-          mediaList.map(async item => {
-            return {
-              uri: getUrlWithFilePrefix(item.uri),
-              name: item.name,
-              type: item.type,
-            };
-          }),
-        )
-          .then(resMediaList => {
-            console.log(resMediaList, 'YUIO');
-            setselectedMediaList(pre => [...pre, ...resMediaList]);
-          })
-          .catch(e => {
-            Toast.fail(e.message);
-          });
-      })
-      .catch(e => {
-        console.log(e, 'ERRORRR');
-      });
-  }
-  function handleRemoveSelectedMediaItem(selectedIndex) {
-    const filteredSelectedMediaList = [...selectedMediaList].filter(
-      (_, index) => index !== selectedIndex,
-    );
-    setselectedMediaList(filteredSelectedMediaList);
-  }
-
-  async function handleOpenCamera() {
-    try {
-      const newCameraPermission = await Camera.requestCameraPermission();
-      const newMicrophonePermission =
-        await Camera.requestMicrophonePermission();
-      if (
-        newCameraPermission === 'authorized' &&
-        newMicrophonePermission === 'authorized'
-      ) {
-        setisOpenCamera(true);
-      } else {
-        if (newCameraPermission === 'denied') {
-          Toast.fail('Camera Permission Denied');
-        } else if (newMicrophonePermission === 'denied') {
-          Toast.fail('Microphone Permission Denied');
-        } else {
-          Toast.fail('Permissions Denied');
-        }
-      }
-    } catch (e) {
-      Toast.fail(e.message);
-    }
-  }
-
   async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
     if (newMicrophonePermission === 'authorized') {
@@ -265,25 +209,12 @@ const UserChat = ({route}) => {
         <ChatTextInput
           onPressSend={() => {}}
           onPressAudio={handleOpenAudioRecorder}
-          onPressCamera={handleOpenCamera}
-          onPressDocument={pickDocument}
+          onSendMedia={onSelectMediaFromCamera}
+          onSelectDocuments={documentsList => {
+            setselectedMediaList(pre => [...pre, ...documentsList]);
+          }}
         />
       </KeyboardAvoidingView>
-      <Modal
-        visible={isOpenCamera}
-        statusBarTranslucent
-        transparent
-        animationType="slide"
-        onRequestClose={() => {
-          if (isMount) {
-            setisOpenCamera(false);
-          }
-        }}>
-        <CustomCameraView
-          setModal={setisOpenCamera}
-          onSendMedia={onSelectMediaFromCamera}
-        />
-      </Modal>
 
       <Modal
         visible={isOpenAudioRecorder}
