@@ -21,6 +21,7 @@ const UserChat = ({route}) => {
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
       content: 'No, I am not😂, and did you heard about my Ooruu?😂',
+      image: profile.profile_image,
       user_id: 2,
     },
     {
@@ -42,6 +43,7 @@ const UserChat = ({route}) => {
       date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
+      image: profile.profile_image,
       content: 'Where are you from?',
       user_id: 1,
     },
@@ -95,6 +97,7 @@ const UserChat = ({route}) => {
       date: '2023-06-22',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
+      image: profile.profile_image,
       content: 'Hiii',
       user_id: 1,
     },
