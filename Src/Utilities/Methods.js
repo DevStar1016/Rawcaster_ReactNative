@@ -278,6 +278,7 @@ export const getUrlWithFilePrefix = (fileUrl = '') => {
   let url = fileUrl ?? '';
 
   if (
+    url.toLowerCase().includes('content://') ||
     url.toLowerCase().includes('file://') ||
     url.toLowerCase().includes('http://') ||
     url.toLowerCase().includes('https://')

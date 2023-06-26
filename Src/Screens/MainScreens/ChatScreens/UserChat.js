@@ -7,14 +7,28 @@ import {IS_IOS} from '../../../Utilities/Constants';
 import {useProfile} from '../../../Utilities/StoreData';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import ChatTextInput from './ChatTextInput';
-import {getSlicedText} from '../../../Utilities/Methods';
+import {
+  compressMedia,
+  getFileName,
+  getSlicedText,
+  getUrlWithFilePrefix,
+} from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
+import {Modal} from 'react-native';
+import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
+import AudioRecorder from '../../../Modals/AudioRecorder';
+import Toast from '../../../Components/Toast';
+import {Camera} from 'react-native-vision-camera';
+import {pick} from 'react-native-document-picker';
 
 var isMount = true;
 const UserChat = ({route}) => {
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
+  const [isOpenCamera, setisOpenCamera] = useState(false);
+  const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
+  const [selectedMediaList, setselectedMediaList] = useState([]);
   const [chatList, setchatList] = useState([
     {
       date: '2023-06-25',
@@ -112,6 +126,93 @@ const UserChat = ({route}) => {
     };
   }, []);
 
+  function pickDocument() {
+    pick({allowMultiSelection: true})
+      .then(mediaList => {
+        console.log(mediaList, 'ASASASASAS');
+        Promise.all(
+          mediaList.map(async item => {
+            return {
+              uri: getUrlWithFilePrefix(item.uri),
+              name: item.name,
+              type: item.type,
+            };
+          }),
+        )
+          .then(resMediaList => {
+            console.log(resMediaList, 'YUIO');
+            setselectedMediaList(pre => [...pre, ...resMediaList]);
+          })
+          .catch(e => {
+            Toast.fail(e.message);
+          });
+      })
+      .catch(e => {
+        console.log(e, 'ERRORRR');
+      });
+  }
+  function handleRemoveSelectedMediaItem(selectedIndex) {
+    const filteredSelectedMediaList = [...selectedMediaList].filter(
+      (_, index) => index !== selectedIndex,
+    );
+    setselectedMediaList(filteredSelectedMediaList);
+  }
+
+  async function handleOpenCamera() {
+    try {
+      const newCameraPermission = await Camera.requestCameraPermission();
+      const newMicrophonePermission =
+        await Camera.requestMicrophonePermission();
+      if (
+        newCameraPermission === 'authorized' &&
+        newMicrophonePermission === 'authorized'
+      ) {
+        setisOpenCamera(true);
+      } else {
+        if (newCameraPermission === 'denied') {
+          Toast.fail('Camera Permission Denied');
+        } else if (newMicrophonePermission === 'denied') {
+          Toast.fail('Microphone Permission Denied');
+        } else {
+          Toast.fail('Permissions Denied');
+        }
+      }
+    } catch (e) {
+      Toast.fail(e.message);
+    }
+  }
+
+  async function handleOpenAudioRecorder() {
+    const newMicrophonePermission = await Camera.requestMicrophonePermission();
+    if (newMicrophonePermission === 'authorized') {
+      setisOpenAudioRecorder(true);
+    } else {
+      Toast.fail('Microphone Permission Denied');
+    }
+  }
+
+  async function onSelectMediaFromCamera(mediaItem) {
+    let mediaType = mediaItem.type.includes('image') ? 1 : 2;
+    let mediaPath = await compressMedia(mediaType, mediaItem.uri);
+    setselectedMediaList(pre => [
+      ...pre,
+      {
+        name: getFileName(mediaPath),
+        type: mediaItem.type,
+        uri: mediaPath,
+      },
+    ]);
+  }
+
+  function handleSubmitAudio(audioFile) {
+    setselectedMediaList(pre => [
+      ...pre,
+      {
+        ...audioFile,
+      },
+    ]);
+  }
+
   const renderChatItem = ({item, index}) => {
     return (
       <ChatItem
@@ -161,8 +262,43 @@ const UserChat = ({route}) => {
           bounces={false}
         />
 
-        <ChatTextInput onPressSend={() => {}} />
+        <ChatTextInput
+          onPressSend={() => {}}
+          onPressAudio={handleOpenAudioRecorder}
+          onPressCamera={handleOpenCamera}
+          onPressDocument={pickDocument}
+        />
       </KeyboardAvoidingView>
+      <Modal
+        visible={isOpenCamera}
+        statusBarTranslucent
+        transparent
+        animationType="slide"
+        onRequestClose={() => {
+          if (isMount) {
+            setisOpenCamera(false);
+          }
+        }}>
+        <CustomCameraView
+          setModal={setisOpenCamera}
+          onSendMedia={onSelectMediaFromCamera}
+        />
+      </Modal>
+
+      <Modal
+        visible={isOpenAudioRecorder}
+        statusBarTranslucent
+        transparent
+        onRequestClose={() => {
+          if (isMount) {
+            setisOpenAudioRecorder(false);
+          }
+        }}>
+        <AudioRecorder
+          setModal={setisOpenAudioRecorder}
+          onSubmitAudio={handleSubmitAudio}
+        />
+      </Modal>
     </HOCView>
   );
 };
