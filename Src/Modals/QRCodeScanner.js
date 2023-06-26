@@ -1,7 +1,6 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Camera, useCameraDevices} from 'react-native-vision-camera';
-import {CameraScreen} from 'react-native-camera-kit';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import StyledText from '../Components/StyledText';
 import {COLORS} from '../Utilities/Colors';
@@ -37,7 +36,7 @@ const QRCodeScanner = () => {
           overflow: 'hidden',
           backgroundColor: 'red',
         }}>
-        <CameraScreen
+        {/* <CameraScreen
           onReadCode={scannerRes => {
             console.log(scannerRes, 'RESPONSE SCAN');
             // dispatch(handleScannerResponse('test'));
@@ -46,7 +45,7 @@ const QRCodeScanner = () => {
           scanBarcode={true}
           hideControls={false}
           showCapturedImageCount={false}
-        />
+        /> */}
       </View>
     </View>
     // <CameraScreen

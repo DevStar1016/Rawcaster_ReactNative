@@ -34,6 +34,7 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
       {item?.user_id === 1 &&
         (isGroup && !isPreChatSame ? (
           <ProfileWithBadge
+            profileImage={item?.profile_img}
             profileSize={22}
             extraMargin={0}
             padding={0}
