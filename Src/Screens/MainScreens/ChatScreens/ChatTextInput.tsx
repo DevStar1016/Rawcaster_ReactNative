@@ -10,9 +10,17 @@ import {WINDOW_HEIGHT} from '@gorhom/bottom-sheet';
 
 type Props = {
   onPressSend: (value: string) => void;
+  onPressCamera: () => void;
+  onPressAudio: () => void;
+  onPressDocument: () => void;
 };
 
-const ChatTextInput = ({onPressSend}: Props) => {
+const ChatTextInput = ({
+  onPressSend,
+  onPressAudio,
+  onPressCamera,
+  onPressDocument,
+}: Props) => {
   const [message, setmessage] = useState<string>('');
   const [isOpenEmoji, setisOpenEmoji] = useState<boolean>(false);
   return (
@@ -42,11 +50,21 @@ const ChatTextInput = ({onPressSend}: Props) => {
         </View>
         <View style={styles.actionButtonsContainer}>
           {message.length === 0 ? (
-            <TouchableOpacity style={styles.actionButtons} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.actionButtons}
+              activeOpacity={0.8}
+              onPress={() => {
+                onPressCamera();
+              }}>
               <SVGIcon icon="camera_fill_primary" />
             </TouchableOpacity>
           ) : null}
-          <TouchableOpacity style={styles.actionButtons} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.actionButtons}
+            activeOpacity={0.8}
+            onPress={() => {
+              onPressDocument();
+            }}>
             <SVGIcon icon="upload_fill_orange" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -56,6 +74,7 @@ const ChatTextInput = ({onPressSend}: Props) => {
                 onPressSend(message);
                 setmessage('');
               } else {
+                onPressAudio();
               }
             }}
             activeOpacity={0.8}>
