@@ -32,12 +32,10 @@ type Props = {
   onPressSend: (value: string) => void;
   onSendMedia: (item: any) => void;
   onSelectDocuments: (documentsList: Document[]) => void;
-  onPressAudio: () => void;
 };
 
 const ChatTextInput = ({
   onPressSend,
-  onPressAudio,
   onSendMedia,
   onSelectDocuments,
 }: Props) => {

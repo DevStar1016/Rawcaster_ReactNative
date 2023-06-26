@@ -13,17 +13,12 @@ import {
   getSlicedText,
 } from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
-import {Modal} from 'react-native';
-import AudioRecorder from '../../../Modals/AudioRecorder';
-import Toast from '../../../Components/Toast';
-import {Camera} from 'react-native-vision-camera';
 
 var isMount = true;
 const UserChat = ({route}) => {
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
-  const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [selectedMediaList, setselectedMediaList] = useState([]);
   const [chatList, setchatList] = useState([
     {
@@ -122,15 +117,6 @@ const UserChat = ({route}) => {
     };
   }, []);
 
-  async function handleOpenAudioRecorder() {
-    const newMicrophonePermission = await Camera.requestMicrophonePermission();
-    if (newMicrophonePermission === 'authorized') {
-      setisOpenAudioRecorder(true);
-    } else {
-      Toast.fail('Microphone Permission Denied');
-    }
-  }
-
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
@@ -204,28 +190,12 @@ const UserChat = ({route}) => {
 
         <ChatTextInput
           onPressSend={() => {}}
-          onPressAudio={handleOpenAudioRecorder}
           onSendMedia={onSelectMediaFromCamera}
           onSelectDocuments={documentsList => {
             setselectedMediaList(pre => [...pre, ...documentsList]);
           }}
         />
       </KeyboardAvoidingView>
-
-      <Modal
-        visible={isOpenAudioRecorder}
-        statusBarTranslucent
-        transparent
-        onRequestClose={() => {
-          if (isMount) {
-            setisOpenAudioRecorder(false);
-          }
-        }}>
-        <AudioRecorder
-          setModal={setisOpenAudioRecorder}
-          onSubmitAudio={handleSubmitAudio}
-        />
-      </Modal>
     </HOCView>
   );
 };
