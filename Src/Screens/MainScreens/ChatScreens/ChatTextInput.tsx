@@ -9,7 +9,7 @@ import EmojiContainer from 'react-native-emoji-container';
 import {WINDOW_HEIGHT} from '@gorhom/bottom-sheet';
 
 type Props = {
-  onPressSend: (item: any) => void;
+  onPressSend: (value: string) => void;
 };
 
 const ChatTextInput = ({onPressSend}: Props) => {
@@ -53,9 +53,7 @@ const ChatTextInput = ({onPressSend}: Props) => {
             style={styles.sendButtonContainer}
             onPress={() => {
               if (message.length > 0) {
-                onPressSend({
-                  msg: message,
-                });
+                onPressSend(message);
                 setmessage('');
               } else {
               }

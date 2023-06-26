@@ -43,6 +43,8 @@ import RightArrowIcon from '../Assets/Svg/right_arrow.svg';
 import TickIcon from '../Assets/Svg/tick.svg';
 import CloseIcon from '../Assets/Svg/close.svg';
 import CloseWhiteIcon from '../Assets/Svg/close_white.svg';
+import CloseWhiteAlterIcon from '../Assets/Svg/close_white_alter.svg';
+
 import RightArrowWhiteIcon from '../Assets/Svg/right_arrow_white.svg';
 import ImageIcon from '../Assets/Svg/image.svg';
 import VideoIcon from '../Assets/Svg/video.svg';
@@ -193,6 +195,7 @@ export type IconType =
   | 'tick'
   | 'close'
   | 'close_white'
+  | 'close_white_alter'
   | 'valued'
   | 'premium'
   | 'diamond'
@@ -349,6 +352,7 @@ export const ICONS = {
   close: CloseIcon,
   info: InfoIcon,
   close_white: CloseWhiteIcon,
+  close_white_alter: CloseWhiteAlterIcon,
   valued: ValuedIcon,
   premium: PremiumIcon,
   diamond: DiamondIcon,

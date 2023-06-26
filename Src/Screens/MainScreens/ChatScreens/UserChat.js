@@ -4,33 +4,72 @@ import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
 import EncryptedMessageContainer from './EncryptedMessageContainer';
 import {IS_IOS} from '../../../Utilities/Constants';
-import {useInsets, useProfile} from '../../../Utilities/StoreData';
+import {useProfile} from '../../../Utilities/StoreData';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import ChatTextInput from './ChatTextInput';
 import {getSlicedText} from '../../../Utilities/Methods';
-import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import StyledText from '../../../Components/StyledText';
-import {useNavigation} from '@react-navigation/native';
+import ChatItem from './ChatItem';
 
 var isMount = true;
 const UserChat = ({route}) => {
-  const insets = useInsets();
-  const navigation = useNavigation();
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
   const [chatList, setchatList] = useState([
     {
-      date: '2023-06-23',
+      date: '2023-06-25',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      content: 'No, I am not😂, and did you heard about my Ooruu?😂',
+      user_id: 2,
+    },
+    {
+      date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
-      content: 'Eppudiiii',
+      content:
+        'Ohooo appadiyaaa😏... I am from thani ooruuuu😁😁😁., Did you heard about this??',
+      user_id: 1,
+    },
+    {
+      date: '2023-06-24',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      content: 'I am from Eatho Oru Ooru😂, and where are you from?',
+      user_id: 2,
+    },
+    {
+      date: '2023-06-24',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Where are you from?',
+      user_id: 1,
+    },
+    {
+      date: '2023-06-24',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Ok Nice to meet you Evano Oruvan',
+      user_id: 1,
+    },
+    {
+      date: '2023-06-24',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Poda Venna',
+      user_id: 1,
+    },
+    {
+      date: '2023-06-23',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      content: 'Eppudiiii😎😎',
       user_id: 2,
     },
 
     {
       date: '2023-06-23',
-      name: 'Thani Oruvan',
+      name: 'Evano Oruvan',
       profile_img: profile.profile_image,
       content: 'Nee Thani Oruvan na Naan Evano Oruvan da',
       user_id: 2,
@@ -70,30 +109,17 @@ const UserChat = ({route}) => {
     };
   }, []);
 
-  const renderChatItem = ({item}) => {
+  const renderChatItem = ({item, index}) => {
     return (
-      <View
-        style={{
-          alignItems: item.user_id === 1 ? 'flex-start' : 'flex-end',
-        }}>
-        <View
-          style={[
-            {padding: 5, borderRadius: 10},
-            item.user_id === 1
-              ? {borderTopStartRadius: 0, backgroundColor: COLORS.lightGrey}
-              : {borderTopEndRadius: 0, backgroundColor: COLORS.primaryLight},
-          ]}>
-          <StyledText
-            style={{color: item.user_id === 1 ? COLORS.black : COLORS.white}}>
-            {item.content}
-          </StyledText>
-        </View>
-      </View>
+      <ChatItem
+        item={item}
+        isPreChatSame={
+          index < chatList.length - 1 &&
+          item.user_id === chatList[index + 1].user_id
+        }
+        isGroup
+      />
     );
-  };
-
-  const handleGoBack = () => {
-    navigation.goBack();
   };
 
   return (
@@ -107,35 +133,30 @@ const UserChat = ({route}) => {
         bgColor: COLORS.transparent,
         title: getSlicedText(userData?.display_name, 25),
         isEnableProfileImage: true,
+        isEnableVideoCallIcon: true,
         titlePaddingHorizontal: 5,
         profileImageProps: {
           profileSize: 30,
           extraMargin: 0,
           padding: 0,
         },
-        isEnableBackButton: false,
-        isEnableRightIcon: true,
-        rightIcon: 'close_white',
-        onPressRightIcon: handleGoBack,
         profileContainer: {marginVertical: 2, marginLeft: 5},
       }}>
       <KeyboardAvoidingView
         keyboardVerticalOffset={!IS_IOS ? 0 : headerHeight}
         behavior={IS_IOS ? 'padding' : null}
         style={{flex: 1}}>
-        <EncryptedMessageContainer />
-        <View style={styles.chatListContainer}>
-          <FlatList
-            data={chatList}
-            inverted
-            renderItem={renderChatItem}
-            keyExtractor={(_, index) => index.toString()}
-            ItemSeparatorComponent={() => <View style={{height: 10}} />}
-            style={{flexGrow: 0}}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          />
-        </View>
+        <FlatList
+          data={chatList}
+          inverted
+          contentContainerStyle={{paddingTop: 10}}
+          ListFooterComponent={() => <EncryptedMessageContainer />}
+          renderItem={renderChatItem}
+          keyExtractor={(_, index) => index.toString()}
+          style={{flexGrow: 0}}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        />
 
         <ChatTextInput onPressSend={() => {}} />
       </KeyboardAvoidingView>

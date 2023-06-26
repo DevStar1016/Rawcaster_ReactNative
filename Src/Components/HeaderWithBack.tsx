@@ -28,6 +28,9 @@ export type BackHeaderProps = {
   rightButtonText?: string;
   isEnableSafeArea?: boolean;
   onPressRightIcon?: () => void;
+  onPressVideoCallButton?: () => void;
+  isEnableVideoCallIcon?: boolean;
+  isEnableAudioCallIcon?: boolean;
   rightIconSize?: number;
   rightTextButtonStyle?: ViewStyle;
   rightButtonTextStyle?: TextStyle;
@@ -53,6 +56,9 @@ const HeaderWithBack = ({
   rightIconSize = 15,
   rightButtonType = 'icon',
   rightButtonText = '',
+  isEnableVideoCallIcon = false,
+  onPressVideoCallButton,
+  isEnableAudioCallIcon = false,
   bgColor = COLORS.primary,
   rightTextButtonStyle,
   rightButtonTextStyle,
@@ -139,23 +145,29 @@ const HeaderWithBack = ({
         </View>
       )}
       {rightButtonType === 'icon' ? (
-        <View style={[styles.iconContainer, {alignItems: 'flex-end'}]}>
-          {isEnableRightIcon && (
+        <View
+          style={[
+            styles.iconContainer,
+            {alignItems: 'flex-end'},
+            isTitleCenter && {width: '10%'},
+          ]}>
+          {isEnableVideoCallIcon && (
             <SVGIcon
               icon={'audio_call_fill_white'}
-              height={rightIconSize}
-              width={rightIconSize}
               isButton
-              onPress={onPressRightIcon}
+              height={20}
+              width={20}
+              marginBottom={2}
+              marginRight={isEnableRightIcon || isEnableVideoCallIcon ? 20 : 0}
+              onPress={onPressVideoCallButton}
             />
           )}
-          {isEnableRightIcon && (
+          {isEnableVideoCallIcon && (
             <SVGIcon
               icon={'video_call_fill_white'}
-              height={rightIconSize}
-              width={rightIconSize}
               isButton
-              onPress={onPressRightIcon}
+              marginRight={isEnableRightIcon ? 10 : 0}
+              onPress={onPressVideoCallButton}
             />
           )}
           {isEnableRightIcon && (
@@ -195,10 +207,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   iconContainer: {
-    width: '10%',
     justifyContent: 'center',
-    alignItems: 'flex-start',
-    backgroundColor: 'red',
+    alignItems: 'center',
     flexDirection: 'row',
   },
   titleContainer: {
