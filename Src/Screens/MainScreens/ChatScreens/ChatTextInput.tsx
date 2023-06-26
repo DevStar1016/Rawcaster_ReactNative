@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {COLORS} from '../../../Utilities/Colors';
 import {TextInput} from 'react-native-gesture-handler';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -17,6 +17,10 @@ import {Camera} from 'react-native-vision-camera';
 import Toast from '../../../Components/Toast';
 import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
 import DocumentPicker from 'react-native-document-picker';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import moment from 'moment';
+import {useProfile} from '../../../Utilities/StoreData';
+import {handleAudioRecord} from '../../../Utilities/AudioPlayerProcess';
 
 type Document = {
   uri: string;
@@ -37,9 +41,68 @@ const ChatTextInput = ({
   onSendMedia,
   onSelectDocuments,
 }: Props) => {
+  const profile = useProfile();
+  const audioPlayer = useRef(new AudioRecorderPlayer()).current;
   const [message, setmessage] = useState<string>('');
   const [isOpenEmoji, setisOpenEmoji] = useState<boolean>(false);
   const [isOpenCamera, setisOpenCamera] = useState<boolean>(false);
+  const [isRecording, setisRecording] = useState<boolean>(false);
+  const [isPlaying, setisPlaying] = useState<boolean>(false);
+  const [recordingSeconds, setrecordingSeconds] = useState<number>(0);
+  const [playingSeconds, setplayingSeconds] = useState<number>(0);
+  const [recordedAudio, setrecordedAudio] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (isRecording) {
+        handleStopRecording();
+      }
+      if (isPlaying) {
+        handleStopPlaying();
+      }
+    };
+  }, []);
+
+  function handleStopPlaying() {
+    try {
+      audioPlayer.stopPlayer();
+      audioPlayer.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setisPlaying(false);
+    }
+  }
+
+  function handleStopRecording() {
+    try {
+      audioPlayer.stopRecorder();
+      audioPlayer.removeRecordBackListener();
+    } catch (e) {
+    } finally {
+      setisRecording(false);
+    }
+  }
+
+  function handleDeleteAudio() {
+    if (isRecording) {
+      handleStopRecording();
+      setrecordingSeconds(0);
+    } else if (isPlaying) {
+      handleStopPlaying();
+      setplayingSeconds(0);
+    }
+    setrecordedAudio(null);
+  }
+
+  const getUniqueId = () => {
+    return (
+      profile?.user_id +
+      '' +
+      moment.utc().format('x') +
+      '' +
+      Math.floor(Math.random() * 10000 + 1)
+    );
+  };
 
   const handleOpenCamera = async () => {
     try {
@@ -118,20 +181,33 @@ const ChatTextInput = ({
           />
         </View>
         <View style={styles.actionButtonsContainer}>
-          {message.length === 0 ? (
-            <TouchableOpacity
-              style={styles.actionButtons}
-              activeOpacity={0.8}
-              onPress={handleOpenCamera}>
-              <SVGIcon icon="camera_fill_primary" />
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity
-            style={styles.actionButtons}
-            activeOpacity={0.8}
-            onPress={handlePickDocument}>
-            <SVGIcon icon="upload_fill_orange" />
-          </TouchableOpacity>
+          {isRecording || isPlaying ? (
+            <>
+              <SVGIcon
+                icon="stop_rounded_primary"
+                marginRight={10}
+                isButton
+                onPress={handleStopRecording}
+              />
+            </>
+          ) : (
+            <>
+              {message.length === 0 ? (
+                <SVGIcon
+                  icon="camera_fill_primary"
+                  marginRight={10}
+                  isButton
+                  onPress={handleOpenCamera}
+                />
+              ) : null}
+              <SVGIcon
+                icon="upload_fill_orange"
+                marginRight={10}
+                isButton
+                onPress={handlePickDocument}
+              />
+            </>
+          )}
           <TouchableOpacity
             style={styles.sendButtonContainer}
             onPress={() => {
@@ -139,11 +215,22 @@ const ChatTextInput = ({
                 onPressSend(message);
                 setmessage('');
               } else {
-                onPressAudio();
+                Keyboard.dismiss();
+                setmessage('');
+                setrecordingSeconds(0);
+                handleAudioRecord({
+                  audioPlayer,
+                  setisRecording,
+                  setrecordedAudio,
+                  setrecordingSeconds,
+                  maxRecordingTimeInSeconds: 119,
+                  onLimitReached: handleStopRecording,
+                  audioUniqueId: getUniqueId(),
+                });
               }
             }}
             activeOpacity={0.8}>
-            {message.length > 0 ? (
+            {message.length > 0 || isRecording ? (
               <SVGIcon icon="send" />
             ) : (
               <SVGIcon icon="mic_fill_white" height={20} width={20} />

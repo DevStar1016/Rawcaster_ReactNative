@@ -11,22 +11,18 @@ import {
   compressMedia,
   getFileName,
   getSlicedText,
-  getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
 import {Modal} from 'react-native';
-import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
 import AudioRecorder from '../../../Modals/AudioRecorder';
 import Toast from '../../../Components/Toast';
 import {Camera} from 'react-native-vision-camera';
-import {pick} from 'react-native-document-picker';
 
 var isMount = true;
 const UserChat = ({route}) => {
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
-  const [isOpenCamera, setisOpenCamera] = useState(false);
   const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [selectedMediaList, setselectedMediaList] = useState([]);
   const [chatList, setchatList] = useState([

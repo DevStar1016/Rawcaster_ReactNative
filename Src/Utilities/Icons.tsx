@@ -24,6 +24,8 @@ import LockColoredIcon from '../Assets/Svg/lock_colored.svg';
 import RocketColoredIcon from '../Assets/Svg/rocket_colored.svg';
 import ValidateColoredIcon from '../Assets/Svg/validate_colored.svg';
 import ClockOrangeIcon from '../Assets/Svg/clock_orange.svg';
+import StopRoundedSecondaryIcon from '../Assets/Svg/stop_rounded_secondary.svg';
+import StopRoundedPrimaryIcon from '../Assets/Svg/stop_rounded_primary.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -314,7 +316,9 @@ export type IconType =
   | 'lock_colored'
   | 'rocket_colored'
   | 'validate_colored'
-  | 'clock_orange';
+  | 'clock_orange'
+  | 'stop_rounded_secondary'
+  | 'stop_rounded_primary';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -472,4 +476,6 @@ export const ICONS = {
   rocket_colored: RocketColoredIcon,
   validate_colored: ValidateColoredIcon,
   clock_orange: ClockOrangeIcon,
+  stop_rounded_secondary: StopRoundedSecondaryIcon,
+  stop_rounded_primary: StopRoundedPrimaryIcon,
 };
