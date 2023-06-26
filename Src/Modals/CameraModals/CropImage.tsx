@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useRef} from 'react';
+import React, {LegacyRef, useRef} from 'react';
 import {CropView} from 'react-native-image-crop-tools';
 import {getUrlWithFilePrefix} from '../../Utilities/Methods';
 import {DIMENSIONS} from '../../Utilities/Constants';
@@ -14,8 +14,14 @@ import SVGIcon from '../../Components/SVGIcon';
 import {useInsets} from '../../Utilities/StoreData';
 import StyledText from '../../Components/StyledText';
 
-const CropImage = ({setModal, uri, onCropImage}) => {
-  const cropViewRef = useRef(null);
+type Props = {
+  setModal: (value: boolean) => void;
+  uri: string;
+  onCropImage: (uri: string) => void;
+};
+
+const CropImage = ({setModal, uri, onCropImage}: Props) => {
+  const cropViewRef = useRef<CropView>(null);
   const insets = useInsets();
 
   return (
@@ -32,7 +38,7 @@ const CropImage = ({setModal, uri, onCropImage}) => {
         ref={cropViewRef}
         onImageCrop={res => {
           setModal(false);
-          onCropImage(res);
+          onCropImage(res.uri);
         }}
         keepAspectRatio={false}
         aspectRatio={{
@@ -50,14 +56,18 @@ const CropImage = ({setModal, uri, onCropImage}) => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            cropViewRef.current.rotateImage(false);
+            if (cropViewRef.current) {
+              cropViewRef.current.rotateImage(false);
+            }
           }}>
           <SVGIcon icon="rotate" height={30} width={30} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonContainer}
           onPress={() => {
-            cropViewRef.current.saveImage(true, 90);
+            if (cropViewRef.current) {
+              cropViewRef.current.saveImage(true, 90);
+            }
           }}>
           <StyledText style={styles.buttonText}>DONE</StyledText>
         </TouchableOpacity>

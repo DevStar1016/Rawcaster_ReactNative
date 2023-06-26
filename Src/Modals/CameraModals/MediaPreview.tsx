@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import React, {useState} from 'react';
+/*@ts-ignore*/
 import Video from 'react-native-video';
 import PhotoEditor from '@baronha/react-native-photo-editor';
 import {COLORS} from '../../Utilities/Colors';
@@ -20,6 +21,32 @@ import {
   getMediaMimeType,
   getUrlWithFilePrefix,
 } from '../../Utilities/Methods';
+import {IconType} from '../../Utilities/Icons';
+
+type PreviewData = {
+  uri: string;
+  mediaType: 'image' | 'video';
+};
+type MediaItem = {
+  name: string;
+  uri: string;
+  type: string;
+};
+
+type ActionButtonsProps = {
+  onPress?: () => void;
+  icon: IconType;
+  iconSize?: number;
+  marginRight?: number;
+};
+
+type Props = {
+  setModal?: (value: boolean) => void;
+  data: PreviewData;
+  onSendMedia: (mediaItem: MediaItem) => void;
+  isEnableDone?: boolean;
+  isEnableEdit?: boolean;
+};
 
 const MediaPreview = ({
   setModal,
@@ -27,7 +54,7 @@ const MediaPreview = ({
   onSendMedia,
   isEnableDone = true,
   isEnableEdit = true,
-}) => {
+}: Props) => {
   const insets = useInsets();
   const [mediaData, setmediaData] = useState(data);
   const [isOpenCrop, setisOpenCrop] = useState(false);
@@ -35,7 +62,7 @@ const MediaPreview = ({
 
   const openEditer = async () => {
     try {
-      const resultUri = await PhotoEditor.open({
+      const resultUri: any = await PhotoEditor.open({
         path: mediaData.uri,
         stickers: [
           'https://cdn-icons-png.flaticon.com/512/5272/5272912.png',
@@ -58,7 +85,7 @@ const MediaPreview = ({
     icon,
     iconSize = 25,
     marginRight = 10,
-  }) => {
+  }: ActionButtonsProps) => {
     return (
       <TouchableOpacity
         style={[styles.topActionButtonContainer, {marginRight}]}
@@ -83,7 +110,9 @@ const MediaPreview = ({
             iconSize={18}
             marginRight={0}
             onPress={() => {
-              setModal(false);
+              if (setModal) {
+                setModal(false);
+              }
             }}
           />
           {isEnableEdit && mediaData.mediaType.includes('image') && (
@@ -130,7 +159,7 @@ const MediaPreview = ({
                 paused={pausedVideo}
                 source={{uri: mediaData.uri}}
                 style={{height: '100%', width: '100%'}}
-                onEnd={e => {
+                onEnd={() => {
                   setpausedVideo(true);
                 }}
               />
@@ -168,7 +197,9 @@ const MediaPreview = ({
             style={styles.sendButton}
             activeOpacity={0.7}
             onPress={() => {
-              setModal(false);
+              if (setModal) {
+                setModal(false);
+              }
               onSendMedia({
                 name: getFileName(mediaData.uri),
                 uri: mediaData.uri,
@@ -193,10 +224,10 @@ const MediaPreview = ({
         <CropImage
           setModal={setisOpenCrop}
           uri={mediaData?.uri}
-          onCropImage={cropedUri => {
+          onCropImage={(cropedUri: string) => {
             setmediaData(pre => ({
               ...pre,
-              uri: getUrlWithFilePrefix(cropedUri.uri),
+              uri: getUrlWithFilePrefix(cropedUri),
             }));
           }}
         />

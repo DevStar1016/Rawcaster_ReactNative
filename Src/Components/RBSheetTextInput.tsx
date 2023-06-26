@@ -82,6 +82,7 @@ const RBSheetTextInput = ({
 }: Props) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
   const profile = useProfile();
+  const [recordingAudioUniqueId, setrecordingAudioUniqueId] = useState('');
   const [isRecording, setisRecording] = useState<boolean>(false);
   const [isPlaying, setisPlaying] = useState<boolean>(false);
   const [recordingSeconds, setrecordingSeconds] = useState<number>(0);
@@ -276,10 +277,13 @@ const RBSheetTextInput = ({
                         audioPlayer,
                         setisPlaying,
                         setplayingSeconds,
+                        audioUniqueId: recordingAudioUniqueId,
                       });
                     } else {
                       Keyboard.dismiss();
                       setrecordingSeconds(0);
+                      const uniqueId = getUniqueId();
+                      setrecordingAudioUniqueId(uniqueId);
                       handleAudioRecord({
                         audioPlayer,
                         setisRecording,
@@ -287,7 +291,7 @@ const RBSheetTextInput = ({
                         setrecordingSeconds,
                         maxRecordingTimeInSeconds: 119,
                         onLimitReached: handleStopRecording,
-                        audioUniqueId: getUniqueId(),
+                        audioUniqueId: uniqueId,
                       });
                     }
                   }

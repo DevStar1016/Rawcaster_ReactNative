@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import StyledText from '../../../Components/StyledText';
 import {COLORS} from '../../../Utilities/Colors';
@@ -24,7 +24,8 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
   };
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.8}
       style={[
         styles.mainContainer,
         {
@@ -59,12 +60,17 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
         {item?.user_id === 1 && isGroup && (
           <StyledText style={styles.userNameText}>{item.name}</StyledText>
         )}
+
         {item?.image && (
-          <Image
-            source={{uri: item.image}}
-            borderRadius={10}
-            style={{height: 150, minWidth: '80%', marginVertical: 5}}
-          />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={{height: 150, minWidth: '80%', marginVertical: 5}}>
+            <Image
+              source={{uri: item.image}}
+              borderRadius={10}
+              style={{height: '100%', width: '100%'}}
+            />
+          </TouchableOpacity>
         )}
         <StyledText
           style={{color: item?.user_id === 1 ? COLORS.black : COLORS.white}}>
@@ -80,7 +86,7 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
           </StyledText>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

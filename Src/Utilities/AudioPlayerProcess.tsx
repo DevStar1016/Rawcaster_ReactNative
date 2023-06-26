@@ -14,6 +14,7 @@ type AudioPlayProps = {
   setisPaused?: (val: boolean) => void;
   setisPlaying?: (val: boolean) => void;
   setplayingSeconds?: (val: number) => void;
+  audioUniqueId?: string | number;
 };
 
 type AudioRecordProps = {
@@ -64,6 +65,8 @@ export const handleAudioRecord = async ({
 
       setrecordedAudio(result);
       audioPlayer?.addRecordBackListener((e: any) => {
+        console.log(Math.floor(e.currentPosition / 1000), 'RECORDING SECONDS');
+
         if (
           maxRecordingTimeInSeconds &&
           Math.floor(e.currentPosition / 1000) > maxRecordingTimeInSeconds
@@ -87,18 +90,19 @@ export const handlePlayAudio = async ({
   setisPaused = () => {},
   setisPlaying = () => {},
   setplayingSeconds = () => {},
+  audioUniqueId = '',
 }: AudioPlayProps) => {
   try {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
-      ios: 'rawcaster_recorded_audio.m4a',
-      android: `${dirs.CacheDir}/rawcaster_recorded_audio.mp3`,
+      ios: `rawcaster_recorded_audio${audioUniqueId}.m4a`,
+      android: `${dirs.CacheDir}/rawcaster_recorded_audio${audioUniqueId}.mp3`,
     });
     setisPaused(false);
     setisPlaying(true);
     await audioPlayer.startPlayer(path);
     audioPlayer.addPlayBackListener((e: any) => {
-      console.log(e, 'PLAYING');
+      console.log(Math.floor(e.currentPosition / 1000), 'PLAYING');
 
       if (Math.floor(e.currentPosition / 1000) >= 0) {
         setplayingSeconds(Math.floor(e.currentPosition / 1000));

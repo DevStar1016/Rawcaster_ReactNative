@@ -95,6 +95,7 @@ const UserChat = ({route}) => {
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
       content: 'Hiii',
+      image: profile.profile_image,
       user_id: 2,
     },
 
@@ -126,15 +127,6 @@ const UserChat = ({route}) => {
         name: getFileName(mediaPath),
         type: mediaItem.type,
         uri: mediaPath,
-      },
-    ]);
-  }
-
-  function handleSubmitAudio(audioFile) {
-    setselectedMediaList(pre => [
-      ...pre,
-      {
-        ...audioFile,
       },
     ]);
   }
