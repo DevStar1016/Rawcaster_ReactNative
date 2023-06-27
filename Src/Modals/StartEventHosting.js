@@ -15,7 +15,7 @@ import {COLORS} from '../Utilities/Colors';
 import SubmitButton from '../Components/SubmitButton';
 import AudioPlayingGif from '../Assets/Gif/audio_playing.gif';
 import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
-import Slider from '@react-native-community/slider';
+import {Slider} from '@miblanchard/react-native-slider';
 
 var isMount = true;
 const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
@@ -78,16 +78,23 @@ const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
         <StyledText style={styles.timeOne}>
           {getDurationFormat(Math.floor((progress * duration) / 100))}
         </StyledText>
-        <Slider
-          style={{height: 30, width: '100%'}}
-          thumbTintColor={COLORS.white}
-          maximumTrackTintColor={COLORS.white}
-          minimumTrackTintColor={COLORS.primary}
-          minimumValue={0}
-          maximumValue={100}
-          value={progress}
-          onSlidingComplete={data => seekUpdate(data)}
-        />
+        <View style={{alignItems: 'center', width: '100%'}}>
+          <Slider
+            containerStyle={{height: 30, width: '90%'}}
+            thumbTintColor={COLORS.white}
+            maximumTrackTintColor={COLORS.white}
+            minimumTrackTintColor={COLORS.primary}
+            minimumValue={0}
+            maximumValue={100}
+            value={progress}
+            onSlidingComplete={data => seekUpdate(data[0])}
+            thumbStyle={{
+              height: 15,
+              width: 15,
+              borderRadius: 9,
+            }}
+          />
+        </View>
         <StyledText style={styles.timeTwo}>
           {getDurationFormat(duration || 0)}
         </StyledText>
@@ -324,7 +331,7 @@ const styles = StyleSheet.create({
   sliderContainer: {
     position: 'absolute',
     height: 55,
-    bottom: 0,
+    bottom: 10,
     zIndex: 100,
   },
   timeOne: {

@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import StyledText from '../../../Components/StyledText';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -15,6 +15,8 @@ import MediaPreview, {
   PreviewMediaData,
 } from '../../../Modals/CameraModals/MediaPreview';
 import SVGIcon from '../../../Components/SVGIcon';
+import {Slider} from '@miblanchard/react-native-slider';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 type Props = {
   item: any;
@@ -32,6 +34,9 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
     isOpen: false,
     data: null,
   });
+  const [isPaused, setisPaused] = useState(false);
+  const [isPlaying, setisPlaying] = useState(false);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
 
   const DummyView = () => {
     return (
@@ -42,6 +47,33 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
         ]}
       />
     );
+  };
+
+  const handlePlayAudio = async (url: any) => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition) === 0) {
+          setisPaused(true);
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      setisPaused(false);
+    }
+  };
+
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      setisPaused(false);
+    }
   };
 
   return (
@@ -90,13 +122,11 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
                 style={{
                   height: 30,
                   width: 30,
-                  borderRadius: 20,
+                  borderRadius: 15,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor:
-                    item?.user_id === 1
-                      ? COLORS.primaryLight
-                      : COLORS.lightGrey,
+                    item?.user_id === 1 ? COLORS.primary : COLORS.lightGrey,
                   marginRight: 10,
                 }}>
                 <SVGIcon
@@ -110,12 +140,19 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
                 />
               </View>
               <View>
-                <StyledText
-                  style={{
-                    color: item?.user_id === 1 ? COLORS.black : COLORS.white,
-                  }}>
-                  {item.document_name} dfgdsfgdsfg dfgdfg dfgdfg dfgdfg
-                </StyledText>
+                <View style={{maxWidth: '90%', minWidth: '60%'}}>
+                  <StyledText
+                    normalTextModeTextProps={{
+                      numberOfLines: 2,
+                      ellipsizeMode: 'tail',
+                    }}
+                    style={{
+                      color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                      fontFamily: FONTS.DMSans.medium,
+                    }}>
+                    {item.document_name}
+                  </StyledText>
+                </View>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -124,6 +161,8 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
                   <StyledText
                     style={{
                       color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                      fontFamily: FONTS.DMSans.medium,
+                      fontSize: 12,
                     }}>
                     {item.document_size}
                   </StyledText>
@@ -139,12 +178,56 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
                   <StyledText
                     style={{
                       color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                      fontFamily: FONTS.DMSans.medium,
+                      fontSize: 12,
                     }}>
                     {item.document_type}
                   </StyledText>
                 </View>
               </View>
             </TouchableOpacity>
+          )}
+          {item.audio_url && (
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={{
+                  height: 30,
+                  width: 30,
+                  borderRadius: 15,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: COLORS.primary,
+                  marginRight: 10,
+                }}>
+                <SVGIcon icon="play_fill_white" height={17} />
+              </TouchableOpacity>
+              <View style={{width: '90%'}}>
+                <Slider
+                  containerStyle={{height: 30, width: '90%'}}
+                  thumbTintColor={COLORS.white}
+                  maximumTrackTintColor={COLORS.dimColor}
+                  minimumTrackTintColor={COLORS.primary}
+                  maximumTrackStyle={{opacity: 0.6}}
+                  minimumValue={0}
+                  maximumValue={100}
+                  // value={progress}
+                  // onSlidingComplete={data => seekUpdate(data[0])}
+                  thumbStyle={{
+                    height: 15,
+                    width: 15,
+                    borderRadius: 9,
+                  }}
+                />
+                <StyledText
+                  style={{
+                    color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                    marginLeft: 5,
+                  }}>
+                  {item.audio_duration}
+                </StyledText>
+              </View>
+            </View>
           )}
 
           {item?.image && (
@@ -158,10 +241,14 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
               />
             </TouchableOpacity>
           )}
-          <StyledText
-            style={{color: item?.user_id === 1 ? COLORS.black : COLORS.white}}>
-            {item?.content}
-          </StyledText>
+          {item?.content && (
+            <StyledText
+              style={{
+                color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+              }}>
+              {item?.content}
+            </StyledText>
+          )}
           <View style={styles.timeContainer}>
             <StyledText
               style={[
