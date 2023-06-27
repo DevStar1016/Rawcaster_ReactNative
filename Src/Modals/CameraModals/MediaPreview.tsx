@@ -23,7 +23,7 @@ import {
 } from '../../Utilities/Methods';
 import {IconType} from '../../Utilities/Icons';
 
-type PreviewData = {
+export type PreviewMediaData = {
   uri: string;
   mediaType: 'image' | 'video';
 };
@@ -42,7 +42,7 @@ type ActionButtonsProps = {
 
 type Props = {
   setModal?: (value: boolean) => void;
-  data: PreviewData;
+  data: PreviewMediaData;
   onSendMedia: (mediaItem: MediaItem) => void;
   isEnableDone?: boolean;
   isEnableEdit?: boolean;

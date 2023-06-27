@@ -100,8 +100,6 @@ export const handlePlayAudio = async ({
     setisPlaying(true);
     await audioPlayer.startPlayer(path);
     audioPlayer.addPlayBackListener((e: any) => {
-      console.log(Math.floor(e.currentPosition / 1000), 'PLAYING');
-
       if (Math.floor(e.currentPosition / 1000) >= 0) {
         setplayingSeconds(Math.floor(e.currentPosition / 1000));
       }
