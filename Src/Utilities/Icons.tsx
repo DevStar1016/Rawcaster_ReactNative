@@ -95,6 +95,8 @@ import StopFillWhiteIcon from '../Assets/Svg/stop_white.svg';
 import StopRoundedWhiteIcon from '../Assets/Svg/stop_rounded_white.svg';
 import PlayFillWhiteIcon from '../Assets/Svg/play_fill_white.svg';
 import PauseFillWhiteIcon from '../Assets/Svg/pause_fill_white.svg';
+import DocumentFillWhiteIcon from '../Assets/Svg/document_fill_white.svg';
+import DocumentFillPrimaryIcon from '../Assets/Svg/document_fill_primary.svg';
 
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
@@ -255,6 +257,8 @@ export type IconType =
   | 'calendar_black'
   | 'clock_black'
   | 'delete_white'
+  | 'document_fill_primary'
+  | 'document_fill_white'
   | 'down_arrow_white'
   | 'close_rounded_white'
   | 'mute_white'
@@ -409,6 +413,8 @@ export const ICONS = {
   mic_fill_primary: MicFillPrimaryIcon,
   mic_fill_secondary: MicFillSecondaryIcon,
   mic_off_fill_secondary: MicOffFillSecondaryIcon,
+  document_fill_white: DocumentFillWhiteIcon,
+  document_fill_primary: DocumentFillPrimaryIcon,
   tick_black: TickBlackIcon,
   edit_black: EditBlackIcon,
   delete_black: DeleteBlackIcon,
