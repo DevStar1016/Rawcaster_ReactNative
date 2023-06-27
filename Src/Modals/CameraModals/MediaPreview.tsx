@@ -22,10 +22,11 @@ import {
   getUrlWithFilePrefix,
 } from '../../Utilities/Methods';
 import {IconType} from '../../Utilities/Icons';
+import ImageZoomViewer from '../../Components/ImageZoomViewer';
 
 export type PreviewMediaData = {
-  uri: string;
-  mediaType: 'image' | 'video';
+  uri: string | '';
+  mediaType: 'image' | 'video' | '';
 };
 type MediaItem = {
   name: string;
@@ -43,7 +44,7 @@ type ActionButtonsProps = {
 type Props = {
   setModal?: (value: boolean) => void;
   data: PreviewMediaData;
-  onSendMedia: (mediaItem: MediaItem) => void;
+  onSendMedia?: (mediaItem: MediaItem) => void;
   isEnableDone?: boolean;
   isEnableEdit?: boolean;
 };
@@ -56,7 +57,7 @@ const MediaPreview = ({
   isEnableEdit = true,
 }: Props) => {
   const insets = useInsets();
-  const [mediaData, setmediaData] = useState(data);
+  const [mediaData, setmediaData] = useState<PreviewMediaData>(data);
   const [isOpenCrop, setisOpenCrop] = useState(false);
   const [pausedVideo, setpausedVideo] = useState(true);
 
@@ -143,6 +144,7 @@ const MediaPreview = ({
         {mediaData &&
           (mediaData.mediaType.includes('image') ? (
             <View style={styles.mediaContainer}>
+              {/* <ImageZoomViewer imageUri={mediaData.uri} /> */}
               <Image
                 source={{uri: mediaData.uri}}
                 resizeMode="contain"
@@ -200,11 +202,13 @@ const MediaPreview = ({
               if (setModal) {
                 setModal(false);
               }
-              onSendMedia({
-                name: getFileName(mediaData.uri),
-                uri: mediaData.uri,
-                type: getMediaMimeType(mediaData.uri, mediaData.mediaType),
-              });
+              if (onSendMedia) {
+                onSendMedia({
+                  name: getFileName(mediaData.uri),
+                  uri: mediaData.uri,
+                  type: getMediaMimeType(mediaData.uri, mediaData.mediaType),
+                });
+              }
             }}>
             <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
               Done

@@ -20,8 +20,10 @@ const UserChat = ({route}) => {
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
   const [selectedMediaList, setselectedMediaList] = useState([]);
+  const [selectedMsgIds, setselectedMsgIds] = useState([]);
   const [chatList, setchatList] = useState([
     {
+      msgId: 11,
       date: '2023-06-25',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -30,6 +32,7 @@ const UserChat = ({route}) => {
       user_id: 2,
     },
     {
+      msgId: 10,
       date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -38,6 +41,7 @@ const UserChat = ({route}) => {
       user_id: 1,
     },
     {
+      msgId: 9,
       date: '2023-06-24',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -45,6 +49,7 @@ const UserChat = ({route}) => {
       user_id: 2,
     },
     {
+      msgId: 8,
       date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -53,6 +58,7 @@ const UserChat = ({route}) => {
       user_id: 1,
     },
     {
+      msgId: 7,
       date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -60,6 +66,7 @@ const UserChat = ({route}) => {
       user_id: 1,
     },
     {
+      msgId: 6,
       date: '2023-06-24',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -71,6 +78,7 @@ const UserChat = ({route}) => {
       document_url: profile.profile_image,
     },
     {
+      msgId: 5,
       date: '2023-06-23',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -83,6 +91,7 @@ const UserChat = ({route}) => {
     },
 
     {
+      msgId: 4,
       date: '2023-06-23',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -91,6 +100,7 @@ const UserChat = ({route}) => {
     },
 
     {
+      msgId: 3,
       date: '2023-06-22',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -99,6 +109,7 @@ const UserChat = ({route}) => {
     },
 
     {
+      msgId: 2,
       date: '2023-06-22',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -108,6 +119,7 @@ const UserChat = ({route}) => {
     },
 
     {
+      msgId: 1,
       date: '2023-06-22',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -139,6 +151,16 @@ const UserChat = ({route}) => {
     ]);
   }
 
+  function handleSelectMessage(msgId) {
+    tempSelectedIds = [...selectedMsgIds];
+    if (tempSelectedIds.includes(msgId)) {
+      tempSelectedIds = tempSelectedIds.filter(id => id !== msgId);
+    } else {
+      tempSelectedIds.push(msgId);
+    }
+    setselectedMsgIds([...tempSelectedIds]);
+  }
+
   const renderChatItem = ({item, index}) => {
     return (
       <ChatItem
@@ -147,6 +169,16 @@ const UserChat = ({route}) => {
           index < chatList.length - 1 &&
           item.user_id === chatList[index + 1].user_id
         }
+        isSelected={selectedMsgIds.includes(item.msgId)}
+        onPress={() => {
+          if (selectedMsgIds.length > 0) {
+            handleSelectMessage(item.msgId);
+          }
+        }}
+        onLongPress={() => {
+          handleSelectMessage(item.msgId);
+        }}
+        onSelectMsg={handleSelectMessage}
         isGroup
       />
     );

@@ -20,17 +20,32 @@ type Props = {
   item: any;
   isPreChatSame?: boolean;
   isGroup?: boolean;
+  isSelected?: boolean;
+  onPress?: () => void;
+  onLongPress?: () => void;
+  isDisableOtherClickables?: boolean;
 };
 
 type PreviewModalData = {
   isOpen: boolean;
-  data: PreviewMediaData | null;
+  data: PreviewMediaData;
 };
 
-const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
+const ChatItem = ({
+  item,
+  isPreChatSame,
+  isGroup,
+  isSelected,
+  isDisableOtherClickables = false,
+  onPress,
+  onLongPress,
+}: Props) => {
   const [previewData, setpreviewData] = useState<PreviewModalData>({
     isOpen: false,
-    data: null,
+    data: {
+      uri: '',
+      mediaType: '',
+    },
   });
 
   const DummyView = () => {
@@ -47,6 +62,8 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
   return (
     <>
       <TouchableOpacity
+        onPress={onPress}
+        onLongPress={onLongPress}
         activeOpacity={0.8}
         style={[
           styles.mainContainer,
@@ -54,6 +71,7 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
             flexDirection: item?.user_id === 1 ? 'row' : 'row-reverse',
             marginTop: isPreChatSame ? 3 : 10,
           },
+          isSelected && {backgroundColor: 'red'},
         ]}>
         {item?.user_id === 1 &&
           (isGroup && !isPreChatSame ? (
@@ -150,7 +168,16 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
           {item?.image && (
             <TouchableOpacity
               activeOpacity={0.8}
-              style={{height: 150, minWidth: '80%', marginVertical: 5}}>
+              style={{height: 150, minWidth: '80%', marginVertical: 5}}
+              onPress={() => {
+                setpreviewData({
+                  data: {
+                    mediaType: 'image',
+                    uri: item?.image,
+                  },
+                  isOpen: true,
+                });
+              }}>
               <Image
                 source={{uri: item.image}}
                 borderRadius={10}
@@ -173,23 +200,35 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
           </View>
         </View>
       </TouchableOpacity>
-      {/* <Modal
+      <Modal
         visible={previewData.isOpen}
         transparent
         statusBarTranslucent
         animationType="slide"
         onRequestClose={() => {
-
+          setpreviewData({
+            isOpen: false,
+            data: {
+              uri: '',
+              mediaType: '',
+            },
+          });
         }}>
         <MediaPreview
-          setModal={setisOpenPreview}
-          data={mediaData}
-          onSendMedia={item => {
-            setModal(false);
-            onSendMedia(item);
+          setModal={() => {
+            setpreviewData({
+              isOpen: false,
+              data: {
+                uri: '',
+                mediaType: '',
+              },
+            });
           }}
+          isEnableDone={false}
+          isEnableEdit={false}
+          data={previewData.data}
         />
-      </Modal> */}
+      </Modal>
     </>
   );
 };
