@@ -198,6 +198,7 @@ const UserChat = ({route}) => {
         onLongPress={() => {
           handleSelectMessage(item.msgId);
         }}
+        isDisableOtherClickables={selectedMsgIds.length > 0}
         onSelectMsg={handleSelectMessage}
         isGroup
       />
@@ -215,7 +216,8 @@ const UserChat = ({route}) => {
         bgColor: COLORS.transparent,
         title: getSlicedText(userData?.display_name, 25),
         isEnableProfileImage: true,
-        isEnableVideoCallIcon: true,
+        isEnableVideoCallIcon: selectedMsgIds.length === 0,
+        isEnableAudioCallIcon: selectedMsgIds.length === 0,
         titlePaddingHorizontal: 5,
         profileImageProps: {
           profileSize: 30,

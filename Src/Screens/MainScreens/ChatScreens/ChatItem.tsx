@@ -103,7 +103,7 @@ const ChatItem = ({
             flexDirection: item?.user_id === 1 ? 'row' : 'row-reverse',
             marginTop: isPreChatSame ? 3 : 10,
           },
-          isSelected && {backgroundColor: 'red'},
+          isSelected && {backgroundColor: COLORS.primaryDark},
         ]}>
         {item?.user_id === 1 &&
           (isGroup && !isPreChatSame ? (
@@ -135,6 +135,7 @@ const ChatItem = ({
           {item.document_url && (
             <TouchableOpacity
               activeOpacity={0.8}
+              disabled={isDisableOtherClickables}
               style={{flexDirection: 'row'}}>
               <View
                 style={{
@@ -251,6 +252,7 @@ const ChatItem = ({
           {item?.image && (
             <TouchableOpacity
               activeOpacity={0.8}
+              disabled={isDisableOtherClickables}
               style={{height: 150, minWidth: '80%', marginVertical: 5}}
               onPress={() => {
                 setpreviewData({
@@ -324,7 +326,7 @@ export default ChatItem;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    marginHorizontal: 10,
+    paddingHorizontal: 10,
   },
   chatMessageContainer: {
     padding: 6,

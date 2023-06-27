@@ -29,6 +29,7 @@ export type BackHeaderProps = {
   isEnableSafeArea?: boolean;
   onPressRightIcon?: () => void;
   onPressVideoCallButton?: () => void;
+  onPressAudioCallButton?: () => void;
   isEnableVideoCallIcon?: boolean;
   isEnableAudioCallIcon?: boolean;
   rightIconSize?: number;
@@ -59,6 +60,7 @@ const HeaderWithBack = ({
   isEnableVideoCallIcon = false,
   onPressVideoCallButton,
   isEnableAudioCallIcon = false,
+  onPressAudioCallButton,
   bgColor = COLORS.primary,
   rightTextButtonStyle,
   rightButtonTextStyle,
@@ -151,7 +153,7 @@ const HeaderWithBack = ({
             {alignItems: 'flex-end'},
             isTitleCenter && {width: '10%'},
           ]}>
-          {isEnableVideoCallIcon && (
+          {isEnableAudioCallIcon && (
             <SVGIcon
               icon={'audio_call_fill_white'}
               isButton
@@ -159,7 +161,7 @@ const HeaderWithBack = ({
               width={20}
               marginBottom={2}
               marginRight={isEnableRightIcon || isEnableVideoCallIcon ? 20 : 0}
-              onPress={onPressVideoCallButton}
+              onPress={onPressAudioCallButton}
             />
           )}
           {isEnableVideoCallIcon && (
