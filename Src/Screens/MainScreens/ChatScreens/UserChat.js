@@ -186,6 +186,7 @@ const UserChat = ({route}) => {
           onSelectDocuments={documentsList => {
             setselectedMediaList(pre => [...pre, ...documentsList]);
           }}
+          onSendAudio={() => {}}
         />
       </KeyboardAvoidingView>
     </HOCView>

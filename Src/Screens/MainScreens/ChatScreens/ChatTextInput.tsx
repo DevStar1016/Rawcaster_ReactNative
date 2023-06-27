@@ -37,12 +37,14 @@ type Document = {
 type Props = {
   onPressSend: (value: string) => void;
   onSendMedia: (item: any) => void;
+  onSendAudio: (item: any) => void;
   onSelectDocuments: (documentsList: Document[]) => void;
 };
 
 const ChatTextInput = ({
   onPressSend,
   onSendMedia,
+  onSendAudio,
   onSelectDocuments,
 }: Props) => {
   const profile = useProfile();
@@ -275,9 +277,14 @@ const ChatTextInput = ({
           <TouchableOpacity
             style={styles.sendButtonContainer}
             onPress={() => {
-              if (message.length > 0) {
-                onPressSend(message);
-                setmessage('');
+              if (message.length > 0 || recordedAudio) {
+                if (recordedAudio) {
+                  onSendAudio(recordedAudio);
+                  handleDeleteAudio();
+                } else {
+                  onPressSend(message);
+                  setmessage('');
+                }
               } else {
                 Keyboard.dismiss();
                 setmessage('');
@@ -296,7 +303,7 @@ const ChatTextInput = ({
               }
             }}
             activeOpacity={0.8}>
-            {message.length > 0 || isRecording ? (
+            {message.length > 0 || isRecording || isPlaying || recordedAudio ? (
               <SVGIcon icon="send" />
             ) : (
               <SVGIcon icon="mic_fill_white" height={20} width={20} />
