@@ -65,6 +65,10 @@ const UserChat = ({route}) => {
       profile_img: profile.profile_image,
       content: 'Poda Venna',
       user_id: 1,
+      document_name: 'Rawcaster File',
+      document_size: '13 MB',
+      document_type: 'PDF',
+      document_url: profile.profile_image,
     },
     {
       date: '2023-06-23',
@@ -72,6 +76,10 @@ const UserChat = ({route}) => {
       profile_img: profile.profile_image,
       content: 'Eppudiiii😎😎',
       user_id: 2,
+      document_name: 'Rawcaster File',
+      document_size: '13 MB',
+      document_type: 'PDF',
+      document_url: profile.profile_image,
     },
 
     {

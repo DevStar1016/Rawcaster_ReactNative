@@ -4,6 +4,7 @@ import StyledText from '../../../Components/StyledText';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {FONTS} from '../../../Utilities/Fonts';
+import SVGIcon from '../../../Components/SVGIcon';
 
 type Props = {
   item: any;
@@ -59,6 +60,65 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
         ]}>
         {item?.user_id === 1 && isGroup && (
           <StyledText style={styles.userNameText}>{item.name}</StyledText>
+        )}
+        {item.document_url && (
+          <TouchableOpacity activeOpacity={0.8} style={{flexDirection: 'row'}}>
+            <View
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor:
+                  item?.user_id === 1 ? COLORS.primaryLight : COLORS.lightGrey,
+                marginRight: 10,
+              }}>
+              <SVGIcon
+                icon={
+                  item?.user_id === 1
+                    ? 'document_fill_white'
+                    : 'document_fill_primary'
+                }
+              />
+            </View>
+            <View>
+              <StyledText
+                style={{
+                  color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                }}>
+                {item.document_name}
+              </StyledText>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <StyledText
+                  style={{
+                    color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                  }}>
+                  {item.document_size}
+                </StyledText>
+                <View
+                  style={[
+                    styles.dotContainer,
+                    {
+                      backgroundColor:
+                        item?.user_id === 1 ? COLORS.black : COLORS.white,
+                    },
+                  ]}
+                />
+                <StyledText
+                  style={{
+                    color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                  }}>
+                  {item.document_type}
+                </StyledText>
+              </View>
+            </View>
+          </TouchableOpacity>
         )}
 
         {item?.image && (
@@ -116,5 +176,12 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 12,
     opacity: 0.6,
+  },
+  dotContainer: {
+    height: 4,
+    width: 4,
+    borderRadius: 4 / 2,
+    backgroundColor: COLORS.white,
+    marginHorizontal: 6,
   },
 });
