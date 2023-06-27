@@ -20,7 +20,13 @@ import DocumentPicker from 'react-native-document-picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import moment from 'moment';
 import {useProfile} from '../../../Utilities/StoreData';
-import {handleAudioRecord} from '../../../Utilities/AudioPlayerProcess';
+import {
+  handleAudioRecord,
+  handlePlayAudio,
+} from '../../../Utilities/AudioPlayerProcess';
+import StyledText from '../../../Components/StyledText';
+import {secondsToMinutesAndSeconds} from '../../../Utilities/Methods';
+import OpacityAnimatedView from '../../../Components/OpacityAnimatedView';
 
 type Document = {
   uri: string;
@@ -49,6 +55,7 @@ const ChatTextInput = ({
   const [recordingSeconds, setrecordingSeconds] = useState<number>(0);
   const [playingSeconds, setplayingSeconds] = useState<number>(0);
   const [recordedAudio, setrecordedAudio] = useState<string | null>(null);
+  const [recordingAudioUniqueId, setrecordingAudioUniqueId] = useState('');
 
   useEffect(() => {
     return () => {
@@ -60,6 +67,13 @@ const ChatTextInput = ({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (isPlaying && playingSeconds >= recordingSeconds) {
+      setisPlaying(false);
+      setplayingSeconds(recordingSeconds);
+    }
+  }, [playingSeconds]);
 
   function handleStopPlaying() {
     try {
@@ -156,36 +170,88 @@ const ChatTextInput = ({
   return (
     <>
       <View style={styles.mainContainer}>
-        <SVGIcon
-          icon="emoji_dark"
-          marginRight={5}
-          marginLeft={10}
-          isButton
-          onPress={() => {
-            Keyboard.dismiss();
-            setisOpenEmoji(pre => !pre);
-          }}
-        />
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputBox}
-            value={message}
-            onChangeText={setmessage}
-            placeholder="type message here..."
-            onFocus={() => {
-              setisOpenEmoji(false);
+        {recordedAudio || isRecording || isPlaying ? (
+          <View style={styles.recordTimerMicIconContainer}>
+            <OpacityAnimatedView
+              opacityMinimumValue={
+                recordedAudio && (isRecording || isPlaying) ? 0.3 : 1
+              }>
+              <SVGIcon
+                icon="mic_fill_secondary"
+                marginRight={5}
+                height={20}
+                width={20}
+              />
+            </OpacityAnimatedView>
+            <StyledText style={{color: COLORS.red}}>
+              {secondsToMinutesAndSeconds(
+                isRecording
+                  ? recordingSeconds
+                  : isPlaying
+                  ? playingSeconds
+                  : recordedAudio
+                  ? recordingSeconds
+                  : 0,
+              )}
+            </StyledText>
+          </View>
+        ) : (
+          <SVGIcon
+            icon="emoji_dark"
+            marginRight={5}
+            marginLeft={10}
+            isButton
+            onPress={() => {
+              Keyboard.dismiss();
+              setisOpenEmoji(pre => !pre);
             }}
           />
-        </View>
+        )}
+
+        {!recordedAudio && !isRecording && !isPlaying && (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.inputBox}
+              value={message}
+              onChangeText={setmessage}
+              placeholder="type message here..."
+              onFocus={() => {
+                setisOpenEmoji(false);
+              }}
+            />
+          </View>
+        )}
         <View style={styles.actionButtonsContainer}>
-          {isRecording || isPlaying ? (
+          {isRecording || isPlaying || recordedAudio ? (
             <>
               <SVGIcon
-                icon="stop_rounded_primary"
+                icon={
+                  isRecording || isPlaying
+                    ? 'stop_rounded_primary'
+                    : 'play_fill_primary'
+                }
                 marginRight={10}
                 isButton
-                onPress={handleStopRecording}
+                onPress={() => {
+                  if (isRecording) {
+                    handleStopRecording();
+                  } else if (isPlaying) {
+                    handleStopPlaying();
+                  } else {
+                    handlePlayAudio({
+                      audioPlayer,
+                      setisPlaying,
+                      setplayingSeconds,
+                      audioUniqueId: recordingAudioUniqueId,
+                    });
+                  }
+                }}
+              />
+              <SVGIcon
+                icon="delete_red"
+                marginRight={10}
+                isButton
+                onPress={handleDeleteAudio}
               />
             </>
           ) : (
@@ -216,6 +282,8 @@ const ChatTextInput = ({
                 Keyboard.dismiss();
                 setmessage('');
                 setrecordingSeconds(0);
+                const uniqueId = getUniqueId();
+                setrecordingAudioUniqueId(uniqueId);
                 handleAudioRecord({
                   audioPlayer,
                   setisRecording,
@@ -223,7 +291,7 @@ const ChatTextInput = ({
                   setrecordingSeconds,
                   maxRecordingTimeInSeconds: 119,
                   onLimitReached: handleStopRecording,
-                  audioUniqueId: getUniqueId(),
+                  audioUniqueId: uniqueId,
                 });
               }
             }}
@@ -307,5 +375,9 @@ const styles = StyleSheet.create({
   emojiContainer: {
     height: WINDOW_HEIGHT / 2 - 120,
     backgroundColor: COLORS.white,
+  },
+  recordTimerMicIconContainer: {
+    flexDirection: 'row',
+    paddingLeft: 10,
   },
 });

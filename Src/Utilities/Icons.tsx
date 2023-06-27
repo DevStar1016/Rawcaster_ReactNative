@@ -99,6 +99,7 @@ import PauseFillWhiteIcon from '../Assets/Svg/pause_fill_white.svg';
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
 import DeleteBlackIcon from '../Assets/Svg/delete_black.svg';
+import DeleteRedIcon from '../Assets/Svg/delete_red.svg';
 import CalendarBlackIcon from '../Assets/Svg/calendar_black.svg';
 import ClockBlackIcon from '../Assets/Svg/clock_black.svg';
 import ClockWhiteIcon from '../Assets/Svg/clock_white.svg';
@@ -250,6 +251,7 @@ export type IconType =
   | 'tick_black'
   | 'edit_black'
   | 'delete_black'
+  | 'delete_red'
   | 'calendar_black'
   | 'clock_black'
   | 'delete_white'
@@ -410,6 +412,7 @@ export const ICONS = {
   tick_black: TickBlackIcon,
   edit_black: EditBlackIcon,
   delete_black: DeleteBlackIcon,
+  delete_red: DeleteRedIcon,
   calendar_black: CalendarBlackIcon,
   clock_black: ClockBlackIcon,
   delete_white: DeleteWhiteIcon,

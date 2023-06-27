@@ -65,8 +65,6 @@ export const handleAudioRecord = async ({
 
       setrecordedAudio(result);
       audioPlayer?.addRecordBackListener((e: any) => {
-        console.log(Math.floor(e.currentPosition / 1000), 'RECORDING SECONDS');
-
         if (
           maxRecordingTimeInSeconds &&
           Math.floor(e.currentPosition / 1000) > maxRecordingTimeInSeconds

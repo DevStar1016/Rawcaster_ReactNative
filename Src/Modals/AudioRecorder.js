@@ -7,6 +7,7 @@ import StyledText from '../Components/StyledText';
 import {
   getFileName,
   getMediaMimeType,
+  getUniqueId,
   secondsToMinutesAndSeconds,
 } from '../Utilities/Methods';
 import {FONTS} from '../Utilities/Fonts';
@@ -25,6 +26,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const [isPlaying, setisPlaying] = useState(false);
   const [recordedAudio, setrecordedAudio] = useState(undefined);
   const [isPaused, setisPaused] = useState(false);
+  const [recordingAudioUniqueId, setrecordingAudioUniqueId] = useState('');
 
   useEffect(() => {
     return () => {
@@ -176,6 +178,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
                   setisPaused,
                   setisPlaying,
                   setplayingSeconds,
+                  audioUniqueId: recordingAudioUniqueId,
                 });
               }}
               icon={'play_fill_primary'}
@@ -184,14 +187,15 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           ) : (
             <ActionButton
               onPress={() => {
-                console.log(moment(), 'SECONDSS');
+                const uniqueId = getUniqueId();
+                setrecordingAudioUniqueId(uniqueId);
                 handleAudioRecord({
                   audioPlayer,
                   setisPaused,
                   setisRecording,
                   setrecordedAudio,
                   setrecordingSeconds,
-                  audioUniqueId: moment(),
+                  audioUniqueId: uniqueId,
                   onLimitReached: handleStopAudioRecord,
                 });
               }}
