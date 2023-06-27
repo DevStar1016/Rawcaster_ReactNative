@@ -114,7 +114,7 @@ const ChatItem = ({item, isPreChatSame, isGroup}: Props) => {
                   style={{
                     color: item?.user_id === 1 ? COLORS.black : COLORS.white,
                   }}>
-                  {item.document_name}
+                  {item.document_name} dfgdsfgdsfg dfgdfg dfgdfg dfgdfg
                 </StyledText>
                 <View
                   style={{
