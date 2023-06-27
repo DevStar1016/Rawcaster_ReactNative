@@ -23,7 +23,7 @@ const UserChat = ({route}) => {
   const [selectedMsgIds, setselectedMsgIds] = useState([]);
   const [chatList, setchatList] = useState([
     {
-      msgId: 11,
+      msgId: 13,
       date: '2023-06-25',
       name: 'Thani Oruvan',
       profile_img: profile.profile_image,
@@ -33,6 +33,7 @@ const UserChat = ({route}) => {
       user_id: 1,
     },
     {
+      msgId: 12,
       date: '2023-06-25',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
@@ -42,6 +43,7 @@ const UserChat = ({route}) => {
       user_id: 2,
     },
     {
+      msgId: 11,
       date: '2023-06-25',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
