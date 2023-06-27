@@ -25,6 +25,24 @@ const UserChat = ({route}) => {
     {
       msgId: 11,
       date: '2023-06-25',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      audio_url:
+        'https://rawcaster.s3.us-west-2.amazonaws.com/nuggets/converted_audio_39221687864620.mp3',
+      audio_duration: '00:18',
+      user_id: 1,
+    },
+    {
+      date: '2023-06-25',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      audio_url:
+        'https://rawcaster.s3.us-west-2.amazonaws.com/nuggets/converted_audio_39221687864620.mp3',
+      audio_duration: '00:18',
+      user_id: 2,
+    },
+    {
+      date: '2023-06-25',
       name: 'Evano Oruvan',
       profile_img: profile.profile_image,
       content: 'No, I am not😂, and did you heard about my Ooruu?😂',

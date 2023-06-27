@@ -1,6 +1,5 @@
 import {StyleSheet, View} from 'react-native';
 import React from 'react';
-// import Slider from '@react-native-community/slider';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {DIMENSIONS} from '../Utilities/Constants';
@@ -71,20 +70,6 @@ const MediaProgressSlider = ({
             onPress={onPlayPause}
           />
         )}
-        {/* <Slider
-          style={{
-            height: 40,
-            width: '100%',
-          }}
-          minimumValue={0}
-          maximumValue={getMaxValue()}
-          value={progress}
-          minimumTrackTintColor={COLORS.white}
-          maximumTrackTintColor={COLORS.white}
-          thumbTintColor={COLORS.white}
-          onValueChange={seekUpdate}
-          // onSlidingComplete={seekUpdate}
-        /> */}
         <View style={{alignItems: 'center', width: '100%'}}>
           <Slider
             containerStyle={{
