@@ -67,6 +67,8 @@ const ChatItem = ({
   const handlePlayAudio = async (url: any) => {
     handleStopAudio();
     try {
+      setisPaused(false);
+      setisPlaying(true);
       await audioPlayerRef.current?.startPlayer(url);
       audioPlayerRef.current?.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition) === 0) {
@@ -77,7 +79,7 @@ const ChatItem = ({
         return;
       });
     } catch (e) {
-      setisPaused(false);
+      setisPlaying(false);
     }
   };
 
@@ -88,6 +90,7 @@ const ChatItem = ({
     } catch (e) {
     } finally {
       setisPaused(false);
+      setisPlaying(false);
     }
   };
 
@@ -207,6 +210,15 @@ const ChatItem = ({
           )}
           {item.audio_url && (
             <View style={{flexDirection: 'row'}}>
+              {item?.user_id === 2 && (
+                <ProfileWithBadge
+                  profileImage={item?.profile_img}
+                  profileSize={30}
+                  extraMargin={0}
+                  padding={0}
+                  containerStyle={{marginRight: 5}}
+                />
+              )}
               <TouchableOpacity
                 activeOpacity={0.8}
                 style={{
@@ -218,9 +230,9 @@ const ChatItem = ({
                   backgroundColor: COLORS.primary,
                   marginRight: 10,
                 }}>
-                <SVGIcon icon="play_fill_white" height={17} />
+                <SVGIcon icon="play_fill_white" height={15} />
               </TouchableOpacity>
-              <View style={{width: '90%'}}>
+              <View style={{width: '73%'}}>
                 <Slider
                   containerStyle={{height: 30, width: '90%'}}
                   thumbTintColor={COLORS.white}
@@ -237,14 +249,40 @@ const ChatItem = ({
                     borderRadius: 9,
                   }}
                 />
-                <StyledText
+                <View
                   style={{
-                    color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
                     marginLeft: 5,
+                    width: '90%',
                   }}>
-                  {item.audio_duration}
-                </StyledText>
+                  <StyledText
+                    style={{
+                      color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                    }}>
+                    {item.audio_duration}
+                  </StyledText>
+                  <StyledText
+                    style={[
+                      styles.timeText,
+                      {
+                        color:
+                          item?.user_id === 1 ? COLORS.black : COLORS.white,
+                      },
+                    ]}>
+                    03:05 pm
+                  </StyledText>
+                </View>
               </View>
+              {item?.user_id === 1 && (
+                <ProfileWithBadge
+                  profileImage={item?.profile_img}
+                  profileSize={30}
+                  extraMargin={0}
+                  padding={0}
+                  containerStyle={{marginRight: 5}}
+                />
+              )}
             </View>
           )}
 
@@ -276,15 +314,17 @@ const ChatItem = ({
               {item?.content}
             </StyledText>
           )}
-          <View style={styles.timeContainer}>
-            <StyledText
-              style={[
-                styles.timeText,
-                {color: item?.user_id === 1 ? COLORS.black : COLORS.white},
-              ]}>
-              03:05 pm
-            </StyledText>
-          </View>
+          {!item.audio_url && (
+            <View style={styles.timeContainer}>
+              <StyledText
+                style={[
+                  styles.timeText,
+                  {color: item?.user_id === 1 ? COLORS.black : COLORS.white},
+                ]}>
+                03:05 pm
+              </StyledText>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
       <Modal
