@@ -229,78 +229,91 @@ const ChatItem = ({
             </TouchableOpacity>
           )}
           {item.audio_url && (
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               {item?.user_id === 2 && (
                 <ProfileWithBadge
                   profileImage={item?.profile_img}
-                  profileSize={30}
+                  profileSize={50}
                   extraMargin={0}
                   padding={0}
                   containerStyle={{marginRight: 5}}
                 />
               )}
-              <TouchableOpacity
-                activeOpacity={0.8}
+              <View
                 style={{
-                  height: 30,
-                  width: 30,
-                  borderRadius: 15,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: COLORS.primary,
-                  marginRight: 10,
+                  flexDirection: 'row',
+                  // backgroundColor: 'red',
+                  width: '75%',
+                  marginTop: 10,
                 }}>
-                <SVGIcon icon="play_fill_white" height={15} marginLeft={3} />
-              </TouchableOpacity>
-              <View style={{width: '73%'}}>
-                <Slider
-                  containerStyle={{height: 30, width: '90%'}}
-                  thumbTintColor={COLORS.white}
-                  maximumTrackTintColor={COLORS.dimColor}
-                  minimumTrackTintColor={COLORS.primary}
-                  maximumTrackStyle={{opacity: 0.6}}
-                  minimumValue={0}
-                  maximumValue={100}
-                  // value={progress}
-                  // onSlidingComplete={data => seekUpdate(data[0])}
-                  thumbStyle={{
-                    height: 15,
-                    width: 15,
-                    borderRadius: 9,
-                  }}
-                />
-                <View
+                <TouchableOpacity
+                  activeOpacity={0.8}
                   style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginLeft: 5,
-                    width: '90%',
+                    height: 30,
+                    width: 30,
+                    borderRadius: 15,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: COLORS.primary,
+                    marginRight: 5,
                   }}>
-                  <StyledText
+                  <SVGIcon icon="play_fill_white" height={15} marginLeft={3} />
+                </TouchableOpacity>
+                <View style={{width: '80%'}}>
+                  <Slider
+                    containerStyle={{
+                      height: 30,
+                      width: '100%',
+                    }}
+                    thumbTintColor={COLORS.white}
+                    maximumTrackTintColor={COLORS.dimColor}
+                    minimumTrackTintColor={COLORS.primary}
+                    maximumTrackStyle={{opacity: 0.6}}
+                    minimumValue={0}
+                    maximumValue={100}
+                    // value={progress}
+                    // onSlidingComplete={data => seekUpdate(data[0])}
+                    thumbStyle={{
+                      height: 15,
+                      width: 15,
+                      borderRadius: 9,
+                    }}
+                  />
+                  <View
                     style={{
-                      color: item?.user_id === 1 ? COLORS.black : COLORS.white,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      // marginLeft: 5,
+                      width: '100%',
                     }}>
-                    {item.audio_duration}
-                  </StyledText>
-                  <StyledText
-                    style={[
-                      styles.timeText,
-                      {
+                    <StyledText
+                      style={{
                         color:
                           item?.user_id === 1 ? COLORS.black : COLORS.white,
-                      },
-                    ]}>
-                    03:05 pm
-                  </StyledText>
+                        fontSize: 12,
+                      }}>
+                      {item.audio_duration}
+                    </StyledText>
+                    <StyledText
+                      style={[
+                        styles.timeText,
+                        {
+                          color:
+                            item?.user_id === 1 ? COLORS.black : COLORS.white,
+                        },
+                      ]}>
+                      03:05 pm
+                    </StyledText>
+                  </View>
                 </View>
               </View>
               {item?.user_id === 1 && (
                 <ProfileWithBadge
                   profileImage={item?.profile_img}
-                  profileSize={30}
+                  profileSize={50}
                   extraMargin={0}
                   padding={0}
-                  containerStyle={{marginRight: 5}}
+                  containerStyle={{marginLeft: 5}}
                 />
               )}
             </View>

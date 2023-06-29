@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 /*@ts-ignore*/
 import Video from 'react-native-video';
 import PhotoEditor from '@baronha/react-native-photo-editor';
@@ -23,6 +23,9 @@ import {
 } from '../../Utilities/Methods';
 import {IconType} from '../../Utilities/Icons';
 import ImageZoomViewer from '../../Components/ImageZoomViewer';
+import MediaProgressSlider from '../../Components/MediaProgressSlider';
+import {FONTS} from '../../Utilities/Fonts';
+import {Slider} from '@miblanchard/react-native-slider';
 
 export type PreviewMediaData = {
   uri: string | '';
@@ -57,9 +60,13 @@ const MediaPreview = ({
   isEnableEdit = true,
 }: Props) => {
   const insets = useInsets();
+  const videoPlayer = useRef<any>(null);
   const [mediaData, setmediaData] = useState<PreviewMediaData>(data);
   const [isOpenCrop, setisOpenCrop] = useState(false);
   const [pausedVideo, setpausedVideo] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setduration] = useState(0);
+  const [isLoadingMedia, setisLoadingMedia] = useState(true);
 
   const openEditer = async () => {
     try {
@@ -81,6 +88,41 @@ const MediaPreview = ({
     }
   };
 
+  const getDurationFormat = (tempDuration: any) => {
+    let time = tempDuration / 1000;
+    let minutes = Math.floor(time / 60);
+    let timeForSeconds = time - minutes * 60;
+    let seconds = Math.floor(timeForSeconds);
+    let secondsReadable = seconds > 9 ? seconds : `0${seconds}`;
+    return `${minutes}:${secondsReadable}`;
+  };
+
+  const seekUpdate = useCallback(
+    async (seekTime: any) => {
+      try {
+        if (videoPlayer.current) videoPlayer.current.seek(seekTime);
+      } catch (error) {}
+    },
+    [duration],
+  );
+
+  const playBackStatusUpdate = (playbackStatus: any) => {
+    try {
+      let currentTime = Math.round(playbackStatus.currentTime);
+      let duration = Math.round(playbackStatus.seekableDuration);
+      if (currentTime)
+        if (duration) setProgress((currentTime / duration) * 100);
+    } catch (error) {}
+  };
+
+  const onLoadComplete = (event: any) => {
+    try {
+      setduration(event.duration * 1000);
+    } catch (error) {
+      console.log(error, 'ONLOAD COMPLETE ERROR');
+    }
+  };
+
   const TopActionButton = ({
     onPress,
     icon,
@@ -97,6 +139,36 @@ const MediaPreview = ({
     );
   };
 
+  const getSlider = useMemo(
+    () => (
+      <View style={[styles.sliderContainer, {width: '100%'}]}>
+        <StyledText style={styles.timeOne}>
+          {getDurationFormat(Math.floor((progress * duration) / 100))}
+        </StyledText>
+        <View style={{alignItems: 'center', width: '100%'}}>
+          <Slider
+            containerStyle={{height: 30, width: '90%'}}
+            thumbTintColor={COLORS.white}
+            maximumTrackTintColor={COLORS.white}
+            minimumTrackTintColor={COLORS.primary}
+            minimumValue={0}
+            maximumValue={100}
+            value={progress}
+            onValueChange={data => seekUpdate(data[0])}
+            thumbStyle={{
+              height: 15,
+              width: 15,
+              borderRadius: 9,
+            }}
+          />
+        </View>
+        <StyledText style={styles.timeTwo}>
+          {getDurationFormat(duration || 0)}
+        </StyledText>
+      </View>
+    ),
+    [duration, progress],
+  );
   return (
     <View style={styles.mainContainer}>
       <View
@@ -154,15 +226,28 @@ const MediaPreview = ({
           ) : (
             <View style={styles.mediaContainer}>
               <Video
+                ref={videoPlayer}
                 repeat={IS_IOS}
-                resizeMode="cover"
+                resizeMode="contain"
                 posterResizeMode="cover"
                 playInBackground={false}
                 paused={pausedVideo}
                 source={{uri: mediaData.uri}}
-                style={{height: '100%', width: '100%'}}
+                style={{height: '80%', width: '100%'}}
+                playWhenInactive={false}
+                progressUpdateInterval={100}
+                useTextureView={true}
+                onBuffer={() => {}}
+                onProgress={playBackStatusUpdate}
+                onLoad={onLoadComplete}
                 onEnd={() => {
-                  setpausedVideo(true);
+                  setProgress(0);
+                  if (videoPlayer.current) {
+                    videoPlayer.current.seek(0);
+                  }
+                  if (!IS_IOS) {
+                    setpausedVideo(true);
+                  }
                 }}
               />
               <TouchableOpacity
@@ -182,6 +267,20 @@ const MediaPreview = ({
                   </View>
                 )}
               </TouchableOpacity>
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: 5,
+                  right: 0,
+                  left: 0,
+                }}>
+                {/* <MediaProgressSlider
+                  duration={duration}
+                  progress={progress}
+                  seekUpdate={seekUpdate}
+                /> */}
+                <View style={styles.videoControllerContainer}>{getSlider}</View>
+              </View>
             </View>
           ))}
       </View>
@@ -288,7 +387,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '100%',
+    height: '80%',
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -301,5 +400,35 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 2,
     borderColor: COLORS.white,
+  },
+  sliderContainer: {
+    position: 'absolute',
+    height: 55,
+    bottom: 10,
+    zIndex: 100,
+  },
+  timeOne: {
+    color: COLORS.white,
+    position: 'absolute',
+    left: 15,
+    fontSize: 13,
+    bottom: 10,
+    paddingVertical: 5,
+    fontFamily: FONTS.DMSans.medium,
+  },
+  timeTwo: {
+    color: COLORS.white,
+    position: 'absolute',
+    right: 15,
+    fontSize: 13,
+    bottom: 10,
+    paddingVertical: 5,
+    fontFamily: FONTS.DMSans.medium,
+  },
+  videoControllerContainer: {
+    height: '20%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
