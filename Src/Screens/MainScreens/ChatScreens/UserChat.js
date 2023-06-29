@@ -1,11 +1,18 @@
-import {FlatList, KeyboardAvoidingView, StyleSheet, View} from 'react-native';
+import {
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
+import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import Clipboard from '@react-native-community/clipboard';
 import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
 import EncryptedMessageContainer from './EncryptedMessageContainer';
 import {IS_IOS} from '../../../Utilities/Constants';
 import {useProfile} from '../../../Utilities/StoreData';
-import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import ChatTextInput from './ChatTextInput';
 import {
   compressMedia,
@@ -13,6 +20,7 @@ import {
   getSlicedText,
 } from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
+import Toast from '../../../Components/Toast';
 
 var isMount = true;
 const UserChat = ({route}) => {
@@ -64,6 +72,7 @@ const UserChat = ({route}) => {
       msgId: 9,
       date: '2023-06-24',
       name: 'Evano Oruvan',
+      forwarded: true,
       profile_img: profile.profile_image,
       content: 'I am from Eatho Oru Ooru😂, and where are you from?',
       user_id: 2,
@@ -172,13 +181,108 @@ const UserChat = ({route}) => {
   }
 
   function handleSelectMessage(msgId) {
-    tempSelectedIds = [...selectedMsgIds];
+    let tempSelectedIds = [...selectedMsgIds];
     if (tempSelectedIds.includes(msgId)) {
       tempSelectedIds = tempSelectedIds.filter(id => id !== msgId);
     } else {
       tempSelectedIds.push(msgId);
     }
     setselectedMsgIds([...tempSelectedIds]);
+  }
+
+  function isIncludeMedia() {
+    return [...chatList].reduce((resultValue, item) => {
+      if (
+        selectedMsgIds.includes(item.msgId) &&
+        (item.audio_url || item.document_url || item.image)
+      ) {
+        resultValue = true;
+      }
+      return resultValue;
+    }, false);
+  }
+
+  function getIsEnableCopy() {
+    if (selectedMsgIds.length > 0) {
+      return !isIncludeMedia();
+    }
+    return false;
+  }
+
+  function isSelfMsgId(msgId) {
+    const tempChatList = [...chatList];
+    const tempMessage = tempChatList.find(item => item.msgId === msgId);
+    if (tempMessage) {
+      return tempMessage.user_id === 2;
+    }
+    return false;
+  }
+
+  function getIsEnableEdit() {
+    return (
+      selectedMsgIds.length === 1 &&
+      !isIncludeMedia() &&
+      isSelfMsgId(selectedMsgIds[0])
+    );
+  }
+
+  function handleCopyOnClipboard() {
+    const tempContentsList = [...chatList]
+      .filter(item => selectedMsgIds.includes(item.msgId))
+      .map(item => item.content)
+      .reverse();
+    Clipboard.setString(tempContentsList.toString());
+    Toast.success(
+      `${
+        selectedMsgIds.length > 1
+          ? selectedMsgIds.length + ' messages'
+          : 'Message'
+      } copied`,
+    );
+    setselectedMsgIds([]);
+  }
+
+  function getMsgUserNameText(msgId) {
+    if (isSelfMsgId(msgId)) {
+      return '';
+    }
+    const tempChatList = [...chatList];
+    const tempMessage = tempChatList.find(item => item.msgId === msgId);
+    if (tempMessage) {
+      return ` from ${tempMessage.name}`;
+    }
+    return '';
+  }
+
+  function onDeleteMessages() {
+    const isContainOtherUsersMessageIds = [...selectedMsgIds].reduce(
+      (result, id) => {
+        if (!isSelfMsgId(id)) {
+          result = true;
+        }
+        return result;
+      },
+      false,
+    );
+    const buttonOptions = [
+      {text: 'Cancel', onPress: () => {}},
+      {text: 'Delete for me', onPress: () => {}},
+    ];
+    if (!isContainOtherUsersMessageIds) {
+      buttonOptions.push({text: 'Delete for everyone', onPress: () => {}});
+    }
+    Alert.alert(
+      '',
+      `Delete ${
+        selectedMsgIds.length === 1
+          ? 'message' + getMsgUserNameText(selectedMsgIds[0])
+          : selectedMsgIds.length + ' messages'
+      }?`,
+      [...buttonOptions],
+      {
+        cancelable: true,
+      },
+    );
   }
 
   const renderChatItem = ({item, index}) => {
@@ -218,6 +322,19 @@ const UserChat = ({route}) => {
         isEnableProfileImage: true,
         isEnableVideoCallIcon: selectedMsgIds.length === 0,
         isEnableAudioCallIcon: selectedMsgIds.length === 0,
+        isEnableDeleteIcon: selectedMsgIds.length > 0,
+        isEnableEditIcon: getIsEnableEdit(),
+        isEnableCopyIcon: getIsEnableCopy(),
+        // isEnableRightIcon: true,
+        // rightIcon: 'menu_vertical_white',
+        // rightIconSize: 19,
+        // rightIconAdditionalProps: {
+        //   marginBottom: 2,
+        // },
+        isEnableshareIcon: selectedMsgIds.length === 1,
+        onPressShareButton: () => {},
+        onPressDeleteButton: onDeleteMessages,
+        onPressCopyButton: handleCopyOnClipboard,
         titlePaddingHorizontal: 5,
         profileImageProps: {
           profileSize: 30,
@@ -233,6 +350,7 @@ const UserChat = ({route}) => {
         <FlatList
           data={chatList}
           inverted
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={{paddingTop: 10}}
           ListFooterComponent={() => <EncryptedMessageContainer />}
           renderItem={renderChatItem}

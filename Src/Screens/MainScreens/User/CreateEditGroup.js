@@ -507,7 +507,7 @@ const CreateEditGroup = ({route}) => {
 
   function getList() {
     let list = [];
-    if (isLocked) {
+    if (!isLocked) {
       if (groupDetails) {
         list = groupDetails.group_members_list ?? [];
       } else {

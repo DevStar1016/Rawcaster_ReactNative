@@ -43,6 +43,7 @@ import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSl
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
 import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
+import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 
 const Stack = createStackNavigator();
 
@@ -182,6 +183,7 @@ const MainStack = () => {
             />
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
             <Stack.Screen name="UserChat" component={UserChat} />
+            <Stack.Screen name="GroupChat" component={GroupChat} />
 
             <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen name="AddUserToGroup" component={AddUserToGroup} />

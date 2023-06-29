@@ -7,10 +7,10 @@ import {
   ViewStyle,
 } from 'react-native';
 import React from 'react';
-import {COLORS} from '../Utilities/Colors';
-import SVGIcon from './SVGIcon';
-import StyledText from './StyledText';
 import {useNavigation} from '@react-navigation/native';
+import {COLORS} from '../Utilities/Colors';
+import SVGIcon, {SVGIconProps} from './SVGIcon';
+import StyledText from './StyledText';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
 import {useInsets} from '../Utilities/StoreData';
@@ -26,12 +26,20 @@ export type BackHeaderProps = {
   rightIcon?: IconType;
   rightButtonType?: 'icon' | 'text';
   rightButtonText?: string;
+  isEnableshareIcon?: boolean;
   isEnableSafeArea?: boolean;
   onPressRightIcon?: () => void;
   onPressVideoCallButton?: () => void;
   onPressAudioCallButton?: () => void;
+  onPressShareButton?: () => void;
+  onPressCopyButton?: () => void;
+  onPressDeleteButton?: () => void;
+  onPressEditButton?: () => void;
+  isEnableDeleteIcon?: boolean;
+  isEnableEditIcon?: boolean;
   isEnableVideoCallIcon?: boolean;
   isEnableAudioCallIcon?: boolean;
+  isEnableCopyIcon?: boolean;
   rightIconSize?: number;
   rightTextButtonStyle?: ViewStyle;
   rightButtonTextStyle?: TextStyle;
@@ -40,6 +48,7 @@ export type BackHeaderProps = {
   profileContainer?: ViewStyle;
   titlePaddingHorizontal?: number;
   isEnableProfileImage?: boolean;
+  rightIconAdditionalProps?: SVGIconProps;
   profileImageProps?: ProfileWithBadgeProps;
 };
 
@@ -53,13 +62,20 @@ const HeaderWithBack = ({
   isEnableRightIcon = false,
   rightIcon,
   onPressRightIcon,
+  onPressCopyButton,
+  onPressDeleteButton,
+  onPressShareButton,
   isEnableBackButton = true,
   rightIconSize = 15,
   rightButtonType = 'icon',
   rightButtonText = '',
   isEnableVideoCallIcon = false,
+  isEnableCopyIcon = false,
   onPressVideoCallButton,
   isEnableAudioCallIcon = false,
+  isEnableEditIcon = false,
+  onPressEditButton,
+  isEnableshareIcon = false,
   onPressAudioCallButton,
   bgColor = COLORS.primary,
   rightTextButtonStyle,
@@ -67,7 +83,9 @@ const HeaderWithBack = ({
   profileImageProps,
   profileContainer,
   titlePaddingHorizontal = 15,
+  rightIconAdditionalProps,
   isEnableProfileImage = false,
+  isEnableDeleteIcon = false,
 }: BackHeaderProps) => {
   const navigation = useNavigation();
   const insets = useInsets();
@@ -153,6 +171,53 @@ const HeaderWithBack = ({
             {alignItems: 'flex-end'},
             isTitleCenter && {width: '10%'},
           ]}>
+          {isEnableEditIcon && (
+            <SVGIcon
+              icon={'edit'}
+              isButton
+              height={19}
+              width={19}
+              marginBottom={2}
+              marginLeft={20}
+              onPress={onPressEditButton}
+            />
+          )}
+
+          {isEnableDeleteIcon && (
+            <SVGIcon
+              icon={'delete_white'}
+              isButton
+              height={23}
+              width={23}
+              marginLeft={20}
+              onPress={onPressDeleteButton}
+            />
+          )}
+
+          {isEnableCopyIcon && (
+            <SVGIcon
+              icon={'clipboard_copy_white'}
+              isButton
+              height={20}
+              width={20}
+              marginBottom={1}
+              marginLeft={20}
+              onPress={onPressCopyButton}
+            />
+          )}
+
+          {isEnableshareIcon && (
+            <SVGIcon
+              icon={'share'}
+              isButton
+              height={22}
+              width={22}
+              marginBottom={1}
+              marginLeft={20}
+              onPress={onPressShareButton}
+            />
+          )}
+
           {isEnableAudioCallIcon && (
             <SVGIcon
               icon={'audio_call_fill_white'}
@@ -160,15 +225,16 @@ const HeaderWithBack = ({
               height={20}
               width={20}
               marginBottom={2}
-              marginRight={isEnableRightIcon || isEnableVideoCallIcon ? 20 : 0}
+              marginLeft={20}
               onPress={onPressAudioCallButton}
             />
           )}
+
           {isEnableVideoCallIcon && (
             <SVGIcon
               icon={'video_call_fill_white'}
               isButton
-              marginRight={isEnableRightIcon ? 10 : 0}
+              marginLeft={20}
               onPress={onPressVideoCallButton}
             />
           )}
@@ -178,7 +244,9 @@ const HeaderWithBack = ({
               height={rightIconSize}
               width={rightIconSize}
               isButton
+              marginLeft={20}
               onPress={onPressRightIcon}
+              {...rightIconAdditionalProps}
             />
           )}
         </View>

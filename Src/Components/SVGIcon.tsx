@@ -10,6 +10,7 @@ export interface SVGIconProps {
   isButton?: boolean;
   marginRight?: number;
   marginBottom?: number;
+  opacity?: number;
   onPress?: () => void;
 }
 
@@ -21,6 +22,7 @@ function SVGIcon({
   marginRight = 0,
   marginBottom,
   isButton = false,
+  opacity = 1,
   onPress,
 }: SVGIconProps) {
   const Icon = ICONS[icon];
@@ -32,6 +34,7 @@ function SVGIcon({
         marginBottom,
         alignItems: 'center',
         justifyContent: 'center',
+        opacity: opacity,
       }}
       activeOpacity={0.7}
       onPress={onPress}>
@@ -41,7 +44,7 @@ function SVGIcon({
     <Icon
       height={height}
       width={width}
-      style={{marginLeft, marginRight, marginBottom}}
+      style={{marginLeft, marginRight, marginBottom, opacity}}
     />
   );
 }

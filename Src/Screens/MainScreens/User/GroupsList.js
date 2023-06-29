@@ -115,10 +115,13 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
-          navigation.navigate('CreateEditGroup', {
-            groupId: item.group_id,
-            isLocked: parseInt(item.locked) === 1,
+          navigation.navigate('GroupChat', {
+            groupData: {...item},
           });
+          // navigation.navigate('CreateEditGroup', {
+          //   groupId: item.group_id,
+          //   isLocked: parseInt(item.locked) === 1,
+          // });
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge

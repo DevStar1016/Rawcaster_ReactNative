@@ -132,9 +132,28 @@ const ChatItem = ({
                 item?.user_id === 1 ? COLORS.lightGrey : COLORS.primaryLight,
             },
           ]}>
+          {item.forwarded && (
+            <View style={styles.forwardTextContainer}>
+              <SVGIcon
+                icon="share"
+                height={15}
+                width={15}
+                marginRight={5}
+                opacity={0.7}
+              />
+              <StyledText
+                style={[
+                  styles.forwardText,
+                  {color: item?.user_id === 1 ? COLORS.black : COLORS.white},
+                ]}>
+                Forwarded
+              </StyledText>
+            </View>
+          )}
           {item?.user_id === 1 && isGroup && (
             <StyledText style={styles.userNameText}>{item.name}</StyledText>
           )}
+
           {item.document_url && (
             <TouchableOpacity
               activeOpacity={0.8}
@@ -231,7 +250,7 @@ const ChatItem = ({
                   backgroundColor: COLORS.primary,
                   marginRight: 10,
                 }}>
-                <SVGIcon icon="play_fill_white" height={15} />
+                <SVGIcon icon="play_fill_white" height={15} marginLeft={3} />
               </TouchableOpacity>
               <View style={{width: '73%'}}>
                 <Slider
@@ -376,6 +395,15 @@ const styles = StyleSheet.create({
   dummyViewContainer: {
     height: 22,
     width: 22,
+  },
+  forwardTextContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingBottom: 3,
+  },
+  forwardText: {
+    fontSize: 12,
+    opacity: 0.7,
   },
   userNameText: {
     fontFamily: FONTS.DMSans.medium,

@@ -26,6 +26,8 @@ import ValidateColoredIcon from '../Assets/Svg/validate_colored.svg';
 import ClockOrangeIcon from '../Assets/Svg/clock_orange.svg';
 import StopRoundedSecondaryIcon from '../Assets/Svg/stop_rounded_secondary.svg';
 import StopRoundedPrimaryIcon from '../Assets/Svg/stop_rounded_primary.svg';
+import ClipboardCopyFillWhiteIcon from '../Assets/Svg/clipboard_copy_fill_white.svg';
+import ClipboardCopyWhiteIcon from '../Assets/Svg/clipboard_copy_white.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -324,7 +326,9 @@ export type IconType =
   | 'validate_colored'
   | 'clock_orange'
   | 'stop_rounded_secondary'
-  | 'stop_rounded_primary';
+  | 'stop_rounded_primary'
+  | 'clipboard_copy_fill_white'
+  | 'clipboard_copy_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -487,4 +491,6 @@ export const ICONS = {
   clock_orange: ClockOrangeIcon,
   stop_rounded_secondary: StopRoundedSecondaryIcon,
   stop_rounded_primary: StopRoundedPrimaryIcon,
+  clipboard_copy_fill_white: ClipboardCopyFillWhiteIcon,
+  clipboard_copy_white: ClipboardCopyWhiteIcon,
 };
