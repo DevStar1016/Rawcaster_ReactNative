@@ -55,6 +55,7 @@ const ChatItem = ({
   const [isPaused, setisPaused] = useState(false);
   const [isPlaying, setisPlaying] = useState(false);
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
+  const videoPlayerRef = useRef<any>(null);
 
   const DummyView = () => {
     return (
@@ -358,22 +359,28 @@ const ChatItem = ({
                   isOpen: true,
                 });
               }}>
-              {IS_IOS ? (
-                <Video
-                  resizeMode="cover"
-                  posterResizeMode="cover"
-                  paused={true}
-                  source={{uri: item.video_url}}
-                  style={{height: '100%', width: '100%', borderRadius: 10}}
-                />
-              ) : (
+              {/* {IS_IOS ? ( */}
+              <Video
+                ref={videoPlayerRef}
+                resizeMode="cover"
+                posterResizeMode="cover"
+                paused={true}
+                source={{uri: item.video_url}}
+                style={{height: '100%', width: '100%', borderRadius: 10}}
+                onLoad={() => {
+                  if (videoPlayerRef.current) {
+                    videoPlayerRef.current.seek(0);
+                  } // this will set first frame of video as thumbnail
+                }}
+              />
+              {/* ) : (
                 <Image
                   style={{height: '100%', width: '100%'}}
                   source={{uri: item.video_url}}
                   borderRadius={10}
                   resizeMode="cover"
                 />
-              )}
+              )} */}
               <View
                 style={{
                   position: 'absolute',
