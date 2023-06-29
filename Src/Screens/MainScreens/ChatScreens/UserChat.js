@@ -31,6 +31,24 @@ const UserChat = ({route}) => {
   const [selectedMsgIds, setselectedMsgIds] = useState([]);
   const [chatList, setchatList] = useState([
     {
+      msgId: 15,
+      date: '2023-06-25',
+      name: 'Evano Oruvan',
+      profile_img: profile.profile_image,
+      video_url:
+        'https://rawcaster.com/rawadmin/uploads/default/myluckyzone.mp4',
+      user_id: 2,
+    },
+    {
+      msgId: 14,
+      date: '2023-06-25',
+      name: 'Thani Oruvan',
+      profile_img: profile.profile_image,
+      video_url:
+        'https://rawcaster.com/rawadmin/uploads/default/myluckyzone.mp4',
+      user_id: 1,
+    },
+    {
       msgId: 13,
       date: '2023-06-25',
       name: 'Thani Oruvan',

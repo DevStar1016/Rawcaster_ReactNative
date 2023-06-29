@@ -17,6 +17,9 @@ import MediaPreview, {
 import SVGIcon from '../../../Components/SVGIcon';
 import {Slider} from '@miblanchard/react-native-slider';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+//@ts-ignore
+import Video from 'react-native-video';
+import {IS_IOS} from '../../../Utilities/Constants';
 
 type Props = {
   item: any;
@@ -338,6 +341,62 @@ const ChatItem = ({
                 borderRadius={10}
                 style={{height: '100%', width: '100%'}}
               />
+            </TouchableOpacity>
+          )}
+
+          {item?.video_url && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              disabled={isDisableOtherClickables}
+              style={{height: 150, minWidth: '80%', marginVertical: 5}}
+              onPress={() => {
+                setpreviewData({
+                  data: {
+                    mediaType: 'video',
+                    uri: item?.video_url,
+                  },
+                  isOpen: true,
+                });
+              }}>
+              {IS_IOS ? (
+                <Video
+                  resizeMode="cover"
+                  posterResizeMode="cover"
+                  paused={true}
+                  source={{uri: item.video_url}}
+                  style={{height: '100%', width: '100%', borderRadius: 10}}
+                />
+              ) : (
+                <Image
+                  style={{height: '100%', width: '100%'}}
+                  source={{uri: item.video_url}}
+                  borderRadius={10}
+                  resizeMode="cover"
+                />
+              )}
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <View
+                  style={{
+                    height: 30,
+                    width: 30,
+                    borderRadius: 15,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: COLORS.primary,
+                    marginRight: 5,
+                  }}>
+                  <SVGIcon icon="play_fill_white" height={15} marginLeft={3} />
+                </View>
+              </View>
             </TouchableOpacity>
           )}
           {item?.content && (
