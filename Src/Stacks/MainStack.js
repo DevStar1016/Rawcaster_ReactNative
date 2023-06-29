@@ -34,7 +34,7 @@ import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ProfileStack from './ProfileStack';
-import SocketListener from '../Components/SocketListener';
+import SocketListener from '../Services/Socket/ListenerComponent/SocketListener';
 import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
@@ -44,6 +44,7 @@ import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/Das
 import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
+// import ChimeMessagingListener from '../Services/ChimeMessaging/ListenerComponent/ChimeMessagingListener';
 
 const Stack = createStackNavigator();
 
@@ -157,6 +158,7 @@ const MainStack = () => {
   ) : (
     <>
       <SocketListener />
+      {/* <ChimeMessagingListener /> */}
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

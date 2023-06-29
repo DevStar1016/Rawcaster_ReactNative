@@ -316,6 +316,7 @@ const GroupChat = ({route}) => {
       />
     );
   };
+  console.log(groupData, 'groupData');
 
   return (
     <HOCView
@@ -356,6 +357,7 @@ const GroupChat = ({route}) => {
         onPressCopyButton: handleCopyOnClipboard,
         titlePaddingHorizontal: 5,
         profileImageProps: {
+          profileImage: groupData?.group_icon,
           profileSize: 30,
           extraMargin: 0,
           padding: 0,

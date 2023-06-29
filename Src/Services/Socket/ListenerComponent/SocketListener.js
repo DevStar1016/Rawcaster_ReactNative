@@ -1,13 +1,16 @@
-import {Modal, StyleSheet, Text, View} from 'react-native';
+import {Modal, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useStore} from 'react-redux';
 import moment from 'moment';
-import ConnectSocket, {socketListen} from '../Services/Socket/Socket';
-import ConectionRequestModal from '../Modals/ConectionRequestModal';
-import {useUserData} from '../Utilities/StoreData';
-import {setConnectionsList, setGroupsList} from '../Store/Slices/HomeSlice';
-import {SocketEvents} from '../Services/Socket/SocketEvents';
-import {GROUP_PROCESS_SOCKET_TYPE} from '../Services/Socket/SocketConstants';
+import ConnectSocket, {socketListen} from '../Socket';
+import ConectionRequestModal from '../../../Modals/ConectionRequestModal';
+import {useUserData} from '../../../Utilities/StoreData';
+import {
+  setConnectionsList,
+  setGroupsList,
+} from '../../../Store/Slices/HomeSlice';
+import {SocketEvents} from '../SocketEvents';
+import {GROUP_PROCESS_SOCKET_TYPE} from '../SocketConstants';
 
 const SocketListener = () => {
   const dispatch = useDispatch();

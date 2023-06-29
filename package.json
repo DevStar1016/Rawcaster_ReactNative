@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/client-chime-sdk-messaging": "^3.362.0",
+    "@aws-sdk/client-chime-sdk-messaging": "^3.360.0",
     "@baronha/react-native-photo-editor": "^1.1.6",
     "@gorhom/bottom-sheet": "^4.4.5",
     "@invertase/react-native-apple-authentication": "^2.2.2",

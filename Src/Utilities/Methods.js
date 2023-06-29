@@ -428,7 +428,7 @@ export const getNotificationMessage = type => {
 
 export const getUniqueId = (userId = '') => {
   return (
-    userId +
+    (userId ?? '') +
     '' +
     moment.utc().format('x') +
     '' +
