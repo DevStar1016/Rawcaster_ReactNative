@@ -260,19 +260,14 @@ const ConnectionsList = () => {
             </>
           ) : (
             <>
-              <SVGIcon icon="chat_white" height={20} width={20} />
               <SVGIcon
                 icon="audio_call_white"
-                height={20}
-                width={20}
+                height={22}
+                width={22}
+                isButton
                 marginLeft={10}
               />
-              <SVGIcon
-                icon="video_call_white"
-                height={23}
-                width={23}
-                marginLeft={10}
-              />
+              <SVGIcon isButton icon="video_call_white" marginLeft={20} />
             </>
           )}
         </View>

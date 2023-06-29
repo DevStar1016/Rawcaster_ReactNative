@@ -21,9 +21,11 @@ import {
 } from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
 import Toast from '../../../Components/Toast';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 const GroupChat = ({route}) => {
+  const navigation = useNavigation();
   const {groupData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
@@ -285,6 +287,12 @@ const GroupChat = ({route}) => {
     );
   }
 
+  function getMembersListText() {
+    return groupData?.group_members_list
+      ?.map(item => item.display_name)
+      .toString();
+  }
+
   const renderChatItem = ({item, index}) => {
     return (
       <ChatItem
@@ -319,6 +327,17 @@ const GroupChat = ({route}) => {
       backHeaderProps={{
         bgColor: COLORS.transparent,
         title: getSlicedText(groupData?.group_name, 25),
+        isTitleButton: true,
+        onPressHeaderTitle: () => {
+          navigation.navigate('CreateEditGroup', {
+            groupId: groupData?.group_id,
+            isLocked: parseInt(groupData?.locked) === 1,
+          });
+        },
+        videoCallIcon: 'event_white',
+        videoCallIconProps: {height: 22, width: 22, marginBottom: 2},
+        subTitle: getMembersListText(),
+        subTitleTextProps: {normalTextModeTextProps: {numberOfLines: 1}},
         isEnableProfileImage: true,
         isEnableVideoCallIcon: selectedMsgIds.length === 0,
         isEnableAudioCallIcon: selectedMsgIds.length === 0,

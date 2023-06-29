@@ -336,7 +336,8 @@ const UserChat = ({route}) => {
       onLayoutHeaderHeight={setheaderHeight}
       backHeaderProps={{
         bgColor: COLORS.transparent,
-        title: getSlicedText(userData?.display_name, 25),
+        title: userData?.display_name,
+        titleTextProps: {normalTextModeTextProps: {numberOfLines: 1}},
         isEnableProfileImage: true,
         isEnableVideoCallIcon: selectedMsgIds.length === 0,
         isEnableAudioCallIcon: selectedMsgIds.length === 0,

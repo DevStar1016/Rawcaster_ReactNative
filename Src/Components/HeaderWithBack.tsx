@@ -10,7 +10,7 @@ import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon, {SVGIconProps} from './SVGIcon';
-import StyledText from './StyledText';
+import StyledText, {StyledTextProps} from './StyledText';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
 import {useInsets} from '../Utilities/StoreData';
@@ -18,12 +18,15 @@ import ProfileWithBadge, {ProfileWithBadgeProps} from './ProfileWithBadge';
 
 export type BackHeaderProps = {
   title?: string;
+  subTitle?: string;
   backIcon?: IconType;
   isModal?: boolean;
   setModal?: (value: boolean) => void;
   isTitleCenter?: boolean;
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
+  videoCallIcon?: IconType;
+  isTitleButton?: boolean;
   rightButtonType?: 'icon' | 'text';
   rightButtonText?: string;
   isEnableshareIcon?: boolean;
@@ -32,6 +35,7 @@ export type BackHeaderProps = {
   onPressVideoCallButton?: () => void;
   onPressAudioCallButton?: () => void;
   onPressShareButton?: () => void;
+  onPressHeaderTitle?: () => void;
   onPressCopyButton?: () => void;
   onPressDeleteButton?: () => void;
   onPressEditButton?: () => void;
@@ -41,6 +45,7 @@ export type BackHeaderProps = {
   isEnableAudioCallIcon?: boolean;
   isEnableCopyIcon?: boolean;
   rightIconSize?: number;
+  videoCallIconProps?: Omit<SVGIconProps, 'onPress' | 'icon' | 'isButton'>;
   rightTextButtonStyle?: ViewStyle;
   rightButtonTextStyle?: TextStyle;
   isEnableBackButton?: boolean;
@@ -50,10 +55,13 @@ export type BackHeaderProps = {
   isEnableProfileImage?: boolean;
   rightIconAdditionalProps?: SVGIconProps;
   profileImageProps?: ProfileWithBadgeProps;
+  subTitleTextProps?: StyledTextProps;
+  titleTextProps?: StyledTextProps;
 };
 
 const HeaderWithBack = ({
   title = '',
+  subTitle = '',
   backIcon = 'back',
   isModal = false,
   setModal,
@@ -65,9 +73,13 @@ const HeaderWithBack = ({
   onPressCopyButton,
   onPressDeleteButton,
   onPressShareButton,
+  onPressHeaderTitle,
+  isTitleButton = false,
   isEnableBackButton = true,
   rightIconSize = 15,
   rightButtonType = 'icon',
+  videoCallIcon = 'video_call_white',
+  videoCallIconProps,
   rightButtonText = '',
   isEnableVideoCallIcon = false,
   isEnableCopyIcon = false,
@@ -86,9 +98,22 @@ const HeaderWithBack = ({
   rightIconAdditionalProps,
   isEnableProfileImage = false,
   isEnableDeleteIcon = false,
+  subTitleTextProps,
+  titleTextProps,
 }: BackHeaderProps) => {
   const navigation = useNavigation();
   const insets = useInsets();
+
+  function TitleTextContainer({children}: any) {
+    return isTitleButton ? (
+      <TouchableOpacity activeOpacity={0.8} onPress={onPressHeaderTitle}>
+        {children}
+      </TouchableOpacity>
+    ) : (
+      <View>{children}</View>
+    );
+  }
+
   return (
     //   <View
     //   style={{
@@ -112,7 +137,7 @@ const HeaderWithBack = ({
             : 12,
         },
       ]}>
-      <View style={{flexDirection: 'row'}}>
+      <View style={[{flexDirection: 'row'}, !isTitleCenter && {flex: 1}]}>
         <View
           style={[
             styles.iconContainer,
@@ -136,7 +161,12 @@ const HeaderWithBack = ({
         </View>
         {isEnableProfileImage && (
           <View style={profileContainer}>
-            <ProfileWithBadge profileSize={40} {...profileImageProps} />
+            <ProfileWithBadge
+              isButton={isTitleButton}
+              onPressProfile={onPressHeaderTitle}
+              profileSize={40}
+              {...profileImageProps}
+            />
           </View>
         )}
         {!isTitleCenter && (
@@ -144,11 +174,23 @@ const HeaderWithBack = ({
             style={[
               styles.titleContainer,
               {
+                flex: 1,
                 alignItems: 'flex-start',
                 paddingHorizontal: titlePaddingHorizontal,
               },
             ]}>
-            <StyledText style={styles.title}>{title}</StyledText>
+            <TitleTextContainer>
+              <StyledText style={styles.title} {...titleTextProps}>
+                {title}
+              </StyledText>
+              {subTitle ? (
+                <StyledText style={styles.subTitle} {...subTitleTextProps}>
+                  {subTitle}
+                </StyledText>
+              ) : (
+                false
+              )}
+            </TitleTextContainer>
           </View>
         )}
       </View>
@@ -158,7 +200,6 @@ const HeaderWithBack = ({
             styles.titleContainer,
             {
               alignItems: 'center',
-              paddingHorizontal: 0,
             },
           ]}>
           <StyledText style={styles.title}>{title}</StyledText>
@@ -220,10 +261,10 @@ const HeaderWithBack = ({
 
           {isEnableAudioCallIcon && (
             <SVGIcon
-              icon={'audio_call_fill_white'}
+              icon={'audio_call_white'}
               isButton
-              height={20}
-              width={20}
+              height={21}
+              width={21}
               marginBottom={2}
               marginLeft={20}
               onPress={onPressAudioCallButton}
@@ -232,9 +273,10 @@ const HeaderWithBack = ({
 
           {isEnableVideoCallIcon && (
             <SVGIcon
-              icon={'video_call_fill_white'}
-              isButton
               marginLeft={20}
+              {...videoCallIconProps}
+              icon={videoCallIcon ?? 'video_call_white'}
+              isButton
               onPress={onPressVideoCallButton}
             />
           )}
@@ -282,13 +324,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   titleContainer: {
-    paddingHorizontal: 10,
     justifyContent: 'center',
   },
   title: {
     color: COLORS.white,
     fontFamily: FONTS.DMSans.bold,
     fontSize: 16,
+  },
+  subTitle: {
+    color: COLORS.white,
+    fontSize: 12,
   },
   rightTextButton: {
     borderRadius: 5,

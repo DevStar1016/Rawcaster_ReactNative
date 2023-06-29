@@ -115,13 +115,17 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
-          navigation.navigate('GroupChat', {
-            groupData: {...item},
-          });
-          // navigation.navigate('CreateEditGroup', {
-          //   groupId: item.group_id,
-          //   isLocked: parseInt(item.locked) === 1,
-          // });
+          console.log(item, 'GROUPDATA');
+          if (item.locked === 1) {
+            navigation.navigate('CreateEditGroup', {
+              groupId: item.group_id,
+              isLocked: parseInt(item.locked) === 1,
+            });
+          } else {
+            navigation.navigate('GroupChat', {
+              groupData: {...item},
+            });
+          }
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge
@@ -141,14 +145,13 @@ const GroupsList = () => {
           </View>
         </View>
         <View style={styles.actionIconsContainer}>
-          <SVGIcon icon="chat_white" height={20} width={20} />
           <SVGIcon
             icon="audio_call_white"
             height={20}
             width={20}
             marginLeft={10}
           />
-          <SVGIcon icon="event_white" height={21} width={21} marginLeft={10} />
+          <SVGIcon icon="event_white" height={21} width={21} marginLeft={20} />
         </View>
       </TouchableOpacity>
     );
