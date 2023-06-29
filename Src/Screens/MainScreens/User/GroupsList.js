@@ -115,7 +115,6 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
-          console.log(item, 'GROUPDATA');
           if (item.locked === 1) {
             navigation.navigate('CreateEditGroup', {
               groupId: item.group_id,
