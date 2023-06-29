@@ -5,13 +5,15 @@ import {FONTS} from '../Utilities/Fonts';
 import Hyperlink from 'react-native-hyperlink';
 import {TextProps} from 'react-native';
 
+export type NormalTextModeProps = Omit<TextProps, 'onPress' | 'style'>;
+
 export interface StyledTextProps {
   children?: JSX.Element | JSX.Element[] | string;
   textMode?: 'read_more' | 'hyper_link' | 'normal' | 'read_more_hyper_link';
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
   readMoreButtonTextStyle?: TextStyle;
-  normalTextModeTextProps?: Omit<TextProps, 'onPress' | 'style'>;
+  normalTextModeTextProps?: NormalTextModeProps;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
 }
