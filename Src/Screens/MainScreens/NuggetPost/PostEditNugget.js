@@ -9,7 +9,7 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Video from 'react-native-video';
 
 import HOCView from '../../../Components/HOCView';
@@ -82,6 +82,7 @@ const PostEditNugget = ({route}) => {
   const navigation = useNavigation();
   const profile = useProfile();
   const token = useToken();
+  const videoPlayerRef = useRef(null);
   const [mainContainerHeight, setmainContainerHeight] = useState(0);
   const [topContainerHeight, settopContainerHeight] = useState(0);
   const [mediaListHeight, setmediaListHeight] = useState(0);
@@ -479,14 +480,20 @@ const PostEditNugget = ({route}) => {
   }
 
   function getMediaItem(item) {
-    if (IS_IOS && item.type.includes('video')) {
+    if (item.type.includes('video')) {
       return (
         <Video
+          ref={videoPlayerRef}
           resizeMode="cover"
           posterResizeMode="cover"
           paused={true}
           source={{uri: item.uri}}
           style={{height: '100%', width: '100%', borderRadius: 10}}
+          onLoad={() => {
+            if (videoPlayerRef.current) {
+              videoPlayerRef.current.seek(0);
+            }
+          }}
         />
       );
     } else if (item.type.includes('audio')) {

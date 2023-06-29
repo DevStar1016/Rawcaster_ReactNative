@@ -117,6 +117,7 @@ const MediaPreview = ({
 
   const onLoadComplete = (event: any) => {
     try {
+      videoPlayer.current.seek(0);
       setduration(event.duration * 1000);
     } catch (error) {
       console.log(error, 'ONLOAD COMPLETE ERROR');

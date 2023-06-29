@@ -24,6 +24,7 @@ const MediaSmallItem = ({
   const [progressValue, setprogressValue] = useState(0);
   const progressRefValue = useRef(0);
   const source = useRef(null);
+  const videoPlayerRef = useRef(null);
   useEffect(() => {
     if (isEnableUploadDownloadProcess) {
       const uniqueId =
@@ -64,8 +65,6 @@ const MediaSmallItem = ({
     // }
   };
 
-  console.log(item, 'ITEM');
-
   const uploadChatAttachmentAPICall = async uniqueId => {
     source.current = axios.CancelToken.source();
     let formData = new FormData();
@@ -94,14 +93,20 @@ const MediaSmallItem = ({
   };
 
   function getMediaItem() {
-    if (IS_IOS && item.type.includes('video')) {
+    if (item.type.includes('video')) {
       return (
         <Video
+          ref={videoPlayerRef}
           resizeMode="cover"
           posterResizeMode="cover"
           paused={true}
           source={{uri: item.uri}}
           style={{height: '100%', width: '100%', borderRadius: 10}}
+          onLoad={() => {
+            if (videoPlayerRef.current) {
+              videoPlayerRef.current.seek(0);
+            }
+          }}
         />
       );
     } else if (item.type.includes('audio')) {

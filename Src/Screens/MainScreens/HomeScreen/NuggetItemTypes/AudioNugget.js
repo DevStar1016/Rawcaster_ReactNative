@@ -46,6 +46,9 @@ function AudioNugget({
   const onLoadComplete = event => {
     setduration(event.duration);
     setisLoadingVideo(false);
+    if (audioPlayer.current) {
+      audioPlayer.current.seek(0);
+    }
   };
 
   return useMemo(
