@@ -1,4 +1,5 @@
-import {ChimeSDKMessagingClient} from '@aws-sdk/client-chime-sdk-messaging';
+// import {ChimeSDKMessagingClient} from '@aws-sdk/client-chime-sdk-messaging';
+import AWS from 'aws-sdk';
 import {
   ConsoleLogger,
   DefaultMessagingSession,
@@ -17,10 +18,10 @@ import {
 let Session: MessagingSessionPropType;
 let messageUpdateCallbacks: ((message: MessageProp) => void)[] = [];
 const logger = new ConsoleLogger('SDK Chat Demo', LogLevel.INFO);
-const chimeClient = new ChimeSDKMessagingClient({
-  region: 'us-east-1',
-  credentials: {...CHIME_MESSAGING_CLIENT_IDS},
-});
+// const chimeClient = new ChimeSDKMessagingClient({
+//   region: 'us-east-1',
+//   credentials: {...CHIME_MESSAGING_CLIENT_IDS},
+// });
 
 export const subscribeToMessageUpdate = (
   callback: (message: MessageProp) => void,
@@ -67,7 +68,7 @@ const connectChimeMessaging = (userId: any) => {
     userId,
     getUniqueId(userId),
     CHIME_END_POINT_URL,
-    chimeClient,
+    new AWS.ChimeSDKMessaging(),
   );
   Session = new DefaultMessagingSession(sessionConfig, logger);
   Session.addObserver(messageObserver);
@@ -82,7 +83,7 @@ const stopChimeMessaging = () => {
   }
 };
 
-export const chimeMessagingClient = chimeClient;
+// export const chimeMessagingClient = chimeClient;
 
 export const ChimeMessaging = {
   connect: connectChimeMessaging,
