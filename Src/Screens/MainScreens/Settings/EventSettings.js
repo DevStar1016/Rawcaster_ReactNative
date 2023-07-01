@@ -315,7 +315,9 @@ const EventSettings = () => {
             onBuffer={() => {}}
             onLoad={() => {
               if (isMount) {
-                videoAudioPlayer.current.seek(0);
+                if (videoAudioPlayer.current) {
+                  videoAudioPlayer.current.seek(0);
+                }
                 setisVideoLoaded(true);
               }
             }}

@@ -146,7 +146,9 @@ const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
             onBuffer={() => {}}
             onLoad={event => {
               if (isMount) {
-                videoPlayer.current.seek(0);
+                if (videoPlayer.current) {
+                  videoPlayer.current.seek(0);
+                }
                 setisLoadingMedia(false);
                 onLoadComplete(event);
               }
@@ -154,7 +156,9 @@ const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
             onProgress={playBackStatusUpdate}
             onEnd={() => {
               setProgress(0);
-              videoPlayer.current.seek(0);
+              if (videoPlayer.current) {
+                videoPlayer.current.seek(0);
+              }
               setpaused(true);
             }}
           />
