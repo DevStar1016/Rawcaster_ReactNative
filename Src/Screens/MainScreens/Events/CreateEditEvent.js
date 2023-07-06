@@ -170,7 +170,7 @@ const CreateEditEvent = ({route}) => {
             event_message: values.eventDescription,
             event_start_date: moment(liveEventDate).utc().format('YYYY-MM-DD'),
             event_start_time: moment(values.eventTime).utc().format('HH:mm'),
-            event_participants: values.maxParticipants,
+            event_participants: selectedValues.maxParticipants,
             event_duration: getDisplayDuration(),
             melodyFile: selectedMelodyFile,
             ...selectedValues,
