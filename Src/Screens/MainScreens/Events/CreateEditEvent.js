@@ -35,6 +35,8 @@ import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import StyledText from '../../../Components/StyledText';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
+import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
+import {useDispatch} from 'react-redux';
 
 var isMount = true;
 const CreateEditEvent = ({route}) => {
@@ -42,6 +44,7 @@ const CreateEditEvent = ({route}) => {
   const token = useToken();
   const profile = useProfile();
   const settings = useSettings();
+  const dispatch = useDispatch();
   const {eventId, isFromEventSearch} = route.params ?? {};
   const [eventTypesList, seteventTypesList] = useState([]);
   const [liveEventDate, setliveEventDate] = useState(new Date());
@@ -66,6 +69,8 @@ const CreateEditEvent = ({route}) => {
       ),
     ),
     durationError: '',
+    maxParticipants: parseInt(settings?.max_event_participants_count),
+    participantError: '',
     waiting_room: parseInt(settings?.waiting_room),
     join_before_host: parseInt(settings?.join_before_host),
     sound_notify: parseInt(settings?.participant_join_sound),
@@ -94,16 +99,6 @@ const CreateEditEvent = ({route}) => {
       .min(5, 'Invalid Event Description.')
       .max(120, 'Invalid Event Description.'),
     eventTime: yup.string().required('Select valid Time'),
-    maxParticipants: yup
-      .number()
-      .min(2, 'Enter valid Participants')
-      .max(
-        parseInt(settings?.max_event_participants_count),
-        `Maximum ${parseInt(
-          settings?.max_event_participants_count,
-        )} participants only allowed`,
-      )
-      .required('Enter valid Participants'),
   });
 
   const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
@@ -112,13 +107,60 @@ const CreateEditEvent = ({route}) => {
         eventTitle: 'Rawcaster Event',
         eventDescription: '',
         eventTime: moment().add(15, 'minute'),
-        maxParticipants: parseInt(settings?.max_event_participants_count),
       },
       validationSchema: validationSchema,
       onSubmit: values => {
         Keyboard.dismiss();
         if (selectedValues.durationError) {
-          Toast.fail('Duration - ' + selectedValues.durationError);
+          if (parseInt(profile?.user_status_id) === 4) {
+            Toast.fail('Duration - ' + selectedValues.durationError);
+          } else {
+            dispatch(
+              setPremiumAlert({
+                status: true,
+                text: `To host event for longer than ${settings?.max_event_duration} hours upgrade your membership!`,
+              }),
+            );
+          }
+        } else if (selectedValues.participantError) {
+          if (
+            parseInt(profile?.user_status_id) !== 4 &&
+            parseInt(selectedValues.maxParticipants) >
+              parseInt(settings?.max_event_participants_count)
+          ) {
+            dispatch(
+              setPremiumAlert({
+                status: true,
+                text: `To add more than ${parseInt(
+                  settings?.max_event_participants_count,
+                )} participants upgrade your membership!`,
+              }),
+            );
+          } else {
+            Toast.fail('Max Participants - ' + selectedValues.participantError);
+          }
+        } else if (
+          parseInt(profile?.user_status_id) <= 1 &&
+          parseInt(selectedValues.waiting_room) !==
+            parseInt(settings?.waiting_room)
+        ) {
+          dispatch(
+            setPremiumAlert({
+              status: true,
+              text: 'To access this feature become a premium member!',
+            }),
+          );
+        } else if (
+          parseInt(profile?.user_status_id) <= 1 &&
+          parseInt(selectedValues.join_before_host) !==
+            parseInt(settings?.join_before_host)
+        ) {
+          dispatch(
+            setPremiumAlert({
+              status: true,
+              text: 'To access this feature become a premium member!',
+            }),
+          );
         } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
           Toast.fail('Upload Melody');
           setmelodyFileError('Melody required');
@@ -519,13 +561,36 @@ const CreateEditEvent = ({route}) => {
         <View style={styles.horizontalBoxesContainer}>
           <TextBox
             title="Max Participants"
-            value={values.maxParticipants.toString()}
+            value={selectedValues.maxParticipants.toString()}
             onChangeText={text => {
               if (!isNaN(text) && !text.includes('.') && !text.includes(' ')) {
-                setFieldValue('maxParticipants', text);
+                if (
+                  parseInt(text) >
+                  parseInt(settings?.max_event_participants_count)
+                ) {
+                  setselectedValues({
+                    ...selectedValues,
+                    maxParticipants: text,
+                    participantError: `Maximum ${parseInt(
+                      settings?.max_event_participants_count,
+                    )} participants only allowed`,
+                  });
+                } else if (parseInt(text) < 2) {
+                  setselectedValues({
+                    ...selectedValues,
+                    maxParticipants: text,
+                    participantError: 'Enter valid Participants',
+                  });
+                } else {
+                  setselectedValues({
+                    ...selectedValues,
+                    maxParticipants: text,
+                    participantError: '',
+                  });
+                }
               }
             }}
-            errorText={errors.maxParticipants}
+            errorText={selectedValues.participantError}
             mainContainerWidth={'48%'}
             keyboardType="number-pad"
             placeHolder="Participants"

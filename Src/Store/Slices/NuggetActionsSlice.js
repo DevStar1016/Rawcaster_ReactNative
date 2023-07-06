@@ -7,6 +7,7 @@ export const initialState = {
   unLikedNuggetsFromLikedNuggets: [],
   editedNuggets: [],
   deletedNuggetsIds: [],
+  translatedNuggets: [],
 };
 
 const NuggetActionsSlice = createSlice({
@@ -103,6 +104,12 @@ const NuggetActionsSlice = createSlice({
         action.payload,
       ]);
     },
+    setTranslatedNuggets: (state, action) => {
+      state.translatedNuggets = getFilteredDuplicatesList(
+        action.payload,
+        'nugget_id',
+      );
+    },
   },
 });
 export const {
@@ -111,5 +118,6 @@ export const {
   setLikedSavedNuggets,
   addDeletedNuggetId,
   addEditedNugget,
+  setTranslatedNuggets,
 } = NuggetActionsSlice.actions;
 export default NuggetActionsSlice.reducer;

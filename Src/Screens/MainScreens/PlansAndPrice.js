@@ -5,8 +5,10 @@ import {COLORS} from '../../Utilities/Colors';
 import {FONTS} from '../../Utilities/Fonts';
 import StyledText from '../../Components/StyledText';
 import SVGIcon from '../../Components/SVGIcon';
+import {useProfile} from '../../Utilities/StoreData';
 
 const PlansAndPrice = () => {
+  const profile = useProfile();
   const [selectedTab, setselectedTab] = useState(1);
   const [plansList, setplansList] = useState([
     {
@@ -121,6 +123,24 @@ const PlansAndPrice = () => {
     },
   ]);
 
+  const getIsCurrentPlan = plan => {
+    if (parseInt(profile?.user_status_id) === 1 && (plan === 1 || plan === 4)) {
+      return true;
+    } else if (
+      parseInt(profile?.user_status_id) === 3 &&
+      (plan === 2 || plan === 5)
+    ) {
+      return true;
+    } else if (
+      parseInt(profile?.user_status_id) === 4 &&
+      (plan === 3 || plan === 6)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const Divider = () => {
     return <View style={styles.divider} />;
   };
@@ -146,7 +166,9 @@ const PlansAndPrice = () => {
         })}
         <Divider />
         <TouchableOpacity style={styles.currentBtn}>
-          <StyledText style={styles.btnText}>Current Plan</StyledText>
+          <StyledText style={styles.btnText}>
+            {getIsCurrentPlan(item.id) ? 'Current Plan' : 'Upgrade Plan'}
+          </StyledText>
         </TouchableOpacity>
       </View>
     );

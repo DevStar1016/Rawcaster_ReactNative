@@ -134,7 +134,6 @@ const EventSettings = () => {
         }
       })
       .catch(e => {
-        console.log(e.response.data);
         setsettingsData(preData => {
           return {...preData, [keyText]: settings[keyText]};
         });
@@ -233,7 +232,7 @@ const EventSettings = () => {
         const isVideo = getFileType(res[0].type) === 2;
         const isSamePath =
           settingsData.default_melody &&
-          settingsData.default_melody.path.includes(res[0].uri);
+          settingsData.default_melody?.path?.includes(res[0].uri);
         if (isVideo && !isSamePath) {
           if (isMount) {
             setisVideoLoading(true);
@@ -252,11 +251,11 @@ const EventSettings = () => {
           }
           updateUsersSettingsAPICall(
             'default_melody',
-            JSON.stringify({
+            {
               uri: res[0].uri,
               type: res[0].type,
               name: res[0].name,
-            }),
+            },
             tempMelody,
           );
         }
@@ -315,7 +314,9 @@ const EventSettings = () => {
             onBuffer={() => {}}
             onLoad={() => {
               if (isMount) {
-                videoAudioPlayer.current.seek(0);
+                if (videoAudioPlayer.current) {
+                  videoAudioPlayer.current.seek(0);
+                }
                 setisVideoLoaded(true);
               }
             }}
@@ -328,7 +329,7 @@ const EventSettings = () => {
             }}
           />
 
-          {settingsData.default_melody.thumbnail && paused ? (
+          {/* {settingsData.default_melody.thumbnail && paused ? (
             <Image
               source={{uri: settingsData.default_melody.thumbnail}}
               style={{
@@ -342,7 +343,7 @@ const EventSettings = () => {
             />
           ) : (
             false
-          )}
+          )} */}
 
           <View
             style={{

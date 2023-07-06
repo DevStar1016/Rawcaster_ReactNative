@@ -18,10 +18,12 @@ import {
   useNuggetsList,
   useSearchedNuggetsList,
   useToken,
+  useTranslatedNuggetsList,
 } from '../../../Utilities/StoreData';
 import PollNugget from './NuggetItemTypes/PollNugget';
 import {
   nuggetAbuseReportService,
+  nuggetContentAudioService,
   shareNuggetService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
@@ -41,7 +43,10 @@ import {
 } from '../../../Utilities/Contexts';
 import InputPopup from '../../../Modals/InputPopup';
 import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
-import {getNuggetsReduxStoreDataFormate} from '../../../Utilities/Methods';
+import {
+  getNuggetsReduxStoreDataFormate,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
 import {
   becomeFan,
   blockUnblockUser,
@@ -49,6 +54,10 @@ import {
   likeAndUnlikeNugget,
   saveAndUnsaveNugget,
 } from '../../../Store/ThunkAPIServices';
+import {
+  addEditedNugget,
+  setTranslatedNuggets,
+} from '../../../Store/Slices/NuggetActionsSlice';
 
 const Nugget = ({nugget, nuggetIndex}) => {
   const {
@@ -65,6 +74,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
   const nuggetsList = useNuggetsList();
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
+  const translatedNuggetsList = useTranslatedNuggetsList();
   const searchedNuggetsList = useSearchedNuggetsList();
   const savedNuggetsList = useSelector(state => state.home.savedNuggetsList);
   const flatlistRef = useRef(null);
@@ -260,6 +270,40 @@ const Nugget = ({nugget, nuggetIndex}) => {
       );
     }
   };
+  function handleNuggetContentTranslate(setisTranslated) {
+    setloaderText('Translating this Nugget');
+    setisActionLoading(true);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', nugget.nugget_id);
+    formData.append('translation_type', 2);
+    nuggetContentAudioService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempList = [...nuggetsList];
+          let temp = tempList.find(ele => ele.nugget_id === nugget.nugget_id);
+          if (temp !== -1) {
+            temp = {
+              ...temp,
+              translated_content: htmlDecodeText(res.data.translation),
+            };
+            dispatch(setTranslatedNuggets([...translatedNuggetsList, temp]));
+          }
+          setisTranslated(true);
+        } else if (res.data.status === 0) {
+          setisTranslated(false);
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(() => {
+        setisTranslated(false);
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisActionLoading(false);
+        setloaderText('');
+      });
+  }
 
   function handleReportNugget(nuggetId, message = '') {
     setloaderText('Reporting this Nugget');
@@ -311,10 +355,8 @@ const Nugget = ({nugget, nuggetIndex}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-          setloaderText('');
-        }
+        setisActionLoading(false);
+        setloaderText('');
       });
   }
 
@@ -363,6 +405,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
     isRepeatVideo: isRepeatVideo,
     setisRepeatVideo: setisRepeatVideo,
     viewableItem: viewableItem,
+    handleNuggetContentTranslate: handleNuggetContentTranslate,
     onFinishPlaying: index => {
       if (index < nugget?.media_list?.length - 1) {
         flatlistRef.current.scrollToIndex({

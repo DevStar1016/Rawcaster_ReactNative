@@ -20,6 +20,7 @@ import {
   useNuggetsListTotalPages,
   useProfile,
   useToken,
+  useTranslatedNuggetsList,
 } from '../../../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
 import Nugget from './Nugget';
@@ -46,8 +47,8 @@ import {
 } from '../../../Store/Slices/NuggetsListSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
+var currentPage = 1;
 const DashboardWithCategory = ({route}) => {
-  let currentPage = 1;
   let controller = undefined;
   const navigation = useNavigation();
   const {filterType, categoryType, categoryName} = route.params ?? {};
@@ -57,6 +58,7 @@ const DashboardWithCategory = ({route}) => {
   const isFocused = useIsFocused();
   const insets = useInsets();
   const editedNuggetsList = useEditedNuggetsList();
+  const translatedNuggetsList = useTranslatedNuggetsList();
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const blockedUserIds = useBlockedUserIds();
   const followingUsersList = useFollowingUsersList();
@@ -287,6 +289,23 @@ const DashboardWithCategory = ({route}) => {
         );
         if (tempEditedItem) {
           resultList.push(tempEditedItem);
+        } else {
+          resultList.push(item);
+        }
+
+        return [...resultList];
+      }, []);
+    }
+    if (translatedNuggetsList && translatedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempTranslatedItem = [...translatedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempTranslatedItem) {
+          resultList.push({
+            ...item,
+            translated_content: tempTranslatedItem.translated_content,
+          });
         } else {
           resultList.push(item);
         }

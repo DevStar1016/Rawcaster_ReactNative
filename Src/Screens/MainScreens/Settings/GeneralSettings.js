@@ -32,6 +32,7 @@ import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {removeToken} from '../../../Utilities/Methods';
 import SwtchesContainer from '../../../Components/SwtchesContainer';
+import {setTranslatedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
 
 var isMount = true;
 const CHOICE_CONTAINERS_LIST = [
@@ -227,6 +228,9 @@ const GeneralSettings = () => {
           dispatch(
             setSettings({...settings, [keyText]: reduxData ?? valueText}),
           );
+          if (keyText === 'read_out_language_id') {
+            dispatch(setTranslatedNuggets([]));
+          }
           if (isLogout) {
             removeToken(dispatch);
           }

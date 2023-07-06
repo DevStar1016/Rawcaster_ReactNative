@@ -65,6 +65,7 @@ import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 import EmojiContainer from 'react-native-emoji-container';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
+import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -509,9 +510,9 @@ const PostEditNugget = ({route}) => {
       return (
         <Video
           ref={videoPlayerRef}
-          resizeMode="cover"
-          posterResizeMode="cover"
+          resizeMode="contain"
           paused={true}
+          muted={false}
           source={{uri: item.uri}}
           style={{height: '100%', width: '100%', borderRadius: 10}}
           onLoad={() => {
@@ -776,21 +777,57 @@ const PostEditNugget = ({route}) => {
                   maxHeight: getMaxHeight(),
                 },
               ]}>
-              <TextInput
-                placeholder={`What’s on your mind, ${profile?.name}!`}
-                style={styles.textInput}
-                multiline
-                maxLength={profile?.nugget_content_length}
-                onFocus={() => {
-                  setisFocusedTextInput(true);
-                  openCloseEmojiPicker(false);
-                }}
-                value={typedText}
-                onChangeText={settypedText}
-                numberOfLines={5}
-                textAlignVertical={'top'}
-                placeholderTextColor={COLORS.placeHolderColor}
-              />
+              {parseInt(profile?.user_status_id) === 4 ? (
+                <TextInput
+                  placeholder={`What’s on your mind, ${profile?.name}!`}
+                  style={styles.textInput}
+                  multiline
+                  maxLength={profile?.nugget_content_length}
+                  onFocus={() => {
+                    setisFocusedTextInput(true);
+                    openCloseEmojiPicker(false);
+                  }}
+                  value={typedText}
+                  onChangeText={settypedText}
+                  numberOfLines={5}
+                  textAlignVertical={'top'}
+                  placeholderTextColor={COLORS.placeHolderColor}
+                />
+              ) : (
+                <TextInput
+                  placeholder={`What’s on your mind, ${profile?.name}!`}
+                  style={styles.textInput}
+                  multiline
+                  // maxLength={profile?.nugget_content_length}
+                  onFocus={() => {
+                    setisFocusedTextInput(true);
+                    openCloseEmojiPicker(false);
+                  }}
+                  value={typedText}
+                  onChangeText={text => {
+                    if (text.length > profile?.nugget_content_length) {
+                      console.log(
+                        text.length,
+                        'AAASSASA',
+                        typedText.length,
+                        profile?.nugget_content_length,
+                      );
+                      Keyboard.dismiss();
+                      dispatch(
+                        setPremiumAlert({
+                          status: true,
+                          text: 'You have reached your character limit, to increase the limit upgrade your membership',
+                        }),
+                      );
+                    } else {
+                      settypedText(text);
+                    }
+                  }}
+                  numberOfLines={5}
+                  textAlignVertical={'top'}
+                  placeholderTextColor={COLORS.placeHolderColor}
+                />
+              )}
               <View style={styles.emojiIconContainer}>
                 <SVGIcon
                   icon={'emojee'}

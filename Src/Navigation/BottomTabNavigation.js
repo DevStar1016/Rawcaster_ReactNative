@@ -6,6 +6,7 @@ import CustomBottomTabBar from './CustomBottomTabBar';
 import {
   useIsOpenLoginAlert,
   useIsOpenVerifyPopup,
+  usePremiumAlert,
   useProfile,
   useToken,
   useUserData,
@@ -19,6 +20,7 @@ import {
   setIsBottomTabBarAbsolute,
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
+  setPremiumAlert,
   setTabNuggetType,
 } from '../Store/Slices/UtilitySlice';
 import TalkshowStack from '../Stacks/TalkshowStack';
@@ -35,6 +37,7 @@ export default function BottomTabNavigation() {
   const user = useUserData();
   const profile = useProfile();
   const isOpenLoginALert = useIsOpenLoginAlert();
+  const premiumALert = usePremiumAlert();
   const isOpenVerifyPopup = useIsOpenVerifyPopup();
   const {setswipeEnabled} = useDashboardProfile() ?? {};
 
@@ -168,6 +171,35 @@ export default function BottomTabNavigation() {
             navigation.navigate('Login');
           }}
           content={'You need to Login / Signup Rawcaster Account'}
+        />
+      </Modal>
+
+      <Modal
+        onRequestClose={() => {}}
+        transparent
+        visible={premiumALert.status}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          onPressNegativeButton={() => {
+            dispatch(
+              setPremiumAlert({
+                status: false,
+                text: '',
+              }),
+            );
+          }}
+          positiveButtonText={'Upgrade'}
+          negativeButtonText={'Later'}
+          onPressPositiveButton={() => {
+            dispatch(
+              setPremiumAlert({
+                status: false,
+                text: '',
+              }),
+            );
+            navigation.navigate('PlansAndPrice');
+          }}
+          content={premiumALert.text}
         />
       </Modal>
     </>

@@ -146,7 +146,7 @@ const ReferalDashboard = () => {
       paddingHorizontal={0}
       isEnablePrimaryColorStatusBar
       backHeaderProps={{
-        title: 'Referral Dashboard',
+        title: 'Referrals Dashboard',
         isTitleCenter: true,
       }}
       backgroundColor={COLORS.white}>

@@ -86,12 +86,19 @@ export const useUnLikedNuggetsFromLikedNuggets = () => {
 export const useSavedNuggetsIds = () => {
   return useSelector(state => state.nugget_actions.savedNuggetsIds);
 };
+export const useTranslatedNuggetsList = () => {
+  return useSelector(state => state.nugget_actions.translatedNuggets);
+};
 export const useIsAppForeground = () => {
   return useSelector(state => state.utility.isAppForeground);
 };
 
 export const useIsOpenLoginAlert = () => {
   return useSelector(state => state.utility.isOpenLoginAlert);
+};
+
+export const usePremiumAlert = () => {
+  return useSelector(state => state.utility.premiumAlert);
 };
 
 export const useIsOpenVerifyPopup = () => {
