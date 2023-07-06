@@ -10,7 +10,7 @@
 #import "MeetingObservers.h"
 #import <React/RCTUIManager.h>
 
-@implementation NativeMobileSDKBridge
+@implementation ChimeMeetingSDKBridge
 
 static DefaultMeetingSession *meetingSession;
 static ConsoleLogger *logger;
@@ -43,7 +43,7 @@ RCT_EXPORT_METHOD(startMeeting:(NSDictionary *)meetingInfoDict attendeeInfo:(NSD
     meetingSession = nil;
   }
 
-  logger = [[ConsoleLogger alloc] initWithName:@"NativeMobileSDKBridge" level:LogLevelDEFAULT];
+  logger = [[ConsoleLogger alloc] initWithName:@"ChimeMeetingSDKBridge" level:LogLevelDEFAULT];
   [logger infoWithMsg: [[NSString alloc] initWithFormat:@"Running Amazon Chime SDK (%@)", Versioning.sdkVersion]];
   // Parse meeting join data from payload
   NSDictionary *mediaPlacementDict = [meetingInfoDict objectForKey:kMediaPlacement];

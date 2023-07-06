@@ -15,6 +15,7 @@ import {
   getDisplayEventDate,
   getDisplayEventTime,
   getSlicedText,
+  getUtcToSystemTime,
   htmlDecodeText,
   utcToUserTimezone,
 } from '../../../Utilities/Methods';
@@ -29,7 +30,7 @@ import SwtchesContainer from '../../../Components/SwtchesContainer';
 import SubmitButton from '../../../Components/SubmitButton';
 import {useNavigation} from '@react-navigation/native';
 import Loader from '../../../Components/Loader';
-import {EVENT_LAYOUT_LIST} from '../../../Utilities/Constants';
+import {EVENT_LAYOUT_LIST, IS_IOS} from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import StyledText from '../../../Components/StyledText';
@@ -223,9 +224,9 @@ const CreateEditEvent = ({route}) => {
               ...preValues,
               eventTitle: htmlDecodeText(res.data.event_detail.event_name),
               eventDescription: htmlDecodeText(res.data.event_detail.message),
-              eventTime: utcToUserTimezone(
+
+              eventTime: getUtcToSystemTime(
                 res.data.event_detail.start_date_time,
-                settings?.time_zone,
               ),
               maxParticipants: parseInt(
                 res.data.event_detail.no_of_participants,
@@ -233,10 +234,15 @@ const CreateEditEvent = ({route}) => {
             };
           });
           setliveEventDate(
-            utcToUserTimezone(
-              res.data.event_detail.start_date_time,
-              settings?.time_zone,
-            ),
+            getUtcToSystemTime(res.data.event_detail.start_date_time),
+            // utcToUserTimezone(
+            //   res.data.event_detail.start_date_time,
+            //   settings?.time_zone,
+            // ),
+          );
+          console.log(
+            res.data.event_detail.invite_groups_id,
+            'SELECTED GROUP IDSSSS',
           );
           tempData = {
             ...tempData,

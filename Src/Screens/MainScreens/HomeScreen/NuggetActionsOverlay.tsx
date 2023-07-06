@@ -184,6 +184,7 @@ function NuggetActionsOverlay({
     useState(0);
   const [nuggetDataBottomContainerHeight, setnuggetDataBottomContainerHeight] =
     useState(0);
+  const [pollDataHeight, setpollDataHeight] = useState(0);
   const [mainContentContainerHeight, setmainContentContainerHeight] =
     useState(0);
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
@@ -534,6 +535,9 @@ function NuggetActionsOverlay({
     return (
       <>
         <PollDataDisplay
+          onLayoutHeight={height => {
+            setpollDataHeight(height);
+          }}
           createdDate={nugget.created_date}
           isVoted={nugget.voted ? parseInt(nugget.voted) === 1 : false}
           onVotePoll={pollVotingAPICall}
@@ -658,7 +662,8 @@ function NuggetActionsOverlay({
             marginRight: actionButtonsContainerWidth + 10,
             maxHeight:
               mainContentContainerHeight -
-              (nuggetDataBottomContainerHeight + 10),
+              (nuggetDataBottomContainerHeight + 10) -
+              pollDataHeight,
             // maxHeight:
             // nugget.media_list.length > 0
             //   ? 200
@@ -813,7 +818,7 @@ function NuggetActionsOverlay({
 
           {(nuggetType === 'video' || nuggetType === 'audio') && (
             <RoundedIconButton
-              icon={isMuted ? 'mute_white' : 'speaker_white'}
+              icon={isMuted ? 'mute_white' : 'speaker_fill_white'}
               bgColor={COLORS.transparentDimColor}
               iconSize={20}
               buttonSize={40}

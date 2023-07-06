@@ -33,6 +33,7 @@
 		95DBB1742C01473BBBF52B28 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0E2E1D3090304ABA9C8427B2 /* Inter-SemiBold.ttf */; };
 		972948014DCD43778F8D39D9 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 84F593CB9DF740A0B3DAA752 /* Roboto-Bold.ttf */; };
 		9C616AD0299A3296009CE5E6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9C616ACF299A3296009CE5E6 /* GoogleService-Info.plist */; };
+		9C65ED042A5287A3004E2F52 /* ChimeMeeting in Resources */ = {isa = PBXBuildFile; fileRef = 9C65ED032A5287A3004E2F52 /* ChimeMeeting */; };
 		9C6C636829FCDB5D0092C83B /* NativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C6C636729FCDB5D0092C83B /* NativeModule.m */; };
 		A46780BEC303416AB43153BA /* Roboto-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5C0543B26AA847F68956EB07 /* Roboto-BlackItalic.ttf */; };
 		A71C9703B5BF47E28737E86B /* DMSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 14B57ACEDC90475CB0C63ECA /* DMSans-MediumItalic.ttf */; };
@@ -95,6 +96,7 @@
 		9AB9B1356B994EFFABAD0D07 /* Roboto-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Black.ttf"; path = "../assets/fonts/Roboto/Roboto-Black.ttf"; sourceTree = "<group>"; };
 		9C515AB3299A399400C8CF1A /* Rawcaster.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Rawcaster.entitlements; path = Rawcaster/Rawcaster.entitlements; sourceTree = "<group>"; };
 		9C616ACF299A3296009CE5E6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		9C65ED032A5287A3004E2F52 /* ChimeMeeting */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ChimeMeeting; sourceTree = "<group>"; };
 		9C6C636629FCDB460092C83B /* NativeModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeModule.h; sourceTree = "<group>"; };
 		9C6C636729FCDB5D0092C83B /* NativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeModule.m; sourceTree = "<group>"; };
 		B4866D6CE58147A7A18A4D24 /* Inter-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.ttf"; path = "../assets/fonts/Inter/Inter-Black.ttf"; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 		13B07FAE1A68108700A75B9A /* Rawcaster */ = {
 			isa = PBXGroup;
 			children = (
+				9C65ED032A5287A3004E2F52 /* ChimeMeeting */,
 				9C515AB3299A399400C8CF1A /* Rawcaster.entitlements */,
 				9C616ACF299A3296009CE5E6 /* GoogleService-Info.plist */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -372,6 +375,7 @@
 				3E748DD30D18405AB1EFC1BF /* Inter-ExtraBold.ttf in Resources */,
 				63340205009D4D2B84DF7D64 /* Inter-ExtraLight.ttf in Resources */,
 				526EA55F249D48648013EA75 /* Inter-Light.ttf in Resources */,
+				9C65ED042A5287A3004E2F52 /* ChimeMeeting in Resources */,
 				D8A672B10EBC4272A3CCAEAE /* Inter-Medium.ttf in Resources */,
 				22F9C5126C74408A939F047C /* Inter-Regular.ttf in Resources */,
 				95DBB1742C01473BBBF52B28 /* Inter-SemiBold.ttf in Resources */,

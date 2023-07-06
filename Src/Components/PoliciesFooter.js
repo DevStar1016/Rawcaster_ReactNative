@@ -29,7 +29,6 @@ const PoliciesFooter = () => {
         visible={isOpenTermsAndConditionsModal}
         transparent
         // statusBarTranslucent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenTermsAndConditionsModal(false);
         }}>

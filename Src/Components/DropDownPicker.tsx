@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Keyboard,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -133,6 +134,7 @@ const DropDownPicker = ({
         disabled={isDisabled}
         activeOpacity={0.7}
         onPress={() => {
+          Keyboard.dismiss();
           if (isInsideList) {
             if (isDateTime) {
               setisOpenDatePicker(true);
@@ -204,12 +206,12 @@ const DropDownPicker = ({
 
       {listType === 'large' && (
         <Modal
+          style={{backgroundColor: COLORS.primary}}
           visible={isOpenDataListModal}
-          animationType="slide"
           onRequestClose={() => {
             setisOpenDataListModal(false);
           }}>
-          <SafeAreaView style={{flex: 1}}>
+          <SafeAreaView style={{flex: 1, backgroundColor: COLORS.primary}}>
             <ItemSelectionBigList
               fieldName={fieldName}
               onSelectItem={(item: any) => {

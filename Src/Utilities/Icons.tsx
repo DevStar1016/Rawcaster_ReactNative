@@ -28,6 +28,11 @@ import StopRoundedSecondaryIcon from '../Assets/Svg/stop_rounded_secondary.svg';
 import StopRoundedPrimaryIcon from '../Assets/Svg/stop_rounded_primary.svg';
 import ClipboardCopyFillWhiteIcon from '../Assets/Svg/clipboard_copy_fill_white.svg';
 import ClipboardCopyWhiteIcon from '../Assets/Svg/clipboard_copy_white.svg';
+import ParticipantsWhiteIcon from '../Assets/Svg/participants_white.svg';
+import MicWhiteIcon from '../Assets/Svg/mic_white.svg';
+import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
+import MicOffWhiteIcon from '../Assets/Svg/mic_off_white.svg';
+import VideoDisabledWhiteIcon from '../Assets/Svg/video_disabled_white.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -115,7 +120,7 @@ import TickRoundedFillPinkIcon from '../Assets/Svg/tick_rounded_fill_pink.svg';
 import SearchBlackIcon from '../Assets/Svg/search_black.svg';
 import ImagePlaceholderIcon from '../Assets/Svg/image_placeholder.svg';
 import MuteWhiteIcon from '../Assets/Svg/mute_white.svg';
-import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
+import SpeakerFillWhiteIcon from '../Assets/Svg/speaker_fill_white.svg';
 import MenuHorizontalIcon from '../Assets/Svg/menu_horizontal.svg';
 import MenuVerticalIcon from '../Assets/Svg/menu_vertical.svg';
 import MenuVerticalWhiteIcon from '../Assets/Svg/menu_vertical_white.svg';
@@ -264,7 +269,7 @@ export type IconType =
   | 'down_arrow_white'
   | 'close_rounded_white'
   | 'mute_white'
-  | 'speaker_white'
+  | 'speaker_fill_white'
   | 'menu_horizontal'
   | 'menu_vertical'
   | 'close_rounded_dim_color'
@@ -328,7 +333,12 @@ export type IconType =
   | 'stop_rounded_secondary'
   | 'stop_rounded_primary'
   | 'clipboard_copy_fill_white'
-  | 'clipboard_copy_white';
+  | 'clipboard_copy_white'
+  | 'participants_white'
+  | 'mic_white'
+  | 'speaker_white'
+  | 'mic_off_white'
+  | 'video_disabled_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -429,7 +439,7 @@ export const ICONS = {
   down_arrow_white: DownArrowWhiteIcon,
   close_rounded_white: CloseRoundedWhiteIcon,
   mute_white: MuteWhiteIcon,
-  speaker_white: SpeakerWhiteIcon,
+  speaker_fill_white: SpeakerFillWhiteIcon,
   menu_horizontal: MenuHorizontalIcon,
   menu_vertical: MenuVerticalIcon,
   close_rounded_dim_color: CloseRoundedDimColorIcon,
@@ -493,4 +503,9 @@ export const ICONS = {
   stop_rounded_primary: StopRoundedPrimaryIcon,
   clipboard_copy_fill_white: ClipboardCopyFillWhiteIcon,
   clipboard_copy_white: ClipboardCopyWhiteIcon,
+  participants_white: ParticipantsWhiteIcon,
+  mic_white: MicWhiteIcon,
+  speaker_white: SpeakerWhiteIcon,
+  mic_off_white: MicOffWhiteIcon,
+  video_disabled_white: VideoDisabledWhiteIcon,
 };

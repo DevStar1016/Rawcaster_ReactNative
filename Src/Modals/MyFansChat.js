@@ -29,7 +29,7 @@ import AudioRecorder from './AudioRecorder';
 import {ImageVideoPicker} from '../Utilities/ImageVideoPicker';
 import MediaSmallItem from '../Components/MediaSmallItem';
 import moment from 'moment';
-import {sendMessage} from '../Services/Socket/Socket';
+import {sendSocketMessage} from '../Services/Socket/Socket';
 
 var isMount = true;
 const MyFansChat = () => {
@@ -98,13 +98,13 @@ const MyFansChat = () => {
           media_path: item.uri,
           type: item.type,
         };
-        sendMessage(msgData, 'groupchatting');
+        sendSocketMessage(msgData, 'groupchatting');
       });
     } else {
       let msgData = {
         ...getMessageItem(),
       };
-      sendMessage(msgData, 'groupchatting');
+      sendSocketMessage(msgData, 'groupchatting');
     }
     navigation.goBack();
   }
@@ -401,7 +401,6 @@ const MyFansChat = () => {
         visible={isOpenCamera}
         statusBarTranslucent
         transparent
-        animationType="slide"
         onRequestClose={() => {
           if (isMount) {
             setisOpenCamera(false);

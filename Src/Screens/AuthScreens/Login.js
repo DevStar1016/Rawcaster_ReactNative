@@ -22,6 +22,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import SubmitButton from '../../Components/SubmitButton';
 import PoliciesFooter from '../../Components/PoliciesFooter';
 import SocialSignin from './SocialSignin';
+import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
 
 const validationSchema = Yup.object({
   login_id: Yup.string().required('Phone number or email is required'),
@@ -82,6 +83,9 @@ const Login = () => {
       .then(res => {
         console.log(res.data, 'LOGINDATA');
         if (res.data.status === 1) {
+          if (parseInt(res.data.first_time) === 1) {
+            dispatch(setIsVisibleInfluencers(true));
+          }
           if (res.data.acc_verify_status === 1) {
             const userData = {
               name: res.data.name,

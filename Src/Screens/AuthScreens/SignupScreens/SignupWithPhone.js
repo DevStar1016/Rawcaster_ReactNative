@@ -305,7 +305,6 @@ const SignupWithPhone = ({route}) => {
       <Modal
         visible={isOpenTermsAndConditionsModal}
         transparent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenTermsAndConditionsModal(false);
         }}>

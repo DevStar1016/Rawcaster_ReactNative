@@ -1,4 +1,4 @@
-import {sendMessage} from './Socket';
+import {sendSocketMessage} from './Socket';
 import {GROUP_PROCESS_SOCKET_TYPE} from './SocketConstants';
 import {SocketEvents} from './SocketEvents';
 import {
@@ -16,7 +16,7 @@ export const friendRequestSocket = ({
     receiverId: user_id,
     data: data,
   };
-  sendMessage(socketMessage, 'message');
+  sendSocketMessage(socketMessage, 'message');
 };
 
 export const groupFunctionalitySocket = ({
@@ -39,7 +39,7 @@ export const groupFunctionalitySocket = ({
     removed_user_id: removed_user_id,
   };
 
-  sendMessage(socketMessage, 'groupchatting');
+  sendSocketMessage(socketMessage, 'groupchatting');
 };
 
 export const groupChatEnableDisableSocket = ({
@@ -54,5 +54,5 @@ export const groupChatEnableDisableSocket = ({
     status: status,
   };
 
-  sendMessage(socketMessage, 'groupchatting');
+  sendSocketMessage(socketMessage, 'groupchatting');
 };

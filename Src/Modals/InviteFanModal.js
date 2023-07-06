@@ -139,7 +139,7 @@ const InviteFanModal = ({setModal}) => {
       <SafeAreaView style={styles.subContainer}>
         <View style={styles.titleContainer}>
           <View style={{flex: 1, justifyContent: 'center'}}>
-            <StyledText style={styles.titleText}>Invite Fans</StyledText>
+            <StyledText style={styles.titleText}>Invite Friends</StyledText>
           </View>
           <SVGIcon
             icon="close_rounded_black"

@@ -17,14 +17,16 @@ type Props = {
   mainContainerStyle?: ViewStyle;
   onPress?: () => void;
   isSelected?: boolean;
+  isVisibleText?: boolean;
 };
 
 const CheckBox = ({
   isSelected = false,
-  text = 'Test',
+  text = '',
   textStyle,
   mainContainerStyle,
   onPress,
+  isVisibleText = true,
 }: Props) => {
   return (
     <TouchableOpacity
@@ -42,9 +44,11 @@ const CheckBox = ({
         ]}>
         {isSelected && <SVGIcon icon="tick" height={13} width={13} />}
       </View>
-      <View style={{flex: 1, paddingLeft: 10}}>
-        <StyledText style={textStyle}>{text}</StyledText>
-      </View>
+      {isVisibleText && (
+        <View style={{flex: 1, paddingLeft: 10}}>
+          <StyledText style={textStyle}>{text}</StyledText>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

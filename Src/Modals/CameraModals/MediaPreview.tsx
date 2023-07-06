@@ -321,7 +321,6 @@ const MediaPreview = ({
         visible={isOpenCrop}
         transparent
         statusBarTranslucent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenCrop(false);
         }}>

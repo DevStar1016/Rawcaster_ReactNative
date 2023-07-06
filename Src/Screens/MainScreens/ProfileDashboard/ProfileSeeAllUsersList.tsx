@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
@@ -56,15 +56,16 @@ type Props = {
 };
 
 const ProfileSeeAllUsersList = ({route}: any) => {
-  let isMount = true;
-  let currentPage = 1;
-  let totalPages = 1;
+  const {initialList, userId, listType, title, nuggetId}: Props =
+    route.params ?? {};
+  const isMount = useRef(true);
+  const currentPage = useRef(1);
+  const totalPages = useRef(1);
   const dispatch = useDispatch();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const otherInfluencersRequestList = useOtherInfluencersRequestList();
   const otherConnectionsRequestList = useOtherConnectionsRequestList();
-  const {initialList, userId, listType, title, nuggetId}: Props =
-    route.params ?? {};
+
   const [isActionLoading, setisActionLoading] = useState(false);
   const [filterData, setfilterData] = useState(null);
   const [isOpenFilterModal, setisOpenFilterModal] = useState(false);
@@ -79,30 +80,31 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   const profile = useProfile();
 
   useEffect(() => {
-    isMount = true;
-    currentPage = 1;
-    totalPages = 1;
+    isMount.current = true;
+    currentPage.current = 1;
+    totalPages.current = 1;
+
     if (token && (userId || initialList.length <= 0)) {
       if (listType) {
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(true);
         }
         listApiCalls(1);
       } else {
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(false);
         }
       }
     } else {
-      if (isMount) {
+      if (isMount.current) {
         setisLoading(false);
       }
     }
 
     return () => {
-      isMount = false;
-      currentPage = 1;
-      totalPages = 1;
+      isMount.current = false;
+      currentPage.current = 1;
+      totalPages.current = 1;
     };
   }, []);
 
@@ -121,7 +123,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         nuggetAndCommentLikedUserListAPICall(pageNumber);
         return;
       default:
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(false);
         }
         break;
@@ -134,7 +136,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     return [...usersList];
   };
   function setLoaders(status = true) {
-    if (isMount) {
+    if (isMount.current) {
       setisLoading(status);
       setisRefreshing(status);
       setisLoadMore(status);
@@ -166,22 +168,22 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     listAllFriendsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isMount) {
+          if (isMount.current) {
             if (pageNumber === 1) {
-              totalPages = parseInt(res.data.total_pages);
+              totalPages.current = parseInt(res.data.total_pages);
               setusersList(res.data.friends_list);
             } else {
               setusersList(preList => [...preList, ...res.data.friends_list]);
             }
           }
         } else if (res.data.status === 0) {
-          if (isMount) {
+          if (isMount.current) {
             setusersList([]);
           }
         }
       })
       .catch(e => {
-        if (isMount) {
+        if (isMount.current) {
           setusersList([]);
         }
       })
@@ -209,25 +211,26 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         formData.append('age', dataToFilter?.age);
       }
     }
+
     getFollowListService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isMount) {
+          if (isMount.current) {
             if (pageNumber === 1) {
-              totalPages = parseInt(res.data.total_pages);
+              totalPages.current = parseInt(res.data.total_pages);
               setusersList(res.data.follow_list);
             } else {
               setusersList(preList => [...preList, ...res.data.follow_list]);
             }
           }
         } else if (res.data.status === 0) {
-          if (isMount) {
+          if (isMount.current) {
             setusersList([]);
           }
         }
       })
       .catch(e => {
-        if (isMount) {
+        if (isMount.current) {
           setusersList([]);
         }
       })
@@ -260,9 +263,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     listUnClaimAccountService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isMount) {
+          if (isMount.current) {
             if (pageNumber === 1) {
-              totalPages = parseInt(res.data.total_pages);
+              totalPages.current = parseInt(res.data.total_pages);
               dispatch(setUnclaimedAccountsList(res.data.unclaim_accounts));
               setusersList(res.data.unclaim_accounts);
             } else {
@@ -279,13 +282,13 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             }
           }
         } else if (res.data.status === 0) {
-          if (isMount) {
+          if (isMount.current) {
             setusersList([]);
           }
         }
       })
       .catch(e => {
-        if (isMount) {
+        if (isMount.current) {
           setusersList([]);
         }
       })
@@ -304,22 +307,22 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     nuggetAndCommentLikedUserListService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isMount) {
+          if (isMount.current) {
             if (pageNumber === 1) {
-              totalPages = parseInt(res.data.total_pages);
+              totalPages.current = parseInt(res.data.total_pages);
               setusersList(res.data.userlist);
             } else {
               setusersList(preList => [...preList, ...res.data.userlist]);
             }
           }
         } else if (res.data.status === 0) {
-          if (isMount) {
+          if (isMount.current) {
             setusersList([]);
           }
         }
       })
       .catch(e => {
-        if (isMount) {
+        if (isMount.current) {
           setusersList([]);
         }
       })
@@ -328,7 +331,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   };
   const handleSendFriendRequest = (userRefId: any, user_id: any) => {
-    if (isMount) {
+    if (isMount.current) {
       setisActionLoading(true);
     }
     const formData = new FormData();
@@ -376,7 +379,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisActionLoading(false);
         }
       });
@@ -384,7 +387,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
   const handleBecomeFan = (followUserId: any) => {
     // 1 - follow, 2 - unfollow
-    if (isMount) {
+    if (isMount.current) {
       setisActionLoading(true);
     }
     const formData = new FormData();
@@ -420,7 +423,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisActionLoading(false);
         }
       });
@@ -476,34 +479,34 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   }
 
   function onPressFilter() {
-    if (isMount) {
+    if (isMount.current) {
       setisOpenFilterModal(true);
     }
   }
 
   const onRefresh = () => {
-    currentPage = 1;
-    totalPages = 1;
-    if (isMount) {
+    currentPage.current = 1;
+    totalPages.current = 1;
+    if (isMount.current) {
       setisRefreshing(true);
       listApiCalls(1, filterData);
     }
   };
 
   const onEndReached = () => {
-    currentPage = currentPage + 1;
-    if (currentPage <= totalPages) {
-      if (isMount) {
+    currentPage.current = currentPage.current + 1;
+    if (currentPage.current <= totalPages.current) {
+      if (isMount.current) {
         setisLoadMore(true);
-        listApiCalls(currentPage, filterData);
+        listApiCalls(currentPage.current, filterData);
       }
     }
   };
 
   function onApplyFilter(filteredData: any) {
-    currentPage = 1;
-    totalPages = 1;
-    if (isMount) {
+    currentPage.current = 1;
+    totalPages.current = 1;
+    if (isMount.current) {
       setisOpenFilterModal(false);
       setfilterData(filteredData);
       setisLoading(true);

@@ -26,10 +26,15 @@ import {
   influencerListService,
   influencerFollowService,
 } from '../../Services/ApiService';
-import {getAuthCode, getDoubleDigit} from '../../Utilities/Methods';
+import {
+  getAuthCode,
+  getDoubleDigit,
+  getFilteredDuplicatesList,
+} from '../../Utilities/Methods';
 import Loader from '../../Components/Loader';
 import Toast from '../../Components/Toast';
 import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
+import CheckBox from '../../Components/CheckBox';
 
 var totalPages = 1;
 var currentPage = 1;
@@ -48,6 +53,8 @@ const InfluencersList = () => {
   const [selectedInfluencersRefIds, setselectedInfluencersRefIds] = useState(
     [],
   );
+  const [isSelectedAll, setisSelectedAll] = useState(false);
+  const [influencersTotalCount, setinfluencersTotalCount] = useState(0);
   const [isActionLoading, setisActionLoading] = useState(false);
 
   useEffect(() => {
@@ -70,6 +77,29 @@ const InfluencersList = () => {
     influencerListAPICall(1);
   }, [selectedCategoryId, searchText]);
 
+  useEffect(() => {
+    if (
+      selectedInfluencersRefIds.length > 0 &&
+      parseInt(influencersTotalCount) > 0 &&
+      selectedInfluencersRefIds.length === parseInt(influencersTotalCount)
+    ) {
+      setisSelectedAll(true);
+    }
+  }, [selectedInfluencersRefIds.length]);
+
+  const handleSelectAllInfluencers = (
+    usersList = [],
+    selectAllStatus = isSelectedAll,
+  ) => {
+    if (selectAllStatus) {
+      const userIdsList = [...usersList].map(item => item.user_ref_id);
+      setselectedInfluencersRefIds(preIdsList => {
+        const idsList = [...preIdsList, ...userIdsList];
+        return getFilteredDuplicatesList(idsList);
+      });
+    }
+  };
+
   function influencerListAPICall(pageNumber = 1) {
     const formData = new FormData();
     formData.append('token', token);
@@ -88,10 +118,12 @@ const InfluencersList = () => {
             seterrorText(null);
             if (currentPage === 1) {
               totalPages = parseInt(res.data.total_pages);
+              setinfluencersTotalCount(res.data.total_influencer_count);
               setinfluencersList(res.data.users_list);
             } else {
               setinfluencersList(pre => [...pre, ...res.data.users_list]);
             }
+            handleSelectAllInfluencers(res.data.users_list);
           }
         } else if (res.data.status === 0) {
           if (isMount) {
@@ -135,6 +167,9 @@ const InfluencersList = () => {
       tempSelectedInfluencersIds = tempSelectedInfluencersIds.filter(
         refId => refId !== id,
       );
+      if (isSelectedAll) {
+        setisSelectedAll(false);
+      }
     } else {
       tempSelectedInfluencersIds.push(id);
     }
@@ -156,7 +191,11 @@ const InfluencersList = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
-    formData.append('follow_userid', JSON.stringify(ids));
+    if (!isSelectedAll) {
+      formData.append('follow_userid', JSON.stringify(ids));
+    }
+    formData.append('select_all', isSelectedAll ? 1 : 0);
+
     influencerFollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -235,7 +274,7 @@ const InfluencersList = () => {
 
   return (
     <HOCView
-      isEnableTopSafeAreaHomeHeader={true}
+      // isEnableTopSafeAreaHomeHeader={true}
       isEnableScroll={false}
       paddingHorizontal={0}
       headerProps={{
@@ -279,12 +318,37 @@ const InfluencersList = () => {
         />
         <View style={{paddingHorizontal: 15}}>
           <View style={styles.listHeader}>
-            <StyledText
-              style={{
-                paddingVertical: 5,
-              }}>{`Selected Influencers (${getDoubleDigit(
-              selectedInfluencersRefIds.length,
-            )})`}</StyledText>
+            <View style={{flexDirection: 'row'}}>
+              <CheckBox
+                isVisibleText={false}
+                isSelected={isSelectedAll}
+                mainContainerStyle={{marginRight: 10}}
+                onPress={() => {
+                  if (isMount) {
+                    setisSelectedAll(pre => {
+                      const updatedStatus = !pre;
+                      if (updatedStatus) {
+                        handleSelectAllInfluencers(
+                          [...influencersList],
+                          updatedStatus,
+                        );
+                      } else {
+                        setselectedInfluencersRefIds([]);
+                      }
+                      return updatedStatus;
+                    });
+                  }
+                }}
+              />
+              <StyledText
+                style={{
+                  paddingVertical: 5,
+                }}>{`Selected ${isSelectedAll ? 'All' : 'Influencers'} (${
+                isSelectedAll
+                  ? getDoubleDigit(influencersTotalCount)
+                  : getDoubleDigit(selectedInfluencersRefIds.length)
+              })`}</StyledText>
+            </View>
             <TouchableOpacity
               style={[
                 styles.becomeFanButton,

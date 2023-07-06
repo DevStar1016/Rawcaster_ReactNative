@@ -149,7 +149,6 @@ const PostEditNugget = ({route}) => {
             type: getMediaMimeType(item.path, item.media_type),
           };
         });
-
         setselectedMediaList(tempMediaList);
       }
       if (nugget.shared_detail && nugget.shared_detail.length > 0) {
@@ -205,7 +204,7 @@ const PostEditNugget = ({route}) => {
         });
       }
     }
-
+    console.log(formData, 'FORMDATAA');
     addNuggetsService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -267,11 +266,12 @@ const PostEditNugget = ({route}) => {
         JSON.stringify([...tempRemovedMediaList].map(item => item.media_id)),
       );
     }
-
+    console.log(JSON.stringify(formData), 'EDITED FORMDATAAAA');
     editNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
+          console.log(res.data, 'EDITED RESPONSEEE');
           dispatch(addEditedNugget(res.data.nugget_detail));
           navigation.goBack();
         } else if (res.data.status === 0) {
@@ -297,7 +297,7 @@ const PostEditNugget = ({route}) => {
   function pickMedia(type) {
     openCloseEmojiPicker(false);
     ImageCropPicker.openPicker({
-      multiple: true,
+      multiple: nugget ? false : true,
       mediaType: type,
       smartAlbums: [
         'PhotoStream',
@@ -319,7 +319,10 @@ const PostEditNugget = ({route}) => {
         'LongExposure',
       ],
     })
-      .then(async mediaList => {
+      .then(async selectedMediaList => {
+        const mediaList = nugget
+          ? [{...selectedMediaList}]
+          : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
         if (isMount) {
           setisLoading(true);
         }
@@ -336,7 +339,11 @@ const PostEditNugget = ({route}) => {
         )
           .then(resMediaList => {
             if (isMount) {
-              setselectedMediaList(pre => [...pre, ...resMediaList]);
+              if (nugget) {
+                setselectedMediaList([...resMediaList]);
+              } else {
+                setselectedMediaList(pre => [...pre, ...resMediaList]);
+              }
             }
           })
           .catch(e => {
@@ -412,23 +419,41 @@ const PostEditNugget = ({route}) => {
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
-    setselectedMediaList(pre => [
-      ...pre,
-      {
-        name: getFileName(mediaPath),
-        type: mediaItem.type,
-        uri: mediaPath,
-      },
-    ]);
+    if (nugget) {
+      setselectedMediaList([
+        {
+          name: getFileName(mediaPath),
+          type: mediaItem.type,
+          uri: mediaPath,
+        },
+      ]);
+    } else {
+      setselectedMediaList(pre => [
+        ...pre,
+        {
+          name: getFileName(mediaPath),
+          type: mediaItem.type,
+          uri: mediaPath,
+        },
+      ]);
+    }
   }
 
   function handleSubmitAudio(audioFile) {
-    setselectedMediaList(pre => [
-      ...pre,
-      {
-        ...audioFile,
-      },
-    ]);
+    if (nugget) {
+      setselectedMediaList([
+        {
+          ...audioFile,
+        },
+      ]);
+    } else {
+      setselectedMediaList(pre => [
+        ...pre,
+        {
+          ...audioFile,
+        },
+      ]);
+    }
   }
 
   function resetSelectedShareType() {
@@ -935,7 +960,6 @@ const PostEditNugget = ({route}) => {
         visible={isOpenCamera}
         statusBarTranslucent
         transparent
-        animationType="slide"
         onRequestClose={() => {
           if (isMount) {
             setisOpenCamera(false);
@@ -1009,7 +1033,6 @@ const PostEditNugget = ({route}) => {
         visible={isOpenPreview}
         transparent
         statusBarTranslucent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenPreview(false);
         }}>

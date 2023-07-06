@@ -58,6 +58,7 @@ type Props = {
   placeHolder?: PlaceHolder;
   dropDownContainerWidth?: ContainerWidth;
   valueShowAdditionalData?: ValueAdditionalData;
+  defaultDurationData?: OtherDataType;
 };
 
 const CustomDateMonthYearPicker = ({
@@ -87,6 +88,11 @@ const CustomDateMonthYearPicker = ({
     second: 'Day',
     third: 'Year',
   },
+  defaultDurationData = {
+    days: 7,
+    hours: 0,
+    minutes: 0,
+  },
   dropDownIcon = 'down_arrow',
   dropDownContainerWidth = {
     first: '39%',
@@ -102,9 +108,7 @@ const CustomDateMonthYearPicker = ({
     year: value ? moment(value, format).year() : null,
   });
   const [durationData, setdurationData] = useState<OtherDataType>({
-    days: 7,
-    hours: 0,
-    minutes: 0,
+    ...defaultDurationData,
   });
 
   useEffect(() => {

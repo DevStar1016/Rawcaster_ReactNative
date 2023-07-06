@@ -339,6 +339,12 @@ export const utcToUserTimezone = (time, zonename) => {
   return moment(displayCutoff);
 };
 
+export const getUtcToSystemTime = dateTime => {
+  return moment(dateTime, 'YYYY-MM-DD HH:mm:ss')
+    .subtract(-moment().utcOffset(), 'minutes')
+    .toDate();
+};
+
 export const {utcOffsetStr} = getTimezone(moment.tz.guess());
 
 export const getDisplayEventTime = time => {

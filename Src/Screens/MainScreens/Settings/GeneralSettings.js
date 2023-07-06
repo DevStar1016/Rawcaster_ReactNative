@@ -246,6 +246,7 @@ const GeneralSettings = () => {
       })
       .finally(() => {
         if (isMount) {
+          console.log('Loader False');
           setisLoading(false);
         }
       });

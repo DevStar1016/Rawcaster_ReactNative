@@ -79,6 +79,7 @@ const ProfilesListContainerWithSeeAll = ({
   const [usersList, setusersList] = useState<any[]>(
     list.length > 0 ? [...list] : [],
   );
+  const [usersTotalCount, setusersTotalCount] = useState(usersList.length);
   const [isActionLoading, setisActionLoading] = useState(false);
   const PROFILE_SIZE =
     (DIMENSIONS.window.width -
@@ -137,6 +138,7 @@ const ProfilesListContainerWithSeeAll = ({
     listAllFriendsService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          setusersTotalCount(res.data.friends_count);
           setusersList(res.data.friends_list);
         }
       })
@@ -161,6 +163,7 @@ const ProfilesListContainerWithSeeAll = ({
     getFollowListService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          setusersTotalCount(res.data.follow_count);
           setusersList(res.data.follow_list);
         }
       })
@@ -289,7 +292,8 @@ const ProfilesListContainerWithSeeAll = ({
     if (isLock) {
       return title;
     }
-    return `${title} (${getList().length})`;
+    return `${title} (${usersTotalCount})`;
+    // return `${title} (${getList().length})`;
   }
 
   function getTopRightIcon(item: any) {
@@ -325,7 +329,8 @@ const ProfilesListContainerWithSeeAll = ({
         onPressButton={() => {
           /* @ts-ignore */
           navigation.navigate('ProfileSeeAllUsersList', {
-            initialList: [...getList()],
+            // initialList: [...getList()],
+            initialList: [],
             userId: userId,
             listType: listType,
             title: title,

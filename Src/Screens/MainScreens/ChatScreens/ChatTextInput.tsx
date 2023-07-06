@@ -198,16 +198,24 @@ const ChatTextInput = ({
             </StyledText>
           </View>
         ) : (
-          <SVGIcon
-            icon="emoji_dark"
-            marginRight={5}
-            marginLeft={10}
-            isButton
-            onPress={() => {
-              Keyboard.dismiss();
-              setisOpenEmoji(pre => !pre);
-            }}
-          />
+          <View
+            style={{
+              alignItems: 'flex-end',
+              flexDirection: 'row',
+              height: '100%',
+              paddingVertical: 12,
+            }}>
+            <SVGIcon
+              icon="emoji_dark"
+              marginRight={5}
+              marginLeft={10}
+              isButton
+              onPress={() => {
+                Keyboard.dismiss();
+                setisOpenEmoji(pre => !pre);
+              }}
+            />
+          </View>
         )}
 
         {!recordedAudio && !isRecording && !isPlaying && (
@@ -215,6 +223,7 @@ const ChatTextInput = ({
             <TextInput
               style={styles.inputBox}
               value={message}
+              multiline
               onChangeText={setmessage}
               placeholder="type message here..."
               onFocus={() => {
@@ -327,7 +336,6 @@ const ChatTextInput = ({
         visible={isOpenCamera}
         statusBarTranslucent
         transparent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenCamera(false);
         }}>
@@ -345,7 +353,7 @@ export default ChatTextInput;
 const styles = StyleSheet.create({
   mainContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
     backgroundColor: COLORS.white,
     borderRadius: 25,
@@ -360,12 +368,13 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flex: 1,
-    height: 45,
+    maxHeight: 100,
+    // height: 45,
   },
   inputBox: {
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.black,
-    flex: 1,
+    // flex: 1,
     backgroundColor: COLORS.white,
   },
   sendButtonContainer: {

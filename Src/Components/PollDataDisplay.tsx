@@ -31,6 +31,7 @@ type Props = {
   onVotePoll?: (id: any) => void;
   pollDuration: string;
   nameMaxCharactersCount?: number;
+  onLayoutHeight?: (val: number) => void;
 };
 
 const PollDataDisplay = ({
@@ -41,8 +42,8 @@ const PollDataDisplay = ({
   onVotePoll,
   nameMaxCharactersCount,
   pollDuration,
+  onLayoutHeight,
 }: Props) => {
-  const settings = useSettings();
   const token = useToken();
   const user = useUserData();
   const dispatch = useDispatch();
@@ -52,59 +53,55 @@ const PollDataDisplay = ({
   });
 
   const getRemainingTimeOfPoll = () => {
-    if (settings) {
-      const [daysval, hoursval, minutesval] = pollDuration.split(':');
+    const [daysval, hoursval, minutesval] = pollDuration.split(':');
 
-      // const userZoneTime = utcToUserTimezone(
-      //   createdDate,
-      //   settings?.time_zone,
-      // ).format('YYYY-MM-DD HH:mm:ss');
+    // const userZoneTime = utcToUserTimezone(
+    //   createdDate,
+    //   settings?.time_zone,
+    // ).format('YYYY-MM-DD HH:mm:ss');
 
-      // const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
-      //   .add(daysval, 'days')
-      //   .add(hoursval, 'hours')
-      //   .add(minutesval, 'minutes');
-      const utcString = moment
-        .utc(createdDate, 'YYYY-MM-DD HH:mm:ss')
-        .add(daysval, 'days')
-        .add(hoursval, 'hours')
-        .add(minutesval, 'minutes');
+    // const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
+    //   .add(daysval, 'days')
+    //   .add(hoursval, 'hours')
+    //   .add(minutesval, 'minutes');
+    const utcString = moment
+      .utc(createdDate, 'YYYY-MM-DD HH:mm:ss')
+      .add(daysval, 'days')
+      .add(hoursval, 'hours')
+      .add(minutesval, 'minutes');
 
-      const now = moment().utc();
-      let timeDiff = utcString - now;
-      let dur = moment.duration(timeDiff);
-      const remainingDays = dur.days();
-      const remainingHours = dur.hours();
-      const remainingMinutes = dur.minutes();
-      let output = '';
-      if (remainingDays > 0) {
-        output += `${remainingDays} day${remainingDays > 1 ? 's' : ''}`;
-        if (remainingMinutes > 0 && remainingHours === 0) {
-          output += ' ';
-        }
+    const now = moment().utc();
+    /*@ts-ignore*/
+    let timeDiff = utcString - now;
+    let dur = moment.duration(timeDiff);
+    const remainingDays = dur.days();
+    const remainingHours = dur.hours();
+    const remainingMinutes = dur.minutes();
+    let output = '';
+    if (remainingDays > 0) {
+      output += `${remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+      if (remainingMinutes > 0 && remainingHours === 0) {
+        output += ' ';
       }
-
-      if (remainingHours > 0) {
-        if (remainingDays > 0) {
-          output += ' ';
-        }
-        output += `${remainingHours} hour${remainingHours > 1 ? 's' : ''}`;
-        if (remainingMinutes > 0) {
-          output += ' ';
-        }
-      }
-
-      if (remainingMinutes > 0) {
-        output += `${remainingMinutes} minute${
-          remainingMinutes > 1 ? 's' : ''
-        } `;
-      }
-      if (output !== '') {
-        output += 'left';
-      }
-      return output ? output : null;
     }
-    return null;
+
+    if (remainingHours > 0) {
+      if (remainingDays > 0) {
+        output += ' ';
+      }
+      output += `${remainingHours} hour${remainingHours > 1 ? 's' : ''}`;
+      if (remainingMinutes > 0) {
+        output += ' ';
+      }
+    }
+
+    if (remainingMinutes > 0) {
+      output += `${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''} `;
+    }
+    if (output !== '') {
+      output += 'left';
+    }
+    return output ? output : null;
   };
 
   const getTotalVotes = () => {
@@ -148,7 +145,13 @@ const PollDataDisplay = ({
   };
 
   return (
-    <View style={{paddingRight: 20}}>
+    <View
+      style={{paddingRight: 20}}
+      onLayout={e => {
+        if (e.nativeEvent.layout.height && onLayoutHeight) {
+          onLayoutHeight(e.nativeEvent.layout.height);
+        }
+      }}>
       {getPollOptions().map((item: PollOptionsItemProp) => {
         return pollVotedData.isVoted || !getRemainingTimeOfPoll() ? (
           // ||!getRemainingTimeOfPoll(nugget.poll_duration)

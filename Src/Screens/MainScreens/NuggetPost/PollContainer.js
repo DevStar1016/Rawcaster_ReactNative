@@ -147,6 +147,11 @@ const PollContainer = ({
             second: 'Hrs',
             third: 'Min',
           }}
+          defaultDurationData={{
+            days: 0,
+            hours: 1,
+            minutes: 0,
+          }}
           dropDownIcon="down_arrow_white"
           title="Poll Length"
           placeHolder={{first: 'Days', second: 'Hrs', third: 'Min'}}

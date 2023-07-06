@@ -431,7 +431,6 @@ const ChatItem = ({
         visible={previewData.isOpen}
         transparent
         statusBarTranslucent
-        animationType="slide"
         onRequestClose={() => {
           setpreviewData({
             isOpen: false,

@@ -25,10 +25,6 @@ const SocketListener = () => {
     if (user) {
       ConnectSocket(user.user_id);
     }
-    return () => {
-      console.log('OFF SOCKET');
-      socketListen.off('call');
-    };
   }, []);
 
   //Socket Connect and Disconnect Status
@@ -66,6 +62,7 @@ const SocketListener = () => {
       },
       [],
     );
+    return () => socketListen.off('groupchatting');
   }, []);
 
   // Socket Type "message" Received
@@ -87,6 +84,7 @@ const SocketListener = () => {
       },
       [],
     );
+    return () => socketListen.off('message');
   }, []);
 
   function handleSocketFriendRequests(data) {

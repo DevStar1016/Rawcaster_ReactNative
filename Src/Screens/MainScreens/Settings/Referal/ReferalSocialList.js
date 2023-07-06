@@ -99,7 +99,7 @@ const REFERAL_OPTIONS_LIST = [
   {
     id: SHARE_OPTION.invite_fans,
     icon: 'share_rounded_fill_blue',
-    name: 'Invite fans',
+    name: 'Invite Friends',
   },
 ];
 

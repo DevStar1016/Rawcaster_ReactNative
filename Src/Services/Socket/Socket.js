@@ -8,7 +8,7 @@ const socket = io(SOCKET_URL, {
 
 const ConnectSocket = userId => {
   if (userId) {
-    sendMessage({
+    sendSocketMessage({
       event: 'userdata',
       userid: userId,
       status: 1,
@@ -21,9 +21,9 @@ export default ConnectSocket;
 
 export const socketListen = socket;
 
-export const sendMessage = (data, type = 'message') => {
+export const sendSocketMessage = (data, type = 'message') => {
   console.log(data, type, 'SOCKET SEND');
   socket.emit(type, data, res => {
-    console.log(res, 'sendMessage');
+    console.log(res, 'sendSocketMessage');
   });
 };

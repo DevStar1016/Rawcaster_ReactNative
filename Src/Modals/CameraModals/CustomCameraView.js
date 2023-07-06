@@ -321,7 +321,6 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         visible={isOpenPreview}
         transparent
         statusBarTranslucent
-        animationType="slide"
         onRequestClose={() => {
           setisOpenPreview(false);
         }}>

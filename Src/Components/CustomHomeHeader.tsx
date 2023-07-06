@@ -110,8 +110,9 @@ const CustomHomeHeader = ({
           />
         ) : (
           <TouchableOpacity
-            disabled={true}
+            // disabled={true}
             onPress={() => {
+              navigation.navigate('EventHost');
               // navigation.navigate('PlansAndPrice');
             }}>
             <SVGIcon icon="app_logo_white" height={30} width={30} />

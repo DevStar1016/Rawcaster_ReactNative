@@ -5,12 +5,12 @@ import {useFormik} from 'formik';
 import * as yup from 'yup';
 import TextBox from '../../../Components/TextBox';
 import DropDownPicker from '../../../Components/DropDownPicker';
-import {EVENT_VISIBILITY_TYPE_LIST} from '../../../Utilities/Constants';
 import {useSettings, useToken} from '../../../Utilities/StoreData';
 import {
   getDisplayEventDate,
   getDisplayEventTime,
   getFileName,
+  getUtcToSystemTime,
   htmlDecodeText,
   utcToUserTimezone,
 } from '../../../Utilities/Methods';
@@ -35,14 +35,6 @@ import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
 
 var isMount = true;
 
-const validationSchema = yup.object({
-  eventTitle: yup
-    .string()
-    .min(1, 'Invalid Event Title.')
-    .max(60, 'Invalid Event Title.')
-    .required('Event Title is required.'),
-  eventTime: yup.string().required('Select valid Time'),
-});
 const CreateEditTalkshow = ({route}) => {
   const eventId =
     route.params && route.params.eventId ? route.params.eventId : null;
@@ -67,6 +59,15 @@ const CreateEditTalkshow = ({route}) => {
   const [loaderText, setloaderText] = useState('Fetching Event Types');
   const [selectedGroupsIdsList, setselectedGroupsIdsList] = useState([]);
   const [isLoading, setisLoading] = useState(true);
+
+  const validationSchema = yup.object({
+    eventTitle: yup
+      .string()
+      .min(1, 'Invalid Event Title.')
+      .max(60, 'Invalid Event Title.')
+      .required('Event Title is required.'),
+    eventTime: yup.string().required('Select valid Time'),
+  });
 
   const {handleSubmit, handleChange, values, errors, setValues, setFieldValue} =
     useFormik({
@@ -142,21 +143,18 @@ const CreateEditTalkshow = ({route}) => {
               uri: res.data.event_detail.banner_image,
             });
           }
+
           setValues(preValues => {
             return {
               ...preValues,
               eventTitle: htmlDecodeText(res.data.event_detail.event_name),
-              eventTime: utcToUserTimezone(
+              eventTime: getUtcToSystemTime(
                 res.data.event_detail.start_date_time,
-                settings?.time_zone,
               ),
             };
           });
           setliveEventDate(
-            utcToUserTimezone(
-              res.data.event_detail.start_date_time,
-              settings?.time_zone,
-            ),
+            getUtcToSystemTime(res.data.event_detail.start_date_time),
           );
 
           seteventVisibilityTypeId(res.data.event_detail.event_type_id);
@@ -442,6 +440,7 @@ const CreateEditTalkshow = ({route}) => {
           inputContainerMarginVertical={5}
           titlePaddingVertical={5}
         />
+
         <DropDownPicker
           title="Event Type"
           dataList={[...eventTypesList]}

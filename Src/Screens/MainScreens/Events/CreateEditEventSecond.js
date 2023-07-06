@@ -14,7 +14,6 @@ import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../../../Utilities/StoreData';
 import {addEventService, editEventService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
-import {log} from 'react-native-reanimated';
 
 var isMount = true;
 const CreateEditEventSecond = ({route}) => {
@@ -39,7 +38,6 @@ const CreateEditEventSecond = ({route}) => {
   );
   useEffect(() => {
     isMount = true;
-    console.log(submitedData, 'SUM');
     return () => {
       isMount = false;
     };
@@ -87,8 +85,10 @@ const CreateEditEventSecond = ({route}) => {
 
   function handleCreateEvent() {
     const formData = getDefaultCreateEditFormData();
+    console.log(JSON.stringify(formData), 'DATA CREATE EVENT');
     addEventService(formData)
       .then(res => {
+        console.log(res.data, 'EVENT CREATE RESPONSE');
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
           navigation.reset({
