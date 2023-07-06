@@ -39,6 +39,7 @@ export const handleAudioRecord = async ({
   audioUniqueId = '',
 }: AudioRecordProps) => {
   const isGrantedPermission = await isHavePermissionToRecordAudio();
+  console.log('ADSFDSF', isGrantedPermission);
   if (isGrantedPermission) {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
@@ -78,6 +79,8 @@ export const handleAudioRecord = async ({
         return;
       });
     } catch (e) {
+      console.log(e, 'ETRHLKHRHYTUYIJ');
+
       setisRecording(false);
     }
   }

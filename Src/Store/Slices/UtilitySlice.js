@@ -14,6 +14,10 @@ export const initialState = {
   isVisibleInfluencers: false,
   isAppForeground: true,
   isOpenLoginAlert: false,
+  premiumAlert: {
+    status: false,
+    text: '',
+  },
   isOpenVerifyPopup: false,
   globalLoaderData: {
     status: false,
@@ -49,6 +53,9 @@ const UtilitySlice = createSlice({
     setIsOpenLoginAlert: (state, action) => {
       state.isOpenLoginAlert = action.payload;
     },
+    setPremiumAlert: (state, action) => {
+      state.premiumAlert = action.payload;
+    },
     setIsOpenVerifyPopup: (state, action) => {
       state.isOpenVerifyPopup = action.payload;
     },
@@ -83,6 +90,7 @@ export const {
   setIsVisibleInfluencers,
   setIsAppForeground,
   setIsOpenLoginAlert,
+  setPremiumAlert,
   setIsOpenVerifyPopup,
   setGlobalLoaderData,
 } = UtilitySlice.actions;

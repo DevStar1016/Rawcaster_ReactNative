@@ -189,6 +189,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
               onPress={() => {
                 const uniqueId = getUniqueId();
                 setrecordingAudioUniqueId(uniqueId);
+                console.log('DSAFFHHJJGGHH');
                 handleAudioRecord({
                   audioPlayer,
                   setisPaused,

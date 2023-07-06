@@ -73,6 +73,7 @@ const NuggetsListSlice = createSlice({
               content: htmlDecodeText(item.content),
               original_user_name: htmlDecodeText(item.original_user_name),
               user_name: htmlDecodeText(item.user_name),
+              translated_content: '',
             };
           });
           if (pageNumber === 1) {

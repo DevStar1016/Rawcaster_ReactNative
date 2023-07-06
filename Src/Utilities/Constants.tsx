@@ -238,6 +238,8 @@ export const NUGGET_ACTIONS = [
   {id: 3, buttonName: 'Block User'},
   {id: 4, buttonName: 'Report Abuse'},
   {id: 5, buttonName: 'Share Link'},
+  {id: 6, buttonName: 'See Translation'},
+  {id: 7, buttonName: 'See Original'},
 ];
 
 export const SHARE_OPTION = {
@@ -268,6 +270,7 @@ export const NUGGET_SHARE_TYPE = [
 ];
 
 export const DEVICE_TYPE = Platform.OS;
+export const DEVICE_VERSION = Platform.Version;
 export const IS_IOS = Platform.OS === 'ios';
 export const AGE_RESTRICTION = 13;
 export const TEXT_INPUT_HEIGHT = 45;

@@ -1,5 +1,5 @@
 import {PermissionsAndroid} from 'react-native';
-import {IS_IOS} from './Constants';
+import {DEVICE_VERSION, IS_IOS} from './Constants';
 
 export const isHavePermissionToRecordAudio = async () => {
   if (IS_IOS) {
@@ -13,10 +13,12 @@ export const isHavePermissionToRecordAudio = async () => {
     ]);
 
     if (
-      grants['android.permission.WRITE_EXTERNAL_STORAGE'] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      grants['android.permission.READ_EXTERNAL_STORAGE'] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
+      (grants['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+        PermissionsAndroid.RESULTS.GRANTED ||
+        parseInt(DEVICE_VERSION) >= 33) &&
+      (grants['android.permission.READ_EXTERNAL_STORAGE'] ===
+        PermissionsAndroid.RESULTS.GRANTED ||
+        parseInt(DEVICE_VERSION) >= 33) &&
       grants['android.permission.RECORD_AUDIO'] ===
         PermissionsAndroid.RESULTS.GRANTED
     ) {

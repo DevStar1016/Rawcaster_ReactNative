@@ -52,6 +52,7 @@ import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useDispatch} from 'react-redux';
 import {
   setIsOpenLoginAlert,
+  setPremiumAlert,
   setIsOpenVerifyPopup,
 } from '../../../Store/Slices/UtilitySlice';
 import {pollVoteService} from '../../../Services/ApiService';
@@ -158,6 +159,7 @@ function NuggetActionsOverlay({
     updateLike,
     updateSave,
     updateIsFan,
+    handleNuggetContentTranslate,
   } = useNuggetItemActions();
 
   const navigation = useNavigation();
@@ -186,9 +188,11 @@ function NuggetActionsOverlay({
     useState(0);
   const [mainContentContainerHeight, setmainContentContainerHeight] =
     useState(0);
+  const [mainContentContainerWidth, setmainContentContainerWidth] = useState(0);
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
   const [isReadLoading, setisReadLoading] = useState(false);
+  const [isTranslated, setisTranslated] = useState(false);
   const [ReadNuggetUrl, setReadNuggetUrl] = useState(null);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -280,6 +284,7 @@ function NuggetActionsOverlay({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
+    formData.append('translation_type', 1);
     nuggetContentAudioService(formData, nuggetContentController.current.signal)
       .then(res => {
         if (res.data.status === 1) {
@@ -342,20 +347,31 @@ function NuggetActionsOverlay({
   };
 
   const getMenuOptions = () => {
+    let result = [];
     if (nugget.is_nugget_owner === 1) {
       if (
         (nugget.poll_option && nugget.poll_option.length > 0) ||
         nugget.type === 2
       ) {
-        return [...NUGGET_ACTIONS].filter(item => item.id === 2);
+        result = [...NUGGET_ACTIONS].filter(item => item.id === 2);
+      } else {
+        result = [...NUGGET_ACTIONS].filter(item => item.id < 3);
       }
-      return [...NUGGET_ACTIONS].filter(item => item.id < 3);
     } else {
       if (nugget.type === 2) {
-        return [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 5);
+        result = [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 5);
+      } else {
+        result = [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 6);
       }
-      return [...NUGGET_ACTIONS].filter(item => item.id > 2);
     }
+    if (nugget.content) {
+      if (isTranslated) {
+        result = [...result, [...NUGGET_ACTIONS].find(item => item.id === 7)];
+      } else {
+        result = [...result, [...NUGGET_ACTIONS].find(item => item.id === 6)];
+      }
+    }
+    return result;
   };
 
   const onPressNuggetAction = (id: number) => {
@@ -374,6 +390,20 @@ function NuggetActionsOverlay({
         onReportAbouseNugget();
         break;
       case 5:
+        break;
+      case 6:
+        getTranslatedContent();
+        break;
+      case 7:
+        setisTranslated(false);
+        break;
+    }
+  };
+  const getTranslatedContent = () => {
+    if (nugget.translated_content) {
+      setisTranslated(true);
+    } else {
+      handleNuggetContentTranslate(setisTranslated);
     }
   };
 
@@ -649,13 +679,18 @@ function NuggetActionsOverlay({
           if (e.nativeEvent.layout.height) {
             setmainContentContainerHeight(e.nativeEvent.layout.height);
           }
+          if (e.nativeEvent.layout.width) {
+            setmainContentContainerWidth(e.nativeEvent.layout.width);
+          }
         }}>
         <View
           style={{
             position: 'absolute',
             top: 0,
             left: 10,
-            marginRight: actionButtonsContainerWidth + 10,
+            // marginRight: actionButtonsContainerWidth + 10,
+            width:
+              mainContentContainerWidth - (actionButtonsContainerWidth + 20),
             maxHeight:
               mainContentContainerHeight -
               (nuggetDataBottomContainerHeight + 10),
@@ -774,7 +809,11 @@ function NuggetActionsOverlay({
                       }}
                     />
                   )}
-                  {htmlDecodeText(nugget.content.trim())}
+                  {htmlDecodeText(
+                    isTranslated && nugget.translated_content?.trim()
+                      ? nugget.translated_content.trim()
+                      : nugget.content.trim(),
+                  )}
                 </StyledText>
               </ScrollView>
             </TouchableOpacity>
@@ -826,7 +865,7 @@ function NuggetActionsOverlay({
             />
           )}
 
-          {token && profile && parseInt(profile?.user_status_id) >= 1 ? (
+          {token && profile ? (
             <RoundedIconButton
               icon="open_ai_white"
               bgColor={COLORS.transparentDimColor}
@@ -834,7 +873,16 @@ function NuggetActionsOverlay({
               buttonSize={40}
               buttonStyle={{marginVertical: 5}}
               onPress={() => {
-                handlePresentAIChatModal();
+                if (parseInt(profile?.user_status_id) > 1) {
+                  handlePresentAIChatModal();
+                } else {
+                  dispatch(
+                    setPremiumAlert({
+                      status: true,
+                      text: 'To access this feature become a premium member!',
+                    }),
+                  );
+                }
               }}
             />
           ) : null}

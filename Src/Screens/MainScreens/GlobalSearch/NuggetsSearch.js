@@ -15,6 +15,7 @@ import {
   useInsets,
   useSearchedNuggetsList,
   useToken,
+  useTranslatedNuggetsList,
 } from '../../../Utilities/StoreData';
 import {
   NuggetParentActionsContext,
@@ -53,6 +54,7 @@ const NuggetsSearch = () => {
   const [isRefreshing, setisRefreshing] = useState(false);
   const flatlistRef = useRef(null);
   const editedNuggetsList = useEditedNuggetsList();
+  const translatedNuggetsList = useTranslatedNuggetsList();
   const token = useToken();
   const insets = useInsets();
   const [viewableItem, setviewableItem] = useState('');
@@ -108,6 +110,7 @@ const NuggetsSearch = () => {
                 content: htmlDecodeText(item.content),
                 original_user_name: htmlDecodeText(item.original_user_name),
                 user_name: htmlDecodeText(item.user_name),
+                translated_content: '',
               };
             });
 
@@ -255,6 +258,23 @@ const NuggetsSearch = () => {
         );
         if (tempEditedItem) {
           resultList.push(tempEditedItem);
+        } else {
+          resultList.push(item);
+        }
+
+        return [...resultList];
+      }, []);
+    }
+    if (translatedNuggetsList && translatedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempTranslatedItem = [...translatedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempTranslatedItem) {
+          resultList.push({
+            ...item,
+            translated_content: tempTranslatedItem.translated_content,
+          });
         } else {
           resultList.push(item);
         }

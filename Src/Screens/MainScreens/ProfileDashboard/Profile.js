@@ -20,6 +20,7 @@ import {
   useProfile,
   useSavedNuggetsList,
   useToken,
+  useTranslatedNuggetsList,
   useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
@@ -49,6 +50,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
+import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 const PADDING_HORIZONTAL = 10;
 var isMount = true;
 var currentPage = 1;
@@ -62,6 +64,7 @@ const Profile = ({route}) => {
   const isFocused = useIsFocused();
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const editedNuggetsList = useEditedNuggetsList();
+  const translatedNuggetsList = useTranslatedNuggetsList();
   const {focusedNuggetUserId} = useDashboardProfile() ?? {};
   const [userId, setuserId] = useState(
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
@@ -289,6 +292,7 @@ const Profile = ({route}) => {
                 content: htmlDecodeText(item.content),
                 original_user_name: htmlDecodeText(item.original_user_name),
                 user_name: htmlDecodeText(item.user_name),
+                translated_content: '',
               };
             });
 
@@ -373,6 +377,23 @@ const Profile = ({route}) => {
         return [...resultList];
       }, []);
     }
+    if (translatedNuggetsList && translatedNuggetsList.length > 0) {
+      tempNuggetsList = [...tempNuggetsList].reduce((resultList, item) => {
+        let tempTranslatedItem = [...translatedNuggetsList].find(
+          subItem => subItem.nugget_id === item.nugget_id,
+        );
+        if (tempTranslatedItem) {
+          resultList.push({
+            ...item,
+            translated_content: tempTranslatedItem.translated_content,
+          });
+        } else {
+          resultList.push(item);
+        }
+
+        return [...resultList];
+      }, []);
+    }
     return [...tempNuggetsList];
   };
 
@@ -388,12 +409,7 @@ const Profile = ({route}) => {
   }
 
   function getIsDisplayVerifyAccount() {
-    if (
-      !userId &&
-      profile &&
-      parseInt(profile?.account_verify_type) !== 2 &&
-      parseInt(profile?.user_status_id) === 4
-    ) {
+    if (!userId && profile && parseInt(profile?.account_verify_type) !== 2) {
       return true;
     }
     return false;
@@ -549,9 +565,18 @@ const Profile = ({route}) => {
           isDisableVerifyAccount={getIsDisableVerifyAccount()}
           verifyAccountButtonText={getVerifyAccountButtonText()}
           onPressVerifyAccount={() => {
-            navigation.navigate('ClaimAccount', {
-              isVerifyAccount: true,
-            });
+            if (parseInt(profile?.user_status_id) === 4) {
+              navigation.navigate('ClaimAccount', {
+                isVerifyAccount: true,
+              });
+            } else {
+              dispatch(
+                setPremiumAlert({
+                  status: true,
+                  text: 'To access this feature become a diamond member!',
+                }),
+              );
+            }
           }}
         />
 
