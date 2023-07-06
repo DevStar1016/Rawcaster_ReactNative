@@ -46,6 +46,7 @@ import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHost from '../Screens/MainScreens/Events/EventHost/EventHost';
 import ChimeSocketListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketListener';
+import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 // import ChimeMessagingListener from '../Services/ChimeMessaging/ListenerComponent/ChimeMessagingListener';
 // import {ChimeSDKMessagingClient} from '@aws-sdk/client-chime-sdk-messaging';
 const Stack = createStackNavigator();
@@ -214,6 +215,7 @@ const MainStack = () => {
               name="AddNewConnection"
               component={AddNewConnection}
             />
+            <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
           </>
         )}
       </Stack.Navigator>

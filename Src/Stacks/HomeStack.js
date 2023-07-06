@@ -6,7 +6,6 @@ import {
   setTabNuggetType,
 } from '../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
-import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 import StackAnimation from '../Utilities/StackAnimation';
 import DashboardTopTabNavigation from '../Navigation/TopTabNavigation/DashboardCategoryTabs/DashboardTopTabNavigation';
 import {useToken} from '../Utilities/StoreData';
@@ -57,7 +56,6 @@ const HomeStack = () => {
           initialParams={{filterType: 0, categoryName: 'forYou'}}
         />
       )}
-      <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
     </Stack.Navigator>
   );
 };

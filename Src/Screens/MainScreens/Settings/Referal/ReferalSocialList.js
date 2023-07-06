@@ -589,7 +589,6 @@ const ReferalSocialList = () => {
       headerProps={{
         isEnableBack: true,
         title: 'Invite Fans & Contacts',
-        onPressBack: () => navigation.goBack(),
         bgColor: COLORS.transparent,
         isEnableReward: true,
         isEnableSearch: false,

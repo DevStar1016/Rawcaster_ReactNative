@@ -178,12 +178,16 @@ const PlansAndPrice = () => {
     <HOCView
       headerType="home_header"
       // isEnableTopSafeAreaHomeHeader
-      headerProps={{bgColor: COLORS.primary, isEnableSearch: true}}
+      headerProps={{
+        bgColor: COLORS.primary,
+        isEnableSearch: true,
+        isEnableBack: true,
+      }}
       isEnablePrimaryColorStatusBar
       //   isEnableDefaultBackground
       isEnableScroll
       isEnableRLogo={false}
-      paddingBottom={25}
+      paddingBottom={10}
       backgroundColor={COLORS.white}>
       <StyledText style={styles.header}>Plans & Pricing</StyledText>
       <StyledText style={styles.describtion}>

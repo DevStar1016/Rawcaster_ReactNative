@@ -52,13 +52,13 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 const PADDING_HORIZONTAL = 10;
-var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 
 const Profile = ({route}) => {
   let profileController = undefined;
   let nuggetsController = undefined;
+  const isMount = useRef(true);
   const dispatch = useDispatch();
   const profile = useProfile();
   const isFocused = useIsFocused();
@@ -126,10 +126,10 @@ const Profile = ({route}) => {
   useEffect(() => {
     currentPage = 1;
     totalPages = 1;
-    isMount = true;
+    isMount.current = true;
 
     return () => {
-      isMount = false;
+      isMount.current = false;
       currentPage = 1;
       totalPages = 1;
       if (profileController) {
@@ -143,13 +143,15 @@ const Profile = ({route}) => {
 
   useEffect(() => {
     if (!route.params?.userId) {
-      setuserId(focusedNuggetUserId);
+      if (isMount.current) {
+        setuserId(focusedNuggetUserId);
+      }
     }
   }, [focusedNuggetUserId]);
 
   useEffect(() => {
     if (userId) {
-      if (isMount) {
+      if (isMount.current) {
         setisLoading(true);
       }
 
@@ -162,7 +164,7 @@ const Profile = ({route}) => {
       (userId && othersProfile && parseInt(othersProfile.lock_nugget) === 0) ||
       (!userId && profile)
     ) {
-      if (isMount) {
+      if (isMount.current) {
         setisListLoading(true);
         setnuggetsCount(0);
         setnuggetsList([]);
@@ -189,7 +191,9 @@ const Profile = ({route}) => {
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
           };
-          setothersProfile({...tempProfile});
+          if (isMount.current) {
+            setothersProfile({...tempProfile});
+          }
           if (tempProfile.follow) {
             dispatch(
               setFollowingUsersList([
@@ -201,18 +205,20 @@ const Profile = ({route}) => {
             );
           }
         } else if (res.data.status === 0) {
-          setemptyText(res.data.msg);
+          if (isMount.current) {
+            setemptyText(res.data.msg);
+          }
         }
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(false);
         }
       })
       .catch(e => {
-        if (e.message.includes('canceled')) {
-          setothersProfile(null);
-        } else {
-          setemptyText(e.message);
-          if (isMount) {
+        if (isMount.current) {
+          if (e.message.includes('canceled')) {
+            setothersProfile(null);
+          } else {
+            setemptyText(e.message);
             setisLoading(false);
           }
         }
@@ -220,7 +226,7 @@ const Profile = ({route}) => {
   };
 
   const sendFriendRequestsAPICall = () => {
-    if (isMount) {
+    if (isMount.current) {
       setisActionLoading(true);
     }
     const formData = new FormData();
@@ -231,9 +237,11 @@ const Profile = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          setothersProfile(pre => {
-            return {...pre, friend_status: '1'};
-          });
+          if (isMount.current) {
+            setothersProfile(pre => {
+              return {...pre, friend_status: '1'};
+            });
+          }
           if (res.data?.friend_request_ids?.length > 0) {
             let data = {
               friend_request_id: res.data.friend_request_ids[0],
@@ -251,7 +259,7 @@ const Profile = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisActionLoading(false);
         }
       });
@@ -284,7 +292,7 @@ const Profile = ({route}) => {
     }
     listNuggetsService(formData, nuggetsController.signal)
       .then(res => {
-        if (isMount) {
+        if (isMount.current) {
           if (res.data.status === 1) {
             let decodedNuggetList = [...res.data.nuggets_list].map(item => {
               return {
@@ -296,20 +304,22 @@ const Profile = ({route}) => {
               };
             });
 
-            if (pageNumber === 1) {
-              totalPages = parseInt(res.data.total_pages);
-              setnuggetsList(decodedNuggetList);
-              setnuggetsCount(res.data.nuggets_count);
-            } else {
-              setnuggetsList(preList => [...preList, ...decodedNuggetList]);
+            if (isMount.current) {
+              if (pageNumber === 1) {
+                totalPages = parseInt(res.data.total_pages);
+                setnuggetsList(decodedNuggetList);
+                setnuggetsCount(res.data.nuggets_count);
+              } else {
+                setnuggetsList(preList => [...preList, ...decodedNuggetList]);
+              }
             }
           } else if (res.data.status === 0) {
-            if (isMount) {
+            if (isMount.current) {
               setnuggetsCount(0);
+              setnuggetsList([]);
             }
-            setnuggetsList([]);
           }
-          if (isMount) {
+          if (isMount.current) {
             setisLoadMore(false);
             setisRefreshing(false);
             setisListLoading(false);
@@ -318,12 +328,10 @@ const Profile = ({route}) => {
       })
       .catch(e => {
         console.log(e, 'ERROR');
-        if (isMount) {
+        if (isMount.current) {
           setnuggetsCount(0);
-        }
-        setnuggetsList([]);
-        if (!e.message.includes('cancel')) {
-          if (isMount) {
+          setnuggetsList([]);
+          if (!e.message.includes('cancel')) {
             setisLoadMore(false);
             setisRefreshing(false);
             setisListLoading(false);
@@ -449,14 +457,18 @@ const Profile = ({route}) => {
       await audioPlayerRef.current?.startPlayer(url);
       audioPlayerRef.current?.addPlayBackListener(e => {
         if (Math.floor(e.currentPosition) === 0) {
-          setisReadMuted(true);
+          if (isMount.current) {
+            setisReadMuted(true);
+          }
         } else if (e.currentPosition >= e.duration) {
           handleStopAudio();
         }
         return;
       });
     } catch (e) {
-      setisReadMuted(false);
+      if (isMount.current) {
+        setisReadMuted(false);
+      }
     }
   };
 
@@ -466,7 +478,9 @@ const Profile = ({route}) => {
       audioPlayerRef.current?.removePlayBackListener();
     } catch (e) {
     } finally {
-      setisReadMuted(false);
+      if (isMount.current) {
+        setisReadMuted(false);
+      }
     }
   };
 
@@ -502,10 +516,10 @@ const Profile = ({route}) => {
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
-      if (isMount) {
+      if (isMount.current) {
         setisLoadMore(true);
-        listNuggetsAPICall(currentPage);
       }
+      listNuggetsAPICall(currentPage);
     }
   };
 
@@ -652,13 +666,14 @@ const Profile = ({route}) => {
               <TouchableOpacity
                 style={styles.nuggetFilter}
                 onPress={() => {
-                  if (isMount) {
+                  if (isMount.current) {
                     setselectedTab(1);
                     setisListLoading(true);
 
                     setnuggetsCount(0);
                     setnuggetsList([]);
                   }
+
                   listNuggetsAPICall(1, 1);
                 }}>
                 <StyledText
@@ -675,7 +690,7 @@ const Profile = ({route}) => {
               <TouchableOpacity
                 style={styles.nuggetFilter}
                 onPress={() => {
-                  if (isMount) {
+                  if (isMount.current) {
                     setselectedTab(2);
                     setisListLoading(true);
 
@@ -737,9 +752,6 @@ const Profile = ({route}) => {
             isEnableSettings={true}
             isEnableLive={false}
             isEnableBack
-            onPressBack={() => {
-              navigation.goBack();
-            }}
             isEnableSafeArea
             bgColor={
               !isLoading && !isShowProfile()

@@ -471,6 +471,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
             ]}
             data={nugget.media_list ?? []}
             horizontal
+            scrollEnabled={false}
             bounces={false}
             keyExtractor={item => item.media_id.toString()}
             renderItem={renderItem}

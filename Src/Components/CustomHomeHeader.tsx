@@ -106,7 +106,9 @@ const CustomHomeHeader = ({
             height={18}
             isButton
             width={18}
-            onPress={onPressBack}
+            onPress={() => {
+              navigation.goBack();
+            }}
           />
         ) : (
           <TouchableOpacity
