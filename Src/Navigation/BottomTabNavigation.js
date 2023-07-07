@@ -107,11 +107,7 @@ export default function BottomTabNavigation() {
               }
             }
 
-            // if (e.target.includes('UsersStack')) {
-            //   dispatch(setIsBottomTabBarAbsolute(false));
-            // } else {
             dispatch(setIsBottomTabBarAbsolute(true));
-            // }
           },
         }}
         screenOptions={({route}) => ({

@@ -13,7 +13,6 @@ const Tab = createMaterialTopTabNavigator();
 
 function GlobalSearchTopTabNavigation() {
   const {setFocusedTab} = useGlobalSearch();
-  const dispatch = useDispatch();
 
   return (
     <Tab.Navigator
@@ -22,16 +21,12 @@ function GlobalSearchTopTabNavigation() {
       screenListeners={{
         focus: e => {
           if (e.target.includes('ProfileSearch')) {
-            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('Profile');
           } else if (e.target.includes('NuggetsSearch')) {
-            // dispatch(setIsBottomTabBarAbsolute(true));
             setFocusedTab('Nuggets');
           } else if (e.target.includes('EventsSearch')) {
-            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('Events');
           } else if (e.target.includes('TagsSearch')) {
-            // dispatch(setIsBottomTabBarAbsolute(false));
             setFocusedTab('#Tags');
           }
         },

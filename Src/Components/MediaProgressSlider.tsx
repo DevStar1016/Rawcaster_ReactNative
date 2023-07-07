@@ -4,10 +4,7 @@ import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {DIMENSIONS} from '../Utilities/Constants';
 import SVGIcon from './SVGIcon';
-import {
-  getMediaDurationFormat,
-  secondsToMinutesAndSeconds,
-} from '../Utilities/Methods';
+import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
 import {Slider} from '@miblanchard/react-native-slider';
 const windowWidth = DIMENSIONS.window.width;
 
@@ -33,11 +30,6 @@ const MediaProgressSlider = ({
   isVisibleStop,
 }: Props) => {
   function getProgressText() {
-    // if (isEnableDurationFloor) {
-    //   return Math.floor((progress * duration) / 100) >= 120
-    //     ? getMediaDurationFormat(Math.floor((progress * duration) / 100))
-    //     : secondsToMinutesAndSeconds(Math.floor((progress * duration) / 100));
-    // }
     return secondsToMinutesAndSeconds(progress);
   }
 
@@ -109,10 +101,7 @@ export default MediaProgressSlider;
 
 const styles = StyleSheet.create({
   sliderContainer: {
-    // position: 'absolute',
     height: 55,
-    // bottom: 100,
-    // zIndex: 100,
   },
   timerText: {
     color: COLORS.white,

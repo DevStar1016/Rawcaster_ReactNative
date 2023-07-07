@@ -28,7 +28,6 @@ const PoliciesFooter = () => {
       <Modal
         visible={isOpenTermsAndConditionsModal}
         transparent
-        // statusBarTranslucent
         onRequestClose={() => {
           setisOpenTermsAndConditionsModal(false);
         }}>

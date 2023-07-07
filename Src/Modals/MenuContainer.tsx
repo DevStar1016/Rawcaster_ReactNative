@@ -1,11 +1,4 @@
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SubmitButton, {SubmitButtonProps} from '../Components/SubmitButton';

@@ -1,10 +1,8 @@
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import React from 'react';
 import StyledText from './StyledText';
@@ -117,7 +115,6 @@ const SubmitButton = ({
             <SVGIcon icon={icon} height={iconSize} width={iconSize} />
           ) : null}
           <StyledText
-            // paddingVertical={0}
             style={{
               ...styles.buttonText,
               marginLeft: icon ? textMarginLeftWhenIcon : 0,

@@ -1,5 +1,4 @@
 import {sendSocketMessage} from './Socket';
-import {GROUP_PROCESS_SOCKET_TYPE} from './SocketConstants';
 import {SocketEvents} from './SocketEvents';
 import {
   FriendRequestSocketProps,

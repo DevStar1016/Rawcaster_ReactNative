@@ -22,8 +22,6 @@ import {
   getUrlWithFilePrefix,
 } from '../../Utilities/Methods';
 import {IconType} from '../../Utilities/Icons';
-import ImageZoomViewer from '../../Components/ImageZoomViewer';
-import MediaProgressSlider from '../../Components/MediaProgressSlider';
 import {FONTS} from '../../Utilities/Fonts';
 import {Slider} from '@miblanchard/react-native-slider';
 
@@ -66,7 +64,6 @@ const MediaPreview = ({
   const [pausedVideo, setpausedVideo] = useState(true);
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
-  const [isLoadingMedia, setisLoadingMedia] = useState(true);
 
   const openEditer = async () => {
     try {
@@ -196,21 +193,11 @@ const MediaPreview = ({
               <TopActionButton
                 icon={'crop'}
                 iconSize={23}
-                // marginRight={15}
                 marginRight={0}
                 onPress={() => {
                   setisOpenCrop(true);
                 }}
               />
-
-              {/* <TopActionButton
-                icon={'edit'}
-                iconSize={22}
-                marginRight={0}
-                onPress={() => {
-                  openEditer();
-                }}
-              /> */}
             </View>
           )}
         </View>
@@ -219,7 +206,6 @@ const MediaPreview = ({
         {mediaData &&
           (mediaData.mediaType.includes('image') ? (
             <View style={styles.mediaContainer}>
-              {/* <ImageZoomViewer imageUri={mediaData.uri} /> */}
               <Image
                 source={{uri: mediaData.uri}}
                 resizeMode="contain"
@@ -277,11 +263,6 @@ const MediaPreview = ({
                   right: 0,
                   left: 0,
                 }}>
-                {/* <MediaProgressSlider
-                  duration={duration}
-                  progress={progress}
-                  seekUpdate={seekUpdate}
-                /> */}
                 <View style={styles.videoControllerContainer}>{getSlider}</View>
               </View>
             </View>
@@ -315,7 +296,6 @@ const MediaPreview = ({
             <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
               Done
             </StyledText>
-            {/* <SVGIcon icon="send" marginLeft={-4} /> */}
           </TouchableOpacity>
         </View>
       )}

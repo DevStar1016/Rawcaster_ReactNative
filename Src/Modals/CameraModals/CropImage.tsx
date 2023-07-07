@@ -1,12 +1,5 @@
-import {
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, {LegacyRef, useRef} from 'react';
+import {StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useRef} from 'react';
 import {CropView} from 'react-native-image-crop-tools';
 import {getUrlWithFilePrefix} from '../../Utilities/Methods';
 import {DIMENSIONS} from '../../Utilities/Constants';

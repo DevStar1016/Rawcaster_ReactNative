@@ -1,10 +1,8 @@
 import {Modal, View} from 'react-native';
 import React, {useState} from 'react';
-import HOCView from '../Components/HOCView';
 import WebView from 'react-native-webview';
 import Loader from '../Components/Loader';
 import {COLORS} from '../Utilities/Colors';
-import {DIMENSIONS} from '../Utilities/Constants';
 import HeaderWithBack from '../Components/HeaderWithBack';
 
 const WebUrlLoaderModal = ({url, setModal}) => {

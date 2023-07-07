@@ -1,4 +1,4 @@
-import {TouchableOpacity, View} from 'react-native';
+import {View} from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import NuggetActionsOverlay from './NuggetActionsOverlay';
@@ -11,7 +11,6 @@ import {
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
-import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
 
 function NuggetItem({
   index,
@@ -61,7 +60,6 @@ function NuggetItem({
     isAppForeground,
     viewableItem,
     viewableNuggetItem,
-    // nugget.nugget_id,
     mediaItem.media_id,
     isFocused,
     isAutoPlay,
@@ -82,7 +80,6 @@ function NuggetItem({
     isAppForeground,
     viewableItem,
     viewableNuggetItem,
-    // nugget.nugget_id,
     mediaItem.media_id,
     isFocused,
   ]);

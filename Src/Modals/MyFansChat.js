@@ -17,11 +17,10 @@ import {
   getFileName,
   getUrlWithFilePrefix,
 } from '../Utilities/Methods';
-import {DIMENSIONS, IS_IOS} from '../Utilities/Constants';
+import {DIMENSIONS} from '../Utilities/Constants';
 import {FONTS} from '../Utilities/Fonts';
 import {useNavigation} from '@react-navigation/native';
-import {useGroupsList, useProfile, useToken} from '../Utilities/StoreData';
-import {influencerChatService} from '../Services/ApiService';
+import {useGroupsList, useProfile} from '../Utilities/StoreData';
 import Toast from '../Components/Toast';
 import {Camera} from 'react-native-vision-camera';
 import CustomCameraView from './CameraModals/CustomCameraView';
@@ -34,13 +33,11 @@ import {sendSocketMessage} from '../Services/Socket/Socket';
 var isMount = true;
 const MyFansChat = () => {
   const navigation = useNavigation();
-  const token = useToken();
   const profile = useProfile();
   const groupsList = useGroupsList();
   const [message, setmessage] = useState('');
   const [selectedMediaList, setselectedMediaList] = useState([]);
   const [uploadedMediaList, setuploadedMediaList] = useState([]);
-  const [type, settype] = useState(1);
   const [isOpenCamera, setisOpenCamera] = useState(false);
   const [isOpenAudioRecorder, setisOpenAudioRecorder] = useState(false);
   const [isLoading, setisLoading] = useState(false);
@@ -158,9 +155,6 @@ const MyFansChat = () => {
 
   async function handleOpenCamera() {
     try {
-      // const cameraPermission = await Camera.getCameraPermissionStatus();
-      // const microphonePermission = await Camera.getMicrophonePermissionStatus();
-
       const newCameraPermission = await Camera.requestCameraPermission();
       const newMicrophonePermission =
         await Camera.requestMicrophonePermission();
@@ -264,7 +258,6 @@ const MyFansChat = () => {
 
   return (
     <HOCView
-      //   isLoading={isLoading}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
       paddingHorizontal={5}
       loaderProps={{
@@ -287,7 +280,6 @@ const MyFansChat = () => {
         activeOpacity={1}
         style={styles.mainContainer}
         onPress={() => {
-          // openCloseEmojiPicker(false);
           Keyboard.dismiss();
         }}>
         <View style={styles.topContainer}>
@@ -297,27 +289,12 @@ const MyFansChat = () => {
               style={styles.textInput}
               multiline
               maxLength={500}
-              // onFocus={() => {
-              //   openCloseEmojiPicker(false);
-              // }}
               value={message}
               onChangeText={setmessage}
               numberOfLines={5}
               textAlignVertical={'top'}
               placeholderTextColor={COLORS.placeHolderColor}
             />
-            {/* <View style={styles.emojiIconContainer}>
-                <SVGIcon
-                  icon={'emojee'}
-                  // height={30}
-                  // width={30}
-                  isButton
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    // openCloseEmojiPicker(true);
-                  }}
-                />
-              </View> */}
           </View>
           <View style={styles.buttonsContainer}>
             <SVGIcon
@@ -367,32 +344,10 @@ const MyFansChat = () => {
           )}
           <SubmitButton
             buttonText="Send"
-            // isDisabled={isDisabledPostButton()}
             disabledColor={COLORS.dimColor}
             isDisabled={uploadedMediaList.length <= 0 && !message.trim()}
             onPress={() => {
               handleSendChat();
-
-              // if (!isDisabledPostButton()) {
-              //   if (
-              //     (selectedShareType.id === 3 ||
-              //       selectedShareType.id === 4) &&
-              //     shareConnectionsGroupsIdsList.length <= 0
-              //   ) {
-              //     Toast.fail(
-              //       selectedShareType.id === 3
-              //         ? 'Select groups'
-              //         : 'Select connections',
-              //     );
-              //     setisOpenSelectionModal(true);
-              //     return;
-              //   }
-              //   if (nugget) {
-              //     handleEditNugget();
-              //   } else {
-              //     handlePostNuggets();
-              //   }
-              // }
             }}
           />
         </View>

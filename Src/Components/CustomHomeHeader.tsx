@@ -50,7 +50,6 @@ const CustomHomeHeader = ({
   isEnableReward = false,
   paddingTop = 0,
   title = '',
-  onPressBack,
   onLeftContainerLayout,
   onRightContainerLayout,
   isEnableLive = true,
@@ -111,12 +110,7 @@ const CustomHomeHeader = ({
             }}
           />
         ) : (
-          <TouchableOpacity
-            // disabled={true}
-            onPress={() => {
-              navigation.navigate('EventHost');
-              // navigation.navigate('PlansAndPrice');
-            }}>
+          <TouchableOpacity disabled>
             <SVGIcon icon="app_logo_white" height={30} width={30} />
           </TouchableOpacity>
         )}
@@ -216,17 +210,6 @@ const CustomHomeHeader = ({
               }
             }}
             style={styles.gifContainer}>
-            {/* <SVGIcon
-            icon="live"
-            isButton
-            height={28}
-            width={28}
-            marginLeft={5}
-            onPress={() => {
-              if (isLogin()) {
-              }
-            }}
-          /> */}
             <Image source={LiveGif} style={styles.gif} />
           </TouchableOpacity>
         )}

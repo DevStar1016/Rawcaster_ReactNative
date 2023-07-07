@@ -10,12 +10,19 @@ import SubmitButton from '../Components/SubmitButton';
 import DropDownPicker from '../Components/DropDownPicker';
 import {GENDER_LIST} from '../Utilities/Constants';
 
+type FilterDataType = {
+  country?: string;
+  gender?: string;
+  age?: string;
+};
+
 type Props = {
   setModal: (val: boolean) => void;
   onSubmit: (filterData: any) => void;
   listType: 'connections' | 'fans' | 'influencers' | 'unclaimed_influencers';
-  preFilterData?: any;
+  preFilterData?: FilterDataType;
 };
+
 var isMount = true;
 const FilterProfileSeeAllUsers = ({
   setModal,
@@ -24,11 +31,11 @@ const FilterProfileSeeAllUsers = ({
   preFilterData,
 }: Props) => {
   const [ageError, setageError] = useState('');
-  const [filterData, setfilterData] = useState(
+  const [filterData, setfilterData] = useState<FilterDataType>(
     preFilterData ?? {
-      country: null,
-      gender: null,
-      age: null,
+      country: undefined,
+      gender: undefined,
+      age: undefined,
     },
   );
 
@@ -173,35 +180,6 @@ const FilterProfileSeeAllUsers = ({
           </View>
         </SafeAreaView>
       </KeyboardAwareScrollView>
-
-      {/* <Modal
-        visible={isOpenCategoryListSelection}
-        statusBarTranslucent
-        onRequestClose={() => {
-          setisOpenCategoryListSelection(false);
-        }}>
-        <MultiItemsSelectList
-          title={'Select Category'}
-          onCloseModal={() => {
-            setisOpenCategoryListSelection(false);
-          }}
-          preSelectedIds={[...selectedCategoryIdsList]}
-          displayFieldName={'name'}
-          idFieldName={'id'}
-          isEnableMaxSelection
-          maxSelectedCount={3}
-          itemTextContainerStyle={{paddingLeft: 10}}
-          list={[...influencerCategoryList]}
-          onSelectItems={list => {
-            setisOpenCategoryListSelection(false);
-            setselectedCategoryIdsList(list);
-            // setisOpenViewOnlySelectionModal(false);
-            // if (selectedShareTypeId) {
-            //   handleSharNugget(selectedShareTypeId, list);
-            // }
-          }}
-        />
-      </Modal> */}
     </View>
   );
 };

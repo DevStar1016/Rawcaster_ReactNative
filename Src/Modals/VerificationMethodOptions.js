@@ -61,10 +61,6 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
                 onPress={() => {
                   onSubmitOption('email');
                 }}>
-                {/* <Image
-                  source={require('../assets/icon/mail.png')}
-                  style={[styles.icon, {width: 20}]}
-                /> */}
                 <SVGIcon icon="email" />
                 <View style={{paddingLeft: 10}}>
                   <StyledText style={styles.choiceText}>
@@ -83,10 +79,6 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
                 onPress={() => {
                   onSubmitOption('sms');
                 }}>
-                {/* <Image
-                  source={require('../assets/icon/phone.png')}
-                  style={[styles.icon, {width: 20}]}
-                /> */}
                 <SVGIcon icon="phone" />
                 <View style={{paddingLeft: 10}}>
                   <StyledText style={styles.choiceText}>

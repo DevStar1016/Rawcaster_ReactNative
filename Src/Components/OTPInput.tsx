@@ -1,6 +1,5 @@
-import {Keyboard, StyleSheet, Text, TextInput, View} from 'react-native';
+import {StyleSheet, TextInput, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import OTPInputView from '@twotalltotems/react-native-otp-input';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
 import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
@@ -151,15 +150,6 @@ const OTPInput = ({
             }}
           />
         ))}
-        {/* <OTPInputView
-          style={{width: '100%', height: '100%'}}
-          pinCount={6}
-          autoFocusOnLoad
-          editable={true}
-          codeInputFieldStyle={styles.inputField}
-          codeInputHighlightStyle={styles.focusedField}
-          onCodeChanged={onCodeChanged}
-        /> */}
       </View>
       {errorText || errorString ? (
         <StyledText style={styles.errorText}>
@@ -198,7 +188,6 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: 'space-between',
     alignItems: 'center',
-    // backgroundColor: 'red',
   },
 
   inputField: {

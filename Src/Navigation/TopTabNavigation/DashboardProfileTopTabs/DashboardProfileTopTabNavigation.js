@@ -3,7 +3,7 @@ import BottomTabNavigation from '../../BottomTabNavigation';
 import ProfileStack from '../../../Stacks/ProfileStack';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {DashboardProfileContext} from '../../../Utilities/Contexts';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 const Tab = createMaterialTopTabNavigator();
 

@@ -1,10 +1,4 @@
-import {
-  Modal,
-  SafeAreaView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Modal, SafeAreaView, StyleSheet, View} from 'react-native';
 import React, {useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import DropDownPicker from '../Components/DropDownPicker';

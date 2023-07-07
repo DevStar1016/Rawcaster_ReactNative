@@ -4,7 +4,7 @@ import Video from 'react-native-video';
 import moment from 'moment';
 import axios from 'axios';
 import * as Progress from 'react-native-progress';
-import {DIMENSIONS, IS_IOS} from '../Utilities/Constants';
+import {DIMENSIONS} from '../Utilities/Constants';
 import SVGIcon from './SVGIcon';
 import {COLORS} from '../Utilities/Colors';
 import {useProfile, useToken} from '../Utilities/StoreData';
@@ -60,9 +60,6 @@ const MediaSmallItem = ({
     setprogressValue(progressEvent.loaded / progressEvent.total);
     progressRefValue.current = progressEvent.loaded / progressEvent.total;
     console.log(progressEvent.loaded / progressEvent.total, 'PROGRESS');
-    // if (progressEvent.loaded >= progressEvent.total) {
-
-    // }
   };
 
   const uploadChatAttachmentAPICall = async uniqueId => {

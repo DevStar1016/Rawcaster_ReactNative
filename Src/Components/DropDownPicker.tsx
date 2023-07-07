@@ -4,7 +4,6 @@ import {
   Modal,
   SafeAreaView,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableOpacity,
   View,
@@ -19,7 +18,6 @@ import SVGIcon from './SVGIcon';
 import ItemSelectionMiniList from './ItemSelectionMiniList';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {IconType} from '../Utilities/Icons';
-import moment from 'moment';
 import ItemSelectionBigList, {
   ItemSelectionBigListProps,
 } from './ItemSelectionBigList';

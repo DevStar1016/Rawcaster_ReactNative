@@ -47,8 +47,6 @@ import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHost from '../Screens/MainScreens/Events/EventHost/EventHost';
 import ChimeSocketListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
-// import ChimeMessagingListener from '../Services/ChimeMessaging/ListenerComponent/ChimeMessagingListener';
-// import {ChimeSDKMessagingClient} from '@aws-sdk/client-chime-sdk-messaging';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -57,24 +55,6 @@ const MainStack = () => {
   const token = useToken();
   const dispatch = useDispatch();
   const globalLoaderData = useGlobalLoaderData();
-
-  useEffect(() => {
-    // AWS.config.update({
-    //   region: 'us-east-1',
-    //   credentials: new AWS.Credentials(
-    //     'AKIAYFYE6EFYG6RJOPMF',
-    //     '2xf3IXK0x9s5KX4da01OM5Lhl+vV17ttloRMeXVk',
-    //   ),
-    // });
-    // const chimeMessaging = new AWS.ChimeSDKMessaging();
-    // chimeMessaging.listChannels({}, (err, data) => {
-    //   if (err) {
-    //     console.log('Error:', err);
-    //   } else {
-    //     console.log('Channels:', data);
-    //   }
-    // });
-  }, []);
 
   useEffect(() => {
     initialAPICall();
@@ -232,5 +212,3 @@ const MainStack = () => {
 };
 
 export default MainStack;
-
-const styles = StyleSheet.create({});

@@ -1,10 +1,4 @@
-import {
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {Alert, FlatList, KeyboardAvoidingView, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import Clipboard from '@react-native-community/clipboard';
@@ -14,11 +8,7 @@ import EncryptedMessageContainer from './EncryptedMessageContainer';
 import {IS_IOS} from '../../../Utilities/Constants';
 import {useProfile} from '../../../Utilities/StoreData';
 import ChatTextInput from './ChatTextInput';
-import {
-  compressMedia,
-  getFileName,
-  getSlicedText,
-} from '../../../Utilities/Methods';
+import {compressMedia, getFileName} from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
 import Toast from '../../../Components/Toast';
 

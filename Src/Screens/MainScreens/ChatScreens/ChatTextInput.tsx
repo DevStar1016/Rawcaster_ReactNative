@@ -2,7 +2,6 @@ import {
   Keyboard,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -358,7 +357,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 25,
     marginHorizontal: 10,
-    // paddingHorizontal: 10,
     overflow: 'hidden',
     marginBottom: 10,
   },
@@ -369,12 +367,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     maxHeight: 100,
-    // height: 45,
   },
   inputBox: {
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.black,
-    // flex: 1,
     backgroundColor: COLORS.white,
   },
   sendButtonContainer: {

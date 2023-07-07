@@ -1,16 +1,16 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {View} from 'react-native';
 import React, {useState} from 'react';
 import AnimatedBgFillContainer from './AnimatedBgFillContainer';
 import SubmitButton from './SubmitButton';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
-import {useSettings, useToken, useUserData} from '../Utilities/StoreData';
+import {useToken, useUserData} from '../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
 import {
   setIsOpenLoginAlert,
   setIsOpenVerifyPopup,
 } from '../Store/Slices/UtilitySlice';
-import {getSlicedText, utcToUserTimezone} from '../Utilities/Methods';
+import {getSlicedText} from '../Utilities/Methods';
 import moment from 'moment';
 
 type PollOptionsItemProp = {
@@ -54,16 +54,6 @@ const PollDataDisplay = ({
 
   const getRemainingTimeOfPoll = () => {
     const [daysval, hoursval, minutesval] = pollDuration.split(':');
-
-    // const userZoneTime = utcToUserTimezone(
-    //   createdDate,
-    //   settings?.time_zone,
-    // ).format('YYYY-MM-DD HH:mm:ss');
-
-    // const utcString = moment(userZoneTime, 'YYYY-MM-DD HH:mm:ss')
-    //   .add(daysval, 'days')
-    //   .add(hoursval, 'hours')
-    //   .add(minutesval, 'minutes');
     const utcString = moment
       .utc(createdDate, 'YYYY-MM-DD HH:mm:ss')
       .add(daysval, 'days')
@@ -154,7 +144,6 @@ const PollDataDisplay = ({
       }}>
       {getPollOptions().map((item: PollOptionsItemProp) => {
         return pollVotedData.isVoted || !getRemainingTimeOfPoll() ? (
-          // ||!getRemainingTimeOfPoll(nugget.poll_duration)
           <AnimatedBgFillContainer
             key={item.option_id.toString()}
             percentage={item.option_percentage}

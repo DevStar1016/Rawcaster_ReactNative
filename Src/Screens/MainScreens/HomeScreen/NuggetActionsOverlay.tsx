@@ -6,12 +6,10 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -24,10 +22,8 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {
   bigNumberFormater,
   dateToShortDate,
-  getMediaDurationFormat,
   getSlicedText,
   htmlDecodeText,
-  utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {
   DIMENSIONS,
@@ -42,7 +38,6 @@ import {
   useLikedNuggets,
   useProfile,
   useSavedNuggetsIds,
-  useSettings,
   useToken,
   useUnLikedNuggetsFromLikedNuggets,
   useUserData,
@@ -58,7 +53,6 @@ import {
 import {pollVoteService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
-import AnimatedBgFillContainer from '../../../Components/AnimatedBgFillContainer';
 import CommentsList from './Comments/CommentsList';
 import MenuContainer from '../../../Modals/MenuContainer';
 import {
@@ -106,11 +100,6 @@ type NuggetDetailsProps = {
   onPress?: () => void;
 };
 
-type PollOptionsItemProp = {
-  option_id: number;
-  option_name: string;
-  option_percentage: string;
-};
 type PollVotedDataProp = {
   isVoted: boolean;
   votedOptionID: any;
@@ -141,7 +130,6 @@ function NuggetActionsOverlay({
     isFromGlobalSearch,
     isEnableHeaderContainerHeightforTopButtons,
     isEnableTopInsetsPadding,
-    textNuggetNumberOfLines,
     isFrom,
     searchFocused,
     dashboardFocused,
@@ -174,8 +162,6 @@ function NuggetActionsOverlay({
   const savedNuggetsIds = useSavedNuggetsIds();
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
-  const [profileDataContainerHeight, setprofileDataContainerHeight] =
-    useState(0);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
   const [url, seturl] = useState('');
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
@@ -194,7 +180,6 @@ function NuggetActionsOverlay({
   const [openMenuOptions, setopenMenuOptions] = useState(false);
   const [isReadLoading, setisReadLoading] = useState(false);
   const [isTranslated, setisTranslated] = useState(false);
-  const [ReadNuggetUrl, setReadNuggetUrl] = useState(null);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
@@ -244,19 +229,6 @@ function NuggetActionsOverlay({
     }
     return '';
   };
-  //  function handleExternalLink(url, event = false) {
-  //     if (url !== null) {
-  //       URL = url;
-  //       if (url.includes("rawcaster")) {
-  //         Linking.openURL(URL);
-  //         return;
-  //       }
-  //     }
-  //     if (event) {
-  //       Linking.openURL(URL);
-  //     }
-  //     setexternalLinkWarning((prev) => !prev);
-  //   }
 
   const pollVotingAPICall = (optionId: number) => {
     const formData = new FormData();
@@ -267,8 +239,6 @@ function NuggetActionsOverlay({
       .then(res => {
         if (res.data.status === 1) {
         } else if (res.data.status === 0) {
-          // setpollVotedData({isVoted: false, votedOptionID: null});
-          // Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
@@ -290,18 +260,15 @@ function NuggetActionsOverlay({
       .then(res => {
         if (res.data.status === 1) {
           if (getIsFocused) {
-            setReadNuggetUrl(res.data.file_path);
             if (handlePlayAudio) {
               handlePlayAudio(res.data.file_path);
             }
           }
         } else if (res.data.status === 0) {
-          setReadNuggetUrl(null);
           Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
-        setReadNuggetUrl(null);
         if (!e.message.includes('cancel')) {
           Toast.fail(e.message);
         }
@@ -367,9 +334,19 @@ function NuggetActionsOverlay({
     }
     if (nugget.content) {
       if (isTranslated) {
-        result = [...result, [...NUGGET_ACTIONS].find(item => item.id === 7)];
+        const translationOption = [...NUGGET_ACTIONS].find(
+          item => item.id === 7,
+        );
+        if (translationOption) {
+          result = [...result, translationOption];
+        }
       } else {
-        result = [...result, [...NUGGET_ACTIONS].find(item => item.id === 6)];
+        const translationOption = [...NUGGET_ACTIONS].find(
+          item => item.id === 6,
+        );
+        if (translationOption) {
+          result = [...result, translationOption];
+        }
       }
     }
     return result;
@@ -575,43 +552,6 @@ function NuggetActionsOverlay({
           pollOptions={nugget.poll_option}
           totalVotes={parseInt(nugget.total_vote)}
         />
-        {/* <View style={{paddingRight: 20}}>
-        {getPollOptions().map((item: PollOptionsItemProp) => {
-          return pollVotedData.isVoted ||
-            getRemainingTimeOfPoll(nugget.poll_duration) === '' ? (
-            // ||!getRemainingTimeOfPoll(nugget.poll_duration)
-            <AnimatedBgFillContainer
-              key={item.option_id.toString()}
-              percentage={item.option_percentage}
-              name={item.option_name}
-              mainContainerStyle={{marginTop: 10}}
-            />
-          ) : (
-            <SubmitButton
-              key={item.option_id.toString()}
-              paddingVertical={5}
-              buttonText={item.option_name}
-              marginTop={10}
-              isDisabled={pollVotedData.isVoted}
-              onPress={() => {
-                if (isLogin() && isVerified()) {
-                  setpollVotedData({
-                    isVoted: true,
-                    votedOptionID: item.option_id,
-                  });
-                  pollVotingAPICall(item.option_id);
-                }
-              }}
-            />
-          );
-        })}
-
-        <StyledText style={{color: COLORS.white, paddingTop: 10}}>
-          {`${getTotalVotes()} votes . ${getRemainingTimeOfPoll(
-            nugget.poll_duration,
-          )}`}
-        </StyledText>
-      </View> */}
       </>
     );
   }, [pollVotedData, getPollOptions(), nugget]);
@@ -619,7 +559,6 @@ function NuggetActionsOverlay({
   return (
     <TouchableOpacity
       activeOpacity={1}
-      // disabled={isLoadingVideo}
       onPress={onPlayPauseVideo}
       style={{
         position: 'absolute',
@@ -692,31 +631,12 @@ function NuggetActionsOverlay({
             position: 'absolute',
             top: 0,
             left: 10,
-            // marginRight: actionButtonsContainerWidth + 10,
             width:
               mainContentContainerWidth - (actionButtonsContainerWidth + 20),
             maxHeight:
               mainContentContainerHeight -
               (nuggetDataBottomContainerHeight + 10) -
               pollDataHeight,
-            // maxHeight:
-            // nugget.media_list.length > 0
-            //   ? 200
-            //   : nugget.poll_option && nugget.poll_option.length > 0
-            //   ? isEnableHeaderContainerHeightforTopButtons
-            //     ? 150
-            //     : nugget.poll_option.length > 2
-            //     ? 60
-            //     : 150
-            //   : DIMENSIONS.window.height -
-            //     (headerContainerHeight +
-            //       (isFromGlobalSearch
-            //         ? insets.bottom
-            //           ? insets.bottom
-            //           : 30
-            //         : 85) /*85 is Bottom Tab Bar Height*/ +
-            //       profileDataContainerHeight +
-            //       (insets.top ? insets.top : StatusBar.currentHeight)),
           }}>
           {nugget.content ? (
             <TouchableOpacity activeOpacity={1}>
@@ -727,31 +647,10 @@ function NuggetActionsOverlay({
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
-                {/* <Text
-                  style={{
-                    color: COLORS.white,
-                    backgroundColor: 'pink',
-                    width: '100%',
-                    height: 250,
-                    fontSize: 15.5,
-                    opacity: 0.8,
-                  }}>
-                  {htmlDecodeText(nugget.content.trim())}
-                </Text> */}
                 {/* @ts-ignore */}
                 <StyledText
                   textMode="read_more_hyper_link"
-                  numberOfLines={
-                    3
-                    // nugget.media_list.length > 0 ||
-                    // (nugget.poll_option && nugget.poll_option.length > 0)
-                    //   ? isEnableHeaderContainerHeightforTopButtons
-                    //     ? 5
-                    //     : nugget.poll_option.length > 2
-                    //     ? 2
-                    //     : 5
-                    //   : textNuggetNumberOfLines ?? 15
-                  }
+                  numberOfLines={3}
                   onPressUrl={onPressUrl}
                   style={{
                     color: COLORS.white,
@@ -759,12 +658,6 @@ function NuggetActionsOverlay({
                     opacity: 0.8,
                     lineHeight: 22,
                     width: '100%',
-                    // height: '200%',
-                    // height:
-                    //   mainContentContainerHeight -
-                    //   (nuggetDataBottomContainerHeight + 90),
-                    // backgroundColor: 'lavender',
-                    // paddingBottom: 5,
                   }}>
                   {isReadLoading ? (
                     <LoadingDots
@@ -825,22 +718,7 @@ function NuggetActionsOverlay({
           ) : null}
           {nugget.poll_option && nugget.poll_option.length > 0 && PollData()}
         </View>
-        <View
-          style={[
-            styles.topRightButtonsContainer,
-            // {
-            //   top:
-            //     (isEnableHeaderContainerHeightforTopButtons
-            //       ? headerContainerHeight
-            //       : 0) +
-            //     10 +
-            //     (isEnableTopInsetsPadding
-            //       ? insets.top
-            //         ? insets.top
-            //         : StatusBar.currentHeight
-            //       : 0),
-            // },
-          ]}>
+        <View style={[styles.topRightButtonsContainer]}>
           <TouchableOpacity
             style={styles.moreIconButton}
             activeOpacity={0.7}
@@ -906,12 +784,7 @@ function NuggetActionsOverlay({
               setnuggetDataBottomContainerHeight(e.nativeEvent.layout.height);
             }
           }}>
-          <View
-            onLayout={e => {
-              if (e.nativeEvent.layout.height) {
-                setprofileDataContainerHeight(e.nativeEvent.layout.height);
-              }
-            }}>
+          <View>
             <ProfileWithBadge
               badge={Badges(nugget.user_status_id)}
               profileImage={nugget.user_image}

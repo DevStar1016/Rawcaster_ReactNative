@@ -1,11 +1,4 @@
-import {
-  Image,
-  ImageStyle,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {ImageStyle, StyleSheet, View} from 'react-native';
 import React from 'react';
 import {BlurView} from '@react-native-community/blur';
 import SVGIcon from './SVGIcon';

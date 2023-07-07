@@ -1,12 +1,11 @@
 import {
   Image,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import React, {useState} from 'react';
+import React from 'react';
 import ImagePicker from 'react-native-image-crop-picker';
 import SVGIcon from './SVGIcon';
 import {BadgesType} from '../Utilities/Badges';
@@ -296,7 +295,6 @@ const styles = StyleSheet.create({
     top: 0,
     height: 32,
     width: 32,
-    // backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 32 / 2,

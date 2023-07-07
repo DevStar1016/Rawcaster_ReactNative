@@ -1,7 +1,5 @@
 import {
-  ListRenderItem,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableOpacity,
   View,

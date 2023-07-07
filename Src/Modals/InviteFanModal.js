@@ -1,4 +1,4 @@
-import {Modal, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {Modal, SafeAreaView, StyleSheet, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import StyledText from '../Components/StyledText';

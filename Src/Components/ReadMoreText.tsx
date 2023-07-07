@@ -1,7 +1,6 @@
-import React, {useCallback, useState} from 'react';
-import {Pressable, Text, TextStyle, TouchableOpacity, View} from 'react-native';
+import React, {useState} from 'react';
+import {Pressable, Text, TextStyle, View} from 'react-native';
 import {COLORS} from '../Utilities/Colors';
-import {IS_IOS} from '../Utilities/Constants';
 import {FONTS} from '../Utilities/Fonts';
 
 type Props = {
@@ -17,7 +16,6 @@ const ReadMoreText = ({
   textStyle = {},
   readMoreTextStyle = {},
 }: Props) => {
-  const [lengthMore, setLengthMore] = useState(false);
   const [isEnableFullText, setisEnableFullText] = useState(false);
 
   const getSlicedText = () => {

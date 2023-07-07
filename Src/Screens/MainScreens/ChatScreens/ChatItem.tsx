@@ -1,11 +1,4 @@
-import {
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, Modal, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useRef, useState} from 'react';
 import StyledText from '../../../Components/StyledText';
 import {COLORS} from '../../../Utilities/Colors';
@@ -19,7 +12,6 @@ import {Slider} from '@miblanchard/react-native-slider';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 //@ts-ignore
 import Video from 'react-native-video';
-import {IS_IOS} from '../../../Utilities/Constants';
 
 type Props = {
   item: any;
@@ -246,7 +238,6 @@ const ChatItem = ({
               <View
                 style={{
                   flexDirection: 'row',
-                  // backgroundColor: 'red',
                   width: '75%',
                   marginTop: 10,
                 }}>
@@ -359,7 +350,6 @@ const ChatItem = ({
                   isOpen: true,
                 });
               }}>
-              {/* {IS_IOS ? ( */}
               <Video
                 ref={videoPlayerRef}
                 resizeMode="cover"
@@ -373,14 +363,7 @@ const ChatItem = ({
                   } // this will set first frame of video as thumbnail
                 }}
               />
-              {/* ) : (
-                <Image
-                  style={{height: '100%', width: '100%'}}
-                  source={{uri: item.video_url}}
-                  borderRadius={10}
-                  resizeMode="cover"
-                />
-              )} */}
+
               <View
                 style={{
                   position: 'absolute',

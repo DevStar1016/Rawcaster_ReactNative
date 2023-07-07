@@ -1,6 +1,5 @@
 import {Animated, View, TouchableOpacity, StyleSheet} from 'react-native';
 import {COLORS} from '../../../Utilities/Colors';
-import {DIMENSIONS} from '../../../Utilities/Constants';
 import {FONTS} from '../../../Utilities/Fonts';
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 function ConnectionsGroupsTopTab({state, descriptors, navigation, position}) {
@@ -116,8 +115,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // paddingBottom: 5,
-    // paddingHorizontal: 15,
     backgroundColor: 'rgba(255,255,255,0.2)',
     height: 50,
     alignItems: 'center',
@@ -127,11 +124,8 @@ const styles = StyleSheet.create({
   tabButton: {
     flex: 1,
     borderRadius: 10,
-    // paddingVertical: 10,
-    // alignItems: 'center',
     marginHorizontal: 5,
     overflow: 'hidden',
-    // justifyContent: 'center',
   },
   textContainer: {
     flex: 1,

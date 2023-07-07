@@ -1,5 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import {StyleSheet} from 'react-native';
+import {useEffect} from 'react';
 import ConnectChimeSocket, {chimeSocketListen} from '../ChimeSocket';
 import {useUserData} from '../../../Utilities/StoreData';
 import {ChimeSocketEvents} from '../ChimeSocketEvents';

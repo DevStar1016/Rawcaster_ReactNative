@@ -1,10 +1,4 @@
-import {
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {Alert, FlatList, KeyboardAvoidingView, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import Clipboard from '@react-native-community/clipboard';

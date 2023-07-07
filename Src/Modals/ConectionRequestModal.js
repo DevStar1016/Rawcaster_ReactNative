@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import SVGIcon from '../Components/SVGIcon';
@@ -8,7 +8,6 @@ import ProfileWithBadge from '../Components/ProfileWithBadge';
 import {usePendingFriendRequests, useToken} from '../Utilities/StoreData';
 import SubmitButton from '../Components/SubmitButton';
 import {respondToFriendRequestsService} from '../Services/ApiService';
-import Toast from '../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setPendingFriendRequests} from '../Store/Slices/HomeSlice';
 import StyledText from '../Components/StyledText';

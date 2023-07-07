@@ -91,17 +91,7 @@ function DashboardTopTabNavigation() {
             fontFamily: FONTS.DMSans.bold,
             fontSize: 13,
           },
-        }}
-        //   screenListeners={{
-        //     focus: e => {
-        //       if (e.target.includes('ConnectionsList')) {
-        //         setFocusedTab(1);
-        //       } else if (e.target.includes('GroupsList')) {
-        //         setFocusedTab(2);
-        //       }
-        //     },
-        //   }}
-      >
+        }}>
         {categoryList.map(item => {
           return (
             <Tab.Screen

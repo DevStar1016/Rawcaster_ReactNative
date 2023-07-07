@@ -1,7 +1,6 @@
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -108,7 +107,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     overflow: 'hidden',
     marginBottom: 40,
-    // transform: [{translateY: -20}],
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

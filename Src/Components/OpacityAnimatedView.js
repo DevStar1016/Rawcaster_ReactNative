@@ -1,4 +1,4 @@
-import {Animated, StyleSheet, Text, View} from 'react-native';
+import {Animated} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 
 const OpacityAnimatedView = ({children, opacityMinimumValue = 0.2}) => {

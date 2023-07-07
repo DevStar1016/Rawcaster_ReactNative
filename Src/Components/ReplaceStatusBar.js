@@ -1,4 +1,4 @@
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
+import {StatusBar, View} from 'react-native';
 import React from 'react';
 import {IS_IOS} from '../Utilities/Constants';
 import {useInsets} from '../Utilities/StoreData';

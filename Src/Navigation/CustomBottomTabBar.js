@@ -57,14 +57,6 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
             : styles.relativeBarStyle
         }>
         {state.routes.map((route, index) => {
-          const {options} = descriptors[route.key];
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-              ? options.title
-              : route.name;
-
           let Icon;
           if (route.name === 'EventsStack') {
             Icon = EventsIcon;

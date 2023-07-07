@@ -1,11 +1,8 @@
 import {
   Animated,
   Modal,
-  Pressable,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,8 +20,6 @@ import {FONTS} from '../../Utilities/Fonts';
 import VideoRecordTimer from '../../Components/VideoRecordTimer';
 
 const MAX_VIDEO_SECONDS = 180;
-const AnimatedTouchableOpacity =
-  Animated.createAnimatedComponent(TouchableOpacity);
 
 const CustomCameraView = ({setModal, onSendMedia}) => {
   const [cameraSetting, setcameraSetting] = useState({
@@ -79,9 +74,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     if (camera.current) {
       try {
         const options = {
-          // qualityPrioritization: 'quality',
           flash: getFlashMode(),
-          // enableAutoRedEyeReduction: true
         };
         const data = await camera.current.takePhoto(options);
         setmediaData({
@@ -89,9 +82,6 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
           mediaType: 'image',
         });
         setisOpenPreview(true);
-        // setselectedMediaList([
-        //   { uri: getUrlWithFilePrefix(data.path), type: "image" },
-        // ]);
       } catch (e) {
         console.log(e, 'ERROR');
       }
@@ -155,13 +145,8 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
   const MediaActionButton = () => {
     return (
       <TouchableOpacity
-        style={[
-          styles.mediaActionButton,
-          // {transform: [{scale: animatedButtonScale}]},
-        ]}
+        style={[styles.mediaActionButton]}
         activeOpacity={0.7}
-        // onPressIn={onPressInMediaActionButton}
-        // onPressOut={onPressOutMediaActionButton}
         delayLongPress={400}
         onLongPress={() => {
           if (!isVideoRecording) {
@@ -210,7 +195,6 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     <View style={styles.mainContainer}>
       <Camera
         ref={camera}
-        // style={styles.cameraContainer}
         style={StyleSheet.absoluteFill}
         device={getCameraType()}
         isActive={true}
@@ -273,11 +257,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
               styles.topBottomActionButtonsContainer,
               {justifyContent: isVideoRecording ? 'center' : 'space-between'},
             ]}>
-            {!isVideoRecording && (
-              <View style={{height: 45, width: 45}} />
-
-              // <BottomActionButton icon="photo_fill_white" />
-            )}
+            {!isVideoRecording && <View style={{height: 45, width: 45}} />}
             <MediaActionButton />
             {!isVideoRecording && (
               <BottomActionButton

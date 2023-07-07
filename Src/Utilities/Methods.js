@@ -166,12 +166,6 @@ const getLatitudeLongitude = async () => {
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
             });
-            // dispatch(
-            //   setLocationDetails({
-            //     latitude: location.coords.latitude,
-            //     longitude: location.coords.longitude,
-            //   }),
-            // );
           },
           error => {
             reject(error);

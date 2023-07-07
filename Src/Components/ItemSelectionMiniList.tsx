@@ -1,4 +1,4 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';

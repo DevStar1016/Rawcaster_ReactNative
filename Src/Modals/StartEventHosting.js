@@ -2,7 +2,6 @@ import {
   ActivityIndicator,
   Image,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -21,7 +20,6 @@ var isMount = true;
 const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
   const videoPlayer = useRef(null);
   const [paused, setpaused] = useState(false);
-  const [isMuted, setisMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
   const [isLoadingMedia, setisLoadingMedia] = useState(true);
@@ -141,7 +139,6 @@ const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
             progressUpdateInterval={100}
             useTextureView={true}
             paused={paused}
-            muted={isMuted}
             repeat={false}
             onBuffer={() => {}}
             onLoad={event => {

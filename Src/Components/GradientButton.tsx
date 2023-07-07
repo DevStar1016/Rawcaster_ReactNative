@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {StyleSheet, TextStyle, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {IconType} from '../Utilities/Icons';
 import SVGIcon from './SVGIcon';

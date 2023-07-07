@@ -16,7 +16,6 @@ import {
   handleAudioRecord,
   handlePlayAudio,
 } from '../Utilities/AudioPlayerProcess';
-import moment from 'moment';
 
 const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -25,7 +24,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
   const [isRecording, setisRecording] = useState(false);
   const [isPlaying, setisPlaying] = useState(false);
   const [recordedAudio, setrecordedAudio] = useState(undefined);
-  const [isPaused, setisPaused] = useState(false);
   const [recordingAudioUniqueId, setrecordingAudioUniqueId] = useState('');
 
   useEffect(() => {
@@ -48,7 +46,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
     } catch (e) {
     } finally {
       setisRecording(false);
-      setisPaused(false);
     }
   };
 
@@ -59,22 +56,7 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
     } catch (e) {
     } finally {
       setisPlaying(false);
-      setisPaused(false);
     }
-  };
-
-  const handlePauseRecorder = async () => {
-    try {
-      await audioPlayer.pauseRecorder();
-      setisPaused(true);
-    } catch (e) {}
-  };
-
-  const handlePausePlayer = async () => {
-    try {
-      await audioPlayer.pausePlayer();
-      setisPaused(true);
-    } catch (e) {}
   };
 
   const ActionButton = ({onPress, icon, marginLeft = 0, iconSize = 15}) => {
@@ -140,24 +122,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
         <View style={styles.actionButtonsContainer}>
           {isRecording || isPlaying ? (
             <>
-              {/* <ActionButton
-                onPress={() => {
-                  if (isRecording) {
-                    if (isPaused) {
-                      handleAudioRecord();
-                    } else {
-                      handlePauseRecorder();
-                    }
-                  } else if (isPlaying) {
-                    if (isPaused) {
-                      handlePlayRecordedAudio();
-                    } else {
-                      handlePausePlayer();
-                    }
-                  }
-                }}
-                icon={isPaused ? 'play_fill_primary' : 'pause_fill_primary'}
-              /> */}
               <ActionButton
                 onPress={() => {
                   if (isRecording) {
@@ -172,10 +136,8 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
           ) : recordedAudio ? (
             <ActionButton
               onPress={() => {
-                // handlePlayRecordedAudio();
                 handlePlayAudio({
                   audioPlayer,
-                  setisPaused,
                   setisPlaying,
                   setplayingSeconds,
                   audioUniqueId: recordingAudioUniqueId,
@@ -192,7 +154,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
                 console.log('DSAFFHHJJGGHH');
                 handleAudioRecord({
                   audioPlayer,
-                  setisPaused,
                   setisRecording,
                   setrecordedAudio,
                   setrecordingSeconds,

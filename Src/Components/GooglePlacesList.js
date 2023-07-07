@@ -1,7 +1,6 @@
 import {SafeAreaView, StyleSheet, View} from 'react-native';
-import React, {useEffect, useRef} from 'react';
+import React from 'react';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
@@ -16,44 +15,6 @@ const GooglePlacesList = ({setOpenModal, onSelect}) => {
           flex: 1,
           backgroundColor: '#fff',
         }}>
-        {/* <View
-        style={{
-          height: 40,
-          backgroundColor: COLORS.primary,
-          justifyContent: "space-between",
-          flexDirection: "row",
-          alignItems: "center",
-          paddingLeft: 10,
-          paddingRight: 10,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => {
-            setislocationsearch(false);
-          }}
-        >
-          <Image
-            source={require("../../assets/icon/close.png")}
-            style={{ width: 20, height: 20, tintColor: "#fff" }}
-          />
-        </TouchableOpacity>
-        <View>
-          <Text style={[styles.textInputFont, { color: "#fff" }]}>
-            Location Search
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            setislocationsearch(false);
-          }}
-        >
-          <Image
-            source={require("../../assets/icon/tick-sign.png")}
-            style={{ width: 20, height: 20, tintColor: "#fff" }}
-          />
-        </TouchableOpacity>
-      </View> */}
-
         <HeaderWithBack
           title="Location Search"
           isTitleCenter={true}
@@ -68,8 +29,6 @@ const GooglePlacesList = ({setOpenModal, onSelect}) => {
           onPress={(data, details = null) => {
             setOpenModal(false);
             onSelect(data.description);
-            //   formRef.current.setFieldValue("location", data.description);
-            // setdetectedAddress(data.description);
           }}
           query={{
             key:

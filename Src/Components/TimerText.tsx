@@ -1,4 +1,4 @@
-import {StyleProp, StyleSheet, Text, TextStyle, View} from 'react-native';
+import {StyleProp, StyleSheet, TextStyle} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import StyledText from './StyledText';
 import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
