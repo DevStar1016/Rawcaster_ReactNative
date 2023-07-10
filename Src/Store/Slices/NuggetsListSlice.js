@@ -50,6 +50,9 @@ const NuggetsListSlice = createSlice({
         state.totalPages[action.payload] = 1;
       }
     },
+    clearNuggetsListReduxData: (state, action) => {
+      state = {...initialState};
+    },
   },
   extraReducers: builder => {
     builder
@@ -89,8 +92,10 @@ const NuggetsListSlice = createSlice({
         state.nuggetsLoading[categoryName] = false;
       })
       .addCase(getListNuggets.rejected, (state, action) => {
-        const {categoryName} = action.payload;
-        state.nuggetsLoading[categoryName] = false;
+        if (action.payload && action.payload.categoryName) {
+          const {categoryName} = action.payload;
+          state.nuggetsLoading[categoryName] = false;
+        }
       });
   },
 });
@@ -99,5 +104,6 @@ export const {
   setNuggetsList,
   setNuggetsLoading,
   resetNuggetsTotalPages,
+  clearNuggetsListReduxData,
 } = NuggetsListSlice.actions;
 export default NuggetsListSlice.reducer;

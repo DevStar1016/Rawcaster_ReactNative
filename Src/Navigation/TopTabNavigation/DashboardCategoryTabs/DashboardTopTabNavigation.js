@@ -12,6 +12,7 @@ import {DashboardCategoryTopTabContext} from '../../../Utilities/Contexts';
 import {useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import {getSlicedText} from '../../../Utilities/Methods';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -80,11 +81,13 @@ function DashboardTopTabNavigation() {
             backgroundColor: COLORS.transparent,
           },
           tabBarItemStyle: {
+            width: 'auto',
             borderColor: COLORS.transparent,
             borderWidth: 0,
             paddingHorizontal: 0,
             paddingRight: 0,
             paddingLeft: 0,
+            marginHorizontal: 10,
           },
           tabBarLabelStyle: {
             textTransform: 'capitalize',
@@ -99,7 +102,7 @@ function DashboardTopTabNavigation() {
               name={item.name}
               component={DashboardWithCategory}
               options={{
-                title: item.name,
+                title: getSlicedText(item.name, 15),
               }}
               initialParams={{
                 categoryType: item.id,

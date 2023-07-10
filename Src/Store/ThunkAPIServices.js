@@ -35,7 +35,6 @@ export const getListNuggets = createAsyncThunk(
     if (data?.categoryType) {
       formData.append('category', data?.categoryType);
     }
-
     try {
       const res = await listNuggetsService(formData, data?.signal);
       const tempLikedNuggets = [...res.data.nuggets_list]
@@ -71,7 +70,10 @@ export const getListNuggets = createAsyncThunk(
         categoryName: data?.categoryName,
       };
     } catch (error) {
-      return rejectWithValue({categoryName: data?.categoryName});
+      if (!error.message.includes('canceled')) {
+        return rejectWithValue({categoryName: data?.categoryName});
+      }
+      return rejectWithValue({categoryName: null});
     }
   },
 );

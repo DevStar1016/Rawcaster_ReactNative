@@ -1,5 +1,12 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, {useState} from 'react';
 import {COLORS} from '../../Utilities/Colors';
 import ProfileWithBadge from '../../Components/ProfileWithBadge';
 import SVGIcon from '../../Components/SVGIcon';
@@ -7,7 +14,8 @@ import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import GradientButton from '../../Components/GradientButton';
 import SubmitButton from '../../Components/SubmitButton';
-import {htmlDecodeText} from '../../Utilities/Methods';
+import {getSlicedText, htmlDecodeText} from '../../Utilities/Methods';
+import ItemSelectionMiniList from '../../Components/ItemSelectionMiniList';
 
 type Props = {
   isSelected?: boolean;
@@ -22,6 +30,40 @@ const InfluencerItem = ({
   onPressSelect,
   item,
 }: Props) => {
+  const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
+    useState<boolean>(false);
+
+  function getSelectedCategoriesList() {
+    if (item.category && item.category.length > 0) {
+      return [...item.category];
+    }
+    return [];
+  }
+
+  function getDisplayNameLength() {
+    if (item.category.length > 0 && item.category.toString().length >= 15) {
+      return 18;
+    }
+    return 23;
+  }
+
+  function getCategoriesTextLength() {
+    if (
+      htmlDecodeText(item.display_name) &&
+      htmlDecodeText(item.display_name).length >= 15
+    ) {
+      return 15;
+    }
+    return 20;
+  }
+
+  function getBioData() {
+    if (item.bio_data) {
+      return item.bio_data;
+    }
+    return '';
+  }
+
   return (
     <View style={styles.mainConatiner}>
       <ProfileWithBadge
@@ -41,20 +83,54 @@ const InfluencerItem = ({
         </TouchableOpacity>
         <View style={styles.nameContainer}>
           <StyledText style={{fontFamily: FONTS.DMSans.medium, fontSize: 17}}>
-            {htmlDecodeText(item.display_name)}
+            {getSlicedText(
+              htmlDecodeText(item.display_name),
+              getDisplayNameLength(),
+            )}
           </StyledText>
-          <View style={styles.dot} />
-          <StyledText style={{opacity: 0.7}}>
-            {item.category.toString()}
-          </StyledText>
+          {item.category.toString() ? (
+            <>
+              <View style={styles.dot} />
+              <StyledText
+                style={{opacity: 0.7}}
+                onPress={() => {
+                  if (
+                    item.category.toString().length > getCategoriesTextLength()
+                  ) {
+                    setisOpenCategoriesListModal(true);
+                  }
+                }}
+                normalTextModeTextProps={{numberOfLines: 1}}>
+                {getSlicedText(
+                  item.category.toString(),
+                  getCategoriesTextLength(),
+                )}
+              </StyledText>
+            </>
+          ) : (
+            false
+          )}
         </View>
+
         <StyledText
           style={{paddingVertical: 5}}
           textMode="read_more"
           numberOfLines={2}>
-          Lorem ipsum dolor sit amet, consectetur ipsum adipiscing elit. Donec
-          suscipit ex condim ilum entum ante egest
+          Lorem Ipsum is simply dummy text of the printing and typesetting
+          industry. Lorem Ipsum has been the industry's standard dummy text ever
+          since the 1500s, when an unknown printer took a galley of type and
+          scrambled it to make a type specimen book.
         </StyledText>
+        {/* {getBioData() ? (
+          <StyledText
+            style={{paddingVertical: 5}}
+            textMode="read_more"
+            numberOfLines={2}>
+            {getBioData()}
+          </StyledText>
+        ) : (
+          false
+        )} */}
 
         {isSelected ? (
           <SubmitButton
@@ -75,6 +151,25 @@ const InfluencerItem = ({
           />
         )}
       </View>
+
+      <Modal
+        visible={isOpenCategoriesListModal}
+        onRequestClose={() => {
+          setisOpenCategoriesListModal(false);
+        }}
+        transparent
+        style={{backgroundColor: COLORS.transparentDimColor}}>
+        <SafeAreaView
+          style={{flex: 1, backgroundColor: COLORS.transparentDimColor}}>
+          <ItemSelectionMiniList
+            onClose={() => {
+              setisOpenCategoriesListModal(false);
+            }}
+            isEnableClickItem={false}
+            listData={[...getSelectedCategoriesList()]}
+          />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 };
@@ -107,6 +202,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nameContainer: {
+    flex: 1,
     flexDirection: 'row',
     paddingVertical: 5,
     alignItems: 'center',

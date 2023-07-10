@@ -115,16 +115,20 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
-          if (item.locked === 1) {
-            navigation.navigate('CreateEditGroup', {
-              groupId: item.group_id,
-              isLocked: parseInt(item.locked) === 1,
-            });
-          } else {
-            navigation.navigate('GroupChat', {
-              groupData: {...item},
-            });
-          }
+          navigation.navigate('CreateEditGroup', {
+            groupId: item.group_id,
+            isLocked: parseInt(item.locked) === 1,
+          });
+          // if (item.locked === 1) {
+          //   navigation.navigate('CreateEditGroup', {
+          //     groupId: item.group_id,
+          //     isLocked: parseInt(item.locked) === 1,
+          //   });
+          // } else {
+          //   navigation.navigate('GroupChat', {
+          //     groupData: {...item},
+          //   });
+          // }
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge

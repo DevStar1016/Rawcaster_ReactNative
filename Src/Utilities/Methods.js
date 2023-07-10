@@ -17,6 +17,7 @@ import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
 import {getTimezone} from 'countries-and-timezones';
 import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
+import {clearNuggetsListReduxData} from '../Store/Slices/NuggetsListSlice';
 
 export const getAuthCode = (value = '') => {
   return sha1(SALT_KEY + value);
@@ -41,7 +42,7 @@ export const removeToken = async dispatch => {
   dispatch(setToken(null));
   dispatch(clearAuthReduxData());
   dispatch(clearHomeReduxData());
-
+  dispatch(clearNuggetsListReduxData());
   try {
     await EncryptedStorage.removeItem(ISLOGIN);
     await EncryptedStorage.removeItem(USER_DATA);

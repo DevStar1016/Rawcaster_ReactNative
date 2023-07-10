@@ -1,13 +1,11 @@
 import {Modal, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import EventTalkshowCommonScreen from '../EventsAndTalkshowsCommon/EventTalkshowCommonList';
-import {useNavigation} from '@react-navigation/native';
-import StartEventHosting from '../../../Modals/StartEventHosting';
+import StartEventHosting from '../../../Modals/StartJoinEventWaitingRoom';
 import {COLORS} from '../../../Utilities/Colors';
 
 var isMount = true;
 const Events = () => {
-  const navigation = useNavigation();
   const [isOpenHostingScreen, setisOpenHostingScreen] = useState(false);
   const [startEventDetails, setstartEventDetails] = useState(null);
 
@@ -19,18 +17,12 @@ const Events = () => {
     };
   }, []);
 
+  const handleJoinMeeting = () => {};
+
   return (
     <>
       <EventTalkshowCommonScreen
         screenType="event_and_live"
-        onPressAddButton={() => {
-          navigation.navigate('CreateEditEvent');
-        }}
-        onEditEvent={eventId => {
-          navigation.navigate('CreateEditEvent', {
-            eventId: eventId,
-          });
-        }}
         onPressStartJoinEvent={eventDetails => {
           if (isMount) {
             setstartEventDetails(eventDetails);
@@ -49,7 +41,11 @@ const Events = () => {
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
           <StartEventHosting
             eventItem={startEventDetails}
-            onStartHosting={() => {}}
+            onStartHosting={() => {
+              if (isMount) {
+                setisOpenHostingScreen(false);
+              }
+            }}
             onClose={() => {
               if (isMount) {
                 setisOpenHostingScreen(false);

@@ -138,6 +138,7 @@ const CreateEditTalkshow = ({route}) => {
     viewEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(JSON.stringify(res.data.event_detail, 'EVENT DETAILSSS'));
           if (res.data.event_detail.banner_image) {
             setbannerImage({
               uri: res.data.event_detail.banner_image,
@@ -159,15 +160,18 @@ const CreateEditTalkshow = ({route}) => {
 
           seteventVisibilityTypeId(res.data.event_detail.event_type_id);
 
-          setselectedGroupsIdsList(res.data.event_detail.invite_groups_id);
-          setremovedGroupsIdsList(res.data.event_detail.invite_groups_id);
-          setselectedConnectionsIdsList(
-            res.data.event_detail.invite_friends_id,
+          setselectedGroupsIdsList(
+            res.data.event_detail.invite_groups_id ?? [],
           );
-          setremovedConnectionsIdsList(res.data.event_detail.invite_friends_id);
-          console.log(res.data.event_detail.invite_mails, 'INVITED USERSS');
-          setinvitedUsersList(res.data.event_detail.invite_mails);
-          setremovedInvitedUsersList(res.data.event_detail.invite_mails);
+          setremovedGroupsIdsList(res.data.event_detail.invite_groups_id ?? []);
+          setselectedConnectionsIdsList(
+            res.data.event_detail.invite_friends_id ?? [],
+          );
+          setremovedConnectionsIdsList(
+            res.data.event_detail.invite_friends_id ?? [],
+          );
+          setinvitedUsersList(res.data.event_detail.invite_mails ?? []);
+          setremovedInvitedUsersList(res.data.event_detail.invite_mails ?? []);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

@@ -29,11 +29,10 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import {useNavigation} from '@react-navigation/native';
 
 type Props = {
   screenType: 'event_and_live' | 'talkshow';
-  onPressAddButton: () => void;
-  onEditEvent: (item: any) => void;
   onPressStartJoinEvent: (item: any) => void;
 };
 var isMount = true;
@@ -42,10 +41,9 @@ var totalPages = 1;
 
 const EventTalkshowCommonScreen = ({
   screenType,
-  onPressAddButton,
-  onEditEvent,
   onPressStartJoinEvent,
 }: Props) => {
+  const navigation = useNavigation();
   const token = useToken();
   const [searchText, setsearchText] = useState('');
   const [eventsList, seteventsList] = useState<any[]>([]);
@@ -291,7 +289,15 @@ const EventTalkshowCommonScreen = ({
               item={item}
               isDarkTheme
               onPressEdit={() => {
-                onEditEvent(item?.event_id);
+                navigation.navigate(
+                  /*@ts-ignore */
+                  screenType === 'talkshow'
+                    ? 'CreateEditTalkshow'
+                    : 'CreateEditEvent',
+                  {
+                    eventId: item?.event_id,
+                  },
+                );
               }}
               onPressDelete={() => {
                 onPressDelete(item?.event_id);
@@ -305,7 +311,14 @@ const EventTalkshowCommonScreen = ({
         />
 
         <RoundedPlusButton
-          onPress={onPressAddButton}
+          onPress={() => {
+            navigation.navigate(
+              /*@ts-ignore */
+              screenType === 'talkshow'
+                ? 'CreateEditTalkshow'
+                : 'CreateEditEvent',
+            );
+          }}
           style={styles.createEventPluButton}
         />
 

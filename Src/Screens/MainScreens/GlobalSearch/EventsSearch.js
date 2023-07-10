@@ -23,7 +23,7 @@ import {useToken} from '../../../Utilities/StoreData';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
 import Toast from '../../../Components/Toast';
-import StartEventHosting from '../../../Modals/StartEventHosting';
+import StartEventHosting from '../../../Modals/StartJoinEventWaitingRoom';
 
 var isMount = true;
 var currentPage = 1;

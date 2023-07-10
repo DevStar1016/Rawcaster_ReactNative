@@ -253,6 +253,7 @@ const CreateEditEvent = ({route}) => {
     formData.append('event_id', eventId);
     viewEventService(formData)
       .then(res => {
+        console.log(res.data.event_detail, 'EVENT DETAILSSS');
         if (res.data.status === 1) {
           let tempData = {...selectedValues};
           if (res.data.event_detail.banner_image) {
@@ -282,10 +283,7 @@ const CreateEditEvent = ({route}) => {
             //   settings?.time_zone,
             // ),
           );
-          console.log(
-            res.data.event_detail.invite_groups_id,
-            'SELECTED GROUP IDSSSS',
-          );
+
           tempData = {
             ...tempData,
             sound_notify: parseInt(res.data.event_detail.sound_notify),
@@ -306,12 +304,14 @@ const CreateEditEvent = ({route}) => {
               moment('2021-01-05 ' + res.data.event_detail.duration),
             ),
             eventVisibilityTypeId: res.data.event_detail.event_type_id,
-            selectedGroupsIdsList: res.data.event_detail.invite_groups_id,
-            removedGroupsIdsList: res.data.event_detail.invite_groups_id,
-            selectedConnectionsIdsList: res.data.event_detail.invite_friends_id,
-            removedConnectionsIdsList: res.data.event_detail.invite_friends_id,
-            invitedUsersList: res.data.event_detail.invite_mails,
-            removedInvitedUsersList: res.data.event_detail.invite_mails,
+            selectedGroupsIdsList: res.data.event_detail.invite_groups_id ?? [],
+            removedGroupsIdsList: res.data.event_detail.invite_groups_id ?? [],
+            selectedConnectionsIdsList:
+              res.data.event_detail.invite_friends_id ?? [],
+            removedConnectionsIdsList:
+              res.data.event_detail.invite_friends_id ?? [],
+            invitedUsersList: res.data.event_detail.invite_mails ?? [],
+            removedInvitedUsersList: res.data.event_detail.invite_mails ?? [],
           };
 
           setselectedValues({...tempData});
@@ -345,6 +345,15 @@ const CreateEditEvent = ({route}) => {
       return;
     }
     if (parseFloat(durationSelected) > settings?.max_event_duration) {
+      if (profile.user_status_id !== 4) {
+        dispatch(
+          setPremiumAlert({
+            status: true,
+            text: `To host event for longer than ${settings?.max_event_duration} hours upgrade your membership!`,
+          }),
+        );
+        return;
+      }
       setselectedValues(preData => ({
         ...preData,
         eventDuration: '',
@@ -571,9 +580,14 @@ const CreateEditEvent = ({route}) => {
                   setselectedValues({
                     ...selectedValues,
                     maxParticipants: text,
-                    participantError: `Maximum ${parseInt(
-                      settings?.max_event_participants_count,
-                    )} participants only allowed`,
+                    participantError:
+                      profile.user_status_id !== 4
+                        ? `To add more than ${parseInt(
+                            settings?.max_event_participants_count,
+                          )} participants upgrade your membership!`
+                        : `Maximum ${parseInt(
+                            settings?.max_event_participants_count,
+                          )} participants only allowed`,
                   });
                 } else if (parseInt(text) < 2) {
                   setselectedValues({
@@ -704,10 +718,21 @@ const CreateEditEvent = ({route}) => {
           mainContainerStyle={{marginVertical: 10}}
           isSelected={Boolean(selectedValues.waiting_room)}
           onPress={() => {
-            setselectedValues(preData => ({
-              ...preData,
-              waiting_room: Boolean(preData.waiting_room) ? 0 : 1,
-            }));
+            if (profile.user_status_id !== 4) {
+              dispatch(
+                setPremiumAlert({
+                  status: true,
+                  text: 'To access this feature become a premium member!',
+                }),
+              );
+              return;
+            }
+            setselectedValues(preData => {
+              return {
+                ...preData,
+                waiting_room: Boolean(preData.waiting_room) ? 0 : 1,
+              };
+            });
           }}
         />
         <CheckBox
@@ -715,6 +740,15 @@ const CreateEditEvent = ({route}) => {
           mainContainerStyle={{marginVertical: 10}}
           isSelected={Boolean(selectedValues.join_before_host)}
           onPress={() => {
+            if (profile.user_status_id !== 4) {
+              dispatch(
+                setPremiumAlert({
+                  status: true,
+                  text: 'To access this feature become a premium member!',
+                }),
+              );
+              return;
+            }
             setselectedValues(preData => ({
               ...preData,
               join_before_host: Boolean(preData.join_before_host) ? 0 : 1,

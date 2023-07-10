@@ -115,15 +115,15 @@ export const useIsNuggetsLoading = (categoryName = 'forYou') => {
       state => state.nugget_list_data.nuggetsLoading[categoryName],
     );
   }
-  return useSelector(state => {
-    const loadingStatusList = Object.keys(
-      state.nugget_list_data.nuggetsLoading,
-    ).map(keyName => state.nugget_list_data.nuggetsLoading[keyName]);
-    if (loadingStatusList.includes(true)) {
-      return true;
-    }
-    return false;
-  });
+  // return useSelector(state => {
+  //   const loadingStatusList = Object.keys(
+  //     state.nugget_list_data.nuggetsLoading,
+  //   ).map(keyName => state.nugget_list_data.nuggetsLoading[keyName]);
+  //   if (loadingStatusList.includes(true)) {
+  //     return true;
+  //   }
+  //   return false;
+  // });
 };
 
 export const useNuggetsList = (categoryName = 'forYou') => {

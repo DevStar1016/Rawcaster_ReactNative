@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../Components/StyledText';
 import SearchInput from '../../Components/SearchInput';
@@ -303,12 +302,16 @@ const InfluencersList = () => {
           </View>
 
           <SmallButton
-            buttonText="Skip"
+            buttonText={selectedInfluencersRefIds.length > 0 ? 'Next' : 'Skip'}
             isEnableIcon
             containerStyle={styles.smallButton}
             onPress={() => {
               Keyboard.dismiss();
-              dispatch(setIsVisibleInfluencers(false));
+              if (selectedInfluencersRefIds.length > 0) {
+                handleInfluencerFollow(selectedInfluencersRefIds, true);
+              } else {
+                dispatch(setIsVisibleInfluencers(false));
+              }
             }}
           />
         </View>

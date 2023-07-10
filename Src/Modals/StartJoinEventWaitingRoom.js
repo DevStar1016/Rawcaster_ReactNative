@@ -17,7 +17,7 @@ import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
 import {Slider} from '@miblanchard/react-native-slider';
 
 var isMount = true;
-const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
+const StartJoinEventWaitingRoom = ({onStartHosting, onClose, eventItem}) => {
   const videoPlayer = useRef(null);
   const [paused, setpaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -252,7 +252,7 @@ const StartEventHosting = ({onStartHosting, onClose, eventItem}) => {
   );
 };
 
-export default StartEventHosting;
+export default StartJoinEventWaitingRoom;
 
 const styles = StyleSheet.create({
   mainContainer: {

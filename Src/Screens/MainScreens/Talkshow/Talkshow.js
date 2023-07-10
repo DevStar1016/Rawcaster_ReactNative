@@ -4,19 +4,9 @@ import EventTalkshowCommonScreen from '../EventsAndTalkshowsCommon/EventTalkshow
 import {useNavigation} from '@react-navigation/native';
 
 const Talkshow = () => {
-  const navigation = useNavigation();
-
   return (
     <EventTalkshowCommonScreen
       screenType="talkshow"
-      onPressAddButton={() => {
-        navigation.navigate('CreateEditTalkshow');
-      }}
-      onEditEvent={eventId => {
-        navigation.navigate('CreateEditTalkshow', {
-          eventId: eventId,
-        });
-      }}
       onPressStartJoinEvent={() => {}}
     />
   );

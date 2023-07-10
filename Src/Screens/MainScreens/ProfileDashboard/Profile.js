@@ -753,11 +753,7 @@ const Profile = ({route}) => {
             isEnableLive={false}
             isEnableBack
             isEnableSafeArea
-            bgColor={
-              !isLoading && !isShowProfile()
-                ? COLORS.transparent
-                : COLORS.primary
-            }
+            bgColor={COLORS.primary}
             isEnableAddUserButton={
               userId &&
               othersProfile &&

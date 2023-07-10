@@ -748,7 +748,7 @@ function NuggetActionsOverlay({
             />
           )}
 
-          {token && profile ? (
+          {token && profile && isEnableADDButton ? (
             <RoundedIconButton
               icon="open_ai_white"
               bgColor={COLORS.transparentDimColor}

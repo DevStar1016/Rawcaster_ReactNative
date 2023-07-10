@@ -590,7 +590,6 @@ const GeneralSettings = () => {
           onSelectItems={list => {
             closeSpecificUsersModal();
             if (isMount) {
-              console.log(selectedChoiceUserGroupListData, 'GFIELD');
               setselectedChoiceUserGroupListData(preData => ({
                 ...preData,
                 [specificUsersModalData.listFieldName]: [...list],
