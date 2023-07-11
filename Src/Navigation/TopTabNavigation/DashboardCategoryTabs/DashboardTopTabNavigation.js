@@ -8,11 +8,15 @@ import {
   useInsets,
   useToken,
 } from '../../../Utilities/StoreData';
-import {DashboardCategoryTopTabContext} from '../../../Utilities/Contexts';
+import {
+  DashboardCategoryTopTabContext,
+  useDashboardProfile,
+} from '../../../Utilities/Contexts';
 import {useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {getSlicedText} from '../../../Utilities/Methods';
+import DashboardCustomTopTabBar from './DashboardCustomTopTabBar';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -20,6 +24,7 @@ function DashboardTopTabNavigation() {
   const insets = useInsets();
   const categoryList = useInfluencerCategoryList();
   const token = useToken();
+  const {setswipeEnabled} = useDashboardProfile() ?? {};
   const [
     headerRightButtonsContainerWidth,
     setheaderRightButtonsContainerWidth,
@@ -35,7 +40,7 @@ function DashboardTopTabNavigation() {
 
   return (
     <DashboardCategoryTopTabContext.Provider value={categoriesListData}>
-      {token && (
+      {/* {token && (
         <View
           onLayout={e => {
             setheaderContainerHeight(e.nativeEvent.layout.height);
@@ -53,10 +58,22 @@ function DashboardTopTabNavigation() {
             onRightContainerLayout={setheaderRightButtonsContainerWidth}
           />
         </View>
-      )}
+      )} */}
       <Tab.Navigator
+        tabBar={props => <DashboardCustomTopTabBar {...props} />}
         initialRouteName="ForYou"
         backBehavior="initialRoute"
+        screenListeners={{
+          focus: e => {
+            if (setswipeEnabled) {
+              if (e.target.includes('ForYou')) {
+                setswipeEnabled(true);
+              } else {
+                setswipeEnabled(false);
+              }
+            }
+          },
+        }}
         screenOptions={{
           tabBarIndicatorStyle: {
             backgroundColor: COLORS.transparent,
@@ -67,33 +84,33 @@ function DashboardTopTabNavigation() {
             // centerText="Fetching Nuggets" isEnableLoading
             />
           ),
-          tabBarScrollEnabled: true,
+          // tabBarScrollEnabled: true,
           tabBarActiveTintColor: COLORS.secondary,
           tabBarInactiveTintColor: COLORS.white,
-          tabBarStyle: {
-            borderWidth: 0,
-            elevation: 0,
-            position: 'absolute',
-            left: headerLeftButtonContainerWidth + 20,
-            right: headerRightButtonsContainerWidth + 20,
-            top: insets.top ? insets.top : StatusBar.currentHeight,
-            alignItems: 'center',
-            backgroundColor: COLORS.transparent,
-          },
-          tabBarItemStyle: {
-            width: 'auto',
-            borderColor: COLORS.transparent,
-            borderWidth: 0,
-            paddingHorizontal: 0,
-            paddingRight: 0,
-            paddingLeft: 0,
-            marginHorizontal: 10,
-          },
-          tabBarLabelStyle: {
-            textTransform: 'capitalize',
-            fontFamily: FONTS.DMSans.bold,
-            fontSize: 13,
-          },
+          // tabBarStyle: {
+          //   borderWidth: 0,
+          //   elevation: 0,
+          //   position: 'absolute',
+          //   left: headerLeftButtonContainerWidth + 20,
+          //   right: headerRightButtonsContainerWidth + 20,
+          //   top: insets.top ? insets.top : StatusBar.currentHeight,
+          //   alignItems: 'center',
+          //   backgroundColor: COLORS.transparent,
+          // },
+          // tabBarItemStyle: {
+          //   width: 'auto',
+          //   borderColor: COLORS.transparent,
+          //   borderWidth: 0,
+          //   paddingHorizontal: 0,
+          //   paddingRight: 0,
+          //   paddingLeft: 0,
+          //   marginHorizontal: 10,
+          // },
+          // tabBarLabelStyle: {
+          //   textTransform: 'capitalize',
+          //   fontFamily: FONTS.DMSans.bold,
+          //   fontSize: 13,
+          // },
         }}>
         {categoryList.map(item => {
           return (
@@ -121,6 +138,7 @@ function DashboardTopTabNavigation() {
           }}
           initialParams={{filterType: 1, categoryName: 'influencing'}}
         />
+
         <Tab.Screen
           name="ForYou"
           component={DashboardWithCategory}
