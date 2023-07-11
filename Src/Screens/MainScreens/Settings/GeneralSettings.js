@@ -474,18 +474,20 @@ const GeneralSettings = () => {
             }}
           />
 
-          <DropDownPicker
-            title="Preference Language"
-            value={getSelectedLanguage()}
-            listTitle=""
-            titleStyle={styles.titleText}
-            borderColor={COLORS.borderColor}
-            dataList={languagesList}
-            fieldName="name"
-            onSelectItem={selectedItem => {
-              handleChangeSettingsData(selectedItem.id, 'language_id');
-            }}
-          />
+          {false && (
+            <DropDownPicker
+              title="Preference Language"
+              value={getSelectedLanguage()}
+              listTitle=""
+              titleStyle={styles.titleText}
+              borderColor={COLORS.borderColor}
+              dataList={languagesList}
+              fieldName="name"
+              onSelectItem={selectedItem => {
+                handleChangeSettingsData(selectedItem.id, 'language_id');
+              }}
+            />
+          )}
           <DropDownPicker
             title="Readout Language"
             value={getSelectedReadOutLanguage()}

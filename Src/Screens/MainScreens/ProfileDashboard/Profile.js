@@ -587,7 +587,7 @@ const Profile = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature become a diamond member!',
+                  text: 'To access this feature you need to become a diamond member!',
                 }),
               );
             }

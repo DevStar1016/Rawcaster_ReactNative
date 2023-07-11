@@ -255,10 +255,12 @@ function NuggetActionsOverlay({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
-    formData.append('translation_type', 1);
+    // formData.append('translation_type', 1);
     nuggetContentAudioService(formData, nuggetContentController.current.signal)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data);
+
           if (getIsFocused) {
             if (handlePlayAudio) {
               handlePlayAudio(res.data.file_path);
@@ -762,7 +764,7 @@ function NuggetActionsOverlay({
                   dispatch(
                     setPremiumAlert({
                       status: true,
-                      text: 'To access this feature become a premium member!',
+                      text: 'To access this feature you need to become a premium member!',
                     }),
                   );
                 }

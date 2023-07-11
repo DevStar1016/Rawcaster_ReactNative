@@ -33,7 +33,7 @@ import {
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 
-const SocialSignin = ({pushId}) => {
+const SocialSignin = ({pushId, isLogin = false}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const locationDetails = useLocationDetails();
@@ -202,7 +202,9 @@ const SocialSignin = ({pushId}) => {
           <SignupTypeButton
             key={item.id.toString()}
             index={index}
-            buttonText={`Signup with ${item.platformName}`}
+            buttonText={`${isLogin ? 'Signin' : 'Signup'} with ${
+              item.platformName
+            }`}
             icon={item.iconName}
             onPress={() => {
               onPressSocialSignup(item.id);

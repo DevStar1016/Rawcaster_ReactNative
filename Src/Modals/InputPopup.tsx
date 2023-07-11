@@ -92,7 +92,8 @@ const styles = StyleSheet.create({
   },
   subContainer: {
     backgroundColor: COLORS.white,
-    padding: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     borderRadius: 10,
   },
   titleContainer: {

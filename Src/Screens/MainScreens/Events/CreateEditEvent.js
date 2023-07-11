@@ -147,7 +147,7 @@ const CreateEditEvent = ({route}) => {
           dispatch(
             setPremiumAlert({
               status: true,
-              text: 'To access this feature become a premium member!',
+              text: 'To access this feature you need to become a premium member!',
             }),
           );
         } else if (
@@ -158,7 +158,7 @@ const CreateEditEvent = ({route}) => {
           dispatch(
             setPremiumAlert({
               status: true,
-              text: 'To access this feature become a premium member!',
+              text: 'To access this feature you need to become a premium member!',
             }),
           );
         } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
@@ -722,7 +722,7 @@ const CreateEditEvent = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature become a premium member!',
+                  text: 'To access this feature you need to become a premium member!',
                 }),
               );
               return;
@@ -744,7 +744,7 @@ const CreateEditEvent = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature become a premium member!',
+                  text: 'To access this feature you need to become a premium member!',
                 }),
               );
               return;

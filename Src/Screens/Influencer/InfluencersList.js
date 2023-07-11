@@ -360,7 +360,7 @@ const InfluencersList = () => {
               activeOpacity={0.7}
               disabled={selectedInfluencersRefIds.length <= 0}
               onPress={() => {
-                handleInfluencerFollow(selectedInfluencersRefIds, true);
+                handleInfluencerFollow(selectedInfluencersRefIds);
               }}>
               <StyledText style={{paddingVertical: 5}}>Become a Fan</StyledText>
               <SVGIcon

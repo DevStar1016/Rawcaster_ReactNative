@@ -196,7 +196,7 @@ const Login = () => {
               Sign up
             </StyledText>
           </View>
-          <SocialSignin pushId={pushId} />
+          <SocialSignin pushId={pushId} isLogin />
 
           <PoliciesFooter />
         </View>
