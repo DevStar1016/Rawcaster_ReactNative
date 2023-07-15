@@ -22,6 +22,7 @@ import {
   useToken,
   useTranslatedNuggetsList,
   useUnclaimedAccountsList,
+  useUploadingNuggets,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
@@ -50,7 +51,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
-import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 const PADDING_HORIZONTAL = 10;
 var currentPage = 1;
 var totalPages = 1;
@@ -62,6 +63,7 @@ const Profile = ({route}) => {
   const dispatch = useDispatch();
   const profile = useProfile();
   const isFocused = useIsFocused();
+  const uploadingNuggets = useUploadingNuggets();
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const editedNuggetsList = useEditedNuggetsList();
   const translatedNuggetsList = useTranslatedNuggetsList();
@@ -70,6 +72,7 @@ const Profile = ({route}) => {
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
   );
 
+  const [isOpenPremiumAlert, setisOpenPremiumAlert] = useState(false);
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
@@ -579,17 +582,16 @@ const Profile = ({route}) => {
           isDisableVerifyAccount={getIsDisableVerifyAccount()}
           verifyAccountButtonText={getVerifyAccountButtonText()}
           onPressVerifyAccount={() => {
+            console.log('VERIFYYY');
             if (parseInt(profile?.user_status_id) === 4) {
+              console.log('IFFF');
               navigation.navigate('ClaimAccount', {
                 isVerifyAccount: true,
               });
             } else {
-              dispatch(
-                setPremiumAlert({
-                  status: true,
-                  text: 'To access this feature you need to become a diamond member!',
-                }),
-              );
+              if (isMount) {
+                setisOpenPremiumAlert(true);
+              }
             }
           }}
         />
@@ -712,6 +714,22 @@ const Profile = ({route}) => {
                 </StyledText>
               </TouchableOpacity>
             </View>
+            <Divider />
+
+            {uploadingNuggets && uploadingNuggets.length > 0 && (
+              <View style={styles.uploadingNuggetItemConteiner}>
+                <ActivityIndicator size={'small'} />
+                <View style={styles.uploadTextContainer}>
+                  <StyledText>{`${
+                    uploadingNuggets.length > 1
+                      ? uploadingNuggets.length + ' '
+                      : ''
+                  }Nugget${
+                    uploadingNuggets.length > 1 ? 's' : ''
+                  } being upload...`}</StyledText>
+                </View>
+              </View>
+            )}
           </>
         ) : (
           false
@@ -829,6 +847,28 @@ const Profile = ({route}) => {
 
         {!isFocused && <DefaultBackground />}
       </View>
+
+      <Modal onRequestClose={() => {}} transparent visible={isOpenPremiumAlert}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          onPressNegativeButton={() => {
+            if (isMount) {
+              setisOpenPremiumAlert(false);
+            }
+          }}
+          positiveButtonText={'Upgrade'}
+          negativeButtonText={'Later'}
+          onPressPositiveButton={() => {
+            if (isMount) {
+              setisOpenPremiumAlert(false);
+            }
+            navigation.navigate('PlansAndPrice');
+          }}
+          content={
+            'To access this feature you need to become a diamond member!'
+          }
+        />
+      </Modal>
     </NuggetParentActionsContext.Provider>
   );
 };
@@ -865,5 +905,14 @@ const styles = StyleSheet.create({
   nuggetFilterText: {
     fontFamily: FONTS.DMSans.medium,
     fontSize: 16,
+  },
+  uploadingNuggetItemConteiner: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  uploadTextContainer: {
+    flex: 1,
+    paddingLeft: 10,
   },
 });

@@ -44,7 +44,7 @@ import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/Das
 import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
-import EventHost from '../Screens/MainScreens/Events/EventHost/EventHost';
+import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
 import ChimeSocketListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 const Stack = createStackNavigator();
@@ -83,6 +83,7 @@ const MainStack = () => {
       listUnClaimAccountService(getCommonFormData()),
     ])
       .then(res => {
+        console.log(res[0].data, 'PROFILE DATAA RESPONSE');
         if (res[0].data.status === 1) {
           let profile = {...res[0].data.profile};
           profile = {
@@ -187,7 +188,7 @@ const MainStack = () => {
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
             <Stack.Screen name="UserChat" component={UserChat} />
             <Stack.Screen name="GroupChat" component={GroupChat} />
-            <Stack.Screen name="EventHost" component={EventHost} />
+            <Stack.Screen name="EventHostScreen" component={EventHostScreen} />
 
             <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen name="AddUserToGroup" component={AddUserToGroup} />

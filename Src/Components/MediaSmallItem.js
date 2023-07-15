@@ -20,10 +20,10 @@ const MediaSmallItem = ({
 }) => {
   const profile = useProfile();
   const token = useToken();
+  const chatUploadDownloadController = useRef(null);
   const [isUploading, setisUploading] = useState(isEnableUploadDownloadProcess);
   const [progressValue, setprogressValue] = useState(0);
   const progressRefValue = useRef(0);
-  const source = useRef(null);
   const videoPlayerRef = useRef(null);
   useEffect(() => {
     if (isEnableUploadDownloadProcess) {
@@ -39,8 +39,11 @@ const MediaSmallItem = ({
     }
 
     return () => {
-      if (isEnableUploadDownloadProcess && source.current) {
-        source.current.cancel();
+      if (
+        isEnableUploadDownloadProcess &&
+        chatUploadDownloadController.current
+      ) {
+        chatUploadDownloadController.current.abort();
       }
     };
   }, []);
@@ -63,14 +66,14 @@ const MediaSmallItem = ({
   };
 
   const uploadChatAttachmentAPICall = async uniqueId => {
-    source.current = axios.CancelToken.source();
+    chatUploadDownloadController.current = new AbortController();
     let formData = new FormData();
     formData.append('token', token);
     formData.append('refid', uniqueId);
     formData.append('chatattachment', item);
     uploadChatAttachmentService(formData, {
       onUploadProgress: onUploadProgress,
-      cancelToken: source.current.token,
+      signal: chatUploadDownloadController.current.signal,
     })
       .then(res => {
         if (res.data.status === 1) {

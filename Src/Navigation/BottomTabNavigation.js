@@ -172,7 +172,6 @@ export default function BottomTabNavigation() {
 
       <Modal
         onRequestClose={() => {}}
-        style={{zIndex: 10000}}
         transparent
         visible={premiumALert.status}>
         <ConfirmationPopup

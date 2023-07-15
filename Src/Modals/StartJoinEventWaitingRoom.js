@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Image,
+  Modal,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -15,14 +16,20 @@ import SubmitButton from '../Components/SubmitButton';
 import AudioPlayingGif from '../Assets/Gif/audio_playing.gif';
 import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
 import {Slider} from '@miblanchard/react-native-slider';
+import {useToken} from '../Utilities/StoreData';
+import {joinMeeting} from '../Services/ApiService';
+import Loader from '../Components/Loader';
+import Toast from '../Components/Toast';
 
 var isMount = true;
-const StartJoinEventWaitingRoom = ({onStartHosting, onClose, eventItem}) => {
+const StartJoinEventWaitingRoom = ({onClose, eventItem, onStartHosting}) => {
   const videoPlayer = useRef(null);
+  const token = useToken();
   const [paused, setpaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
   const [isLoadingMedia, setisLoadingMedia] = useState(true);
+  const [isLoading, setisLoading] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -31,6 +38,31 @@ const StartJoinEventWaitingRoom = ({onStartHosting, onClose, eventItem}) => {
       isMount = false;
     };
   }, []);
+
+  const handleJoinMeeting = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('meeting_id', eventItem.chime_meeting_id);
+    joinMeeting(formData)
+      .then(res => {
+        console.log(res.data, 'MEETING RESPONSE');
+        if (res.data.status === 1) {
+          onStartHosting(res.data.meeting, res.data.attendee);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        console.log(e, 'ERROR JOIN MEETING');
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          onClose();
+          setisLoading(false);
+        }
+      });
+  };
 
   function onVideoError() {}
 
@@ -246,8 +278,16 @@ const StartJoinEventWaitingRoom = ({onStartHosting, onClose, eventItem}) => {
         borderWidth={1}
         textColor={COLORS.primary}
         marginTop={5}
-        onPress={onStartHosting}
+        onPress={() => {
+          if (isMount) {
+            setisLoading(true);
+          }
+          handleJoinMeeting();
+        }}
       />
+      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+        <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
     </View>
   );
 };

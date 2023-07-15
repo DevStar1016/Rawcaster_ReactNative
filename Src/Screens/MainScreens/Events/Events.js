@@ -3,9 +3,14 @@ import React, {useEffect, useState} from 'react';
 import EventTalkshowCommonScreen from '../EventsAndTalkshowsCommon/EventTalkshowCommonList';
 import StartEventHosting from '../../../Modals/StartJoinEventWaitingRoom';
 import {COLORS} from '../../../Utilities/Colors';
+import {createMeetingRoom} from '../../../Services/ChimeSocket/ChimeSocketRequests';
+import {useProfile} from '../../../Utilities/StoreData';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 const Events = () => {
+  const profile = useProfile();
+  const navigation = useNavigation();
   const [isOpenHostingScreen, setisOpenHostingScreen] = useState(false);
   const [startEventDetails, setstartEventDetails] = useState(null);
 
@@ -17,7 +22,19 @@ const Events = () => {
     };
   }, []);
 
-  const handleJoinMeeting = () => {};
+  const handleJoinMeeting = (meetingData, attendeeData) => {
+    if (isMount) {
+      setisOpenHostingScreen(false);
+    }
+    createMeetingRoom({
+      hostId: profile.user_id,
+      meetingId: meetingData.MeetingId,
+    });
+    navigation.navigate('EventHostScreen', {
+      meetingData: meetingData,
+      attendeeData: attendeeData,
+    });
+  };
 
   return (
     <>
@@ -41,11 +58,7 @@ const Events = () => {
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
           <StartEventHosting
             eventItem={startEventDetails}
-            onStartHosting={() => {
-              if (isMount) {
-                setisOpenHostingScreen(false);
-              }
-            }}
+            onStartHosting={handleJoinMeeting}
             onClose={() => {
               if (isMount) {
                 setisOpenHostingScreen(false);

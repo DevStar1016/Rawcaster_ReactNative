@@ -16,10 +16,7 @@ import HOCView from '../../../Components/HOCView';
 import {
   useConnectionsList,
   useGroupsList,
-  useNuggetsList,
   useProfile,
-  useSavedNuggetsList,
-  useSearchedNuggetsList,
   useToken,
 } from '../../../Utilities/StoreData';
 import {useNavigation} from '@react-navigation/native';
@@ -42,6 +39,7 @@ import {
   compressMedia,
   getFileName,
   getMediaMimeType,
+  getMillisToMinutesNumber,
   getSlicedText,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
@@ -59,6 +57,7 @@ import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 import EmojiContainer from 'react-native-emoji-container';
 import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
+import {addNugget} from '../../../Store/ThunkAPIServices';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -94,6 +93,7 @@ const PostEditNugget = ({route}) => {
       item => item.id === (nugget ? parseInt(nugget.share_type) : 1),
     ),
   );
+  const [isMediaAbove5Min, setisMediaAbove5Min] = useState(false);
   const [mediaData, setmediaData] = useState({
     uri: '',
     mediaType: '',
@@ -104,7 +104,10 @@ const PostEditNugget = ({route}) => {
       list: [...shareConnectionsGroupsIdsList],
     });
   const [isPollClicked, setisPollClicked] = useState(false);
-  const [isLoading, setisLoading] = useState(false);
+  const [loadingData, setloadingData] = useState({
+    status: false,
+    text: '',
+  });
   const [typedText, settypedText] = useState(
     preContent ?? (nugget ? nugget.content ?? '' : ''),
   );
@@ -150,10 +153,22 @@ const PostEditNugget = ({route}) => {
     }
   }, []);
 
-  function handlePostNuggets() {
+  const stopLoader = () => {
     if (isMount) {
-      setisLoading(true);
+      setloadingData({
+        status: false,
+        text: '',
+      });
     }
+  };
+
+  function handlePostNuggets() {
+    // if (isMount) {
+    //   setloadingData({
+    //     status: true,
+    //     text: 'Nugget being upload',
+    //   });
+    // }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('share_type', selectedShareType.id);
@@ -195,31 +210,39 @@ const PostEditNugget = ({route}) => {
         });
       }
     }
-    console.log(formData, 'FORMDATAA');
-    addNuggetsService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          navigation.reset({
-            routes: [{name: 'DashboardProfileTopTabNavigation'}],
-          });
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisLoading(false);
-        }
-      });
+    dispatch(addNugget({navigation, formData}));
+    // stopLoader();
+    // addNuggetsService(formData)
+    //   .then(res => {
+    //     if (res.data.status === 1) {
+    //       if (isMediaAbove5Min) {
+    //         Toast.success('Media being upload...', 6000);
+    //       } else {
+    //         Toast.success(res.data.msg);
+    //       }
+    //       navigation.reset({
+    //         routes: [{name: 'DashboardProfileTopTabNavigation'}],
+    //       });
+    //     } else if (res.data.status === 0) {
+    //       Toast.fail(res.data.msg);
+    //     }
+    //   })
+    //   .catch(e => {
+    //     Toast.fail(e.message);
+    //   })
+    //   .finally(() => {
+    //     if (isMount) {
+    //       stopLoader();
+    //     }
+    //   });
   }
 
   function handleEditNugget() {
     if (isMount) {
-      setisLoading(true);
+      setloadingData({
+        status: true,
+        text: 'Nugget being Edit...',
+      });
     }
     const formData = new FormData();
     formData.append('token', token);
@@ -261,9 +284,16 @@ const PostEditNugget = ({route}) => {
     editNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          // if (isMediaAbove5Min) {
+          //   Toast.success('Media being upload...', 000);
+          // } else {
+          //   Toast.success(res.data.msg);
+          // }
           Toast.success(res.data.msg);
           console.log(res.data, 'EDITED RESPONSEEE');
-          dispatch(addEditedNugget(res.data.nugget_detail));
+          if (res.data.nugget_detail) {
+            dispatch(addEditedNugget(res.data.nugget_detail));
+          }
           navigation.goBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -274,7 +304,7 @@ const PostEditNugget = ({route}) => {
       })
       .finally(() => {
         if (isMount) {
-          setisLoading(false);
+          stopLoader();
         }
       });
   }
@@ -311,12 +341,15 @@ const PostEditNugget = ({route}) => {
       ],
     })
       .then(async selectedMediaList => {
-        console.log(selectedMediaList, 'SELECTED MEDIA LIST');
         const mediaList = nugget
           ? [{...selectedMediaList}]
           : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
+        console.log(mediaList, 'SELECTED MEDIA LIST');
         if (isMount) {
-          setisLoading(true);
+          setloadingData({
+            status: true,
+            text: 'Selected media being compress',
+          });
         }
         let mediaType = type === 'photo' ? 1 : 2;
         Promise.all(
@@ -326,15 +359,36 @@ const PostEditNugget = ({route}) => {
               uri: getUrlWithFilePrefix(mediaPath),
               name: getFileName(mediaPath),
               type: item.mime,
+              duration: item.duration,
             };
           }),
         )
           .then(resMediaList => {
             if (isMount) {
               if (nugget) {
+                if (
+                  resMediaList.find(
+                    item => getMillisToMinutesNumber(item.duration) > 5,
+                  )
+                ) {
+                  setisMediaAbove5Min(true);
+                } else {
+                  setisMediaAbove5Min(false);
+                }
                 setselectedMediaList([...resMediaList]);
               } else {
-                setselectedMediaList(pre => [...pre, ...resMediaList]);
+                setselectedMediaList(pre => {
+                  if (
+                    [...pre, ...resMediaList].find(
+                      item => getMillisToMinutesNumber(item.duration) > 5,
+                    )
+                  ) {
+                    setisMediaAbove5Min(true);
+                  } else {
+                    setisMediaAbove5Min(false);
+                  }
+                  return [...pre, ...resMediaList];
+                });
               }
             }
           })
@@ -343,7 +397,7 @@ const PostEditNugget = ({route}) => {
           })
           .finally(() => {
             if (isMount) {
-              setisLoading(false);
+              stopLoader();
             }
           });
       })
@@ -374,12 +428,12 @@ const PostEditNugget = ({route}) => {
         newMicrophonePermission === 'authorized'
       ) {
         if (isMount) {
-          setisLoading(false);
+          stopLoader();
           setisOpenCamera(true);
         }
       } else {
         if (isMount) {
-          setisLoading(false);
+          stopLoader();
         }
         if (newCameraPermission === 'denied') {
           Toast.fail('Camera Permission Denied');
@@ -391,7 +445,7 @@ const PostEditNugget = ({route}) => {
       }
     } catch (e) {
       if (isMount) {
-        setisLoading(false);
+        stopLoader();
       }
       Toast.fail(e.message);
     }
@@ -591,7 +645,10 @@ const PostEditNugget = ({route}) => {
 
   return (
     <HOCView
-      isLoading={isLoading}
+      isLoading={loadingData.status}
+      loaderProps={{
+        loaderText: loadingData.text,
+      }}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
       isEnableKeyboardAware={isPollClicked ? true : false}
       paddingHorizontal={5}
@@ -660,7 +717,10 @@ const PostEditNugget = ({route}) => {
                 onPress={() => {
                   if (isMount) {
                     setisPollClicked(false);
-                    setisLoading(true);
+                    setloadingData({
+                      status: true,
+                      text: 'Opening Camera',
+                    });
                   }
 
                   handleOpenCamera();

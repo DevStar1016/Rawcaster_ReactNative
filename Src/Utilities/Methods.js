@@ -474,3 +474,7 @@ export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
     nuggetsList,
   };
 };
+
+export const getMillisToMinutesNumber = millis => {
+  return parseFloat(parseFloat(millis) / 60000);
+};

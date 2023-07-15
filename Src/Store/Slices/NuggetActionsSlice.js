@@ -8,6 +8,7 @@ export const initialState = {
   editedNuggets: [],
   deletedNuggetsIds: [],
   translatedNuggets: [],
+  uploadingNuggets: [],
 };
 
 const NuggetActionsSlice = createSlice({
@@ -110,6 +111,23 @@ const NuggetActionsSlice = createSlice({
         'nugget_id',
       );
     },
+    addUpdateUploadingNugget: (state, action) => {
+      let tempUploadingNuggets = [...state.uploadingNuggets];
+      const updateNuggetIndex = tempUploadingNuggets.findIndex(
+        item => item.id === action.payload.id,
+      );
+      if (updateNuggetIndex !== -1) {
+        tempUploadingNuggets[updateNuggetIndex] = {...action.payload};
+      } else {
+        tempUploadingNuggets = [{...action.payload}, ...tempUploadingNuggets];
+      }
+      state.uploadingNuggets = [...tempUploadingNuggets];
+    },
+    removeUploadingNugget: (state, action) => {
+      state.uploadingNuggets = [...state.uploadingNuggets].filter(
+        item => item.id !== action.payload,
+      );
+    },
   },
 });
 export const {
@@ -119,5 +137,7 @@ export const {
   addDeletedNuggetId,
   addEditedNugget,
   setTranslatedNuggets,
+  addUpdateUploadingNugget,
+  removeUploadingNugget,
 } = NuggetActionsSlice.actions;
 export default NuggetActionsSlice.reducer;
