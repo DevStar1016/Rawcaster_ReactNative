@@ -53,6 +53,7 @@ const InfluencersList = () => {
     [],
   );
   const [isSelectedAll, setisSelectedAll] = useState(false);
+  const [isSelectedAllCheckbox, setisSelectedAllCheckbox] = useState(false);
   const [influencersTotalCount, setinfluencersTotalCount] = useState(0);
   const [isActionLoading, setisActionLoading] = useState(false);
 
@@ -168,6 +169,7 @@ const InfluencersList = () => {
       );
       if (isSelectedAll) {
         setisSelectedAll(false);
+        setisSelectedAllCheckbox(false);
       }
     } else {
       tempSelectedInfluencersIds.push(id);
@@ -338,6 +340,7 @@ const InfluencersList = () => {
                       } else {
                         setselectedInfluencersRefIds([]);
                       }
+                      setisSelectedAllCheckbox(updatedStatus);
                       return updatedStatus;
                     });
                   }

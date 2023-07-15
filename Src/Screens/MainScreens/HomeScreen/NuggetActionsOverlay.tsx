@@ -84,6 +84,7 @@ type Props = {
   duration?: number;
   progress?: number;
   nuggetContentController?: any;
+  numberOfLines?: number;
 };
 type ActionContainerProps = {
   icon: IconType;
@@ -121,6 +122,7 @@ function NuggetActionsOverlay({
   duration = 0,
   progress = 0,
   nuggetContentController,
+  numberOfLines = 3,
 }: Props) {
   const {
     headerContainerHeight,
@@ -179,6 +181,7 @@ function NuggetActionsOverlay({
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
   const [isReadLoading, setisReadLoading] = useState(false);
+  const [isTranslateLoading, setisTranslateLoading] = useState(false);
   const [isTranslated, setisTranslated] = useState(false);
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -247,27 +250,37 @@ function NuggetActionsOverlay({
       });
   };
 
-  const nuggetContentAudioAPICall = () => {
-    if (nuggetContentController && nuggetContentController.current) {
+  const nuggetContentAudioAPICall = (type = 1) => {
+    if (
+      nuggetContentController &&
+      nuggetContentController.current &&
+      type === 1
+    ) {
       nuggetContentController.current.abort();
     }
     nuggetContentController.current = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', nugget.nugget_id);
-    // formData.append('translation_type', 1);
+    formData.append('translation_type', type);
     nuggetContentAudioService(formData, nuggetContentController.current.signal)
       .then(res => {
-        if (res.data.status === 1) {
-          console.log(res.data);
-
-          if (getIsFocused) {
-            if (handlePlayAudio) {
-              handlePlayAudio(res.data.file_path);
+        if (res.data?.status === 1) {
+          if (type === 1) {
+            if (getIsFocused) {
+              if (handlePlayAudio) {
+                handlePlayAudio(res.data.file_path);
+              }
             }
+          } else {
+            handleNuggetContentTranslate(res.data.translation);
+            setisTranslated(true);
           }
-        } else if (res.data.status === 0) {
+        } else if (res.data?.status === 0) {
           Toast.fail(res.data.msg);
+          if (type === 2) {
+            setisTranslated(false);
+          }
         }
       })
       .catch(e => {
@@ -276,7 +289,11 @@ function NuggetActionsOverlay({
         }
       })
       .finally(() => {
-        setisReadLoading(false);
+        if (type === 1) {
+          setisReadLoading(false);
+        } else {
+          setisTranslateLoading(false);
+        }
       });
   };
 
@@ -334,23 +351,6 @@ function NuggetActionsOverlay({
         result = [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 6);
       }
     }
-    if (nugget.content) {
-      if (isTranslated) {
-        const translationOption = [...NUGGET_ACTIONS].find(
-          item => item.id === 7,
-        );
-        if (translationOption) {
-          result = [...result, translationOption];
-        }
-      } else {
-        const translationOption = [...NUGGET_ACTIONS].find(
-          item => item.id === 6,
-        );
-        if (translationOption) {
-          result = [...result, translationOption];
-        }
-      }
-    }
     return result;
   };
 
@@ -371,19 +371,14 @@ function NuggetActionsOverlay({
         break;
       case 5:
         break;
-      case 6:
-        getTranslatedContent();
-        break;
-      case 7:
-        setisTranslated(false);
-        break;
     }
   };
   const getTranslatedContent = () => {
     if (nugget.translated_content) {
       setisTranslated(true);
     } else {
-      handleNuggetContentTranslate(setisTranslated);
+      setisTranslateLoading(true);
+      nuggetContentAudioAPICall(2);
     }
   };
 
@@ -645,6 +640,7 @@ function NuggetActionsOverlay({
               <ScrollView
                 contentContainerStyle={{
                   flexGrow: 1,
+                  zIndex: 1000,
                 }}
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
@@ -652,7 +648,7 @@ function NuggetActionsOverlay({
                 {/* @ts-ignore */}
                 <StyledText
                   textMode="read_more_hyper_link"
-                  numberOfLines={3}
+                  numberOfLines={numberOfLines}
                   onPressUrl={onPressUrl}
                   style={{
                     color: COLORS.white,
@@ -660,6 +656,18 @@ function NuggetActionsOverlay({
                     opacity: 0.8,
                     lineHeight: 22,
                     width: '100%',
+                  }}>
+                  {htmlDecodeText(
+                    isTranslated && nugget.translated_content?.trim()
+                      ? nugget.translated_content.trim()
+                      : nugget.content.trim(),
+                  )}
+                </StyledText>
+                <View
+                  style={{
+                    alignItems: 'flex-start',
+                    flexDirection: 'row',
+                    marginVertical: 5,
                   }}>
                   {isReadLoading ? (
                     <LoadingDots
@@ -709,12 +717,44 @@ function NuggetActionsOverlay({
                       }}
                     />
                   )}
-                  {htmlDecodeText(
-                    isTranslated && nugget.translated_content?.trim()
-                      ? nugget.translated_content.trim()
-                      : nugget.content.trim(),
+                  <View
+                    style={{
+                      width: 2,
+                      height: 16,
+                      marginHorizontal: 5,
+                      backgroundColor: COLORS.white,
+                    }}
+                  />
+                  {isTranslateLoading ? (
+                    <LoadingDots
+                      size={6}
+                      bounceHeight={4}
+                      dots={3}
+                      borderRadius={3}
+                    />
+                  ) : (
+                    <SVGIcon
+                      height={15.5}
+                      icon={
+                        !isTranslateLoading
+                          ? isTranslated
+                            ? 'translation_secondary'
+                            : 'translation_white'
+                          : undefined
+                      }
+                      isButton
+                      onPress={() => {
+                        if (isLogin()) {
+                          if (isTranslated) {
+                            setisTranslated(false);
+                          } else {
+                            getTranslatedContent();
+                          }
+                        }
+                      }}
+                    />
                   )}
-                </StyledText>
+                </View>
               </ScrollView>
             </TouchableOpacity>
           ) : null}

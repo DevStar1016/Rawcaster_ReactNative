@@ -270,39 +270,16 @@ const Nugget = ({nugget, nuggetIndex}) => {
       );
     }
   };
-  function handleNuggetContentTranslate(setisTranslated) {
-    setloaderText('Translating this Nugget');
-    setisActionLoading(true);
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nugget.nugget_id);
-    formData.append('translation_type', 2);
-    nuggetContentAudioService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          let tempList = [...nuggetsList];
-          let temp = tempList.find(ele => ele.nugget_id === nugget.nugget_id);
-          if (temp !== -1) {
-            temp = {
-              ...temp,
-              translated_content: htmlDecodeText(res.data.translation),
-            };
-            dispatch(setTranslatedNuggets([...translatedNuggetsList, temp]));
-          }
-          setisTranslated(true);
-        } else if (res.data.status === 0) {
-          setisTranslated(false);
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(() => {
-        setisTranslated(false);
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        setisActionLoading(false);
-        setloaderText('');
-      });
+  function handleNuggetContentTranslate(translatedText) {
+    let tempList = [...nuggetsList];
+    let temp = tempList.find(ele => ele.nugget_id === nugget.nugget_id);
+    if (temp !== -1) {
+      temp = {
+        ...temp,
+        translated_content: htmlDecodeText(translatedText),
+      };
+      dispatch(setTranslatedNuggets([...translatedNuggetsList, temp]));
+    }
   }
 
   function handleReportNugget(nuggetId, message = '') {

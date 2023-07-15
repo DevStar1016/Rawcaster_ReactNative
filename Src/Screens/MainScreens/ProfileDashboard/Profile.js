@@ -66,16 +66,16 @@ const Profile = ({route}) => {
   const editedNuggetsList = useEditedNuggetsList();
   const translatedNuggetsList = useTranslatedNuggetsList();
   const {focusedNuggetUserId} = useDashboardProfile() ?? {};
-  const [userId, setuserId] = useState(
-    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
-  );
-
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
   const blockedUserIds = useBlockedUserIds();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
+
+  const [userId, setuserId] = useState(
+    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
+  );
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);

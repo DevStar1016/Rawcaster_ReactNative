@@ -73,6 +73,7 @@ const TextOnlyNugget = ({
         onBlockUser={onBlockUser}
         onReportAbouseNugget={onReportAbouseNugget}
         nuggetContentController={nuggetContentController}
+        numberOfLines={15}
       />
     </View>
   );
