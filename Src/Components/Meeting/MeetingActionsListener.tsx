@@ -5,12 +5,25 @@ import {
   getSDKEventEmitter,
 } from '../../Native/Bridges/ChimeMeetingBridge';
 
+type DataMessage = {
+  topic: string;
+  data: any;
+  senderAttendeeId: string;
+  senderExternalUserId: string;
+  timestampMs: number;
+  throttled: boolean;
+};
+
 type Props = {
   onJoinAttendee: (attendeeId: string | number, attendeeName: string) => void;
   onLeaveAttendee: (attendeeId: string | number) => void;
   onMuteAttendee: (attendeeId: string | number) => void;
   onUnMuteAttendee: (attendeeId: string | number) => void;
-  onAddVideoTile: (attendeeId: string | number) => void;
+  onEnableScreenShare: (tileId: string | number) => void;
+  onAddVideoTile: (tileId: string | number, isLocal: boolean) => void;
+  onDisableScreenShare: () => void;
+  onRemoveVideoTile: (tileId: string | number, isLocal: boolean) => void;
+  onReceiveDataMessage: (data: DataMessage) => void;
 };
 
 type AttendeeJoinResponseProps = {
@@ -33,6 +46,11 @@ const MeetingActionsListener = ({
   onLeaveAttendee,
   onMuteAttendee,
   onUnMuteAttendee,
+  onEnableScreenShare,
+  onAddVideoTile,
+  onDisableScreenShare,
+  onRemoveVideoTile,
+  onReceiveDataMessage,
 }: Props) => {
   useEffect(() => {
     /**
@@ -82,26 +100,9 @@ const MeetingActionsListener = ({
       tileState => {
         console.log(tileState, 'STATE TILE');
         if (tileState.isScreenShare) {
-          setdata(pre => ({
-            ...pre,
-            screenShareTile: tileState.tileId,
-          }));
+          onEnableScreenShare(tileState.tileId);
         } else {
-          setdata(pre => {
-            let tempVideoTiles = [...pre.videoTiles];
-            if (!tempVideoTiles.includes(tileState.tileId)) {
-              if (tileState.isLocal) {
-                tempVideoTiles = [tileState.tileId, ...tempVideoTiles];
-              } else {
-                tempVideoTiles = [...tempVideoTiles, tileState.tileId];
-              }
-            }
-            return {
-              ...pre,
-              videoTiles: [...tempVideoTiles],
-              selfVideoEnabled: tileState.isLocal ? true : pre.selfVideoEnabled,
-            };
-          });
+          onAddVideoTile(tileState.tileId, tileState.isLocal);
         }
       },
     );
@@ -110,19 +111,20 @@ const MeetingActionsListener = ({
       MobileSDKEvent.OnRemoveVideoTile,
       tileState => {
         if (tileState.isScreenShare) {
-          setdata(pre => ({
-            ...pre,
-            screenShareTile: null,
-          }));
+          onDisableScreenShare();
         } else {
-          setdata(pre => ({
-            ...pre,
-            videoTiles: pre.videoTiles.filter(
-              tileIdToCompare => tileIdToCompare != tileState.tileId,
-            ),
-            selfVideoEnabled: tileState.isLocal ? false : pre.selfVideoEnabled,
-          }));
+          onRemoveVideoTile(tileState.tileId, tileState.isLocal);
         }
+      },
+    );
+
+    /**
+     * Data message handler
+     */
+    onDataMessageReceivedSubscription = getSDKEventEmitter().addListener(
+      MobileSDKEvent.OnDataMessageReceive,
+      (dataMessage: DataMessage) => {
+        onReceiveDataMessage(dataMessage);
       },
     );
   }, []);
