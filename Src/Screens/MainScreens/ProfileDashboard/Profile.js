@@ -22,6 +22,7 @@ import {
   useToken,
   useTranslatedNuggetsList,
   useUnclaimedAccountsList,
+  useUploadingNuggets,
 } from '../../../Utilities/StoreData';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
@@ -62,6 +63,7 @@ const Profile = ({route}) => {
   const dispatch = useDispatch();
   const profile = useProfile();
   const isFocused = useIsFocused();
+  const uploadingNuggets = useUploadingNuggets();
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const editedNuggetsList = useEditedNuggetsList();
   const translatedNuggetsList = useTranslatedNuggetsList();
@@ -579,7 +581,9 @@ const Profile = ({route}) => {
           isDisableVerifyAccount={getIsDisableVerifyAccount()}
           verifyAccountButtonText={getVerifyAccountButtonText()}
           onPressVerifyAccount={() => {
+            console.log('VERIFYYY');
             if (parseInt(profile?.user_status_id) === 4) {
+              console.log('IFFF');
               navigation.navigate('ClaimAccount', {
                 isVerifyAccount: true,
               });
@@ -712,6 +716,22 @@ const Profile = ({route}) => {
                 </StyledText>
               </TouchableOpacity>
             </View>
+            <Divider />
+
+            {uploadingNuggets && uploadingNuggets.length > 0 && (
+              <View style={styles.uploadingNuggetItemConteiner}>
+                <ActivityIndicator size={'small'} />
+                <View style={styles.uploadTextContainer}>
+                  <StyledText>{`${
+                    uploadingNuggets.length > 1
+                      ? uploadingNuggets.length + ' '
+                      : ''
+                  }Nugget${
+                    uploadingNuggets.length > 1 ? 's' : ''
+                  } being upload...`}</StyledText>
+                </View>
+              </View>
+            )}
           </>
         ) : (
           false
@@ -865,5 +885,14 @@ const styles = StyleSheet.create({
   nuggetFilterText: {
     fontFamily: FONTS.DMSans.medium,
     fontSize: 16,
+  },
+  uploadingNuggetItemConteiner: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  uploadTextContainer: {
+    flex: 1,
+    paddingLeft: 10,
   },
 });

@@ -1,5 +1,6 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import {
+  addNuggetsService,
   blockMultipleUserService,
   blockUnblockUserService,
   deleteNuggetService,
@@ -9,12 +10,14 @@ import {
 } from '../Services/ApiService';
 import {
   addDeletedNuggetId,
+  addUpdateUploadingNugget,
   likeUnlikeNugget,
+  removeUploadingNugget,
   saveUnSaveNugget,
   setLikedSavedNuggets,
 } from './Slices/NuggetActionsSlice';
 import Toast from '../Components/Toast';
-import {getFilteredDuplicatesList} from '../Utilities/Methods';
+import {getFilteredDuplicatesList, getUniqueId} from '../Utilities/Methods';
 import {
   addFollowingUser,
   blockUsers,
@@ -259,6 +262,46 @@ export const blockMultipleUsers = createAsyncThunk(
           text: '',
         }),
       );
+    }
+  },
+);
+
+export const addNugget = createAsyncThunk(
+  'addNugget',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    const uniqueId = getUniqueId();
+    dispatch(
+      addUpdateUploadingNugget({
+        id: uniqueId,
+        progressValue: 0,
+      }),
+    );
+    Toast.success('Nugget being upload...');
+    try {
+      data.navigation.goBack();
+      // data.navigation.reset({
+      //   routes: [{name: 'DashboardProfileTopTabNavigation'}],
+      // });
+      const res = await addNuggetsService(data.formData, {
+        onUploadProgress: progressEvent => {
+          console.log(
+            progressEvent,
+            progressEvent.loaded / progressEvent.total,
+            'UPLOAD PROGRESS',
+          );
+        },
+        onDownloadProgress: progressEvent => {
+          console.log(progressEvent, 'DOWNLOAD PROGRESS');
+        },
+      });
+
+      Toast.success(res.data.msg);
+      console.log(res.data, 'ADD NUGGET RESPONSE');
+    } catch (error) {
+      Toast.fail(error.message);
+      console.log(error, 'NUGGET UPLOAD ERRORRRR');
+    } finally {
+      dispatch(removeUploadingNugget(uniqueId));
     }
   },
 );

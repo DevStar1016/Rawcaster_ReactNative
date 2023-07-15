@@ -6,9 +6,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {requireNativeComponent, findNodeHandle} from 'react-native';
-import {NativeFunction} from '../utils/Bridge';
+import {NativeFunction} from '../Bridges/ChimeMeetingBridge';
 
-export class ChimeMeetingVideo extends React.Component {
+export class MeetingVideo extends React.Component {
   componentDidMount() {
     // we need to delay the bind video
     // Because "componentDidMount" will be called "immediately after the initial rendering occurs"
@@ -28,7 +28,7 @@ export class ChimeMeetingVideo extends React.Component {
   }
 }
 
-ChimeMeetingVideo.propTypes = {
+MeetingVideo.propTypes = {
   /**
    * A int value to identifier the Video view, will be used to bind video stream later
    */
@@ -37,5 +37,5 @@ ChimeMeetingVideo.propTypes = {
 
 var RNVideoRenderViewNative = requireNativeComponent(
   'RNVideoView',
-  ChimeMeetingVideo,
+  MeetingVideo,
 );

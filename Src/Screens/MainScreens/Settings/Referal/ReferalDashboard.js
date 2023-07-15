@@ -46,11 +46,14 @@ const ReferalDashboard = () => {
     formData.append('page_number', pageNumber);
     getReferralListService(formData)
       .then(res => {
+        console.log(res.data);
         if (res.data.status === 1) {
           if (isMount) {
             if (pageNumber === 1) {
               totalPages = res.data.total_pages;
-              setreferalList([...res.data.referral_list]);
+              if (res.data.referral_list) {
+                setreferalList([...res.data.referral_list]);
+              }
               setcountData({
                 referalCount: res.data.referral_count,
                 referalNeededCount: res.data.referral_needed_count,

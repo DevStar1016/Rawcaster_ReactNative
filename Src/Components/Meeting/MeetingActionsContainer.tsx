@@ -1,10 +1,10 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
-import SVGIcon from '../../../../Components/SVGIcon';
-import StyledText from '../../../../Components/StyledText';
-import {COLORS} from '../../../../Utilities/Colors';
-import {IconType} from '../../../../Utilities/Icons';
-import {useInsets} from '../../../../Utilities/StoreData';
+import SVGIcon from '../SVGIcon';
+import StyledText from '../StyledText';
+import {COLORS} from '../../Utilities/Colors';
+import {IconType} from '../../Utilities/Icons';
+import {useInsets} from '../../Utilities/StoreData';
 
 type ActionButtonProps = {
   text: string;
@@ -12,7 +12,7 @@ type ActionButtonProps = {
   onPress: () => void;
 };
 
-const EventHostBottomTabView = () => {
+const MeetingActionsContainer = () => {
   const [isMuted, setisMuted] = useState(false);
   const [isVideo, setisVideo] = useState(false);
   const insets = useInsets();
@@ -62,7 +62,7 @@ const EventHostBottomTabView = () => {
   );
 };
 
-export default EventHostBottomTabView;
+export default MeetingActionsContainer;
 
 const styles = StyleSheet.create({
   mainContainer: {
