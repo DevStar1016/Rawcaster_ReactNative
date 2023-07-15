@@ -45,22 +45,15 @@ import {
   getSlicedText,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
-import {EmojiKeyboard} from 'rn-emoji-keyboard';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Toast from '../../../Components/Toast';
-import EmojiPicker from 'react-native-emoji-picker-staltz';
 import {Camera} from 'react-native-vision-camera';
 import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
 import AudioRecorder from '../../../Modals/AudioRecorder';
 import PollContainer from './PollContainer';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {useDispatch} from 'react-redux';
-import {
-  setSavedNuggetsList,
-  setSearchedNuggetsList,
-} from '../../../Store/Slices/HomeSlice';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
-import {setNuggetsList} from '../../../Store/Slices/NuggetsListSlice';
 import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 import EmojiContainer from 'react-native-emoji-container';
@@ -74,10 +67,8 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 var isMount = true;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
 const PostEditNugget = ({route}) => {
-  const {nugget, categoryName, preContent} = route.params ?? {};
-  const searchedNuggetsList = useSearchedNuggetsList();
+  const {nugget, preContent} = route.params ?? {};
   const dispatch = useDispatch();
-  const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
   const navigation = useNavigation();
@@ -89,7 +80,6 @@ const PostEditNugget = ({route}) => {
   const [mediaListHeight, setmediaListHeight] = useState(0);
   const [buttonHeight, setbuttonHeight] = useState(0);
   const [isFocusedTextInput, setisFocusedTextInput] = useState(false);
-  const savedNuggetsList = useSavedNuggetsList();
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenCamera, setisOpenCamera] = useState(false);
@@ -321,6 +311,7 @@ const PostEditNugget = ({route}) => {
       ],
     })
       .then(async selectedMediaList => {
+        console.log(selectedMediaList, 'SELECTED MEDIA LIST');
         const mediaList = nugget
           ? [{...selectedMediaList}]
           : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
