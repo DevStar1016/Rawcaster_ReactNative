@@ -51,7 +51,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
-import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
+import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 const PADDING_HORIZONTAL = 10;
 var currentPage = 1;
 var totalPages = 1;
@@ -68,17 +68,16 @@ const Profile = ({route}) => {
   const editedNuggetsList = useEditedNuggetsList();
   const translatedNuggetsList = useTranslatedNuggetsList();
   const {focusedNuggetUserId} = useDashboardProfile() ?? {};
-  const [userId, setuserId] = useState(
-    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
-  );
-
-  const [isOpenPremiumAlert, setisOpenPremiumAlert] = useState(false);
   const navigation = useNavigation();
   const token = useToken();
   const savedNuggetsList = useSavedNuggetsList();
   const blockedUserIds = useBlockedUserIds();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
+
+  const [userId, setuserId] = useState(
+    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
+  );
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
@@ -589,9 +588,12 @@ const Profile = ({route}) => {
                 isVerifyAccount: true,
               });
             } else {
-              if (isMount) {
-                setisOpenPremiumAlert(true);
-              }
+              dispatch(
+                setPremiumAlert({
+                  status: true,
+                  text: 'To access this feature you need to become a diamond member!',
+                }),
+              );
             }
           }}
         />
@@ -847,28 +849,6 @@ const Profile = ({route}) => {
 
         {!isFocused && <DefaultBackground />}
       </View>
-
-      <Modal onRequestClose={() => {}} transparent visible={isOpenPremiumAlert}>
-        <ConfirmationPopup
-          isEnableClose={false}
-          onPressNegativeButton={() => {
-            if (isMount) {
-              setisOpenPremiumAlert(false);
-            }
-          }}
-          positiveButtonText={'Upgrade'}
-          negativeButtonText={'Later'}
-          onPressPositiveButton={() => {
-            if (isMount) {
-              setisOpenPremiumAlert(false);
-            }
-            navigation.navigate('PlansAndPrice');
-          }}
-          content={
-            'To access this feature you need to become a diamond member!'
-          }
-        />
-      </Modal>
     </NuggetParentActionsContext.Provider>
   );
 };

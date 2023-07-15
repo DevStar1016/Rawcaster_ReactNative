@@ -5,6 +5,7 @@ import Loader from '../Components/Loader';
 import {
   useGlobalLoaderData,
   useIsVisibleInfluencers,
+  usePremiumAlert,
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
@@ -47,6 +48,9 @@ import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
 import ChimeSocketListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
+import ConfirmationPopup from '../Modals/ConfirmationPopup';
+import {setPremiumAlert} from '../Store/Slices/UtilitySlice';
+import {useNavigation} from '@react-navigation/native';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -55,6 +59,8 @@ const MainStack = () => {
   const token = useToken();
   const dispatch = useDispatch();
   const globalLoaderData = useGlobalLoaderData();
+  const navigation = useNavigation();
+  const premiumALert = usePremiumAlert();
 
   useEffect(() => {
     initialAPICall();
@@ -205,6 +211,37 @@ const MainStack = () => {
           <Loader
             bgColor={COLORS.transparentDimColor}
             loaderText={globalLoaderData?.text}
+          />
+        </Modal>
+      )}
+      {premiumALert?.status && (
+        <Modal
+          onRequestClose={() => {}}
+          // style={{zIndex: 10000}}
+          transparent
+          visible={premiumALert.status}>
+          <ConfirmationPopup
+            isEnableClose={false}
+            onPressNegativeButton={() => {
+              dispatch(
+                setPremiumAlert({
+                  status: false,
+                  text: '',
+                }),
+              );
+            }}
+            positiveButtonText={'Upgrade'}
+            negativeButtonText={'Later'}
+            onPressPositiveButton={() => {
+              dispatch(
+                setPremiumAlert({
+                  status: false,
+                  text: '',
+                }),
+              );
+              navigation.navigate('PlansAndPrice');
+            }}
+            content={premiumALert.text}
           />
         </Modal>
       )}
