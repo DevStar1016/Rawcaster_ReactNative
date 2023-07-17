@@ -6,7 +6,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {requireNativeComponent, findNodeHandle} from 'react-native';
-import {NativeFunction} from '../Bridges/ChimeMeetingBridge';
+import {Meeting} from '../Bridges/ChimeMeetingBridge';
 
 export class MeetingVideo extends React.Component {
   componentDidMount() {
@@ -15,12 +15,12 @@ export class MeetingVideo extends React.Component {
     // This is *before* RCTUIManager add this view to register (so that viewForReactTag() can return a view)
     // So we need to dispatch bindVideoView after this function complete
     setTimeout(() => {
-      NativeFunction.bindVideoView(findNodeHandle(this), this.props.tileId);
+      Meeting.bindVideoView(findNodeHandle(this), this.props.tileId);
     });
   }
 
   componentWillUnmount() {
-    NativeFunction.unbindVideoView(this.props.tileId);
+    Meeting.unbindVideoView(this.props.tileId);
   }
 
   render() {

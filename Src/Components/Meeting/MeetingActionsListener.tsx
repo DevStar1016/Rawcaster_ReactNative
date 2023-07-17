@@ -1,11 +1,11 @@
 import {EmitterSubscription, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import {useEffect} from 'react';
 import {
-  MobileSDKEvent,
-  getSDKEventEmitter,
+  MeetingEvent,
+  MeetingEmitter,
 } from '../../Native/Bridges/ChimeMeetingBridge';
 
-type DataMessage = {
+export type DataMessage = {
   topic: string;
   data: any;
   senderAttendeeId: string;
@@ -21,9 +21,10 @@ type Props = {
   onUnMuteAttendee: (attendeeId: string | number) => void;
   onEnableScreenShare: (tileId: string | number) => void;
   onAddVideoTile: (tileId: string | number, isLocal: boolean) => void;
-  onDisableScreenShare: () => void;
+  onRemoveScreenShare: () => void;
   onRemoveVideoTile: (tileId: string | number, isLocal: boolean) => void;
   onReceiveDataMessage: (data: DataMessage) => void;
+  onError: (error: string) => void;
 };
 
 type AttendeeJoinResponseProps = {
@@ -48,16 +49,17 @@ const MeetingActionsListener = ({
   onUnMuteAttendee,
   onEnableScreenShare,
   onAddVideoTile,
-  onDisableScreenShare,
+  onRemoveScreenShare,
   onRemoveVideoTile,
   onReceiveDataMessage,
+  onError,
 }: Props) => {
   useEffect(() => {
     /**
      * Attendee Join and Leave handler
      */
-    onAttendeesJoinSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnAttendeesJoin,
+    onAttendeesJoinSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAttendeesJoin,
       ({attendeeId, externalUserId}: AttendeeJoinResponseProps) => {
         const attendeeNameMap: any = {};
         if (!(attendeeId in attendeeNameMap)) {
@@ -68,8 +70,8 @@ const MeetingActionsListener = ({
       },
     );
 
-    onAttendeesLeaveSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnAttendeesLeave,
+    onAttendeesLeaveSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAttendeesLeave,
       ({attendeeId}) => {
         onLeaveAttendee(attendeeId);
       },
@@ -78,15 +80,15 @@ const MeetingActionsListener = ({
     /**
      * Attendee Mute & Unmute handler
      */
-    onAttendeesMuteSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnAttendeesMute,
+    onAttendeesMuteSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAttendeesMute,
       attendeeId => {
         onMuteAttendee(attendeeId);
       },
     );
 
-    onAttendeesUnmuteSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnAttendeesUnmute,
+    onAttendeesUnmuteSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAttendeesUnmute,
       attendeeId => {
         onUnMuteAttendee(attendeeId);
       },
@@ -95,8 +97,8 @@ const MeetingActionsListener = ({
     /**
      * Video tile Add & Remove Handler
      */
-    onAddVideoTileSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnAddVideoTile,
+    onAddVideoTileSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAddVideoTile,
       tileState => {
         console.log(tileState, 'STATE TILE');
         if (tileState.isScreenShare) {
@@ -107,11 +109,11 @@ const MeetingActionsListener = ({
       },
     );
 
-    onRemoveVideoTileSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnRemoveVideoTile,
+    onRemoveVideoTileSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onRemoveVideoTile,
       tileState => {
         if (tileState.isScreenShare) {
-          onDisableScreenShare();
+          onRemoveScreenShare();
         } else {
           onRemoveVideoTile(tileState.tileId, tileState.isLocal);
         }
@@ -121,15 +123,54 @@ const MeetingActionsListener = ({
     /**
      * Data message handler
      */
-    onDataMessageReceivedSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnDataMessageReceive,
+    onDataMessageReceivedSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onDataMessageReceive,
       (dataMessage: DataMessage) => {
         onReceiveDataMessage(dataMessage);
       },
     );
+
+    /**
+     * General Error handler
+     */
+    onErrorSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onError,
+      errorType => {
+        onError(errorType);
+      },
+    );
   }, []);
 
-  return false;
+  useEffect(() => {
+    return () => {
+      if (onAttendeesJoinSubscription) {
+        onAttendeesJoinSubscription.remove();
+      }
+      if (onAttendeesLeaveSubscription) {
+        onAttendeesLeaveSubscription.remove();
+      }
+      if (onAttendeesMuteSubscription) {
+        onAttendeesMuteSubscription.remove();
+      }
+      if (onAttendeesUnmuteSubscription) {
+        onAttendeesUnmuteSubscription.remove();
+      }
+      if (onAddVideoTileSubscription) {
+        onAddVideoTileSubscription.remove();
+      }
+      if (onRemoveVideoTileSubscription) {
+        onRemoveVideoTileSubscription.remove();
+      }
+      if (onDataMessageReceivedSubscription) {
+        onDataMessageReceivedSubscription.remove();
+      }
+      if (onErrorSubscription) {
+        onErrorSubscription.remove();
+      }
+    };
+  }, []);
+
+  return null;
 };
 
 export default MeetingActionsListener;

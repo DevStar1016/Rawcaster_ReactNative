@@ -256,7 +256,13 @@ const AIChatItem = ({
               }
             }}>
             {isLoadingRead(item.id) ? (
-              <LoadingDots size={6} bounceHeight={5} dots={3} />
+              <View style={{flexDirection: 'row'}}>
+                <LoadingDots size={6} bounceHeight={5} dots={3} />
+                <StyledText
+                  style={{color: COLORS.white, marginLeft: 10, fontSize: 12}}>
+                  Coverting to Audio
+                </StyledText>
+              </View>
             ) : (
               <>
                 <SVGIcon

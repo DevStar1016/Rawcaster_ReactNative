@@ -1,12 +1,9 @@
-import {EmitterSubscription, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
+import React, {useState} from 'react';
 import MeetingActionsContainer from './MeetingActionsContainer';
-import {
-  MeetingError,
-  MobileSDKEvent,
-  NativeFunction,
-  getSDKEventEmitter,
-} from '../../Native/Bridges/ChimeMeetingBridge';
+import {MeetingError, Meeting} from '../../Native/Bridges/ChimeMeetingBridge';
+import MeetingActionsListener, {DataMessage} from './MeetingActionsListener';
+import MeetingVideoView from './MeetingVideoView';
 
 type Props = {
   meetingId: string;
@@ -23,22 +20,7 @@ type DataProps = {
   screenShareTile: any;
 };
 
-type AttendeeJoinResponseProps = {
-  attendeeId: number;
-  externalUserId: string;
-};
-
-var onAttendeesJoinSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesLeaveSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesMuteSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesUnmuteSubscription: EmitterSubscription | undefined = undefined;
-var onAddVideoTileSubscription: EmitterSubscription | undefined = undefined;
-var onRemoveVideoTileSubscription: EmitterSubscription | undefined = undefined;
-var onDataMessageReceivedSubscription: EmitterSubscription | undefined =
-  undefined;
-var onErrorSubscription: EmitterSubscription | undefined = undefined;
-
-const attendeeNameMap: any = {};
+var isMount = true;
 const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
   const [data, setdata] = useState<DataProps>({
     attendees: [],
@@ -49,64 +31,142 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
     screenShareTile: null,
   });
 
-  useEffect(() => {
-    /**
-     * General Error handler
-     */
-    onErrorSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnError,
-      errorType => {
-        switch (errorType) {
-          case MeetingError.OnMaximumConcurrentVideoReached:
-            console.log(
-              'Failed to enable video',
-              'maximum number of concurrent videos reached!',
-            );
-            // Alert.alert(
-            //   "Failed to enable video",
-            //   "maximum number of concurrent videos reached!"
-            // );
-            break;
-          default:
-            console.log('Error', errorType);
-            break;
-        }
-      },
-    );
-  }, []);
+  const onJoinAttendee = (
+    attendeeId: string | number,
+    attendeeName: string,
+  ) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        attendees: pre.attendees.concat([attendeeId]),
+      }));
+    }
+  };
 
-  useEffect(() => {
-    return () => {
-      if (onAttendeesJoinSubscription) {
-        onAttendeesJoinSubscription.remove();
-      }
-      if (onAttendeesLeaveSubscription) {
-        onAttendeesLeaveSubscription.remove();
-      }
-      if (onAttendeesMuteSubscription) {
-        onAttendeesMuteSubscription.remove();
-      }
-      if (onAttendeesUnmuteSubscription) {
-        onAttendeesUnmuteSubscription.remove();
-      }
-      if (onAddVideoTileSubscription) {
-        onAddVideoTileSubscription.remove();
-      }
-      if (onRemoveVideoTileSubscription) {
-        onRemoveVideoTileSubscription.remove();
-      }
-      if (onDataMessageReceivedSubscription) {
-        onDataMessageReceivedSubscription.remove();
-      }
-      if (onErrorSubscription) {
-        onErrorSubscription.remove();
-      }
-    };
-  }, []);
+  const onLeaveAttendee = (attendeeId: string | number) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        attendees: pre.attendees.filter(
+          attendeeToCompare => attendeeId != attendeeToCompare,
+        ),
+      }));
+    }
+  };
+
+  const onMuteAttendee = (attendeeId: string | number) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        mutedAttendee: pre.mutedAttendee.concat([attendeeId]),
+      }));
+    }
+  };
+
+  const onUnMuteAttendee = (attendeeId: string | number) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        mutedAttendee: pre.mutedAttendee.filter(
+          attendeeToCompare => attendeeId != attendeeToCompare,
+        ),
+      }));
+    }
+  };
+
+  const onAddVideoTile = (tileId: string | number, isLocal: boolean) => {
+    if (isMount) {
+      setdata(pre => {
+        let tempVideoTiles = [...pre.videoTiles];
+        if (!tempVideoTiles.includes(tileId)) {
+          if (isLocal) {
+            tempVideoTiles = [tileId, ...tempVideoTiles];
+          } else {
+            tempVideoTiles = [...tempVideoTiles, tileId];
+          }
+        }
+        return {
+          ...pre,
+          videoTiles: [...tempVideoTiles],
+          selfVideoEnabled: isLocal ? true : pre.selfVideoEnabled,
+        };
+      });
+    }
+  };
+
+  const onRemoveVideoTile = (tileId: string | number, isLocal: boolean) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        videoTiles: pre.videoTiles.filter(
+          tileIdToCompare => tileIdToCompare != tileId,
+        ),
+        selfVideoEnabled: isLocal ? false : pre.selfVideoEnabled,
+      }));
+    }
+  };
+
+  const onEnableScreenShare = (tileId: string | number) => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        screenShareTile: tileId,
+      }));
+    }
+  };
+
+  const onRemoveScreenShare = () => {
+    if (isMount) {
+      setdata(pre => ({
+        ...pre,
+        screenShareTile: null,
+      }));
+    }
+  };
+
+  const onReceiveDataMessage = (dataMessage: DataMessage) => {
+    const str = `Received Data message (topic: ${dataMessage.topic}) ${dataMessage.data} from ${dataMessage.senderAttendeeId}:${dataMessage.senderExternalUserId} at ${dataMessage.timestampMs} throttled: ${dataMessage.throttled}`;
+    console.log(str);
+    Meeting.sendDataMessage(dataMessage.topic, str, 1000);
+  };
+
+  const onError = (errorType: string) => {
+    switch (errorType) {
+      case MeetingError.OnMaximumConcurrentVideoReached:
+        console.log(
+          'Failed to enable video',
+          'maximum number of concurrent videos reached!',
+        );
+        // Alert.alert(
+        //   "Failed to enable video",
+        //   "maximum number of concurrent videos reached!"
+        // );
+        break;
+      default:
+        console.log('Error', errorType);
+        break;
+    }
+  };
 
   return (
     <View style={styles.mainContainer}>
-      <View style={styles.videoTilesContainer}></View>
+      <MeetingActionsListener
+        onJoinAttendee={onJoinAttendee}
+        onLeaveAttendee={onLeaveAttendee}
+        onMuteAttendee={onMuteAttendee}
+        onUnMuteAttendee={onUnMuteAttendee}
+        onAddVideoTile={onAddVideoTile}
+        onRemoveVideoTile={onRemoveVideoTile}
+        onEnableScreenShare={onEnableScreenShare}
+        onRemoveScreenShare={onRemoveScreenShare}
+        onReceiveDataMessage={onReceiveDataMessage}
+        onError={onError}
+      />
+      <View style={styles.videoTilesContainer}>
+        {data.videoTiles.map(item => {
+          return <MeetingVideoView tileId={item} />;
+        })}
+      </View>
 
       <MeetingActionsContainer />
     </View>

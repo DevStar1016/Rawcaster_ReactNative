@@ -1,8 +1,3 @@
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * SPDX-License-Identifier: MIT-0
- */
-
 import {NativeModules, NativeEventEmitter} from 'react-native';
 
 /**
@@ -17,30 +12,26 @@ import {NativeModules, NativeEventEmitter} from 'react-native';
  * NativeEventEmitter.onRemoveVideoTile(tileState)
  * NativeEventEmitter.onError(errorMessage)
  */
-const _eventEmitter = new NativeEventEmitter(
+export const MeetingEmitter = new NativeEventEmitter(
   NativeModules.ChimeMeetingSDKBridge,
 );
 
-export const MobileSDKEvent = {
-  OnMeetingStart: 'OnMeetingStart',
-  OnMeetingEnd: 'OnMeetingEnd',
-  OnAttendeesJoin: 'OnAttendeesJoin',
-  OnAttendeesLeave: 'OnAttendeesLeave',
-  OnAttendeesMute: 'OnAttendeesMute',
-  OnAttendeesUnmute: 'OnAttendeesUnmute',
-  OnAddVideoTile: 'OnAddVideoTile',
-  OnRemoveVideoTile: 'OnRemoveVideoTile',
-  OnDataMessageReceive: 'OnDataMessageReceive',
-  OnError: 'OnError',
+export const MeetingEvent = {
+  onStart: 'OnMeetingStart',
+  onEnd: 'OnMeetingEnd',
+  onAttendeesJoin: 'OnAttendeesJoin',
+  onAttendeesLeave: 'OnAttendeesLeave',
+  onAttendeesMute: 'OnAttendeesMute',
+  onAttendeesUnmute: 'OnAttendeesUnmute',
+  onAddVideoTile: 'OnAddVideoTile',
+  onRemoveVideoTile: 'OnRemoveVideoTile',
+  onDataMessageReceive: 'OnDataMessageReceive',
+  onError: 'OnError',
 };
 
 export const MeetingError = {
   OnMaximumConcurrentVideoReached: 'OnMaximumConcurrentVideoReached',
 };
-
-export function getSDKEventEmitter() {
-  return _eventEmitter;
-}
 
 /**
  * These are functions available for React native to call on native
@@ -53,9 +44,9 @@ export function getSDKEventEmitter() {
  * NativeModules.ChimeMeetingSDKBridge.bindVideoView(reactTagId, tileId)
  * NativeModules.ChimeMeetingSDKBridge.unbindVideoView(reactTagId, tileId)
  */
-export const NativeFunction = {
-  startMeeting: NativeModules.ChimeMeetingSDKBridge.startMeeting,
-  stopMeeting: NativeModules.ChimeMeetingSDKBridge.stopMeeting,
+export const Meeting = {
+  start: NativeModules.ChimeMeetingSDKBridge.startMeeting,
+  stop: NativeModules.ChimeMeetingSDKBridge.stopMeeting,
   setMute: NativeModules.ChimeMeetingSDKBridge.setMute,
   setCameraOn: NativeModules.ChimeMeetingSDKBridge.setCameraOn,
   bindVideoView: NativeModules.ChimeMeetingSDKBridge.bindVideoView,

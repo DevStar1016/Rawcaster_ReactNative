@@ -3,9 +3,9 @@ import React, {useEffect, useState} from 'react';
 import HOCView from '../../../../Components/HOCView';
 import {COLORS} from '../../../../Utilities/Colors';
 import {
-  MobileSDKEvent,
-  NativeFunction,
-  getSDKEventEmitter,
+  MeetingEvent,
+  Meeting,
+  MeetingEmitter,
 } from '../../../../Native/Bridges/ChimeMeetingBridge';
 import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../../../../Utilities/StoreData';
@@ -30,7 +30,7 @@ const EventHostScreen = ({route}) => {
   const [isInMeeting, setisInMeeting] = useState(false);
 
   useEffect(() => {
-    NativeFunction.startMeeting(meetingData, attendeeData);
+    Meeting.start(meetingData, attendeeData);
     isMount = true;
     return () => {
       isMount = false;
@@ -38,8 +38,8 @@ const EventHostScreen = ({route}) => {
   }, []);
 
   useEffect(() => {
-    onMeetingStartSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnMeetingStart,
+    onMeetingStartSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onStart,
       () => {
         console.log('MEETING START');
         if (isMount) {
@@ -49,8 +49,8 @@ const EventHostScreen = ({route}) => {
       },
     );
 
-    onMeetingEndSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnMeetingEnd,
+    onMeetingEndSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onEnd,
       () => {
         console.log('MEETING END');
         if (isMount) {
@@ -61,8 +61,8 @@ const EventHostScreen = ({route}) => {
       },
     );
 
-    onErrorSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnError,
+    onErrorSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onError,
       message => {
         console.log(message, 'MEETING ERROR');
         if (isMount) {
@@ -110,7 +110,7 @@ const EventHostScreen = ({route}) => {
     deleteMeeting(formData)
       .then(res => {
         if (res.data.status === 1) {
-          NativeFunction.stopMeeting();
+          Meeting.stop();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
           stopLoader();
