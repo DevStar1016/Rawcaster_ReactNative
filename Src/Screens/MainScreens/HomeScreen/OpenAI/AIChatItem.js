@@ -199,7 +199,16 @@ const AIChatItem = ({
                   duration={item.duration ?? 0}
                 />
               </View>
-
+              {item.isAudioLoading ? (
+                <StyledText
+                  style={{
+                    color: COLORS.dividerColor,
+                  }}>
+                  Conterting audio to text...
+                </StyledText>
+              ) : (
+                false
+              )}
               {item.audioText ? (
                 <StyledText
                   style={{
