@@ -194,7 +194,13 @@ const MainStack = () => {
             <Stack.Screen name="ProfileStack" component={ProfileStack} />
             <Stack.Screen name="UserChat" component={UserChat} />
             <Stack.Screen name="GroupChat" component={GroupChat} />
-            <Stack.Screen name="EventHostScreen" component={EventHostScreen} />
+            <Stack.Screen
+              name="EventHostScreen"
+              component={EventHostScreen}
+              options={{
+                gestureEnabled: false,
+              }}
+            />
 
             <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen name="AddUserToGroup" component={AddUserToGroup} />

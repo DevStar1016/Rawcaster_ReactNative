@@ -1,10 +1,17 @@
 import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import React from 'react';
 import SVGIcon from '../SVGIcon';
 import StyledText from '../StyledText';
 import {COLORS} from '../../Utilities/Colors';
 import {IconType} from '../../Utilities/Icons';
-import {useInsets} from '../../Utilities/StoreData';
+
+type Props = {
+  onChangeVideoStatus: () => void;
+  onChangeMicStatus: () => void;
+  onPressMenu: () => void;
+  isMuted?: boolean;
+  isVideoEnabled: boolean;
+};
 
 type ActionButtonProps = {
   text: string;
@@ -12,11 +19,13 @@ type ActionButtonProps = {
   onPress: () => void;
 };
 
-const MeetingActionsContainer = () => {
-  const [isMuted, setisMuted] = useState(false);
-  const [isVideo, setisVideo] = useState(false);
-  const insets = useInsets();
-
+const MeetingActionsContainer = ({
+  onChangeVideoStatus,
+  onPressMenu,
+  onChangeMicStatus,
+  isMuted,
+  isVideoEnabled,
+}: Props) => {
   const ActionButton = ({text = '', icon, onPress}: ActionButtonProps) => {
     return (
       <View style={styles.buttonContainer}>
@@ -36,18 +45,14 @@ const MeetingActionsContainer = () => {
       <ActionButton
         text={isMuted ? 'Un Mute' : 'Mute'}
         icon={isMuted ? 'mic_off_white' : 'mic_white'}
-        onPress={() => {
-          setisMuted(pre => !pre);
-        }}
+        onPress={onChangeMicStatus}
       />
       <ActionButton
-        text={isVideo ? 'Stop Video' : 'Start Video'}
-        icon={isVideo ? 'video_disabled_white' : 'video_call_white'}
-        onPress={() => {
-          setisVideo(pre => !pre);
-        }}
+        text={isVideoEnabled ? 'Stop Video' : 'Start Video'}
+        icon={isVideoEnabled ? 'video_disabled_white' : 'video_call_white'}
+        onPress={onChangeVideoStatus}
       />
-      <ActionButton text="Speaker" icon="speaker_white" onPress={() => {}} />
+      {/* <ActionButton text="Speaker" icon="speaker_white" onPress={() => {}} /> */}
       <ActionButton
         text="Participants"
         icon="participants_white"
@@ -56,7 +61,7 @@ const MeetingActionsContainer = () => {
       <ActionButton
         text="More"
         icon="menu_horizontal_white"
-        onPress={() => {}}
+        onPress={onPressMenu}
       />
     </View>
   );

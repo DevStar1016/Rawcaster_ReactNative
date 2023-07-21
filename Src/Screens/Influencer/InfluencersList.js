@@ -56,6 +56,7 @@ const InfluencersList = () => {
   const [isSelectedAllCheckbox, setisSelectedAllCheckbox] = useState(false);
   const [influencersTotalCount, setinfluencersTotalCount] = useState(0);
   const [isActionLoading, setisActionLoading] = useState(false);
+  const [calledBecomeFan, setcalledBecomeFan] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -203,6 +204,9 @@ const InfluencersList = () => {
     influencerFollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          if (isMount) {
+            setcalledBecomeFan(true);
+          }
           handleFilterInfluencerList(ids);
           if (isSkipScreen) {
             dispatch(setIsVisibleInfluencers(false));
@@ -307,16 +311,12 @@ const InfluencersList = () => {
           </View>
 
           <SmallButton
-            buttonText={selectedInfluencersRefIds.length > 0 ? 'Next' : 'Skip'}
+            buttonText={calledBecomeFan ? 'Next' : 'Skip'}
             isEnableIcon
             containerStyle={styles.smallButton}
             onPress={() => {
               Keyboard.dismiss();
-              if (selectedInfluencersRefIds.length > 0) {
-                handleInfluencerFollow(selectedInfluencersRefIds, true);
-              } else {
-                dispatch(setIsVisibleInfluencers(false));
-              }
+              dispatch(setIsVisibleInfluencers(false));
             }}
           />
         </View>

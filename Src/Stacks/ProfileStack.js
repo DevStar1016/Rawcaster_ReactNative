@@ -5,6 +5,8 @@ import Profile from '../Screens/MainScreens/ProfileDashboard/Profile';
 import ProfileSeeAllUsersList from '../Screens/MainScreens/ProfileDashboard/ProfileSeeAllUsersList';
 import MyFansChat from '../Modals/MyFansChat';
 import StackAnimation from '../Utilities/StackAnimation';
+import ReferalDashboard from '../Screens/MainScreens/Settings/Referal/ReferalDashboard';
+import ReferalSocialList from '../Screens/MainScreens/Settings/Referal/ReferalSocialList';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +24,8 @@ const ProfileStack = ({route}) => {
       />
       <Stack.Screen name="ClaimAccount" component={ClaimAccount} />
       <Stack.Screen name="MyFansChat" component={MyFansChat} />
+      <Stack.Screen name="ReferalDashboard" component={ReferalDashboard} />
+      <Stack.Screen name="ReferalSocialList" component={ReferalSocialList} />
     </Stack.Navigator>
   );
 };

@@ -771,6 +771,10 @@ const Profile = ({route}) => {
             isEnableSearch={false}
             isEnableSettings={true}
             isEnableLive={false}
+            isEnableReward
+            onPressRewardButton={() => {
+              navigation.navigate('ReferalSocialList');
+            }}
             isEnableBack
             isEnableSafeArea
             bgColor={COLORS.primary}
