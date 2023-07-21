@@ -4,6 +4,7 @@ package com.rawcaster.ChimeMeeting
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import com.amazonaws.services.chime.sdk.meetings.audiovideo.contentshare.ContentShareSource
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_ERROR
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_MEETING_END
 import com.amazonaws.services.chime.sdk.meetings.session.DefaultMeetingSession
@@ -193,6 +194,16 @@ class NativeMobileSDKBridge(
     @ReactMethod
     fun sendDataMessage(topic: String, message: String, lifetimeMs: Int) {
         meetingSession?.audioVideo?.realtimeSendDataMessage(topic, message, lifetimeMs)
+    }
+
+    @ReactMethod
+    fun startScreenShare() {
+        val contentShareSource = ContentShareSource()
+        meetingSession?.audioVideo?.startContentShare(contentShareSource);
+    }
+    @ReactMethod
+    fun stopScreenShare() {
+        meetingSession?.audioVideo?.stopContentShare();
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?): Boolean {

@@ -33,6 +33,7 @@ const Events = () => {
     navigation.navigate('EventHostScreen', {
       meetingData: meetingData,
       attendeeData: attendeeData,
+      eventDetails: startEventDetails,
     });
   };
 

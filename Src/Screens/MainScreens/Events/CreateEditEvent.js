@@ -718,7 +718,7 @@ const CreateEditEvent = ({route}) => {
           mainContainerStyle={{marginVertical: 10}}
           isSelected={Boolean(selectedValues.waiting_room)}
           onPress={() => {
-            if (profile.user_status_id !== 4) {
+            if (profile.user_status_id <= 1) {
               dispatch(
                 setPremiumAlert({
                   status: true,
@@ -740,7 +740,7 @@ const CreateEditEvent = ({route}) => {
           mainContainerStyle={{marginVertical: 10}}
           isSelected={Boolean(selectedValues.join_before_host)}
           onPress={() => {
-            if (profile.user_status_id !== 4) {
+            if (profile.user_status_id <= 1) {
               dispatch(
                 setPremiumAlert({
                   status: true,

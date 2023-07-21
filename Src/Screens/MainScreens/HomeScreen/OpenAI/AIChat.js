@@ -97,7 +97,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
             dateTime: moment().format('hh:mm A'),
             isIntro: !((text && text.trim()) || audioFile),
           };
-          if (audioFile && existingUniqueId && res.data.query) {
+          if (audioFile && existingUniqueId) {
             setchatList(preList => {
               let tempChatList = [...preList];
               const tempIndex = tempChatList.findIndex(
@@ -106,7 +106,8 @@ const AIChat = ({onPressBack, handleShareContent}) => {
               if (tempIndex !== -1) {
                 tempChatList[tempIndex] = {
                   ...tempChatList[tempIndex],
-                  audioText: res.data.query,
+                  audioText: res.data.query || '',
+                  isAudioLoading: false,
                 };
               }
               return [...tempChatList];
@@ -159,6 +160,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           dateTime: moment().format('hh:mm A'),
           audioUrl: audioFile?.uri,
           duration,
+          isAudioLoading: audioFile ? true : false,
         },
         ...preList,
       ];

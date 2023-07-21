@@ -11,7 +11,6 @@ import {TextInput} from 'react-native-gesture-handler';
 import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import EmojiContainer from 'react-native-emoji-container';
-import {WINDOW_HEIGHT} from '@gorhom/bottom-sheet';
 import {Camera} from 'react-native-vision-camera';
 import Toast from '../../../Components/Toast';
 import CustomCameraView from '../../../Modals/CameraModals/CustomCameraView';
@@ -26,6 +25,7 @@ import {
 import StyledText from '../../../Components/StyledText';
 import {secondsToMinutesAndSeconds} from '../../../Utilities/Methods';
 import OpacityAnimatedView from '../../../Components/OpacityAnimatedView';
+import {DIMENSIONS} from '../../../Utilities/Constants';
 
 type Document = {
   uri: string;
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   emojiContainer: {
-    height: WINDOW_HEIGHT / 2 - 120,
+    height: DIMENSIONS.window.height / 2 - 120,
     backgroundColor: COLORS.white,
   },
   recordTimerMicIconContainer: {

@@ -104,6 +104,8 @@ import PlayFillWhiteIcon from '../Assets/Svg/play_fill_white.svg';
 import PauseFillWhiteIcon from '../Assets/Svg/pause_fill_white.svg';
 import DocumentFillWhiteIcon from '../Assets/Svg/document_fill_white.svg';
 import DocumentFillPrimaryIcon from '../Assets/Svg/document_fill_primary.svg';
+import TranslationWhiteIcon from '../Assets/Svg/translation_white.svg';
+import TranslationSecondaryIcon from '../Assets/Svg/translation_secondary.svg';
 
 import TickBlackIcon from '../Assets/Svg/tick_black.svg';
 import EditBlackIcon from '../Assets/Svg/edit_black.svg';
@@ -312,6 +314,8 @@ export type IconType =
   | 'filter_line_white'
   | 'filter_line_black'
   | 'verified_sign'
+  | 'translation_secondary'
+  | 'translation_white'
   | 'close_black'
   | 'claim_user'
   | 'menu_vertical_white'
@@ -429,6 +433,8 @@ export const ICONS = {
   mic_off_fill_secondary: MicOffFillSecondaryIcon,
   document_fill_white: DocumentFillWhiteIcon,
   document_fill_primary: DocumentFillPrimaryIcon,
+  translation_white: TranslationWhiteIcon,
+  translation_secondary: TranslationSecondaryIcon,
   tick_black: TickBlackIcon,
   edit_black: EditBlackIcon,
   delete_black: DeleteBlackIcon,

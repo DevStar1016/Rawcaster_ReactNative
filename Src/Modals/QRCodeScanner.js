@@ -1,10 +1,10 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {Camera, useCameraDevices} from 'react-native-vision-camera';
-import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import StyledText from '../Components/StyledText';
 import {COLORS} from '../Utilities/Colors';
-
+import {DIMENSIONS} from '../Utilities/Constants';
+const WINDOW_WIDTH = DIMENSIONS.window.width;
 const QRCodeScanner = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const devices = useCameraDevices();

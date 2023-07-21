@@ -199,7 +199,16 @@ const AIChatItem = ({
                   duration={item.duration ?? 0}
                 />
               </View>
-
+              {item.isAudioLoading ? (
+                <StyledText
+                  style={{
+                    color: COLORS.dividerColor,
+                  }}>
+                  Conterting audio to text...
+                </StyledText>
+              ) : (
+                false
+              )}
               {item.audioText ? (
                 <StyledText
                   style={{
@@ -256,7 +265,13 @@ const AIChatItem = ({
               }
             }}>
             {isLoadingRead(item.id) ? (
-              <LoadingDots size={6} bounceHeight={5} dots={3} />
+              <View style={{flexDirection: 'row'}}>
+                <LoadingDots size={6} bounceHeight={5} dots={3} />
+                <StyledText
+                  style={{color: COLORS.white, marginLeft: 10, fontSize: 12}}>
+                  Coverting to Audio
+                </StyledText>
+              </View>
             ) : (
               <>
                 <SVGIcon

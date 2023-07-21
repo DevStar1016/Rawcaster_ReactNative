@@ -148,8 +148,8 @@ const PollContainer = ({
             third: 'Min',
           }}
           defaultDurationData={{
-            days: 0,
-            hours: 1,
+            days: 1,
+            hours: 0,
             minutes: 0,
           }}
           dropDownIcon="down_arrow_white"

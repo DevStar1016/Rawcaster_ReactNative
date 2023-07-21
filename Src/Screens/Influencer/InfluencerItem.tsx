@@ -16,6 +16,7 @@ import GradientButton from '../../Components/GradientButton';
 import SubmitButton from '../../Components/SubmitButton';
 import {getSlicedText, htmlDecodeText} from '../../Utilities/Methods';
 import ItemSelectionMiniList from '../../Components/ItemSelectionMiniList';
+import Badges from '../../Utilities/Badges';
 
 type Props = {
   isSelected?: boolean;
@@ -67,7 +68,7 @@ const InfluencerItem = ({
   return (
     <View style={styles.mainConatiner}>
       <ProfileWithBadge
-        badge={'diamond'}
+        badge={Badges(item.user_status_id)}
         containerStyle={styles.profileImageContainer}
         profileImage={item.profile_img}
       />

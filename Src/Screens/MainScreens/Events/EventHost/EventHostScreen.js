@@ -1,17 +1,18 @@
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, BackHandler, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HOCView from '../../../../Components/HOCView';
 import {COLORS} from '../../../../Utilities/Colors';
 import {
-  MobileSDKEvent,
-  NativeFunction,
-  getSDKEventEmitter,
+  MeetingEvent,
+  Meeting,
+  MeetingEmitter,
 } from '../../../../Native/Bridges/ChimeMeetingBridge';
 import {useNavigation} from '@react-navigation/native';
-import {useToken} from '../../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import MeetingUI from '../../../../Components/Meeting/MeetingUI';
 import Toast from '../../../../Components/Toast';
 import {deleteMeeting} from '../../../../Services/ApiService';
+import {IS_IOS} from '../../../../Utilities/Constants';
 
 var isMount = true;
 var onMeetingStartSubscription = undefined;
@@ -20,7 +21,8 @@ var onErrorSubscription = undefined;
 
 const EventHostScreen = ({route}) => {
   const navigation = useNavigation();
-  const {meetingData, attendeeData} = route.params ?? {};
+  const profile = useProfile();
+  const {meetingData, attendeeData, eventDetails} = route.params ?? {};
   const token = useToken();
   const [attendeesList, setattendeesList] = useState([]);
   const [loaderData, setloaderData] = useState({
@@ -28,9 +30,9 @@ const EventHostScreen = ({route}) => {
     text: 'Meeting being start',
   });
   const [isInMeeting, setisInMeeting] = useState(false);
-
+  console.log(eventDetails, 'DETAILSSS');
   useEffect(() => {
-    NativeFunction.startMeeting(meetingData, attendeeData);
+    Meeting.start(meetingData, attendeeData);
     isMount = true;
     return () => {
       isMount = false;
@@ -38,8 +40,21 @@ const EventHostScreen = ({route}) => {
   }, []);
 
   useEffect(() => {
-    onMeetingStartSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnMeetingStart,
+    const backAction = () => {
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    onMeetingStartSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onStart,
       () => {
         console.log('MEETING START');
         if (isMount) {
@@ -49,20 +64,20 @@ const EventHostScreen = ({route}) => {
       },
     );
 
-    onMeetingEndSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnMeetingEnd,
+    onMeetingEndSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onEnd,
       () => {
-        console.log('MEETING END');
         if (isMount) {
           setisInMeeting(false);
           stopLoader();
         }
+        Toast.success('Meeting has been end');
         navigation.goBack();
       },
     );
 
-    onErrorSubscription = getSDKEventEmitter().addListener(
-      MobileSDKEvent.OnError,
+    onErrorSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onError,
       message => {
         console.log(message, 'MEETING ERROR');
         if (isMount) {
@@ -110,7 +125,7 @@ const EventHostScreen = ({route}) => {
     deleteMeeting(formData)
       .then(res => {
         if (res.data.status === 1) {
-          NativeFunction.stopMeeting();
+          Meeting.stop();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
           stopLoader();
@@ -128,6 +143,7 @@ const EventHostScreen = ({route}) => {
         title: 'Events',
         bgColor: COLORS.transparent,
         isTitleCenter: true,
+        isEnableBackButton: false,
       }}
       isLoading={loaderData.status}
       loaderProps={{
@@ -139,7 +155,13 @@ const EventHostScreen = ({route}) => {
       {isInMeeting && (
         <MeetingUI
           meetingId={meetingData.MeetingId}
-          handleEndMeeting={handleEndMeeting}
+          handleEndMeeting={() => {
+            if (eventDetails.original_user_id === profile.user_id) {
+              handleEndMeeting();
+            } else {
+              Meeting.stop();
+            }
+          }}
           selfAttendeeId={attendeeData.AttendeeId}
         />
       )}

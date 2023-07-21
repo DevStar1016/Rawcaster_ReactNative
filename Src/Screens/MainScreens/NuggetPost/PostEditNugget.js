@@ -55,7 +55,6 @@ import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 import EmojiContainer from 'react-native-emoji-container';
-import {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {addNugget} from '../../../Store/ThunkAPIServices';
 
@@ -962,7 +961,7 @@ const PostEditNugget = ({route}) => {
 
             /> */}
           <EmojiContainer
-            emojisContainerWidth={WINDOW_WIDTH - 10}
+            emojisContainerWidth={DIMENSIONS.window.width - 10}
             titleTextStyle={{
               fontFamily: FONTS.DMSans.medium,
               fontSize: 14,

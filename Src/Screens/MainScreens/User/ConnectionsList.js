@@ -205,6 +205,7 @@ const ConnectionsList = () => {
         activeOpacity={0.8}
         disabled={typeof item.online === typeof undefined}
         onPress={() => {
+          console.log(item, 'ITEM');
           // navigation.navigate('UserChat', {
           //   userData: item,
           // });
