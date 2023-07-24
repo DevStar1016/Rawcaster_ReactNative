@@ -335,35 +335,39 @@ const InfluencersList = () => {
         <View style={{paddingHorizontal: 15}}>
           <View style={styles.listHeader}>
             <View style={{flexDirection: 'row'}}>
-              <CheckBox
-                isVisibleText={false}
-                isSelected={isSelectedAll}
-                mainContainerStyle={{marginRight: 10}}
-                onPress={() => {
-                  if (isMount) {
-                    setisSelectedAll(pre => {
-                      const updatedStatus = !pre;
-                      if (updatedStatus) {
-                        handleSelectAllInfluencers(
-                          [...influencersList],
-                          updatedStatus,
-                        );
-                      } else {
-                        setselectedInfluencersRefIds([]);
+              {influencersList.length > 0 && !isLoading && (
+                <>
+                  <CheckBox
+                    isVisibleText={false}
+                    isSelected={isSelectedAll}
+                    mainContainerStyle={{marginRight: 10}}
+                    onPress={() => {
+                      if (isMount) {
+                        setisSelectedAll(pre => {
+                          const updatedStatus = !pre;
+                          if (updatedStatus) {
+                            handleSelectAllInfluencers(
+                              [...influencersList],
+                              updatedStatus,
+                            );
+                          } else {
+                            setselectedInfluencersRefIds([]);
+                          }
+                          return updatedStatus;
+                        });
                       }
-                      return updatedStatus;
-                    });
-                  }
-                }}
-              />
-              <StyledText
-                style={{
-                  paddingVertical: 5,
-                }}>{`Selected ${isSelectedAll ? 'All' : 'Influencers'} (${
-                isSelectedAll
-                  ? getDoubleDigit(influencersTotalCount)
-                  : getDoubleDigit(selectedInfluencersRefIds.length)
-              })`}</StyledText>
+                    }}
+                  />
+                  <StyledText
+                    style={{
+                      paddingVertical: 5,
+                    }}>{`Selected ${isSelectedAll ? 'All' : 'Influencers'} (${
+                    isSelectedAll
+                      ? getDoubleDigit(influencersTotalCount)
+                      : getDoubleDigit(selectedInfluencersRefIds.length)
+                  })`}</StyledText>
+                </>
+              )}
             </View>
             <TouchableOpacity
               style={[
