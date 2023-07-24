@@ -53,7 +53,6 @@ const InfluencersList = () => {
     [],
   );
   const [isSelectedAll, setisSelectedAll] = useState(false);
-  const [isSelectedAllCheckbox, setisSelectedAllCheckbox] = useState(false);
   const [influencersTotalCount, setinfluencersTotalCount] = useState(0);
   const [isActionLoading, setisActionLoading] = useState(false);
   const [calledBecomeFan, setcalledBecomeFan] = useState(false);
@@ -74,7 +73,6 @@ const InfluencersList = () => {
     if (isMount) {
       setisLoading(true);
     }
-
     influencerListAPICall(1);
   }, [selectedCategoryId, searchText]);
 
@@ -162,6 +160,11 @@ const InfluencersList = () => {
       return item;
     });
     setinfluencersList(tempInfluencersList);
+    // if (isSelectedAll) {
+    //   setinfluencersTotalCount(pre =>
+    //     pre - ids.length > 0 ? pre - ids.length : 0,
+    //   );
+    // }
     setselectedInfluencersRefIds([]);
   }
 
@@ -173,7 +176,6 @@ const InfluencersList = () => {
       );
       if (isSelectedAll) {
         setisSelectedAll(false);
-        setisSelectedAllCheckbox(false);
       }
     } else {
       tempSelectedInfluencersIds.push(id);
@@ -322,7 +324,13 @@ const InfluencersList = () => {
         </View>
         <InfluencerCategoriesList
           selectedCategoryId={selectedCategoryId}
-          onSelectCategory={setSelectedCategoryId}
+          onSelectCategory={id => {
+            if (isMount) {
+              setisSelectedAll(false);
+              setselectedInfluencersRefIds([]);
+              setSelectedCategoryId(id);
+            }
+          }}
         />
         <View style={{paddingHorizontal: 15}}>
           <View style={styles.listHeader}>
@@ -343,7 +351,6 @@ const InfluencersList = () => {
                       } else {
                         setselectedInfluencersRefIds([]);
                       }
-                      setisSelectedAllCheckbox(updatedStatus);
                       return updatedStatus;
                     });
                   }

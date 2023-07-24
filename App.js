@@ -30,9 +30,10 @@ import {
   GOOGLE_PLACES_API_KEY,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from './Src/Services/APIKeysIds';
+import DefaultBackground from './Src/Components/DefaultBackground';
 
 const Stack = createStackNavigator();
-var tokenFetchingTimer = undefined;
+// var tokenFetchingTimer = undefined;
 const App = () => {
   const [isIntroSeen, setisIntroSeen] = useState(false);
   const dispatch = useDispatch();
@@ -67,7 +68,7 @@ const App = () => {
       iosClientId: GOOGLE_SIGNIN_IOS_CLIENT_ID,
     });
     Geocode.setApiKey(GOOGLE_PLACES_API_KEY);
-    return () => tokenFetchingTimer && clearTimeout(tokenFetchingTimer);
+    // return () => tokenFetchingTimer && clearTimeout(tokenFetchingTimer);
   }, []);
 
   useEffect(() => {
@@ -90,20 +91,22 @@ const App = () => {
           dispatch(setToken(token));
         }
 
-        setTokenFetched();
+        // setTokenFetched();
+        setisFetchingToken(false);
       } catch (e) {
-        setTokenFetched();
+        // setTokenFetched();
+        setisFetchingToken(false);
       }
     }
     getIsIntroSeen();
   }, []);
 
-  function setTokenFetched() {
-    tokenFetchingTimer = setTimeout(() => {
-      setisFetchingToken(false);
-      clearTimeout(tokenFetchingTimer);
-    }, 1000);
-  }
+  // function setTokenFetched() {
+  //   tokenFetchingTimer = setTimeout(() => {
+  //     setisFetchingToken(false);
+  //     clearTimeout(tokenFetchingTimer);
+  //   }, 1000);
+  // }
 
   async function onSkipIntro() {
     setisIntroSeen(true);
@@ -140,8 +143,9 @@ const App = () => {
       <CustomStatusBar />
 
       {isFetchingToken ? (
-        <AsyncFetchIntro />
-      ) : isIntroSeen ? (
+        <DefaultBackground />
+      ) : // <AsyncFetchIntro />
+      isIntroSeen ? (
         <NavigationContainer>
           <Stack.Navigator>
             {token ? (
