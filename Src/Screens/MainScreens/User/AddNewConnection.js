@@ -25,11 +25,13 @@ import UserItem from './UserItem';
 import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
+import {useNavigation} from '@react-navigation/native';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 const AddNewConnection = () => {
+  const navigation = useNavigation();
   const token = useToken();
   const profile = useProfile();
   const dispatch = useDispatch();
@@ -235,6 +237,13 @@ const AddNewConnection = () => {
         }}
         onConnectionRequest={() => {
           handleSendFriendRequest(item.user_ref_id, item.user_id);
+        }}
+        isProfileButton
+        onPressProfile={() => {
+          /* @ts-ignore*/
+          navigation.navigate('ProfileStack', {
+            userId: item.user_id,
+          });
         }}
       />
     );

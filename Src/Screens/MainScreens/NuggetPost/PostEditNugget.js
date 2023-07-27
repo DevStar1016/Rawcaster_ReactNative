@@ -165,7 +165,7 @@ const PostEditNugget = ({route}) => {
     // if (isMount) {
     //   setloadingData({
     //     status: true,
-    //     text: 'Nugget being upload',
+    //     text: 'Nugget being uploaded',
     //   });
     // }
     const formData = new FormData();
@@ -215,7 +215,7 @@ const PostEditNugget = ({route}) => {
     //   .then(res => {
     //     if (res.data.status === 1) {
     //       if (isMediaAbove5Min) {
-    //         Toast.success('Media being upload...', 6000);
+    //         Toast.success('Media being uploaded...', 6000);
     //       } else {
     //         Toast.success(res.data.msg);
     //       }
@@ -240,7 +240,7 @@ const PostEditNugget = ({route}) => {
     if (isMount) {
       setloadingData({
         status: true,
-        text: 'Nugget being Edit...',
+        text: 'Nugget being Edited...',
       });
     }
     const formData = new FormData();
@@ -284,7 +284,7 @@ const PostEditNugget = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           // if (isMediaAbove5Min) {
-          //   Toast.success('Media being upload...', 000);
+          //   Toast.success('Media being uploaded...', 000);
           // } else {
           //   Toast.success(res.data.msg);
           // }
@@ -347,7 +347,7 @@ const PostEditNugget = ({route}) => {
         if (isMount) {
           setloadingData({
             status: true,
-            text: 'Selected media being compress',
+            text: 'Selected media being compressed',
           });
         }
         let mediaType = type === 'photo' ? 1 : 2;

@@ -26,10 +26,6 @@ const Events = () => {
     if (isMount) {
       setisOpenHostingScreen(false);
     }
-    createMeetingRoom({
-      hostId: profile.user_id,
-      meetingId: meetingData.MeetingId,
-    });
     navigation.navigate('EventHostScreen', {
       meetingData: meetingData,
       attendeeData: attendeeData,
@@ -59,7 +55,7 @@ const Events = () => {
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
           <StartEventHosting
             eventItem={startEventDetails}
-            onStartHosting={handleJoinMeeting}
+            handleStartJoinMeeting={handleJoinMeeting}
             onClose={() => {
               if (isMount) {
                 setisOpenHostingScreen(false);

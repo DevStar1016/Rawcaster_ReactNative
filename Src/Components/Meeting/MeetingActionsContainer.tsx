@@ -9,6 +9,7 @@ type Props = {
   onChangeVideoStatus: () => void;
   onChangeMicStatus: () => void;
   onPressMenu: () => void;
+  onPressParticipants: () => void;
   isMuted?: boolean;
   isVideoEnabled: boolean;
 };
@@ -22,6 +23,7 @@ type ActionButtonProps = {
 const MeetingActionsContainer = ({
   onChangeVideoStatus,
   onPressMenu,
+  onPressParticipants,
   onChangeMicStatus,
   isMuted,
   isVideoEnabled,
@@ -56,7 +58,7 @@ const MeetingActionsContainer = ({
       <ActionButton
         text="Participants"
         icon="participants_white"
-        onPress={() => {}}
+        onPress={onPressParticipants}
       />
       <ActionButton
         text="More"

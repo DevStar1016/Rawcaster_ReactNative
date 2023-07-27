@@ -728,7 +728,7 @@ const Profile = ({route}) => {
                       : ''
                   }Nugget${
                     uploadingNuggets.length > 1 ? 's' : ''
-                  } being upload...`}</StyledText>
+                  } being uploaded...`}</StyledText>
                 </View>
               </View>
             )}

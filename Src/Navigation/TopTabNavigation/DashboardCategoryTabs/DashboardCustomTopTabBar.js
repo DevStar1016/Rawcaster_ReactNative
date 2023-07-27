@@ -17,6 +17,7 @@ import {useDispatch} from 'react-redux';
 import {setIsOpenLoginAlert} from '../../../Store/Slices/UtilitySlice';
 import {useNavigation} from '@react-navigation/native';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
+import Badges from '../../../Utilities/Badges';
 
 function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
   const dispatch = useDispatch();
@@ -141,6 +142,9 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
           profileSize={28}
           extraMargin={0}
           padding={0}
+          // badge={Badges(profile?.user_status_id)}
+          // badgeSize={15}
+          // badgeContainerStyle={{right: -5, bottom: -2}}
           containerStyle={{marginLeft: 5, marginRight: 0}}
           isButton
           onPressProfile={() => {

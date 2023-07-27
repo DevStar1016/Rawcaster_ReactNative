@@ -12,5 +12,5 @@ export const ChimeSocketEvents: ChimeEventsProps = {
   rejectToJoinMeeting: 'rejectToJoinMeeting',
   joinRequest: 'joinRequest',
   joinRequestFromUser: 'joinRequestFromUser',
-  joinRequestResponse: 'joinRequestResponse',
+  joinRequestAnswer: 'joinRequestAnswer',
 };

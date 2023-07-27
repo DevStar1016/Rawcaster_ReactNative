@@ -407,10 +407,6 @@ export const textToAudioService = (data: FormData) => {
 
 //Chime Meeting
 
-export const joinMeeting = (data: FormData) => {
-  return axios.post('join_meeting', data);
-};
-
 export const attendees = (data: FormData) => {
   return axios.post('attendees', data);
 };

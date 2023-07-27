@@ -276,7 +276,7 @@ export const addNugget = createAsyncThunk(
         progressValue: 0,
       }),
     );
-    Toast.success('Nugget being upload...');
+    Toast.success('Nugget being uploaded...');
     try {
       data.navigation.goBack();
       // data.navigation.reset({

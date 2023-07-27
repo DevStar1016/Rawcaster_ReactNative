@@ -180,6 +180,7 @@ const ReferalDashboardHeader = ({
       isEnableHeader={false}
       isEnableKeyboardAware
       paddingHorizontal={0}
+      isLoading={isLoading}
       backgroundColor={COLORS.white}
       isEnablePrimaryColorStatusBar={false}
       keyBoardAwareScrollViewProps={{
@@ -199,16 +200,16 @@ const ReferalDashboardHeader = ({
       </View>
       <View style={styles.divider} />
       <View style={styles.bottomContainer}>
+        <Image
+          source={GroupUsersImage}
+          style={styles.groupImage}
+          resizeMode="contain"
+        />
         <LinearGradient
           colors={COLORS.gradientColorsSecondary}
           start={{x: 1, y: 1}}
           end={{x: 0, y: 0}}
           style={styles.referalHeaderContent}>
-          <Image
-            source={GroupUsersImage}
-            style={styles.groupImage}
-            resizeMode="contain"
-          />
           <View style={{marginTop: 25}}>
             <StyledText style={styles.referalText}>
               Refer your friends & unlock Rawcaster Pro features
@@ -245,9 +246,11 @@ const ReferalDashboardHeader = ({
             mainContainerMarginVertical={0}
             backgroundColor={COLORS.transparent}
             borderColor={COLORS.white}
-            returnKeyType="send"
+            returnKeyType="done"
             clearButtonMode="while-editing"
-            onSubmitEditing={addInvitedUsers}
+            onSubmitEditing={() => {
+              addInvitedUsers();
+            }}
             textAlignVertical={'top'}
             additionalTextInputProps={{
               placeholderTextColor: COLORS.white,
@@ -318,10 +321,11 @@ const styles = StyleSheet.create({
   },
   groupImage: {
     position: 'absolute',
-    top: -35,
+    top: 15,
     left: 15,
     height: 80,
     width: 170,
+    zIndex: 1,
   },
   referalHeaderContent: {
     backgroundColor: 'red',

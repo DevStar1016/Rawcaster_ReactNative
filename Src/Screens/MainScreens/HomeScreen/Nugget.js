@@ -583,6 +583,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
               multiline: true,
               inputContainerHeight: 100,
               textAlignVertical: 'top',
+              maxLength: 500,
             }}
             onSubmit={message => {
               setisOpenReportModal(false);

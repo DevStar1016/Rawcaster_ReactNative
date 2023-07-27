@@ -14,22 +14,27 @@ import {FONTS} from '../Utilities/Fonts';
 import {COLORS} from '../Utilities/Colors';
 import SubmitButton from '../Components/SubmitButton';
 import AudioPlayingGif from '../Assets/Gif/audio_playing.gif';
+import LoaderGif from '../Assets/Gif/loader.gif';
 import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
 import {Slider} from '@miblanchard/react-native-slider';
-import {useToken} from '../Utilities/StoreData';
-import {joinMeeting} from '../Services/ApiService';
-import Loader from '../Components/Loader';
-import Toast from '../Components/Toast';
+import {chimeSocketListen} from '../Services/ChimeSocket/ChimeSocket';
+import {ChimeSocketEvents} from '../Services/ChimeSocket/ChimeSocketEvents';
+import {joinRequest} from '../Services/ChimeSocket/ChimeSocketRequests';
+import {useProfile} from '../Utilities/StoreData';
 
 var isMount = true;
-const StartJoinEventWaitingRoom = ({onClose, eventItem, onStartHosting}) => {
+const StartJoinEventWaitingRoom = ({
+  onClose,
+  eventItem,
+  handleStartJoinMeeting,
+}) => {
+  const profile = useProfile();
   const videoPlayer = useRef(null);
-  const token = useToken();
   const [paused, setpaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
   const [isLoadingMedia, setisLoadingMedia] = useState(true);
-  const [isLoading, setisLoading] = useState(false);
+  const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -39,29 +44,40 @@ const StartJoinEventWaitingRoom = ({onClose, eventItem, onStartHosting}) => {
     };
   }, []);
 
-  const handleJoinMeeting = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('meeting_id', eventItem.chime_meeting_id);
-    joinMeeting(formData)
-      .then(res => {
-        console.log(res.data, 'MEETING RESPONSE');
-        if (res.data.status === 1) {
-          onStartHosting(res.data.meeting, res.data.attendee);
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        console.log(e, 'ERROR JOIN MEETING');
-        Toast.fail(e.message);
-      })
-      .finally(() => {
+  // Meeting Room - Host Accept or Reject Join Request Response Received here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.joinRequestAnswer,
+      joinedData => {
+        console.log(joinedData, 'Meeting JOINED DATATTATAA joinRequestAnswer');
+        const meetingJoinedResult = joinedData?.result;
         if (isMount) {
-          onClose();
-          setisLoading(false);
+          setisRequestingMeeting(false);
         }
-      });
+        if (meetingJoinedResult) {
+          handleStartJoinMeeting(
+            meetingJoinedResult.meeting,
+            meetingJoinedResult.Attendee,
+          );
+        }
+      },
+      [],
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
+    };
+  }, []);
+
+  const onStartHosting = () => {
+    if (isMount) {
+      setisRequestingMeeting(true);
+    }
+    joinRequest({
+      meetingId: eventItem.chime_meeting_id,
+      userId: profile.user_id,
+      user_img: profile.profile_image,
+      user_name: profile.name,
+    });
   };
 
   function onVideoError() {}
@@ -270,24 +286,24 @@ const StartJoinEventWaitingRoom = ({onClose, eventItem, onStartHosting}) => {
           renderMediaControllers()
         )}
       </View>
-      <SubmitButton
-        buttonText="START HOSTING"
-        bgColor={COLORS.white}
-        borderColor={COLORS.primary}
-        marginHorizontal={10}
-        borderWidth={1}
-        textColor={COLORS.primary}
-        marginTop={5}
-        onPress={() => {
-          if (isMount) {
-            setisLoading(true);
-          }
-          handleJoinMeeting();
-        }}
-      />
-      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
-        <Loader bgColor={COLORS.transparentDimColor} />
-      </Modal>
+      {isRequestingMeeting ? (
+        <Image
+          source={LoaderGif}
+          resizeMode="contain"
+          style={{width: '80%', height: 50, alignSelf: 'center'}}
+        />
+      ) : (
+        <SubmitButton
+          buttonText="START HOSTING"
+          bgColor={COLORS.white}
+          borderColor={COLORS.primary}
+          marginHorizontal={10}
+          borderWidth={1}
+          textColor={COLORS.primary}
+          marginTop={5}
+          onPress={onStartHosting}
+        />
+      )}
     </View>
   );
 };

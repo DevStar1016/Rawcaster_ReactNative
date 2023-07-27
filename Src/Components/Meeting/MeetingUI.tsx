@@ -9,6 +9,7 @@ import {
 } from '../../Native/Bridges/ChimeMeetingBridge';
 import MeetingVideoView, {AttendeeDetail} from './MeetingVideoView';
 import {DIMENSIONS} from '../../Utilities/Constants';
+import MeetingActionsListener from './MeetingActionsListener';
 
 type DataMessage = {
   topic: string;
@@ -224,7 +225,7 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
     }
   };
 
-  const onMuteAttendee = (attendeeId: string | number) => {
+  const onMuteAttendee = (attendeeId: string) => {
     if (isMount) {
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
@@ -391,6 +392,7 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
 
   return (
     <View style={styles.mainContainer}>
+      {/* <MeetingActionsListener  onJoinAttendee={onJoinAttendee} onLeaveAttendee={onLeaveAttendee} onMuteAttendee={onMuteAttendee}  onUnMuteAttendee={onUnMuteAttendee} onAddVideoTile={onAddVideoTile} /> */}
       <View
         style={{flex: 1}}
         onLayout={e => {
@@ -417,6 +419,7 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
           Meeting.setMute(!getIsMuted());
         }}
         onPressMenu={handleEndMeeting}
+        onPressParticipants={() => {}}
       />
     </View>
   );

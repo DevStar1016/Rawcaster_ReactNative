@@ -65,6 +65,20 @@ const MainStack = () => {
   useEffect(() => {
     initialAPICall();
   }, []);
+
+  const getChimeTestUserId = userId => {
+    switch (userId) {
+      case 67:
+        return 11;
+      case 88:
+        return 22;
+      case 21:
+        return 33;
+      default:
+        return userId;
+    }
+  };
+
   function getCommonFormData() {
     const formData = new FormData();
     formData.append('token', token);
@@ -98,7 +112,9 @@ const MainStack = () => {
             first_name: htmlDecodeText(profile?.first_name),
             last_name: htmlDecodeText(profile?.last_name),
             bio_data: htmlDecodeText(profile?.bio_data),
+            user_id: getChimeTestUserId(profile?.user_id), //Testing Purpose remove this after testing chime meeting
           };
+
           dispatch(setMyProfile(profile));
           dispatch(
             setUnreadNotificationCount(
@@ -165,7 +181,7 @@ const MainStack = () => {
     />
   ) : (
     <>
-      <SocketListener />
+      {/* <SocketListener /> */}
       <ChimeSocketListener />
       <Stack.Navigator
         screenOptions={{

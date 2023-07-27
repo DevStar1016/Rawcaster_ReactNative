@@ -13,6 +13,8 @@ import MeetingUI from '../../../../Components/Meeting/MeetingUI';
 import Toast from '../../../../Components/Toast';
 import {deleteMeeting} from '../../../../Services/ApiService';
 import {IS_IOS} from '../../../../Utilities/Constants';
+import {chimeSocketListen} from '../../../../Services/ChimeSocket/ChimeSocket';
+import {ChimeSocketEvents} from '../../../../Services/ChimeSocket/ChimeSocketEvents';
 
 var isMount = true;
 var onMeetingStartSubscription = undefined;
@@ -24,18 +26,33 @@ const EventHostScreen = ({route}) => {
   const profile = useProfile();
   const {meetingData, attendeeData, eventDetails} = route.params ?? {};
   const token = useToken();
-  const [attendeesList, setattendeesList] = useState([]);
+  const [requestedList, setrequestedList] = useState([]);
   const [loaderData, setloaderData] = useState({
     status: true,
-    text: 'Meeting being start',
+    text: 'Meeting being started',
   });
   const [isInMeeting, setisInMeeting] = useState(false);
-  console.log(eventDetails, 'DETAILSSS');
+  console.log(requestedList, 'REQUESTEDLIST');
   useEffect(() => {
     Meeting.start(meetingData, attendeeData);
     isMount = true;
     return () => {
       isMount = false;
+    };
+  }, []);
+
+  // Meeting Room Join Request Received here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.joinRequestFromUser,
+      requestData => {
+        handleAddRequestedUser(requestData);
+        console.log(requestData, 'ChimeSocketListen  joinRequestFromUser');
+      },
+      [],
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.joinRequestFromUser);
     };
   }, []);
 
@@ -103,6 +120,26 @@ const EventHostScreen = ({route}) => {
     };
   }, []);
 
+  const handleAddRequestedUser = requestData => {
+    setrequestedList(preList => {
+      if (
+        [...preList].findIndex(item => item.user_id === requestData.userId) ===
+        -1
+      ) {
+        return [
+          {
+            user_id: requestData.userId,
+            user_img: requestData.user_img,
+            user_name: requestData.user_name,
+            isRequested: true,
+          },
+          ...preList,
+        ];
+      }
+      return [...preList];
+    });
+  };
+
   const stopLoader = () => {
     if (isMount) {
       setloaderData({
@@ -116,7 +153,7 @@ const EventHostScreen = ({route}) => {
     if (isMount) {
       setloaderData({
         status: true,
-        text: 'Meeting being end',
+        text: 'Meeting being ended',
       });
     }
     const formData = new FormData();

@@ -83,6 +83,7 @@ const Login = () => {
       .then(res => {
         console.log(res.data, 'LOGINDATA');
         if (res.data.status === 1) {
+          console.log(res.data.first_time, 'FIRSTTIME');
           if (parseInt(res.data.first_time) === 1) {
             dispatch(setIsVisibleInfluencers(true));
           }

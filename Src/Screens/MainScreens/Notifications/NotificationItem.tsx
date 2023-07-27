@@ -18,6 +18,7 @@ import {
   useUnreadNotificationCount,
 } from '../../../Utilities/StoreData';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
+import {useNavigation} from '@react-navigation/native';
 
 type ConnectionResponseProp = {
   responseType: number;
@@ -39,6 +40,7 @@ const NotificationItem = ({
   handleFriendRequest,
   handleReadNotification,
 }: Props) => {
+  const navigation = useNavigation();
   const settings = useSettings();
   const unreadNotificationCount = useUnreadNotificationCount();
 
@@ -51,6 +53,8 @@ const NotificationItem = ({
         (item.poll_option && item.poll_option.length > 0)
       }
       onPress={() => {
+        console.log(item, 'ITEM');
+
         if (
           unreadNotificationCount &&
           !item.is_read &&
@@ -63,12 +67,30 @@ const NotificationItem = ({
         profileImage={item.userImage}
         profileSize={40}
         padding={0}
+        isButton
+        onPressProfile={() => {
+          /* @ts-ignore*/
+          navigation.navigate('ProfileStack', {
+            userId: item.user_id,
+          });
+        }}
         extraMargin={0}
       />
       <View style={styles.itemRightContainer}>
         <View style={styles.titleShortTimeContainer}>
           <View style={{flex: 1, paddingRight: 5}}>
-            <StyledText style={styles.nameText}>
+            <StyledText
+              style={[
+                styles.nameText,
+                {
+                  opacity:
+                    !unreadNotificationCount ||
+                    item.is_read ||
+                    (item.poll_option && item.poll_option.length > 0)
+                      ? 0.7
+                      : 1,
+                },
+              ]}>
               {getSlicedText(item.userName, 25)}
             </StyledText>
           </View>
@@ -172,13 +194,21 @@ const NotificationItem = ({
                   marginRight={5}
                   height={20}
                   width={20}
+                  opacity={
+                    !unreadNotificationCount ||
+                    item.is_read ||
+                    (item.poll_option && item.poll_option.length > 0)
+                      ? 0.7
+                      : 1
+                  }
                 />
                 <StyledText
                   style={[
                     styles.subText,
                     {
                       opacity:
-                        (!unreadNotificationCount && item.is_read) ||
+                        !unreadNotificationCount ||
+                        item.is_read ||
                         (item.poll_option && item.poll_option.length > 0)
                           ? 0.7
                           : 1,
@@ -196,6 +226,13 @@ const NotificationItem = ({
                   marginRight={5}
                   height={20}
                   width={20}
+                  opacity={
+                    !unreadNotificationCount ||
+                    item.is_read ||
+                    (item.poll_option && item.poll_option.length > 0)
+                      ? 0.7
+                      : 1
+                  }
                 />
                 <StyledText
                   style={[

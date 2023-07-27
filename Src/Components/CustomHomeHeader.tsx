@@ -189,19 +189,6 @@ const CustomHomeHeader = ({
             }}
           />
         )}
-        {isEnableSettings && (
-          <SVGIcon
-            icon="settings_white"
-            marginLeft={5}
-            height={26}
-            width={26}
-            onPress={() => {
-              /* @ts-ignore */
-              navigation.navigate('SettingsStack');
-            }}
-            isButton
-          />
-        )}
 
         {isEnableLive && (
           <TouchableOpacity
@@ -229,6 +216,19 @@ const CustomHomeHeader = ({
             icon="reward"
             onPress={onPressRewardButton}
             marginLeft={5}
+            isButton
+          />
+        )}
+        {isEnableSettings && (
+          <SVGIcon
+            icon="settings_white"
+            marginLeft={5}
+            height={26}
+            width={26}
+            onPress={() => {
+              /* @ts-ignore */
+              navigation.navigate('SettingsStack');
+            }}
             isButton
           />
         )}

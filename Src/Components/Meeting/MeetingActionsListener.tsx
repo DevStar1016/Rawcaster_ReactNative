@@ -15,12 +15,16 @@ export type DataMessage = {
 };
 
 type Props = {
-  onJoinAttendee: (attendeeId: string | number, attendeeName: string) => void;
-  onLeaveAttendee: (attendeeId: string | number) => void;
-  onMuteAttendee: (attendeeId: string | number) => void;
-  onUnMuteAttendee: (attendeeId: string | number) => void;
+  onJoinAttendee: (attendeeId: string, attendeeName: string) => void;
+  onLeaveAttendee: (attendeeId: string) => void;
+  onMuteAttendee: (attendeeId: string) => void;
+  onUnMuteAttendee: (attendeeId: string) => void;
   onEnableScreenShare: (tileId: string | number) => void;
-  onAddVideoTile: (tileId: string | number, isLocal: boolean) => void;
+  onAddVideoTile: (
+    tileId: string | number,
+    isLocal: boolean,
+    attendeeId: string,
+  ) => void;
   onRemoveScreenShare: () => void;
   onRemoveVideoTile: (tileId: string | number, isLocal: boolean) => void;
   onReceiveDataMessage: (data: DataMessage) => void;
@@ -28,7 +32,7 @@ type Props = {
 };
 
 type AttendeeJoinResponseProps = {
-  attendeeId: number;
+  attendeeId: string;
   externalUserId: string;
 };
 
@@ -104,7 +108,11 @@ const MeetingActionsListener = ({
         if (tileState.isScreenShare) {
           onEnableScreenShare(tileState.tileId);
         } else {
-          onAddVideoTile(tileState.tileId, tileState.isLocal);
+          onAddVideoTile(
+            tileState.tileId,
+            tileState.isLocal,
+            tileState.attendeeId,
+          );
         }
       },
     );

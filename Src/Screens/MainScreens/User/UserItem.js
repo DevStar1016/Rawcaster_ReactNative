@@ -22,6 +22,8 @@ const UserItem = ({
   onConnectionRequest,
   isMe,
   isGroup = true,
+  isProfileButton = false,
+  onPressProfile,
 }) => {
   const followingUsersList = useFollowingUsersList();
 
@@ -104,6 +106,8 @@ const UserItem = ({
         padding={0}
         profileSize={50}
         containerStyle={{marginRight: 10}}
+        isButton={isProfileButton}
+        onPressProfile={onPressProfile}
       />
       <View style={styles.displayTextContainer}>
         <StyledText

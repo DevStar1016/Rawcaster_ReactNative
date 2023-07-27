@@ -297,7 +297,7 @@ const ProfilesListContainerWithSeeAll = ({
   }
 
   function getTopRightIcon(item: any) {
-    if (item.user_id !== profile.user_id) {
+    if (item.user_id !== profile?.user_id) {
       if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
         return 'shield_secondary';
       }

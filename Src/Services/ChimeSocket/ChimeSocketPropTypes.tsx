@@ -10,7 +10,7 @@ export type ChimeEventsType =
   | 'rejectToJoinMeeting'
   | 'joinRequest'
   | 'joinRequestFromUser'
-  | 'joinRequestResponse';
+  | 'joinRequestAnswer';
 
 export type ChimeEventsProps = {
   joinSocket: 'joinSocket';
@@ -24,7 +24,7 @@ export type ChimeEventsProps = {
   rejectToJoinMeeting: 'rejectToJoinMeeting';
   joinRequest: 'joinRequest';
   joinRequestFromUser: 'joinRequestFromUser';
-  joinRequestResponse: 'joinRequestResponse';
+  joinRequestAnswer: 'joinRequestAnswer';
 };
 
 export type CreateMeetingRoomMessageData = {
@@ -51,4 +51,7 @@ export interface JoinMeetingRequestActionMessageData
 
 export interface JoinMeetingRequestMessageData
   extends JoinMeetingRequestActionMessageData,
-    JoinMeetingRoomMessageData {}
+    JoinMeetingRoomMessageData {
+  user_name: string;
+  user_img: string;
+}

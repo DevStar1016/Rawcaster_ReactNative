@@ -159,6 +159,9 @@ const InfluencersList = () => {
       }
       return item;
     });
+    if (tempInfluencersList.length === 0) {
+      seterrorText('No data found');
+    }
     setinfluencersList(tempInfluencersList);
     // if (isSelectedAll) {
     //   setinfluencersTotalCount(pre =>
@@ -200,6 +203,12 @@ const InfluencersList = () => {
     formData.append('auth_code', getAuthCode(token));
     if (!isSelectedAll) {
       formData.append('follow_userid', JSON.stringify(ids));
+    }
+    if (selectedCategoryId) {
+      formData.append('category', selectedCategoryId);
+    }
+    if (searchText) {
+      formData.append('search_key', searchText);
     }
     formData.append('select_all', isSelectedAll ? 1 : 0);
 
