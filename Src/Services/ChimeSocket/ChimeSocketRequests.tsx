@@ -68,7 +68,7 @@ export const allowToJoinMeeting = (
  * @param messageData Request Meeting Data
  */
 export const rejectToJoinMeeting = (
-  messageData: JoinMeetingRequestActionMessageData,
+  messageData: Omit<JoinMeetingRequestActionMessageData, 'meetingId'>,
 ) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.rejectToJoinMeeting);
 };

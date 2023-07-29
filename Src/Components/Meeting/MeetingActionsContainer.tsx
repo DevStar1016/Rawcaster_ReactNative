@@ -4,6 +4,8 @@ import SVGIcon from '../SVGIcon';
 import StyledText from '../StyledText';
 import {COLORS} from '../../Utilities/Colors';
 import {IconType} from '../../Utilities/Icons';
+import {DIMENSIONS} from '../../Utilities/Constants';
+import {FONTS} from '../../Utilities/Fonts';
 
 type Props = {
   onChangeVideoStatus: () => void;
@@ -12,12 +14,14 @@ type Props = {
   onPressParticipants: () => void;
   isMuted?: boolean;
   isVideoEnabled: boolean;
+  participantsRequestCount: number;
 };
 
 type ActionButtonProps = {
   text: string;
   icon: IconType;
   onPress: () => void;
+  isEnableParticipantRequestsCount?: boolean;
 };
 
 const MeetingActionsContainer = ({
@@ -27,14 +31,29 @@ const MeetingActionsContainer = ({
   onChangeMicStatus,
   isMuted,
   isVideoEnabled,
+  participantsRequestCount = 0,
 }: Props) => {
-  const ActionButton = ({text = '', icon, onPress}: ActionButtonProps) => {
+  const ActionButton = ({
+    text = '',
+    icon,
+    onPress,
+    isEnableParticipantRequestsCount = false,
+  }: ActionButtonProps) => {
     return (
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={{alignItems: 'center'}}
           activeOpacity={0.8}
           onPress={onPress}>
+          {isEnableParticipantRequestsCount && participantsRequestCount > 0 && (
+            <View style={styles.badgeContainer}>
+              <StyledText style={styles.participantCountText}>
+                {participantsRequestCount <= 9
+                  ? participantsRequestCount.toString()
+                  : '9+'}
+              </StyledText>
+            </View>
+          )}
           <SVGIcon icon={icon} marginBottom={5} />
           <StyledText style={{color: COLORS.white}}>{text}</StyledText>
         </TouchableOpacity>
@@ -58,6 +77,7 @@ const MeetingActionsContainer = ({
       <ActionButton
         text="Participants"
         icon="participants_white"
+        isEnableParticipantRequestsCount={true}
         onPress={onPressParticipants}
       />
       <ActionButton
@@ -83,5 +103,23 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignItems: 'center',
+    width: (DIMENSIONS.window.width - 30) / 4,
+    justifyContent: 'center',
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -5,
+    right: 10,
+    height: 20,
+    width: 20,
+    borderRadius: 18 / 2,
+    backgroundColor: COLORS.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  participantCountText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontFamily: FONTS.DMSans.medium,
   },
 });

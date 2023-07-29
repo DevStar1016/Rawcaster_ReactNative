@@ -46,12 +46,13 @@ export interface SingleUserSendMessageData {
   msg: string;
 }
 
-export interface JoinMeetingRequestActionMessageData
-  extends SingleUserSendMessageData {}
+export interface JoinMeetingRequestActionMessageData {
+  userId: number;
+  meetingId: string;
+}
 
 export interface JoinMeetingRequestMessageData
-  extends JoinMeetingRequestActionMessageData,
-    JoinMeetingRoomMessageData {
+  extends JoinMeetingRequestActionMessageData {
   user_name: string;
   user_img: string;
 }

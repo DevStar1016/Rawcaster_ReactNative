@@ -1,15 +1,22 @@
-import {EmitterSubscription, ScrollView, StyleSheet, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {BackHandler, ScrollView, StyleSheet, View} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import MeetingActionsContainer from './MeetingActionsContainer';
-import {
-  MeetingError,
-  Meeting,
-  MeetingEvent,
-  MeetingEmitter,
-} from '../../Native/Bridges/ChimeMeetingBridge';
+import {MeetingError, Meeting} from '../../Native/Bridges/ChimeMeetingBridge';
 import MeetingVideoView, {AttendeeDetail} from './MeetingVideoView';
 import {DIMENSIONS} from '../../Utilities/Constants';
 import MeetingActionsListener from './MeetingActionsListener';
+import CustomBottomSheetModal from '../CustomBottomSheetModal';
+import ParticipantsList from './ParticipantsList';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {chimeSocketListen} from '../../Services/ChimeSocket/ChimeSocket';
+import {ChimeSocketEvents} from '../../Services/ChimeSocket/ChimeSocketEvents';
+import {
+  allowToJoinMeeting,
+  rejectToJoinMeeting,
+} from '../../Services/ChimeSocket/ChimeSocketRequests';
+import {useToken} from '../../Utilities/StoreData';
+import {attendees} from '../../Services/ApiService';
+import Toast from '../Toast';
 
 type DataMessage = {
   topic: string;
@@ -19,11 +26,26 @@ type DataMessage = {
   timestampMs: number;
   throttled: boolean;
 };
+type UserData = {
+  attendeeId?: string;
+  user_id: number;
+  user_img: string;
+  user_name: string;
+  isRequested?: boolean;
+};
+
+type RequestedData = {
+  meetingId: string;
+  userId: number;
+  user_img: string;
+  user_name: string;
+};
 
 type Props = {
   meetingId: string;
   handleEndMeeting: () => void;
   selfAttendeeId: string;
+  hostUserId: number;
 };
 
 type DataProps = {
@@ -33,23 +55,16 @@ type DataProps = {
   screenShareTile: any;
 };
 
-type AttendeeJoinResponseProps = {
-  attendeeId: string;
-  externalUserId: string;
-};
-
-var onAttendeesJoinSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesLeaveSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesMuteSubscription: EmitterSubscription | undefined = undefined;
-var onAttendeesUnmuteSubscription: EmitterSubscription | undefined = undefined;
-var onAddVideoTileSubscription: EmitterSubscription | undefined = undefined;
-var onRemoveVideoTileSubscription: EmitterSubscription | undefined = undefined;
-var onDataMessageReceivedSubscription: EmitterSubscription | undefined =
-  undefined;
-var onErrorSubscription: EmitterSubscription | undefined = undefined;
-
 var isMount = true;
-const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
+const MeetingUI = ({
+  meetingId,
+  handleEndMeeting,
+  selfAttendeeId,
+  hostUserId,
+}: Props) => {
+  const token = useToken();
+  const [isLoadingUsersList, setisLoadingUsersList] = useState(true);
+
   const [data, setdata] = useState<DataProps>({
     attendees: [],
     selfVideoEnabled: false,
@@ -57,133 +72,105 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
     screenShareTile: null,
   });
 
+  const participantsListModalRef = useRef<BottomSheetModal>();
+
   const [containerHeight, setcontainerHeight] = useState(0);
+  const [usersList, setusersList] = useState<UserData[]>([]);
 
   useEffect(() => {
-    /**
-     * Attendee Join and Leave handler
-     */
-    onAttendeesJoinSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAttendeesJoin,
-      ({attendeeId, externalUserId}: AttendeeJoinResponseProps) => {
-        const attendeeNameMap: any = {};
-        if (!(attendeeId in attendeeNameMap)) {
-          // The externalUserId will be a format such as c19587e7#Alice
-          attendeeNameMap[attendeeId] = externalUserId.split('#')[1];
-        }
-        onJoinAttendee(attendeeId, attendeeNameMap[attendeeId]);
-      },
+    const backAction = () => {
+      handleCloseParticipantsModal();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
     );
 
-    onAttendeesLeaveSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAttendeesLeave,
-      ({attendeeId}) => {
-        onLeaveAttendee(attendeeId);
-      },
-    );
-
-    /**
-     * Attendee Mute & Unmute handler
-     */
-    onAttendeesMuteSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAttendeesMute,
-      attendeeId => {
-        onMuteAttendee(attendeeId);
-      },
-    );
-
-    onAttendeesUnmuteSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAttendeesUnmute,
-      attendeeId => {
-        onUnMuteAttendee(attendeeId);
-      },
-    );
-
-    /**
-     * Video tile Add & Remove Handler
-     */
-    onAddVideoTileSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAddVideoTile,
-      tileState => {
-        console.log(tileState, 'STATE TILE');
-        if (tileState.isScreenShare) {
-          onEnableScreenShare(tileState.tileId, tileState.attendeeId);
-        } else {
-          onAddVideoTile(
-            tileState.tileId,
-            tileState.isLocal,
-            tileState.attendeeId,
-          );
-        }
-      },
-    );
-
-    onRemoveVideoTileSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onRemoveVideoTile,
-      tileState => {
-        if (tileState.isScreenShare) {
-          onRemoveScreenShare();
-        } else {
-          console.log(tileState, 'ONREMOVE STATE');
-
-          onRemoveVideoTile(
-            tileState.tileId,
-            tileState.isLocal,
-            tileState.attendeeId,
-          );
-        }
-      },
-    );
-
-    /**
-     * Data message handler
-     */
-    onDataMessageReceivedSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onDataMessageReceive,
-      (dataMessage: DataMessage) => {
-        onReceiveDataMessage(dataMessage);
-      },
-    );
-
-    /**
-     * General Error handler
-     */
-    onErrorSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onError,
-      errorType => {
-        onError(errorType);
-      },
-    );
+    return () => backHandler.remove();
   }, []);
 
   useEffect(() => {
+    getAttendeesList();
+  }, []);
+
+  // Meeting Room Join Request Received here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.joinRequestFromUser,
+      (requestData: RequestedData) => {
+        handleAddRequestedUser(requestData);
+        console.log(requestData, 'ChimeSocketListen  joinRequestFromUser');
+      },
+    );
     return () => {
-      if (onAttendeesJoinSubscription) {
-        onAttendeesJoinSubscription.remove();
-      }
-      if (onAttendeesLeaveSubscription) {
-        onAttendeesLeaveSubscription.remove();
-      }
-      if (onAttendeesMuteSubscription) {
-        onAttendeesMuteSubscription.remove();
-      }
-      if (onAttendeesUnmuteSubscription) {
-        onAttendeesUnmuteSubscription.remove();
-      }
-      if (onAddVideoTileSubscription) {
-        onAddVideoTileSubscription.remove();
-      }
-      if (onRemoveVideoTileSubscription) {
-        onRemoveVideoTileSubscription.remove();
-      }
-      if (onDataMessageReceivedSubscription) {
-        onDataMessageReceivedSubscription.remove();
-      }
-      if (onErrorSubscription) {
-        onErrorSubscription.remove();
-      }
+      chimeSocketListen.off(ChimeSocketEvents.joinRequestFromUser);
     };
   }, []);
+
+  const getAttendeesList = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('meeting_id', meetingId);
+    attendees(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          if (isMount) {
+            const tempUsersList: UserData[] = [...res.data.data.users].map(
+              item => {
+                console.log(item, 'ITEM');
+
+                const attendee = [...res.data.data.Attendees].find(
+                  attendeeItem =>
+                    parseInt(attendeeItem.ExternalUserId) === item.id,
+                );
+                return {
+                  attendeeId: attendee ? attendee.AttendeeId : undefined,
+                  user_id: item.id,
+                  user_img: item.image,
+                  user_name: item.name,
+                };
+              },
+            );
+            setusersList(preList => [...preList, ...tempUsersList]);
+          }
+          console.log(JSON.stringify(res.data), 'RESPONSE ATTENDEES');
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        console.log(e, 'ERRROR');
+
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoadingUsersList(false);
+        }
+      });
+  };
+
+  const handleAddRequestedUser = (requestData: RequestedData) => {
+    setusersList(preList => {
+      if (
+        [...preList].findIndex(item => item.user_id === requestData.userId) ===
+        -1
+      ) {
+        return [
+          {
+            user_id: requestData.userId,
+            user_img: requestData.user_img,
+            user_name: requestData.user_name,
+            isRequested: true,
+          },
+          ...preList,
+        ];
+      }
+      return [...preList];
+    });
+  };
 
   const onJoinAttendee = (attendeeId: string, attendeeName: string) => {
     if (isMount) {
@@ -343,10 +330,6 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
           'Failed to enable video',
           'maximum number of concurrent videos reached!',
         );
-        // Alert.alert(
-        //   "Failed to enable video",
-        //   "maximum number of concurrent videos reached!"
-        // );
         break;
       default:
         console.log('Error', errorType);
@@ -363,7 +346,18 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
     }
     return false;
   };
-  console.log(data.attendees, 'ATTENDEES');
+
+  const handleCloseParticipantsModal = () => {
+    participantsListModalRef.current?.close();
+  };
+
+  const handleFilterRequestedList = (userId: number) => {
+    if (isMount) {
+      setusersList(preList =>
+        [...preList].filter(item => item.user_id !== userId),
+      );
+    }
+  };
 
   function getVideoItem(item: AttendeeDetail, index: number) {
     const listLength = data.attendees.length;
@@ -392,7 +386,18 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* <MeetingActionsListener  onJoinAttendee={onJoinAttendee} onLeaveAttendee={onLeaveAttendee} onMuteAttendee={onMuteAttendee}  onUnMuteAttendee={onUnMuteAttendee} onAddVideoTile={onAddVideoTile} /> */}
+      <MeetingActionsListener
+        onJoinAttendee={onJoinAttendee}
+        onLeaveAttendee={onLeaveAttendee}
+        onMuteAttendee={onMuteAttendee}
+        onUnMuteAttendee={onUnMuteAttendee}
+        onAddVideoTile={onAddVideoTile}
+        onRemoveVideoTile={onRemoveVideoTile}
+        onEnableScreenShare={onEnableScreenShare}
+        onRemoveScreenShare={onRemoveScreenShare}
+        onReceiveDataMessage={onReceiveDataMessage}
+        onError={onError}
+      />
       <View
         style={{flex: 1}}
         onLayout={e => {
@@ -415,12 +420,40 @@ const MeetingUI = ({meetingId, handleEndMeeting, selfAttendeeId}: Props) => {
         onChangeVideoStatus={() => {
           Meeting.setCameraOn(!data.selfVideoEnabled);
         }}
+        participantsRequestCount={
+          usersList.filter(item => item.isRequested).length
+        }
         onChangeMicStatus={() => {
           Meeting.setMute(!getIsMuted());
         }}
         onPressMenu={handleEndMeeting}
-        onPressParticipants={() => {}}
+        onPressParticipants={() => {
+          participantsListModalRef.current?.present();
+        }}
       />
+      <CustomBottomSheetModal
+        // @ts-ignore
+        refValue={participantsListModalRef}
+        onCloseModal={handleCloseParticipantsModal}>
+        <ParticipantsList
+          onClose={handleCloseParticipantsModal}
+          hostUserId={hostUserId}
+          participantsList={usersList}
+          onPressAccept={userId => {
+            handleFilterRequestedList(userId);
+            allowToJoinMeeting({
+              meetingId: meetingId,
+              userId,
+            });
+          }}
+          onPressReject={userId => {
+            handleFilterRequestedList(userId);
+            rejectToJoinMeeting({
+              userId,
+            });
+          }}
+        />
+      </CustomBottomSheetModal>
     </View>
   );
 };

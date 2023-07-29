@@ -21,6 +21,7 @@ import {chimeSocketListen} from '../Services/ChimeSocket/ChimeSocket';
 import {ChimeSocketEvents} from '../Services/ChimeSocket/ChimeSocketEvents';
 import {joinRequest} from '../Services/ChimeSocket/ChimeSocketRequests';
 import {useProfile} from '../Utilities/StoreData';
+import Toast from '../Components/Toast';
 
 var isMount = true;
 const StartJoinEventWaitingRoom = ({
@@ -59,6 +60,11 @@ const StartJoinEventWaitingRoom = ({
             meetingJoinedResult.meeting,
             meetingJoinedResult.Attendee,
           );
+        } else {
+          if (joinedData.allow === false) {
+            Toast.fail(joinedData.msg);
+          }
+          onClose();
         }
       },
       [],
