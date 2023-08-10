@@ -9,7 +9,11 @@ import {
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
+import {
+  getAuthCode,
+  getChimeTestUserId,
+  htmlDecodeText,
+} from '../Utilities/Methods';
 import {
   getInfluencerCategoryService,
   getMyProfileService,
@@ -65,19 +69,6 @@ const MainStack = () => {
   useEffect(() => {
     initialAPICall();
   }, []);
-
-  const getChimeTestUserId = userId => {
-    switch (userId) {
-      case 67:
-        return 11;
-      case 88:
-        return 22;
-      case 21:
-        return 33;
-      default:
-        return userId;
-    }
-  };
 
   function getCommonFormData() {
     const formData = new FormData();

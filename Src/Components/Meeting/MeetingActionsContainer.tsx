@@ -12,8 +12,11 @@ type Props = {
   onChangeMicStatus: () => void;
   onPressMenu: () => void;
   onPressParticipants: () => void;
+  onPressRaiseHand: () => void;
   isMuted?: boolean;
+  isHandRaised?: boolean;
   isVideoEnabled: boolean;
+  isVisibleRaiseHand?: boolean;
   participantsRequestCount: number;
 };
 
@@ -29,8 +32,11 @@ const MeetingActionsContainer = ({
   onPressMenu,
   onPressParticipants,
   onChangeMicStatus,
+  onPressRaiseHand,
   isMuted,
   isVideoEnabled,
+  isHandRaised,
+  isVisibleRaiseHand,
   participantsRequestCount = 0,
 }: Props) => {
   const ActionButton = ({
@@ -40,7 +46,11 @@ const MeetingActionsContainer = ({
     isEnableParticipantRequestsCount = false,
   }: ActionButtonProps) => {
     return (
-      <View style={styles.buttonContainer}>
+      <View
+        style={[
+          styles.buttonContainer,
+          !isVisibleRaiseHand && {width: (DIMENSIONS.window.width - 30) / 4},
+        ]}>
         <TouchableOpacity
           style={{alignItems: 'center'}}
           activeOpacity={0.8}
@@ -55,14 +65,16 @@ const MeetingActionsContainer = ({
             </View>
           )}
           <SVGIcon icon={icon} marginBottom={5} />
-          <StyledText style={{color: COLORS.white}}>{text}</StyledText>
+          <StyledText style={{color: COLORS.white, fontSize: 10}}>
+            {text}
+          </StyledText>
         </TouchableOpacity>
       </View>
     );
   };
 
   return (
-    <View style={[styles.mainContainer]}>
+    <View style={styles.mainContainer}>
       <ActionButton
         text={isMuted ? 'Un Mute' : 'Mute'}
         icon={isMuted ? 'mic_off_white' : 'mic_white'}
@@ -70,9 +82,16 @@ const MeetingActionsContainer = ({
       />
       <ActionButton
         text={isVideoEnabled ? 'Stop Video' : 'Start Video'}
-        icon={isVideoEnabled ? 'video_disabled_white' : 'video_call_white'}
+        icon={isVideoEnabled ? 'video_call_white' : 'video_disabled_white'}
         onPress={onChangeVideoStatus}
       />
+      {isVisibleRaiseHand && (
+        <ActionButton
+          text={'Raise Hand'}
+          icon={isHandRaised ? 'hand_secondary' : 'hand_white'}
+          onPress={onPressRaiseHand}
+        />
+      )}
       {/* <ActionButton text="Speaker" icon="speaker_white" onPress={() => {}} /> */}
       <ActionButton
         text="Participants"
@@ -103,7 +122,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignItems: 'center',
-    width: (DIMENSIONS.window.width - 30) / 4,
+    width: (DIMENSIONS.window.width - 30) / 5,
     justifyContent: 'center',
   },
   badgeContainer: {
@@ -116,6 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 1,
   },
   participantCountText: {
     color: COLORS.white,

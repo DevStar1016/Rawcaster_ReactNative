@@ -15,6 +15,7 @@ export type RoundedIconButtonProps = {
   buttonStyle?: ViewStyle;
   iconSize?: number;
   buttonSize?: number;
+  disabled?: boolean;
   bgColor?: string;
   onPress?: () => void;
   iconProps?: Omit<SVGIconProps, 'icon' | 'height' | 'width'>;
@@ -24,6 +25,7 @@ const RoundedIconButton = ({
   icon,
   iconSize = 18,
   buttonSize = 35,
+  disabled = false,
   bgColor = COLORS.lightGrey,
   buttonStyle = {},
   onPress,
@@ -31,6 +33,7 @@ const RoundedIconButton = ({
 }: RoundedIconButtonProps) => {
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={[
         styles.mainContainer,
         {

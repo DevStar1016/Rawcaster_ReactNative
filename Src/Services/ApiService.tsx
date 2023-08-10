@@ -49,8 +49,8 @@ export const changePasswordService = (data: FormData) => {
   return axios.post('changepassword', data);
 };
 
-export const getCountylistService = (data: FormData) => {
-  return axios.post('getcountylist', data);
+export const getCountylistService = () => {
+  return axios.post('getcountylist');
 };
 
 export const contactusService = (data: FormData) => {

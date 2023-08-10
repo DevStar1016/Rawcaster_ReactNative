@@ -12,7 +12,7 @@ import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import MeetingUI from '../../../../Components/Meeting/MeetingUI';
 import Toast from '../../../../Components/Toast';
 import {deleteMeeting} from '../../../../Services/ApiService';
-import {getSlicedText} from '../../../../Utilities/Methods';
+import {getChimeTestUserId, getSlicedText} from '../../../../Utilities/Methods';
 
 var isMount = true;
 var onMeetingStartSubscription = undefined;
@@ -48,7 +48,9 @@ const EventHostScreen = ({route}) => {
       backAction,
     );
 
-    return () => backHandler.remove();
+    return () => {
+      backHandler.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -153,9 +155,15 @@ const EventHostScreen = ({route}) => {
       {isInMeeting && (
         <MeetingUI
           meetingId={meetingData.MeetingId}
-          hostUserId={parseInt(eventDetails.original_user_id)}
+          hostUserId={getChimeTestUserId(
+            parseInt(eventDetails.original_user_id),
+          )}
+          selfUserId={profile.user_id}
           handleEndMeeting={() => {
-            if (eventDetails.original_user_id === profile.user_id) {
+            if (
+              getChimeTestUserId(eventDetails.original_user_id) ===
+              profile.user_id
+            ) {
               handleEndMeeting();
             } else {
               Meeting.stop();

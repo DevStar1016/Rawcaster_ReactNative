@@ -2,11 +2,14 @@ import {sendChimeSocketMessage} from './ChimeSocket';
 import {ChimeSocketEvents} from './ChimeSocketEvents';
 import {
   CreateMeetingRoomMessageData,
+  InCallEventsMessageData,
   JoinMeetingRequestActionMessageData,
   JoinMeetingRequestMessageData,
   JoinMeetingRoomMessageData,
   MeetingRoomSendMessageData,
+  RaiseHandMessageData,
   SingleUserSendMessageData,
+  UserLeftMessageData,
 } from './ChimeSocketPropTypes';
 
 /**
@@ -79,4 +82,28 @@ export const rejectToJoinMeeting = (
  */
 export const joinRequest = (messageData: JoinMeetingRequestMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.joinRequest);
+};
+
+/**
+ *
+ * @param messageData RasiseHand Message Data
+ */
+export const raiseHand = (messageData: RaiseHandMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.raiseHand);
+};
+
+/**
+ *
+ * @param messageData InCallEvents Message Data
+ */
+export const inCallEvents = (messageData: InCallEventsMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.inCallEvents);
+};
+
+/**
+ *
+ * @param messageData UserData
+ */
+export const userLeft = (messageData: UserLeftMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.userLeft);
 };

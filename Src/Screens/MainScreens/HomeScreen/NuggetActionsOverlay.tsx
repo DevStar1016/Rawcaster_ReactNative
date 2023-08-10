@@ -652,7 +652,8 @@ function NuggetActionsOverlay({
                   onPressUrl={onPressUrl}
                   style={{
                     color: COLORS.white,
-                    fontSize: 15.5,
+                    // fontSize: 15.5,
+                    fontSize: 18,
                     opacity: 0.8,
                     lineHeight: 22,
                     width: '100%',

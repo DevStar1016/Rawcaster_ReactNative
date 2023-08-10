@@ -44,6 +44,13 @@ target 'Rawcaster' do
   )
   pod 'AmazonChimeSDK-Bitcode', '0.22.7'
 
+  # pod 'Amplify',:modular_headers => true
+  # pod 'AmplifyPlugins/AWSS3StoragePlugin',:modular_headers => true
+  # pod 'AmplifyPlugins/AWSCognitoAuthPlugin',:modular_headers => true
+  # pod 'AWSChimeSDKMessaging',:modular_headers => true
+  # pod 'AWSChimeSDKIdentity',:modular_headers => true
+  # pod 'Starscream', '~> 4.0.0',:modular_headers => true
+
   target 'RawcasterTests' do
     inherit! :complete
     # Pods for testing

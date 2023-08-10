@@ -125,14 +125,14 @@ const EventTalkshowCommonScreen = ({
             if (isMount) {
               setisActionLoading(true);
             }
-            onDeleteEvent(eventId);
+            handleDeleteEvent(eventId);
           },
         },
       ],
       {cancelable: false},
     );
 
-  const onDeleteEvent = (eventId: any) => {
+  const handleDeleteEvent = (eventId: any) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_id', eventId);

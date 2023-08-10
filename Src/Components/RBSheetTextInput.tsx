@@ -1,9 +1,11 @@
 import {
+  FlexAlignType,
   Keyboard,
   NativeSyntheticEvent,
   StyleSheet,
   TextInputFocusEventData,
   TextInputProps,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
@@ -26,6 +28,7 @@ import {
 } from '../Utilities/AudioPlayerProcess';
 import OpacityAnimatedView from './OpacityAnimatedView';
 import moment from 'moment';
+import RoundedIconButton from './RoundedIconButton';
 
 type FileType = {
   uri: string;
@@ -35,17 +38,23 @@ type FileType = {
 
 type Props = {
   onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
+  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   placeholderText?: string;
   onPressSend?: (text: string) => void;
   inpuFieldRef?: (e: any) => void;
   isInsideTextChange?: boolean;
   onChangeText?: (text: string) => void;
   text?: string;
+  isSearchBar?: boolean;
+  containerAlignItems?: FlexAlignType;
+  actionsContainerPaddingTop?: number;
+  containerHeight?: number;
   isDisableSend?: boolean;
   isVisibleEmoji?: boolean;
   isKeyboardCloseWhenSend?: boolean;
   isVisibleVoiceRecord?: boolean;
   onPressEmoji?: () => void;
+  onPressSearch?: () => void;
   onSendAudio?: (audioFile: FileType, duration: number) => void;
   isEnableOnSubmitEditing?: boolean;
   isDisableAudioProcess?: boolean;
@@ -64,20 +73,26 @@ type Props = {
 };
 const RBSheetTextInput = ({
   onFocus,
+  onBlur,
   placeholderText = '',
   onPressSend,
   inpuFieldRef,
   isInsideTextChange = true,
   onChangeText,
   text = '',
+  isSearchBar = false,
   onSendAudio,
+  containerAlignItems = 'center',
   isKeyboardCloseWhenSend = true,
   isVisibleEmoji = true,
   isDisableSend = false,
   onPressEmoji,
+  onPressSearch,
+  containerHeight = 45,
   isVisibleVoiceRecord = false,
   isEnableOnSubmitEditing = false,
   inputProps,
+  actionsContainerPaddingTop,
   isDisableAudioProcess,
 }: Props) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
@@ -199,7 +214,11 @@ const RBSheetTextInput = ({
   };
 
   return (
-    <View style={styles.inputContainer}>
+    <View
+      style={[
+        styles.inputContainer,
+        {height: containerHeight, alignItems: containerAlignItems},
+      ]}>
       {recordedAudio || isRecording || isPlaying ? (
         <View style={styles.recordTimerMicIconContainer}>
           <OpacityAnimatedView
@@ -246,94 +265,109 @@ const RBSheetTextInput = ({
               handleSubmit();
             }
           }}
+          onBlur={onBlur}
           {...inputProps}
         />
       )}
-      <View style={styles.actionsContainer}>
-        {isVisibleVoiceRecord &&
-          ((isInsideTextChange && !typedText) ||
-            (!isInsideTextChange && !text)) && (
-            <>
-              <SVGIcon
-                icon={
-                  isRecording || isPlaying
-                    ? 'stop_rounded_white'
-                    : recordedAudio
-                    ? 'play_fill_white'
-                    : 'mic_fill_white'
-                }
-                marginRight={12}
-                height={22}
-                width={22}
-                isButton={!isDisableAudioProcess}
-                onPress={() => {
-                  if (isRecording) {
-                    handleStopRecording();
-                  } else if (isPlaying) {
-                    handleStopPlaying();
-                  } else {
-                    if (recordedAudio) {
-                      handlePlayAudio({
-                        audioPlayer,
-                        setisPlaying,
-                        setplayingSeconds,
-                        audioUniqueId: recordingAudioUniqueId,
-                      });
-                    } else {
-                      Keyboard.dismiss();
-                      setrecordingSeconds(0);
-                      const uniqueId = getUniqueId();
-                      setrecordingAudioUniqueId(uniqueId);
-                      handleAudioRecord({
-                        audioPlayer,
-                        setisRecording,
-                        setrecordedAudio,
-                        setrecordingSeconds,
-                        maxRecordingTimeInSeconds: 119,
-                        onLimitReached: handleStopRecording,
-                        audioUniqueId: uniqueId,
-                      });
-                    }
-                  }
-                }}
-              />
-              {recordedAudio && (
+      {isSearchBar ? (
+        <RoundedIconButton
+          icon="search"
+          bgColor={COLORS.secondary}
+          disabled={!isInsideTextChange}
+          buttonStyle={{marginHorizontal: 5}}
+          onPress={onPressSearch}
+        />
+      ) : (
+        <View
+          style={[
+            styles.actionsContainer,
+            {paddingTop: actionsContainerPaddingTop},
+          ]}>
+          {isVisibleVoiceRecord &&
+            ((isInsideTextChange && !typedText) ||
+              (!isInsideTextChange && !text)) && (
+              <>
                 <SVGIcon
-                  icon={'delete_white'}
-                  marginRight={5}
+                  icon={
+                    isRecording || isPlaying
+                      ? 'stop_rounded_white'
+                      : recordedAudio
+                      ? 'play_fill_white'
+                      : 'mic_fill_white'
+                  }
+                  marginRight={12}
                   height={22}
                   width={22}
-                  isButton
+                  isButton={!isDisableAudioProcess}
                   onPress={() => {
-                    handleDeleteAudio();
+                    if (isRecording) {
+                      handleStopRecording();
+                    } else if (isPlaying) {
+                      handleStopPlaying();
+                    } else {
+                      if (recordedAudio) {
+                        handlePlayAudio({
+                          audioPlayer,
+                          setisPlaying,
+                          setplayingSeconds,
+                          audioUniqueId: recordingAudioUniqueId,
+                        });
+                      } else {
+                        Keyboard.dismiss();
+                        setrecordingSeconds(0);
+                        const uniqueId = getUniqueId();
+                        setrecordingAudioUniqueId(uniqueId);
+                        handleAudioRecord({
+                          audioPlayer,
+                          setisRecording,
+                          setrecordedAudio,
+                          setrecordingSeconds,
+                          maxRecordingTimeInSeconds: 119,
+                          onLimitReached: handleStopRecording,
+                          audioUniqueId: uniqueId,
+                        });
+                      }
+                    }
                   }}
                 />
-              )}
-            </>
-          )}
+                {recordedAudio && (
+                  <SVGIcon
+                    icon={'delete_white'}
+                    marginRight={5}
+                    height={22}
+                    width={22}
+                    isButton
+                    onPress={() => {
+                      handleDeleteAudio();
+                    }}
+                  />
+                )}
+              </>
+            )}
 
-        {isVisibleEmoji && !isRecording && (
+          {isVisibleEmoji && !isRecording && (
+            <SVGIcon
+              icon="emojee"
+              marginRight={5}
+              isButton
+              onPress={() => {
+                Keyboard.dismiss();
+                if (onPressEmoji) {
+                  onPressEmoji();
+                }
+              }}
+            />
+          )}
           <SVGIcon
-            icon="emojee"
+            icon="send"
             marginRight={5}
-            isButton
-            onPress={() => {
-              Keyboard.dismiss();
-              if (onPressEmoji) {
-                onPressEmoji();
-              }
-            }}
+            isButton={!isDisableSend}
+            height={27}
+            width={27}
+            onPress={handleSubmit}
           />
-        )}
-        <SVGIcon
-          icon="send"
-          marginRight={5}
-          isButton={!isDisableSend}
-          height={27}
-          width={27}
-          onPress={handleSubmit}
-        />
-      </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -351,7 +385,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: '90%',
+    height: '100%',
     borderRadius: 20,
     fontFamily: FONTS.DMSans.regular,
     fontSize: 15,

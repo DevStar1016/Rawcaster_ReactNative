@@ -92,7 +92,7 @@ const EmailPhoneVerification = ({route}) => {
     resendOTPService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          Toast.success(res.data.msg, 4000);
+          Toast.success(res.data.msg, {visibilityTime: 4000});
           if (isMount) {
             setotpRefId(res.data.otp_ref_id);
             settimer(parseInt(res.data.remaining_seconds));

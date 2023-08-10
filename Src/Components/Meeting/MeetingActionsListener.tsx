@@ -4,6 +4,7 @@ import {
   MeetingEvent,
   MeetingEmitter,
 } from '../../Native/Bridges/ChimeMeetingBridge';
+import {IS_IOS} from '../../Utilities/Constants';
 
 export type DataMessage = {
   topic: string;
@@ -15,7 +16,7 @@ export type DataMessage = {
 };
 
 type Props = {
-  onJoinAttendee: (attendeeId: string, attendeeName: string) => void;
+  onJoinAttendee: (attendeeId: string, externalUserId: number) => void;
   onLeaveAttendee: (attendeeId: string) => void;
   onMuteAttendee: (attendeeId: string) => void;
   onUnMuteAttendee: (attendeeId: string) => void;
@@ -69,12 +70,13 @@ const MeetingActionsListener = ({
     onAttendeesJoinSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesJoin,
       ({attendeeId, externalUserId}: AttendeeJoinResponseProps) => {
-        const attendeeNameMap: any = {};
-        if (!(attendeeId in attendeeNameMap)) {
-          // The externalUserId will be a format such as c19587e7#Alice
-          attendeeNameMap[attendeeId] = externalUserId.split('#')[1];
-        }
-        onJoinAttendee(attendeeId, attendeeNameMap[attendeeId]);
+        // const attendeeNameMap: any = {};
+        // if (!(attendeeId in attendeeNameMap)) {
+        //   // The externalUserId will be a format such as c19587e7#Alice
+        //   attendeeNameMap[attendeeId] = externalUserId.split('#')[1];
+        // }
+
+        onJoinAttendee(attendeeId, parseInt(externalUserId));
       },
     );
 
@@ -127,6 +129,10 @@ const MeetingActionsListener = ({
         if (tileState.isScreenShare) {
           onRemoveScreenShare();
         } else {
+          if (!IS_IOS) {
+            console.log(tileState, 'TILESTATE CHECK VIDEO');
+          }
+
           onRemoveVideoTile(
             tileState.tileId,
             tileState.isLocal,

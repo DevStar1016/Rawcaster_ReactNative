@@ -10,7 +10,12 @@ export type ChimeEventsType =
   | 'rejectToJoinMeeting'
   | 'joinRequest'
   | 'joinRequestFromUser'
-  | 'joinRequestAnswer';
+  | 'joinRequestAnswer'
+  | 'raiseHand'
+  | 'inCallEvents'
+  | 'userLefted'
+  | 'userLeft'
+  | 'newUserJoined';
 
 export type ChimeEventsProps = {
   joinSocket: 'joinSocket';
@@ -25,25 +30,39 @@ export type ChimeEventsProps = {
   joinRequest: 'joinRequest';
   joinRequestFromUser: 'joinRequestFromUser';
   joinRequestAnswer: 'joinRequestAnswer';
+  raiseHand: 'raiseHand';
+  inCallEvents: 'inCallEvents';
+  userLefted: 'userLefted';
+  userLeft: 'userLeft';
+  newUserJoined: 'newUserJoined';
 };
+
+interface UserDataProp {
+  id: number;
+  name: string;
+  image?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
 
 export type CreateMeetingRoomMessageData = {
   meetingId: string;
-  hostId: string;
 };
 
 export type JoinMeetingRoomMessageData = {
   meetingId: string;
 };
 
-export type MeetingRoomSendMessageData = {
+export interface MeetingRoomSendMessageData extends UserDataProp {
+  message: string;
   meetingId: string;
-  msg: string;
-};
+}
 
-export interface SingleUserSendMessageData {
-  userId: string;
-  msg: string;
+export interface SingleUserSendMessageData extends UserDataProp {
+  userId: number;
+  message: string;
+  isPrivate: boolean;
+  send_to?: UserDataProp;
 }
 
 export interface JoinMeetingRequestActionMessageData {
@@ -55,4 +74,19 @@ export interface JoinMeetingRequestMessageData
   extends JoinMeetingRequestActionMessageData {
   user_name: string;
   user_img: string;
+}
+export interface RaiseHandMessageData {
+  meetingId: string;
+  raise_hand: boolean;
+  user_id: number;
+}
+
+export interface UserLeftMessageData {
+  user_id: string;
+}
+
+export interface InCallEventsMessageData {
+  userId: number;
+  audio?: boolean;
+  video?: boolean;
 }

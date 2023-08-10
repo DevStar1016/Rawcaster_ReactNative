@@ -7,6 +7,7 @@ import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
 import {EVENT_TYPE} from '../../../Utilities/Constants';
 import {
+  getChimeTestUserId,
   getSlicedText,
   htmlDecodeText,
   utcToUserTimezone,
@@ -50,7 +51,7 @@ const EventListItem = ({
   };
 
   const isOwner = () => {
-    return item?.original_user_id === profile?.user_id;
+    return getChimeTestUserId(item?.original_user_id) === profile?.user_id;
   };
 
   return (

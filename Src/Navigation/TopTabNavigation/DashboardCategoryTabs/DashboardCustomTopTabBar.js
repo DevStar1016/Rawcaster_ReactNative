@@ -18,6 +18,7 @@ import {setIsOpenLoginAlert} from '../../../Store/Slices/UtilitySlice';
 import {useNavigation} from '@react-navigation/native';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import Badges from '../../../Utilities/Badges';
+import Toast from '../../../Components/Toast';
 
 function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
   const dispatch = useDispatch();
@@ -48,7 +49,14 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
         styles.mainContainer,
         {top: insets.top ? insets.top : StatusBar.currentHeight},
       ]}>
-      <TouchableOpacity disabled style={{marginRight: 10}}>
+      <TouchableOpacity
+        // onPress={() => {
+        //   Toast.success('Someone wants to join.', {
+        //     position: 'top',
+        //   });
+        // }}
+        disabled
+        style={{marginRight: 10}}>
         <SVGIcon icon="app_logo_white" height={30} width={30} />
       </TouchableOpacity>
       <ScrollView

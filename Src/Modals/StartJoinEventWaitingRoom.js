@@ -19,9 +19,14 @@ import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
 import {Slider} from '@miblanchard/react-native-slider';
 import {chimeSocketListen} from '../Services/ChimeSocket/ChimeSocket';
 import {ChimeSocketEvents} from '../Services/ChimeSocket/ChimeSocketEvents';
-import {joinRequest} from '../Services/ChimeSocket/ChimeSocketRequests';
+import {
+  createMeetingRoom,
+  joinMeetingRoom,
+  joinRequest,
+} from '../Services/ChimeSocket/ChimeSocketRequests';
 import {useProfile} from '../Utilities/StoreData';
 import Toast from '../Components/Toast';
+import {getChimeTestUserId} from '../Utilities/Methods';
 
 var isMount = true;
 const StartJoinEventWaitingRoom = ({
@@ -78,6 +83,18 @@ const StartJoinEventWaitingRoom = ({
     if (isMount) {
       setisRequestingMeeting(true);
     }
+    if (getIsOwner()) {
+      console.log(eventItem.chime_meeting_id, 'OWNERRRR');
+      createMeetingRoom({
+        meetingId: eventItem.chime_meeting_id,
+      });
+    } else {
+      console.log(eventItem.chime_meeting_id, 'ATTENDEEEEE');
+      joinMeetingRoom({
+        meetingId: eventItem.chime_meeting_id,
+      });
+    }
+    console.log(eventItem.chime_meeting_id, 'REQUESTTTTT');
     joinRequest({
       meetingId: eventItem.chime_meeting_id,
       userId: profile.user_id,
@@ -123,6 +140,10 @@ const StartJoinEventWaitingRoom = ({
     },
     [duration],
   );
+
+  const getIsOwner = () => {
+    return profile?.user_id === getChimeTestUserId(eventItem.original_user_id);
+  };
 
   const getSlider = useMemo(
     () => (
@@ -264,9 +285,11 @@ const StartJoinEventWaitingRoom = ({
   return (
     <View style={styles.mainContainer}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity activeOpacity={0.8} onPress={onClose}>
-          <SVGIcon icon="close" />
-        </TouchableOpacity>
+        {!isRequestingMeeting && (
+          <TouchableOpacity activeOpacity={0.8} onPress={onClose}>
+            <SVGIcon icon="close" />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.titleMessageContainer}>
         <StyledText style={styles.titleText}>
@@ -300,7 +323,7 @@ const StartJoinEventWaitingRoom = ({
         />
       ) : (
         <SubmitButton
-          buttonText="START HOSTING"
+          buttonText={getIsOwner() ? 'START HOSTING' : 'JOIN MEETING'}
           bgColor={COLORS.white}
           borderColor={COLORS.primary}
           marginHorizontal={10}

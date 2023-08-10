@@ -1,22 +1,39 @@
-import {BackHandler, ScrollView, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import ToastMessage from 'react-native-toast-message';
 import React, {useEffect, useRef, useState} from 'react';
 import MeetingActionsContainer from './MeetingActionsContainer';
 import {MeetingError, Meeting} from '../../Native/Bridges/ChimeMeetingBridge';
 import MeetingVideoView, {AttendeeDetail} from './MeetingVideoView';
-import {DIMENSIONS} from '../../Utilities/Constants';
+import {DIMENSIONS, IS_IOS} from '../../Utilities/Constants';
 import MeetingActionsListener from './MeetingActionsListener';
 import CustomBottomSheetModal from '../CustomBottomSheetModal';
-import ParticipantsList from './ParticipantsList';
+import ParticipantsList, {ParticipantProp} from './ParticipantsList';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {chimeSocketListen} from '../../Services/ChimeSocket/ChimeSocket';
 import {ChimeSocketEvents} from '../../Services/ChimeSocket/ChimeSocketEvents';
 import {
   allowToJoinMeeting,
+  inCallEvents,
+  raiseHand,
   rejectToJoinMeeting,
+  sendMessageToMeetingRoom,
+  sendMessageToSingleUser,
 } from '../../Services/ChimeSocket/ChimeSocketRequests';
-import {useToken} from '../../Utilities/StoreData';
+import {useProfile, useToken} from '../../Utilities/StoreData';
 import {attendees} from '../../Services/ApiService';
 import Toast from '../Toast';
+import {COLORS} from '../../Utilities/Colors';
+import StyledText from '../StyledText';
+import {ToastActionButtonProp} from '../../Utilities/ToastConfig';
+import MeetingMoreOptions, {MEETING_MENU_IDS} from './MeetingMoreOptions';
+import InCallMessages, {MessageData} from './InCallMessages';
 
 type DataMessage = {
   topic: string;
@@ -26,13 +43,6 @@ type DataMessage = {
   timestampMs: number;
   throttled: boolean;
 };
-type UserData = {
-  attendeeId?: string;
-  user_id: number;
-  user_img: string;
-  user_name: string;
-  isRequested?: boolean;
-};
 
 type RequestedData = {
   meetingId: string;
@@ -41,11 +51,31 @@ type RequestedData = {
   user_name: string;
 };
 
+type LeftedUserDataProp = {
+  meetingId: string;
+  user_id: number;
+  user_name: string;
+};
+
+interface RaiseHandUserDataProp {
+  meetingId: string;
+  raise_hand: boolean;
+  user_id: number;
+  user_name: string;
+}
+
+interface InCallEventProp {
+  userId: number;
+  audio?: boolean;
+  video?: boolean;
+}
+
 type Props = {
   meetingId: string;
   handleEndMeeting: () => void;
   selfAttendeeId: string;
   hostUserId: number;
+  selfUserId: number;
 };
 
 type DataProps = {
@@ -61,10 +91,14 @@ const MeetingUI = ({
   handleEndMeeting,
   selfAttendeeId,
   hostUserId,
+  selfUserId,
 }: Props) => {
   const token = useToken();
+  const profile = useProfile();
+  const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
+    useState(false);
   const [isLoadingUsersList, setisLoadingUsersList] = useState(true);
-
+  const [messagesList, setmessagesList] = useState<MessageData[]>([]);
   const [data, setdata] = useState<DataProps>({
     attendees: [],
     selfVideoEnabled: false,
@@ -73,13 +107,29 @@ const MeetingUI = ({
   });
 
   const participantsListModalRef = useRef<BottomSheetModal>();
+  const moreOptionsModalRef = useRef<BottomSheetModal>();
+  const inCallMessagesModalRef = useRef<BottomSheetModal>();
 
   const [containerHeight, setcontainerHeight] = useState(0);
-  const [usersList, setusersList] = useState<UserData[]>([]);
+  const [usersList, setusersList] = useState<ParticipantProp[]>([]);
+  const openedModals = useRef({
+    participants: false,
+    moreOptions: false,
+    messages: false,
+  });
 
+  // Back Handler
   useEffect(() => {
     const backAction = () => {
-      handleCloseParticipantsModal();
+      if (openedModals.current.participants) {
+        handleCloseParticipantsModal();
+      }
+      if (openedModals.current.moreOptions) {
+        handleCloseMoreOptionsModal();
+      }
+      if (openedModals.current.messages) {
+        handleCloseInCallMessagesModal();
+      }
       return true;
     };
 
@@ -88,11 +138,18 @@ const MeetingUI = ({
       backAction,
     );
 
-    return () => backHandler.remove();
+    return () => {
+      backHandler.remove();
+    };
   }, []);
 
+  // GetAttendees Initial API Call
   useEffect(() => {
+    isMount = true;
     getAttendeesList();
+    return () => {
+      isMount = false;
+    };
   }, []);
 
   // Meeting Room Join Request Received here - Socket
@@ -101,7 +158,6 @@ const MeetingUI = ({
       ChimeSocketEvents.joinRequestFromUser,
       (requestData: RequestedData) => {
         handleAddRequestedUser(requestData);
-        console.log(requestData, 'ChimeSocketListen  joinRequestFromUser');
       },
     );
     return () => {
@@ -109,39 +165,128 @@ const MeetingUI = ({
     };
   }, []);
 
+  // New User Joined Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.newUserJoined,
+      (participantData: ParticipantProp) => {
+        handleAddJoinedUser(participantData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.newUserJoined);
+    };
+  }, []);
+
+  // Raise Hand Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.raiseHand,
+      (raiseHandUserData: RaiseHandUserDataProp) => {
+        handleRaiseHand(raiseHandUserData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.raiseHand);
+    };
+  }, []);
+
+  // In Call Events Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.inCallEvents,
+      (inCallEventData: InCallEventProp) => {
+        handleInCallEvents(inCallEventData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.inCallEvents);
+    };
+  }, [data.attendees]);
+
+  // User Lefted Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.userLefted,
+      (leftedUserData: LeftedUserDataProp) => {
+        handleUserLefted(leftedUserData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.userLefted);
+    };
+  }, []);
+
+  // Meeting Room Message Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.meetingRoomMsg,
+      (messageData: MessageData) => {
+        console.log(messageData, 'MEETING ROOM MESSAGE');
+        handleAddMessage(messageData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.meetingRoomMsg);
+    };
+  }, [messagesList]);
+
+  // Single User Message Received Here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.singleUserMsg,
+      (messageData: MessageData) => {
+        console.log(messageData, 'SINGLE USER MESSAGE');
+        handleAddMessage(messageData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.singleUserMsg);
+    };
+  }, [messagesList]);
+
+  const triggerToast = (
+    message: string,
+    normalActionButton?: ToastActionButtonProp,
+  ) => {
+    Toast.normal(message, {
+      position: 'bottom',
+      visibilityTime: 6000,
+      normalActionButton,
+    });
+  };
+
   const getAttendeesList = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('meeting_id', meetingId);
+    console.log(formData, 'ATTENDEES GET FORM DATA');
+
     attendees(formData)
       .then(res => {
+        console.log(JSON.stringify(res.data), 'GET ATTENDEES RESPONSE');
+
         if (res.data.status === 1) {
           if (isMount) {
-            const tempUsersList: UserData[] = [...res.data.data.users].map(
-              item => {
-                console.log(item, 'ITEM');
-
-                const attendee = [...res.data.data.Attendees].find(
-                  attendeeItem =>
-                    parseInt(attendeeItem.ExternalUserId) === item.id,
-                );
-                return {
-                  attendeeId: attendee ? attendee.AttendeeId : undefined,
-                  user_id: item.id,
-                  user_img: item.image,
-                  user_name: item.name,
-                };
-              },
-            );
-            setusersList(preList => [...preList, ...tempUsersList]);
+            setusersList(preList => {
+              let tempUsersList = [...preList];
+              res.data.data.users.map((item: ParticipantProp) => {
+                const ind = tempUsersList.findIndex(ele => ele.id === item.id);
+                if (ind === -1) {
+                  tempUsersList = [{...item}, ...tempUsersList];
+                } else {
+                  tempUsersList[ind] = {...item};
+                }
+              });
+              return [...tempUsersList];
+            });
           }
-          console.log(JSON.stringify(res.data), 'RESPONSE ATTENDEES');
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
-        console.log(e, 'ERRROR');
+        console.log(e, 'GET ATTENDEES ERRROR');
 
         Toast.fail(e.message);
       })
@@ -153,26 +298,172 @@ const MeetingUI = ({
   };
 
   const handleAddRequestedUser = (requestData: RequestedData) => {
-    setusersList(preList => {
-      if (
-        [...preList].findIndex(item => item.user_id === requestData.userId) ===
-        -1
-      ) {
-        return [
-          {
-            user_id: requestData.userId,
-            user_img: requestData.user_img,
-            user_name: requestData.user_name,
+    if (isMount) {
+      triggerToast(`${requestData.user_name} wants to join this meeting.`, {
+        buttonName: 'View',
+        onPress: () => {
+          handleOpenParticipantsModal();
+        },
+      });
+
+      setusersList(preList => {
+        let tempUsersList = [...preList];
+        const ind = [...tempUsersList].findIndex(
+          item => item.id === requestData.userId,
+        );
+        if (ind === -1) {
+          tempUsersList = [
+            {
+              id: requestData.userId,
+              image: requestData.user_img,
+              name: requestData.user_name,
+              isRequested: true,
+            },
+            ...tempUsersList,
+          ];
+        } else {
+          tempUsersList[ind] = {
+            id: requestData.userId,
+            image: requestData.user_img,
+            name: requestData.user_name,
             isRequested: true,
-          },
-          ...preList,
-        ];
+          };
+        }
+        return [...tempUsersList];
+      });
+    }
+  };
+
+  const handleAddJoinedUser = (userData: ParticipantProp) => {
+    if (
+      [...usersList].findIndex(
+        (item: ParticipantProp) => item.id === userData.id,
+      ) === -1
+    ) {
+      triggerToast(`${userData.name} joined.`);
+    }
+
+    setusersList(preList => {
+      let tempUsersList = [...preList];
+      const ind = tempUsersList.findIndex(
+        (item: ParticipantProp) => item.id === userData.id,
+      );
+      if (ind === -1) {
+        tempUsersList = [{...userData}, ...tempUsersList];
+      } else {
+        tempUsersList[ind] = {...userData};
       }
-      return [...preList];
+      return [...tempUsersList];
     });
   };
 
-  const onJoinAttendee = (attendeeId: string, attendeeName: string) => {
+  const handleRaiseHand = (
+    raiseHandData: RaiseHandUserDataProp,
+    isSelf: boolean = false,
+  ) => {
+    if (isMount) {
+      if (
+        [...data.attendees].findIndex(
+          item => item.userId === raiseHandData.user_id,
+        ) !== -1 &&
+        raiseHandData.raise_hand &&
+        !isSelf
+      ) {
+        triggerToast(`${raiseHandData.user_name} has raised a hand.`, {
+          buttonName: 'Show',
+          onPress() {
+            handleOpenParticipantsModal();
+          },
+        });
+      }
+      setdata(pre => {
+        let tempAttendeesList = [...pre.attendees];
+        const ind = tempAttendeesList.findIndex(
+          item => item.userId === raiseHandData.user_id,
+        );
+        if (ind !== -1) {
+          tempAttendeesList[ind] = {
+            ...tempAttendeesList[ind],
+            isHandRaised: raiseHandData.raise_hand,
+          };
+        }
+        return {
+          ...pre,
+          attendees: [...tempAttendeesList],
+        };
+      });
+    }
+  };
+
+  const handleInCallEvents = (inCallEvent: InCallEventProp) => {
+    console.log(
+      'INCALL EVENTS CALLEDDD',
+      inCallEvent,
+      data.attendees,
+      [...data.attendees].findIndex(item => item.userId === inCallEvent.userId),
+    );
+
+    if (isMount) {
+      if (
+        [...data.attendees].findIndex(
+          item => item.userId === inCallEvent.userId,
+        ) !== -1
+      ) {
+        if (typeof inCallEvent.audio === 'boolean') {
+          if (inCallEvent.audio) {
+            triggerToast('Host wants you to un mute', {
+              buttonName: 'Un Mute',
+              onPress: () => {
+                Meeting.setMute(false);
+                handleHideToast();
+              },
+            });
+          } else {
+            console.log('IOP');
+
+            Meeting.setMute(true);
+          }
+        } else if (typeof inCallEvent.video === 'boolean') {
+          if (inCallEvent.video) {
+            triggerToast('Host wants you to enable camera', {
+              buttonName: 'Enable',
+              onPress: () => {
+                Meeting.setCameraOn(true);
+                handleHideToast();
+              },
+            });
+          } else {
+            Meeting.setCameraOn(false);
+          }
+        }
+      }
+    }
+  };
+
+  const handleAddMessage = (messageData: MessageData) => {
+    if (isMount) {
+      setmessagesList(preList => [{...messageData}, ...preList]);
+    }
+  };
+
+  const handleUserLefted = (leftedUserData: LeftedUserDataProp) => {
+    if (isMount) {
+      setdata(preData => {
+        return {
+          ...preData,
+          attendees: [...preData.attendees].filter(
+            item => item.userId !== leftedUserData.user_id,
+          ),
+        };
+      });
+      setusersList(preList =>
+        [...preList].filter(item => item.id !== leftedUserData.user_id),
+      );
+      triggerToast(`${leftedUserData.user_name} has left the meeting`);
+    }
+  };
+
+  const onJoinAttendee = (attendeeId: string, userId: number) => {
     if (isMount) {
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
@@ -183,13 +474,13 @@ const MeetingUI = ({
         ) {
           if (attendeeId === selfAttendeeId) {
             tempAttendeesList = [
-              {attendeeId, attendeeName},
+              {attendeeId, attendeeName: '', userId},
               ...tempAttendeesList,
             ];
           } else {
             tempAttendeesList = [
               ...tempAttendeesList,
-              {attendeeId, attendeeName},
+              {attendeeId, attendeeName: '', userId},
             ];
           }
         }
@@ -213,6 +504,8 @@ const MeetingUI = ({
   };
 
   const onMuteAttendee = (attendeeId: string) => {
+    console.log(attendeeId, 'SELFFFFF MUTE');
+
     if (isMount) {
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
@@ -254,7 +547,6 @@ const MeetingUI = ({
     attendeeId: string,
   ) => {
     if (isMount) {
-      console.log('ADD VIDEO TILE');
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
         const ind = tempAttendeesList.findIndex(
@@ -277,7 +569,6 @@ const MeetingUI = ({
     isLocal: boolean,
     attendeeId: string,
   ) => {
-    console.log('REMOVE VIDEO TILE', isLocal, tileId, attendeeId);
     if (isMount) {
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
@@ -337,7 +628,7 @@ const MeetingUI = ({
     }
   };
 
-  const getIsMuted = () => {
+  const getIsSelfMuted = () => {
     const attendeeItem = [...data.attendees].find(
       item => item.attendeeId === selfAttendeeId,
     );
@@ -347,16 +638,110 @@ const MeetingUI = ({
     return false;
   };
 
+  const getIsSelfHandRaised = () => {
+    const attendeeItem = [...data.attendees].find(
+      item => item.attendeeId === selfAttendeeId,
+    );
+    if (attendeeItem) {
+      return attendeeItem.isHandRaised;
+    }
+    return false;
+  };
+
+  const handleHideToast = () => {
+    ToastMessage.hide();
+  };
+
+  const handleOpenParticipantsModal = () => {
+    handleHideToast();
+    openedModals.current.participants = true;
+    participantsListModalRef.current?.present();
+  };
+
   const handleCloseParticipantsModal = () => {
+    openedModals.current.participants = false;
     participantsListModalRef.current?.close();
+  };
+
+  const handleOpenMoreOptionsModal = () => {
+    handleHideToast();
+    openedModals.current.moreOptions = true;
+    moreOptionsModalRef.current?.present();
+  };
+
+  const handleCloseMoreOptionsModal = () => {
+    openedModals.current.moreOptions = false;
+    moreOptionsModalRef.current?.close();
+  };
+
+  const handleOpenInCallMessagesModal = () => {
+    handleHideToast();
+    handleCloseMoreOptionsModal();
+    openedModals.current.messages = true;
+    inCallMessagesModalRef.current?.present();
+  };
+
+  const handleCloseInCallMessagesModal = () => {
+    openedModals.current.messages = false;
+    inCallMessagesModalRef.current?.close();
   };
 
   const handleFilterRequestedList = (userId: number) => {
     if (isMount) {
-      setusersList(preList =>
-        [...preList].filter(item => item.user_id !== userId),
-      );
+      setusersList(preList => [...preList].filter(item => item.id !== userId));
     }
+  };
+
+  const getAttendeesUsersTileList = () => {
+    return [...data.attendees]
+      .map((item: AttendeeDetail) => {
+        const userData = [...usersList].find(ele => ele.id === item.userId);
+        if (userData) {
+          return {...item, attendeeName: userData.name};
+        }
+        return {...item, attendeeName: undefined};
+      })
+      .filter(item => item.attendeeName);
+  };
+
+  const getParticipantsList = () => {
+    return [...usersList]
+      .map((item: ParticipantProp) => {
+        const attendeeData = [...data.attendees].find(
+          ele => ele.userId === item.id,
+        );
+        if (attendeeData) {
+          return {
+            ...item,
+            isMuted: attendeeData.isMuted,
+            isHandRaised: attendeeData.isHandRaised,
+            tileId: attendeeData.tileId,
+          };
+        }
+        if (item.isRequested) {
+          return {...item};
+        }
+      })
+      .filter(item => item !== undefined);
+  };
+
+  const getMessageParticipantsList = () => {
+    return [...usersList]
+      .map((item: ParticipantProp) => {
+        const attendeeData = [...data.attendees].find(
+          ele => ele.userId === item.id,
+        );
+        if (attendeeData) {
+          return {
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+          };
+        }
+      })
+      .filter(item => item && item.id !== selfUserId);
   };
 
   function getVideoItem(item: AttendeeDetail, index: number) {
@@ -370,6 +755,8 @@ const MeetingUI = ({
           style={{height: maxHeight / listLength, width: maxWidth}}
           key={index.toString()}
           attendeeDetail={item}
+          hostUserId={hostUserId}
+          selfUserId={selfUserId}
         />
       );
     } else if (data.attendees.length === 3) {
@@ -378,10 +765,21 @@ const MeetingUI = ({
           style={{height: maxHeight / 2, width: maxWidth / (index < 2 ? 2 : 1)}}
           key={index.toString()}
           attendeeDetail={item}
+          hostUserId={hostUserId}
+          selfUserId={selfUserId}
+          nameCharactersLength={index < 2 ? 20 : 10}
         />
       );
     }
-    return <MeetingVideoView key={index.toString()} attendeeDetail={item} />;
+    return (
+      <MeetingVideoView
+        key={index.toString()}
+        attendeeDetail={item}
+        hostUserId={hostUserId}
+        selfUserId={selfUserId}
+        nameCharactersLength={10}
+      />
+    );
   }
 
   return (
@@ -398,39 +796,63 @@ const MeetingUI = ({
         onReceiveDataMessage={onReceiveDataMessage}
         onError={onError}
       />
-      <View
-        style={{flex: 1}}
-        onLayout={e => {
-          if (isMount && containerHeight === 0) {
-            setcontainerHeight(e.nativeEvent.layout.height);
-          }
-        }}>
-        <ScrollView
-          style={{flex: 1}}
-          contentContainerStyle={styles.videoTilesContainer}>
-          {data.attendees.map((item, index) => {
-            return getVideoItem(item, index);
-          })}
-        </ScrollView>
-      </View>
+      {isLoadingUsersList ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator color={COLORS.white} size={'large'} />
+          <StyledText style={styles.loaderText}>Getting Attendees</StyledText>
+        </View>
+      ) : (
+        <>
+          <View
+            style={{flex: 1}}
+            onLayout={e => {
+              if (isMount && containerHeight === 0) {
+                setcontainerHeight(e.nativeEvent.layout.height);
+              }
+            }}>
+            <ScrollView
+              style={{flex: 1}}
+              contentContainerStyle={styles.videoTilesContainer}>
+              {getAttendeesUsersTileList().map((item, index) => {
+                return getVideoItem(item, index);
+              })}
+            </ScrollView>
+          </View>
 
-      <MeetingActionsContainer
-        isMuted={getIsMuted()}
-        isVideoEnabled={data.selfVideoEnabled}
-        onChangeVideoStatus={() => {
-          Meeting.setCameraOn(!data.selfVideoEnabled);
-        }}
-        participantsRequestCount={
-          usersList.filter(item => item.isRequested).length
-        }
-        onChangeMicStatus={() => {
-          Meeting.setMute(!getIsMuted());
-        }}
-        onPressMenu={handleEndMeeting}
-        onPressParticipants={() => {
-          participantsListModalRef.current?.present();
-        }}
-      />
+          <MeetingActionsContainer
+            isMuted={getIsSelfMuted()}
+            isHandRaised={getIsSelfHandRaised()}
+            isVideoEnabled={data.selfVideoEnabled}
+            isVisibleRaiseHand={selfUserId !== hostUserId}
+            onChangeVideoStatus={() => {
+              Meeting.setCameraOn(!data.selfVideoEnabled);
+            }}
+            participantsRequestCount={
+              getParticipantsList().filter(item => item?.isRequested).length
+            }
+            onChangeMicStatus={() => {
+              Meeting.setMute(!getIsSelfMuted());
+            }}
+            onPressRaiseHand={() => {
+              const raiseHandData: RaiseHandUserDataProp = {
+                meetingId: meetingId,
+                raise_hand: !getIsSelfHandRaised(),
+                user_id: selfUserId,
+                user_name: profile?.name,
+              };
+              handleRaiseHand(raiseHandData, true);
+              raiseHand(raiseHandData);
+            }}
+            onPressMenu={() => {
+              handleOpenMoreOptionsModal();
+            }}
+            onPressParticipants={() => {
+              handleOpenParticipantsModal();
+            }}
+          />
+        </>
+      )}
+      {/* Participants List Modal */}
       <CustomBottomSheetModal
         // @ts-ignore
         refValue={participantsListModalRef}
@@ -438,7 +860,44 @@ const MeetingUI = ({
         <ParticipantsList
           onClose={handleCloseParticipantsModal}
           hostUserId={hostUserId}
-          participantsList={usersList}
+          selfUserId={selfUserId}
+          isLoading={isLoadingUsersList}
+          // @ts-ignore
+          participantsList={getParticipantsList()}
+          onPressMic={(userId: number, requestStatus: boolean) => {
+            console.log(selfUserId, 'SELF USER ID');
+            if (userId === selfUserId) {
+              Meeting.setMute(!getIsSelfMuted());
+            } else {
+              if (selfUserId === hostUserId) {
+                console.log(
+                  {
+                    meetingId: meetingId,
+                    user_id: userId,
+                    audio: requestStatus,
+                  },
+                  'SEND DATAAA',
+                );
+
+                inCallEvents({
+                  userId: userId,
+                  audio: requestStatus,
+                });
+              }
+            }
+          }}
+          onPressVideo={(userId: number, requestStatus: boolean) => {
+            if (userId === selfUserId) {
+              Meeting.setCameraOn(!data.selfVideoEnabled);
+            } else {
+              if (selfUserId === hostUserId) {
+                inCallEvents({
+                  userId: userId,
+                  video: requestStatus,
+                });
+              }
+            }
+          }}
           onPressAccept={userId => {
             handleFilterRequestedList(userId);
             allowToJoinMeeting({
@@ -454,6 +913,90 @@ const MeetingUI = ({
           }}
         />
       </CustomBottomSheetModal>
+
+      {/* More Options Modal */}
+      <CustomBottomSheetModal
+        // @ts-ignore
+        refValue={moreOptionsModalRef}
+        onCloseModal={handleCloseMoreOptionsModal}
+        heightPercentage="50%">
+        <MeetingMoreOptions
+          onPress={(buttonId: MEETING_MENU_IDS) => {
+            if (buttonId === 'exit_meeting') {
+              handleCloseMoreOptionsModal();
+              Alert.alert(
+                'Exit Meeting!',
+                'Do you want to exit from this meeting?',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => {},
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      handleEndMeeting();
+                    },
+                  },
+                ],
+                {cancelable: false},
+              );
+            } else if (buttonId === 'in_call_message') {
+              handleOpenInCallMessagesModal();
+            }
+          }}
+        />
+      </CustomBottomSheetModal>
+
+      {/* Chat Modal */}
+      <CustomBottomSheetModal
+        // @ts-ignore
+        refValue={inCallMessagesModalRef}
+        enableContentPanningGesture={isEnableContentPanningGesture}
+        onCloseModal={handleCloseInCallMessagesModal}
+        heightPercentage="90%">
+        <InCallMessages
+          onClose={handleCloseInCallMessagesModal}
+          // @ts-ignore
+          participantsList={getMessageParticipantsList()}
+          selfUserId={selfUserId}
+          hostUserId={hostUserId}
+          messagesList={messagesList}
+          setisEnableContentPanningGesture={setisEnableContentPanningGesture}
+          onSendMessage={(msg, userData) => {
+            const myUserData = [...usersList].find(
+              item => item.id === selfUserId,
+            );
+            const sendData = {
+              id: myUserData?.id ?? selfUserId,
+              name: myUserData?.name ?? '',
+              image: myUserData?.image,
+              createdAt: myUserData?.createdAt,
+              updatedAt: myUserData?.updatedAt,
+              meetingId: meetingId,
+              message: msg,
+            };
+            if (userData.id === -1) {
+              handleAddMessage(sendData);
+              sendMessageToMeetingRoom(sendData);
+            } else {
+              handleAddMessage({
+                ...sendData,
+                userId: userData.id,
+                isPrivate: true,
+                send_to: {...userData},
+              });
+              sendMessageToSingleUser({
+                ...sendData,
+                userId: userData.id,
+                isPrivate: true,
+                send_to: {...userData},
+              });
+            }
+          }}
+        />
+      </CustomBottomSheetModal>
     </View>
   );
 };
@@ -465,6 +1008,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
+  loaderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   videoTilesContainer: {
     flexGrow: 0,
     flexDirection: 'row',
@@ -473,5 +1021,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 5,
     overflow: 'hidden',
+  },
+  loaderText: {
+    color: COLORS.white,
   },
 });

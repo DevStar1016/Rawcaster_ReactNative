@@ -33,6 +33,9 @@ import MicWhiteIcon from '../Assets/Svg/mic_white.svg';
 import SpeakerWhiteIcon from '../Assets/Svg/speaker_white.svg';
 import MicOffWhiteIcon from '../Assets/Svg/mic_off_white.svg';
 import VideoDisabledWhiteIcon from '../Assets/Svg/video_disabled_white.svg';
+import HandWhiteIcon from '../Assets/Svg/hand_white.svg';
+import HandSecondaryIcon from '../Assets/Svg/hand_secondary.svg';
+import ExitWhiteIcon from '../Assets/Svg/exit_white.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -342,7 +345,10 @@ export type IconType =
   | 'mic_white'
   | 'speaker_white'
   | 'mic_off_white'
-  | 'video_disabled_white';
+  | 'video_disabled_white'
+  | 'hand_white'
+  | 'hand_secondary'
+  | 'exit_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -514,4 +520,7 @@ export const ICONS = {
   speaker_white: SpeakerWhiteIcon,
   mic_off_white: MicOffWhiteIcon,
   video_disabled_white: VideoDisabledWhiteIcon,
+  hand_white: HandWhiteIcon,
+  hand_secondary: HandSecondaryIcon,
+  exit_white: ExitWhiteIcon,
 };

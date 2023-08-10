@@ -47,9 +47,9 @@ const Events = () => {
       <Modal
         visible={isOpenHostingScreen}
         onRequestClose={() => {
-          if (isMount) {
-            setisOpenHostingScreen(false);
-          }
+          // if (isMount) {
+          //   setisOpenHostingScreen(false);
+          // }
         }}
         style={{backgroundColor: COLORS.white}}>
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>

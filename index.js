@@ -23,6 +23,7 @@ const HOC = () => {
           visibilityTime={3000}
           config={ToastConfig}
           topOffset={40}
+          bottomOffset={60}
         />
       </GestureHandlerRootView>
     </Provider>

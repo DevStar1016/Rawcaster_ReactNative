@@ -110,10 +110,8 @@ const InfluencersList = () => {
     if (selectedCategoryId) {
       formData.append('category', selectedCategoryId);
     }
-    console.log(JSON.stringify(formData), 'INFLUENCERS LIST FORMDATAA');
     influencerListService(formData)
       .then(res => {
-        console.log(res.data, 'RESPONSE INFLUENCER LIST');
         if (res.data.status === 1) {
           if (isMount) {
             seterrorText(null);

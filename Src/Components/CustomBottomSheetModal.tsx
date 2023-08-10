@@ -8,6 +8,7 @@ type Props = {
   refValue?: any;
   heightPercentage?: string;
   onCloseModal?: () => void;
+  enableContentPanningGesture?: boolean;
   children: JSX.Element;
 };
 
@@ -15,6 +16,7 @@ const CustomBottomSheetModal = ({
   refValue,
   onCloseModal,
   heightPercentage = '80%',
+  enableContentPanningGesture = true,
   children,
 }: Props) => {
   const insets = useInsets();
@@ -30,7 +32,7 @@ const CustomBottomSheetModal = ({
       keyboardBlurBehavior={'restore'}
       android_keyboardInputMode="adjustPan"
       backgroundComponent={() => <View />}
-      enableContentPanningGesture={true}
+      enableContentPanningGesture={enableContentPanningGesture}
       backdropComponent={() => {
         return (
           <TouchableOpacity

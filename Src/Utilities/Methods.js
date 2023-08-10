@@ -478,3 +478,25 @@ export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
 export const getMillisToMinutesNumber = millis => {
   return parseFloat(parseFloat(millis) / 60000);
 };
+
+// for Chime integration After that remove this
+export const getChimeTestUserId = userId => {
+  switch (userId) {
+    case 88:
+      return 11;
+    case 67:
+      return 22;
+    case 21:
+      return 33;
+    case 728:
+      return 44;
+    case 164:
+      return 55;
+    case 684:
+      return 66;
+    case 682:
+      return 77;
+    default:
+      return userId;
+  }
+};

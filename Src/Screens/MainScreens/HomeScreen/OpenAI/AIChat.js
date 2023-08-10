@@ -42,7 +42,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   const listRef = useRef(null);
   useEffect(() => {
     isMount = true;
-    aiChatAPICall();
+    // aiChatAPICall();
     return () => {
       isMount = false;
       if (timer) {
@@ -90,6 +90,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     aiChatService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data, 'DATAAA');
           const responseChatData = {
             id: getUniqueId(),
             msg: res.data.msg,
@@ -243,7 +244,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
       </View>
       <View
         style={styles.commentsListContainer}
-        activeOpacity={1}
+        // activeOpacity={1}
         // onPress={() => {
         //   Keyboard.dismiss();
         // }}
@@ -287,13 +288,19 @@ const AIChat = ({onPressBack, handleShareContent}) => {
         )}
         <RBSheetTextInput
           isVisibleEmoji={false}
-          placeholderText="Type or ask your question here..."
+          placeholderText={`HI ${profile.name}, I am an Artificial Intelligence (AI), I can answer your question on anything. Speak or type your question here..`}
           onPressSend={text => {
             handleSendMessage({text});
           }}
+          actionsContainerPaddingTop={5}
+          containerAlignItems="flex-start"
           inputProps={{
             maxLength: profile?.ai_content_length ?? 0,
+            multiline: true,
+            textAlignVertical: 'top',
+            numberOfLines: 6,
           }}
+          containerHeight={110}
           isDisableAudioProcess={isDisableAudioProcess}
           isVisibleVoiceRecord={true}
           isDisableSend={isLoadingChat}

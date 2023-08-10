@@ -13,4 +13,9 @@ export const ChimeSocketEvents: ChimeEventsProps = {
   joinRequest: 'joinRequest',
   joinRequestFromUser: 'joinRequestFromUser',
   joinRequestAnswer: 'joinRequestAnswer',
+  raiseHand: 'raiseHand',
+  inCallEvents: 'inCallEvents',
+  newUserJoined: 'newUserJoined',
+  userLeft: 'userLeft',
+  userLefted: 'userLefted',
 };

@@ -8,18 +8,22 @@ import React from 'react';
 import {requireNativeComponent, findNodeHandle} from 'react-native';
 import {Meeting} from '../Bridges/ChimeMeetingBridge';
 
+var timer = undefined;
 export class MeetingVideo extends React.Component {
   componentDidMount() {
     // we need to delay the bind video
     // Because "componentDidMount" will be called "immediately after the initial rendering occurs"
     // This is *before* RCTUIManager add this view to register (so that viewForReactTag() can return a view)
     // So we need to dispatch bindVideoView after this function complete
-    setTimeout(() => {
+    timer = setTimeout(() => {
       Meeting.bindVideoView(findNodeHandle(this), this.props.tileId);
     });
   }
 
   componentWillUnmount() {
+    if (timer) {
+      clearTimeout(timer);
+    }
     Meeting.unbindVideoView(this.props.tileId);
   }
 
