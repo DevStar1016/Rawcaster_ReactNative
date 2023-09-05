@@ -20,7 +20,7 @@ type Props = {
   setModal: (val: boolean) => void;
   onSubmit: (filterData: any) => void;
   listType: 'connections' | 'fans' | 'influencers' | 'unclaimed_influencers';
-  preFilterData?: FilterDataType;
+  preFilterData?: FilterDataType | null;
 };
 
 var isMount = true;
@@ -47,6 +47,10 @@ const FilterProfileSeeAllUsers = ({
     };
   }, []);
 
+  /**
+   * Clears the filter data by setting all values to null.
+   * @returns None
+   */
   function clearFilterData() {
     if (isMount) {
       let tempFilterData: any = {...filterData};
@@ -58,6 +62,10 @@ const FilterProfileSeeAllUsers = ({
     }
   }
 
+  /**
+   * Returns the title based on the given list type.
+   * @returns {string} The title corresponding to the list type.
+   */
   function getTitle() {
     switch (listType) {
       case 'connections':
@@ -73,6 +81,12 @@ const FilterProfileSeeAllUsers = ({
     }
   }
 
+  /**
+   * Sets the selected data value for a given field name in the filter data state.
+   * @param {any} value - The value to set for the selected data.
+   * @param {any} fieldName - The name of the field to set the value for.
+   * @returns None
+   */
   function setSelectedData(value: any, fieldName: any) {
     if (isMount) {
       setfilterData(preData => ({

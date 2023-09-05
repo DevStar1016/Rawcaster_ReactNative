@@ -109,85 +109,7 @@ const CreateEditEvent = ({route}) => {
         eventTime: moment().add(15, 'minute'),
       },
       validationSchema: validationSchema,
-      onSubmit: values => {
-        Keyboard.dismiss();
-        if (selectedValues.durationError) {
-          if (parseInt(profile?.user_status_id) === 4) {
-            Toast.fail('Duration - ' + selectedValues.durationError);
-          } else {
-            dispatch(
-              setPremiumAlert({
-                status: true,
-                text: `To host event for longer than ${settings?.max_event_duration} hours upgrade your membership!`,
-              }),
-            );
-          }
-        } else if (selectedValues.participantError) {
-          if (
-            parseInt(profile?.user_status_id) !== 4 &&
-            parseInt(selectedValues.maxParticipants) >
-              parseInt(settings?.max_event_participants_count)
-          ) {
-            dispatch(
-              setPremiumAlert({
-                status: true,
-                text: `To add more than ${parseInt(
-                  settings?.max_event_participants_count,
-                )} participants upgrade your membership!`,
-              }),
-            );
-          } else {
-            Toast.fail('Max Participants - ' + selectedValues.participantError);
-          }
-        } else if (
-          parseInt(profile?.user_status_id) <= 1 &&
-          parseInt(selectedValues.waiting_room) !==
-            parseInt(settings?.waiting_room)
-        ) {
-          dispatch(
-            setPremiumAlert({
-              status: true,
-              text: 'To access this feature you need to become a premium member!',
-            }),
-          );
-        } else if (
-          parseInt(profile?.user_status_id) <= 1 &&
-          parseInt(selectedValues.join_before_host) !==
-            parseInt(settings?.join_before_host)
-        ) {
-          dispatch(
-            setPremiumAlert({
-              status: true,
-              text: 'To access this feature you need to become a premium member!',
-            }),
-          );
-        } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
-          Toast.fail('Upload Melody');
-          setmelodyFileError('Melody required');
-        } else {
-          const data = {
-            event_title: values.eventTitle,
-            event_message: values.eventDescription,
-            event_start_date: moment(liveEventDate).utc().format('YYYY-MM-DD'),
-            event_start_time: moment(values.eventTime).utc().format('HH:mm'),
-            event_participants: selectedValues.maxParticipants,
-            event_duration: getDisplayDuration(),
-            melodyFile: selectedMelodyFile,
-            ...selectedValues,
-          };
-
-          navigation.navigate(
-            isFromEventSearch
-              ? 'CreateEditSearchEventSecond'
-              : 'CreateEditEventSecond',
-            {
-              isFromEventSearch: isFromEventSearch,
-              submitedData: data,
-              eventId,
-            },
-          );
-        }
-      },
+      onSubmit: onSubmit,
     });
 
   useEffect(() => {
@@ -202,6 +124,10 @@ const CreateEditEvent = ({route}) => {
     };
   }, []);
 
+  /**
+   * Performs initial API calls to fetch event types and event melodies.
+   * @returns None
+   */
   function initialAPICalls() {
     const formData = new FormData();
     formData.append('token', token);
@@ -247,13 +173,100 @@ const CreateEditEvent = ({route}) => {
       });
   }
 
+  /**
+   * Handles the form submission for creating or editing an event.
+   * @param {object} values - The form values submitted by the user.
+   * @returns None
+   */
+  const onSubmit = values => {
+    Keyboard.dismiss();
+    if (selectedValues.durationError) {
+      if (parseInt(profile?.user_status_id) === 4) {
+        Toast.fail('Duration - ' + selectedValues.durationError);
+      } else {
+        dispatch(
+          setPremiumAlert({
+            status: true,
+            text: `To host event for longer than ${settings?.max_event_duration} hours upgrade your membership!`,
+          }),
+        );
+      }
+    } else if (selectedValues.participantError) {
+      if (
+        parseInt(profile?.user_status_id) !== 4 &&
+        parseInt(selectedValues.maxParticipants) >
+          parseInt(settings?.max_event_participants_count)
+      ) {
+        dispatch(
+          setPremiumAlert({
+            status: true,
+            text: `To add more than ${parseInt(
+              settings?.max_event_participants_count,
+            )} participants upgrade your membership!`,
+          }),
+        );
+      } else {
+        Toast.fail('Max Participants - ' + selectedValues.participantError);
+      }
+    } else if (
+      parseInt(profile?.user_status_id) <= 1 &&
+      parseInt(selectedValues.waiting_room) !== parseInt(settings?.waiting_room)
+    ) {
+      dispatch(
+        setPremiumAlert({
+          status: true,
+          text: 'To access this feature you need to become a premium member!',
+        }),
+      );
+    } else if (
+      parseInt(profile?.user_status_id) <= 1 &&
+      parseInt(selectedValues.join_before_host) !==
+        parseInt(settings?.join_before_host)
+    ) {
+      dispatch(
+        setPremiumAlert({
+          status: true,
+          text: 'To access this feature you need to become a premium member!',
+        }),
+      );
+    } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
+      Toast.fail('Upload Melody');
+      setmelodyFileError('Melody required');
+    } else {
+      const data = {
+        event_title: values.eventTitle,
+        event_message: values.eventDescription,
+        event_start_date: moment(liveEventDate).utc().format('YYYY-MM-DD'),
+        event_start_time: moment(values.eventTime).utc().format('HH:mm'),
+        event_participants: selectedValues.maxParticipants,
+        event_duration: getDisplayDuration(),
+        melodyFile: selectedMelodyFile,
+        ...selectedValues,
+      };
+
+      navigation.navigate(
+        isFromEventSearch
+          ? 'CreateEditSearchEventSecond'
+          : 'CreateEditEventSecond',
+        {
+          isFromEventSearch: isFromEventSearch,
+          submitedData: data,
+          eventId,
+        },
+      );
+    }
+  };
+
+  /**
+   * Makes an API call to retrieve the details of an event.
+   * @returns None
+   */
   const getEventDetailsAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('event_id', eventId);
     viewEventService(formData)
       .then(res => {
-        console.log(res.data.event_detail, 'EVENT DETAILSSS');
         if (res.data.status === 1) {
           let tempData = {...selectedValues};
           if (res.data.event_detail.banner_image) {
@@ -329,6 +342,11 @@ const CreateEditEvent = ({route}) => {
       });
   };
 
+  /**
+   * Handles the selection of a duration for an event.
+   * @param {Date} date - The selected date for the duration.
+   * @returns None
+   */
   const onSelectDuration = date => {
     let actualDurationallowed = settings?.max_event_duration;
     let selectedDuration = moment(date).format('HH:mm');
@@ -381,6 +399,11 @@ const CreateEditEvent = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection of an event date.
+   * @param {Date} selectedDate - The selected date for the event.
+   * @returns None
+   */
   const onSelectEventDate = selectedDate => {
     if (isMount) {
       setliveEventDate(selectedDate);
@@ -397,6 +420,11 @@ const CreateEditEvent = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection of an event time.
+   * @param {Date} selectedTime - The selected time for the event.
+   * @returns None
+   */
   const onSelectEventTime = selectedTime => {
     if (
       moment().format('DD:MM:YYYY') ==
@@ -415,24 +443,46 @@ const CreateEditEvent = ({route}) => {
     }
   };
 
+  /**
+   * Retrieves the event visibility type based on the provided event type ID.
+   * @param {string} [eventTypeId=selectedValues.eventVisibilityTypeId] - The event type ID to retrieve the visibility type for.
+   * @returns {object | undefined} - The event visibility type object if found, otherwise undefined.
+   */
   const getEventVisibilityType = (
     eventTypeId = selectedValues.eventVisibilityTypeId,
   ) => {
     return [...eventTypesList].find(item => item.id === eventTypeId);
   };
 
+  /**
+   * Returns the display duration of an event.
+   * @returns {string} The formatted display duration in 'HH:mm' format, or an empty string if no duration is provided.
+   */
   const getDisplayDuration = () => {
     return selectedValues.eventDuration
       ? moment(selectedValues.eventDuration).format('HH:mm').toString()
       : '';
   };
 
+  /**
+   * Retrieves the layout value from the EVENT_LAYOUT_LIST array based on the selected event layout ID.
+   * @returns The layout value object that matches the selected event layout ID.
+   */
   const getLayoutValue = () => {
     return [...EVENT_LAYOUT_LIST].find(
       item => item.id === selectedValues.event_layout_id,
     );
   };
 
+  /**
+   * Returns a list of audio or video settings based on the given type.
+   * @param {number} [type=1] - The type of settings to retrieve. 1 for audio settings, 2 for video settings.
+   * @returns {Array} - An array of objects representing the settings.
+   * Each object has the following properties:
+   * - id: The ID of the setting.
+   * - name: The name of the setting.
+   * - status: The status of the setting, true if selected, false otherwise.
+   */
   function getAudioVideoSettingsList(type = 1) {
     //1 - audio , 2 - video
     return [
@@ -452,14 +502,27 @@ const CreateEditEvent = ({route}) => {
     ];
   }
 
+  /**
+   * Returns an array of enabled switches IDs from the given list.
+   * @param {Array} list - The list of items.
+   * @returns {Array} An array of enabled switches IDs.
+   */
   function getEnabledSwitchesIds(list) {
     return list.filter(item => item.status).map(item => item.id);
   }
 
+  /**
+   * Retrieves the melody object from the eventMelodies array based on the selected melody ID.
+   * @returns The melody object that matches the selected melody ID, or undefined if not found.
+   */
   function getMelody() {
     return [...eventMelodies].find(item => item.id === selectedValues.melody);
   }
 
+  /**
+   * Handles the selection of a melody file using the DocumentPicker.
+   * @returns None
+   */
   function handleSelectMelodyFile() {
     DocumentPicker.pick({
       type: [
@@ -731,6 +794,9 @@ const CreateEditEvent = ({route}) => {
               return {
                 ...preData,
                 waiting_room: Boolean(preData.waiting_room) ? 0 : 1,
+                join_before_host: Boolean(preData.waiting_room)
+                  ? preData.join_before_host
+                  : 0,
               };
             });
           }}
@@ -751,6 +817,9 @@ const CreateEditEvent = ({route}) => {
             }
             setselectedValues(preData => ({
               ...preData,
+              waiting_room: Boolean(preData.join_before_host)
+                ? preData.waiting_room
+                : 0,
               join_before_host: Boolean(preData.join_before_host) ? 0 : 1,
             }));
           }}

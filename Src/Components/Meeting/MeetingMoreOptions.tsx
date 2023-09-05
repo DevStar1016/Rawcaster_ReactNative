@@ -5,48 +5,227 @@ import SVGIcon from '../SVGIcon';
 import StyledText from '../StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import {IconType} from '../../Utilities/Icons';
+import {EVENT_TYPE} from '../../Utilities/Constants';
+import Reactions from './Reactions';
+import {UserDataProp} from '../../Services/ChimeSocket/ChimeSocketPropTypes';
+import {UserVideoItemDetailsProp} from './MeetingVideoView';
+import {getSlicedText} from '../../Utilities/Methods';
 
-export type MEETING_MENU_IDS = 'in_call_message' | 'exit_meeting';
+export type MEETING_MENU_IDS =
+  | 'in_call_message'
+  | 'exit_meeting'
+  | 'end_meeting'
+  | 'participants'
+  | 'screenshare_permission'
+  | 'rename'
+  | 'enable_disable_audio'
+  | 'enable_disable_video'
+  | 'raise_hand'
+  | 'remove_user';
+
 type OptionsProp = {
   id: MEETING_MENU_IDS;
   buttonText: string;
   icon: IconType;
+  isShow?: boolean;
+  highLightedTextColor?: string;
 };
 
 type Props = {
   onPress: (buttonId: MEETING_MENU_IDS) => void;
+  onPressEmoji?: (emoji: string) => void;
+  onClose?: () => void;
+  eventType?: number;
+  isAllowedScreenShare?: boolean;
+  selfUserId: number;
+  hostUserId: number;
+  userData?: UserDataProp | UserVideoItemDetailsProp;
+  visibleMenuIds: MEETING_MENU_IDS[];
+  isEnableReactionsWithCondition?: boolean;
 };
 
-const MENU_OPTIONS: OptionsProp[] = [
-  {
-    id: 'in_call_message',
-    buttonText: 'In-call messages',
-    icon: 'chat_white',
-  },
-  {
-    id: 'exit_meeting',
-    buttonText: 'Exit Meeting',
-    icon: 'exit_white',
-  },
-];
+type MenuListProps = {
+  hostUserId: number;
+  selfUserId: number;
+  eventType?: number;
+  isAllowedScreenShare?: boolean;
+  userData?: UserDataProp | UserVideoItemDetailsProp;
+  visibleMenuIds: MEETING_MENU_IDS[];
+};
 
-const MeetingMoreOptions = ({onPress}: Props) => {
+export const GetMeetingOptionsMenuList = ({
+  hostUserId,
+  selfUserId,
+  userData,
+  isAllowedScreenShare,
+  eventType,
+  visibleMenuIds,
+}: MenuListProps): OptionsProp[] => {
+  let menuList: OptionsProp[] = [
+    {
+      id: 'rename',
+      buttonText: 'Rename',
+      icon: 'edit_name_white',
+      isShow: hostUserId === selfUserId,
+    },
+    {
+      id: 'in_call_message',
+      buttonText:
+        userData && userData.userId !== selfUserId
+          ? 'Chat'
+          : 'In-call messages',
+      icon: 'chat_white',
+      isShow: true,
+    },
+    {
+      id: 'enable_disable_audio',
+      buttonText: userData?.audio ? 'Mute' : 'Un Mute',
+      icon: userData?.audio ? 'mic_white' : 'mic_off_white',
+      isShow: userData
+        ? hostUserId === selfUserId
+          ? true
+          : userData.userId === selfUserId
+        : false,
+    },
+    {
+      id: 'enable_disable_video',
+      buttonText: `${userData?.video ? 'Stop' : 'Start'} Video`,
+      icon:
+        userData?.video &&
+        // @ts-ignore
+        (typeof userData.tileId === 'number' ||
+          // @ts-ignore
+          typeof userData.tileId === 'string')
+          ? 'video_call_white'
+          : 'video_disabled_white',
+      isShow: userData
+        ? hostUserId === selfUserId
+          ? true
+          : userData.userId === selfUserId
+        : false,
+    },
+    {
+      id: 'raise_hand',
+      buttonText: `${userData?.handRaised ? 'Drop' : 'Raise'} Hand`,
+      icon: userData?.handRaised ? 'hand_secondary' : 'hand_white',
+      isShow: userData ? userData.userId === selfUserId : false,
+      highLightedTextColor: userData?.handRaised ? COLORS.secondary : undefined,
+    },
+
+    {
+      id: 'participants',
+      buttonText: 'Participants',
+      icon: 'participants_white',
+      isShow: true,
+    },
+    {
+      id: 'screenshare_permission',
+      buttonText: `${isAllowedScreenShare ? 'Stop' : 'Allow'} Screen Share`,
+      icon: isAllowedScreenShare
+        ? 'screen_share_disable_pink'
+        : 'screen_share_enable',
+      isShow: eventType === EVENT_TYPE.event && selfUserId === hostUserId,
+      highLightedTextColor: isAllowedScreenShare ? COLORS.secondary : undefined,
+    },
+    {
+      id: 'remove_user',
+      buttonText: 'Remove User',
+      icon: 'remove_user_white',
+      isShow:
+        userData && userData.userId !== selfUserId && hostUserId === selfUserId,
+    },
+    {
+      id: 'exit_meeting',
+      buttonText: `${hostUserId === selfUserId ? 'End' : 'Exit'} Meeting`,
+      icon: 'exit_white',
+      isShow: true,
+    },
+    // {
+    //   id: 'end_meeting',
+    //   buttonText: `End Meeting`,
+    //   icon: 'exit_white',
+    //   isShow: hostUserId === selfUserId,
+    // },
+  ];
+  menuList = [...menuList].filter(
+    item => visibleMenuIds.includes(item.id) && item.isShow,
+  );
+  return [...menuList];
+};
+
+const MeetingMoreOptions = ({
+  onPress,
+  onPressEmoji,
+  eventType,
+  isAllowedScreenShare,
+  selfUserId,
+  hostUserId,
+  userData,
+  visibleMenuIds = [],
+  onClose,
+  isEnableReactionsWithCondition = true,
+}: Props) => {
+  const getMenuOptions = (): OptionsProp[] => {
+    return GetMeetingOptionsMenuList({
+      hostUserId,
+      selfUserId,
+      userData,
+      eventType,
+      isAllowedScreenShare,
+      visibleMenuIds,
+    });
+  };
+
   return (
-    <View style={styles.mainContainer}>
-      {MENU_OPTIONS.map((item: OptionsProp) => {
-        return (
-          <TouchableOpacity
-            key={item.id}
-            style={styles.buttonContainer}
-            activeOpacity={0.7}
-            onPress={() => {
-              onPress(item.id);
-            }}>
-            <SVGIcon icon={item.icon} marginBottom={5} />
-            <StyledText style={styles.buttonText}>{item.buttonText}</StyledText>
-          </TouchableOpacity>
-        );
-      })}
+    <View
+      style={[
+        styles.mainContainer,
+        eventType === EVENT_TYPE.event &&
+          isEnableReactionsWithCondition && {paddingHorizontal: 0},
+      ]}>
+      {eventType !== EVENT_TYPE.event && isEnableReactionsWithCondition && (
+        <Reactions onPressEmoji={onPressEmoji} />
+      )}
+      {userData ? (
+        <View style={styles.titleContainer}>
+          <View style={{width: '10%'}} />
+
+          <StyledText style={styles.title}>
+            {getSlicedText(userData.name, 20)}
+          </StyledText>
+          <View style={{width: '10%', paddingRight: 5}}>
+            <SVGIcon
+              icon="close_white"
+              height={15}
+              width={15}
+              isButton
+              onPress={onClose}
+            />
+          </View>
+        </View>
+      ) : null}
+      <View style={styles.subContainer}>
+        {getMenuOptions().map((item: OptionsProp) => {
+          return (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.buttonContainer}
+              activeOpacity={0.7}
+              onPress={() => {
+                onPress(item.id);
+              }}>
+              <SVGIcon icon={item.icon} marginBottom={5} />
+              <StyledText
+                style={[
+                  styles.buttonText,
+                  {color: item.highLightedTextColor ?? COLORS.white},
+                ]}>
+                {item.buttonText}
+              </StyledText>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };
@@ -56,13 +235,32 @@ export default MeetingMoreOptions;
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
+    paddingHorizontal: 10,
+  },
+  subContainer: {
+    flex: 1,
     backgroundColor: COLORS.transparentDimColor,
     borderTopStartRadius: 20,
     borderTopEndRadius: 20,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-evenly',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    paddingVertical: 15,
+    paddingHorizontal: 5,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 0.4,
+    borderColor: COLORS.grey,
+  },
+  title: {
+    fontFamily: FONTS.DMSans.bold,
+    color: COLORS.white,
+    fontSize: 16,
   },
   buttonContainer: {
     width: '28%',

@@ -24,10 +24,7 @@ const AuthSlice = createSlice({
       state.settings = action.payload;
     },
     clearAuthReduxData: (state, action) => {
-      state.token = null;
-      state.profile = null;
-      state.settings = null;
-      state.userData = null;
+      return {...initialState};
     },
   },
 });

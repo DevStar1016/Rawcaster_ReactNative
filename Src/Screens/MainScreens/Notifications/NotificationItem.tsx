@@ -53,8 +53,6 @@ const NotificationItem = ({
         (item.poll_option && item.poll_option.length > 0)
       }
       onPress={() => {
-        console.log(item, 'ITEM');
-
         if (
           unreadNotificationCount &&
           !item.is_read &&

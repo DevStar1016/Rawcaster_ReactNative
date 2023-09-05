@@ -63,6 +63,11 @@ const ProfileSearch = () => {
     }
   }, [searchText]);
 
+  /**
+   * Makes an API call to search for profiles using the provided search key and page number.
+   * @param {number} [pageNumber=1] - The page number to retrieve results from.
+   * @returns None
+   */
   const profileSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -118,6 +123,13 @@ const ProfileSearch = () => {
       });
   };
 
+  /**
+   * Handles the action of a user becoming a fan.
+   * @param {string} userId - The ID of the user becoming a fan.
+   * @param {string} userRefId - The reference ID of the user becoming a fan.
+   * @param {number} followCount - The number of followers the user has.
+   * @returns None
+   */
   const handleBecomeFan = (userId, userRefId, followCount) => {
     dispatch(
       becomeFan({
@@ -128,6 +140,12 @@ const ProfileSearch = () => {
     );
   };
 
+  /**
+   * Handles sending a friend request to a user.
+   * @param {string} userRefId - The user reference ID of the user to send the friend request to.
+   * @param {string} user_id - The ID of the current user.
+   * @returns None
+   */
   const handleSendFriendRequest = (userRefId, user_id) => {
     if (isMount) {
       setisActionLoading(true);
@@ -176,6 +194,13 @@ const ProfileSearch = () => {
       });
   };
 
+  /**
+   * Function called when refreshing the page.
+   * Resets the currentPage and totalPages variables to 1.
+   * If the component is mounted, sets the isRefreshing state to true.
+   * Calls the profileSearchAPICall function with the page number 1.
+   * @returns None
+   */
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -185,6 +210,13 @@ const ProfileSearch = () => {
     profileSearchAPICall(1);
   };
 
+  /**
+   * Callback function triggered when the end of the list is reached.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true
+   * and makes an API call to load the next page of profiles.
+   * @returns None
+   */
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {

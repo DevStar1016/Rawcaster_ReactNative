@@ -20,17 +20,23 @@ export type BackHeaderProps = {
   title?: string;
   subTitle?: string;
   backIcon?: IconType;
+  backIconSize?: number;
+  backIconMarginLeft?: number;
   isModal?: boolean;
   setModal?: (value: boolean) => void;
   isTitleCenter?: boolean;
   isEnableRightIcon?: boolean;
   rightIcon?: IconType;
+  rightTextButtonLeftIcon?: IconType;
+  rightTextButtonRightIcon?: IconType;
   videoCallIcon?: IconType;
   isTitleButton?: boolean;
   rightButtonType?: 'icon' | 'text';
   rightButtonText?: string;
   isEnableshareIcon?: boolean;
   isEnableSafeArea?: boolean;
+  insideBackPress?: boolean;
+  onPressBack?: () => void;
   onPressRightIcon?: () => void;
   onPressVideoCallButton?: () => void;
   onPressAudioCallButton?: () => void;
@@ -69,10 +75,13 @@ const HeaderWithBack = ({
   isTitleCenter = false,
   isEnableRightIcon = false,
   rightIcon,
+  backIconSize = 17,
   onPressRightIcon,
   onPressCopyButton,
   onPressDeleteButton,
   onPressShareButton,
+  insideBackPress = true,
+  onPressBack,
   onPressHeaderTitle,
   isTitleButton = false,
   isEnableBackButton = true,
@@ -81,6 +90,8 @@ const HeaderWithBack = ({
   videoCallIcon = 'video_call_white',
   videoCallIconProps,
   rightButtonText = '',
+  rightTextButtonLeftIcon,
+  rightTextButtonRightIcon,
   isEnableVideoCallIcon = false,
   isEnableCopyIcon = false,
   onPressVideoCallButton,
@@ -95,6 +106,7 @@ const HeaderWithBack = ({
   profileImageProps,
   profileContainer,
   titlePaddingHorizontal = 15,
+  backIconMarginLeft = 0,
   rightIconAdditionalProps,
   isEnableProfileImage = false,
   isEnableDeleteIcon = false,
@@ -146,14 +158,19 @@ const HeaderWithBack = ({
           {isEnableBackButton && (
             <SVGIcon
               icon={backIcon}
-              height={17}
-              width={17}
+              height={backIconSize}
+              width={backIconSize}
               isButton
+              marginLeft={backIconMarginLeft}
               onPress={() => {
-                if (isModal && setModal) {
-                  setModal(false);
-                } else {
-                  navigation.goBack();
+                if (insideBackPress) {
+                  if (isModal && setModal) {
+                    setModal(false);
+                  } else {
+                    navigation.goBack();
+                  }
+                } else if (onPressBack) {
+                  onPressBack();
                 }
               }}
             />
@@ -297,9 +314,25 @@ const HeaderWithBack = ({
           activeOpacity={0.8}
           style={[styles.rightTextButton, rightTextButtonStyle]}
           onPress={onPressRightIcon}>
+          {rightTextButtonLeftIcon && (
+            <SVGIcon
+              icon={rightTextButtonLeftIcon}
+              height={15}
+              width={15}
+              marginRight={5}
+            />
+          )}
           <StyledText style={[styles.rightButtonText, rightButtonTextStyle]}>
             {rightButtonText}
           </StyledText>
+          {rightTextButtonRightIcon && (
+            <SVGIcon
+              icon={rightTextButtonRightIcon}
+              height={15}
+              width={15}
+              marginLeft={5}
+            />
+          )}
         </TouchableOpacity>
       ) : (
         <View style={[styles.iconContainer, {height: 25}]} />

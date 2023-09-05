@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   RefreshControl,
@@ -131,7 +132,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   }
   const getList = () => {
     if (listType === 'unclaimed_influencers') {
-      return [...unclaimedAccountsList];
+      return unclaimedAccountsList ? [...unclaimedAccountsList] : [];
     }
     return [...usersList];
   };
@@ -269,12 +270,14 @@ const ProfileSeeAllUsersList = ({route}: any) => {
               dispatch(setUnclaimedAccountsList(res.data.unclaim_accounts));
               setusersList(res.data.unclaim_accounts);
             } else {
-              dispatch(
-                setUnclaimedAccountsList([
-                  ...unclaimedAccountsList,
-                  ...res.data.unclaim_accounts,
-                ]),
-              );
+              if (unclaimedAccountsList) {
+                dispatch(
+                  setUnclaimedAccountsList([
+                    ...unclaimedAccountsList,
+                    ...res.data.unclaim_accounts,
+                  ]),
+                );
+              }
               setusersList(preList => [
                 ...preList,
                 ...res.data.unclaim_accounts,
@@ -385,7 +388,10 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       });
   };
 
-  const handleBecomeFan = (followUserId: any) => {
+  const handleFollowUnfollow = (
+    followUserId: any,
+    type: number /* 1 - follow, 2 - unfollow */,
+  ) => {
     // 1 - follow, 2 - unfollow
     if (isMount.current) {
       setisActionLoading(true);
@@ -393,27 +399,41 @@ const ProfileSeeAllUsersList = ({route}: any) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('follow_userid', followUserId);
-    formData.append('type', 1);
+    formData.append('type', type);
     followAndUnfollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
+
           setusersList(preList => {
             let tempList = [...preList];
-            let tempIndex = tempList.findIndex(
-              sub => sub.user_ref_id === followUserId,
-            );
-            if (tempIndex !== -1) {
-              tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+            if (type === 1) {
+              let tempIndex = tempList.findIndex(
+                sub => sub.user_ref_id === followUserId,
+              );
+              if (tempIndex !== -1) {
+                tempList[tempIndex] = {...tempList[tempIndex], follow: true};
+              }
+            } else {
+              tempList = [...tempList].filter(
+                item => item.user_ref_id !== followUserId,
+              );
             }
             return tempList;
           });
-
-          dispatch(
-            setOtherInfluencersRequestList([
-              ...otherInfluencersRequestList,
+          let tempInfluencersRequestList = [...otherInfluencersRequestList];
+          if (type === 1) {
+            tempInfluencersRequestList = [
+              ...tempInfluencersRequestList,
               followUserId,
-            ]),
+            ];
+          } else {
+            tempInfluencersRequestList = [...tempInfluencersRequestList].filter(
+              userRefId => userRefId !== followUserId,
+            );
+          }
+          dispatch(
+            setOtherInfluencersRequestList([...tempInfluencersRequestList]),
           );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -440,18 +460,67 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       ) {
         return 'user_plus_pink';
       }
-      if (userId) {
-        if (listType === 'connections' && item.friend_status === 0) {
-          return 'user_plus_pink';
-        }
-        if (listType === 'influencers' && !item.follow) {
-          return 'plus_rounded_fill_primary';
+      {
+        if (userId) {
+          if (listType === 'connections' && item.friend_status === 0) {
+            return 'user_plus_pink';
+          }
+          if (listType === 'influencers' && !item.follow) {
+            return 'plus_rounded_fill_primary';
+          }
+        } else {
+          if (listType === 'influencers') {
+            return 'close_black';
+          }
         }
       }
       return undefined;
     }
     return undefined;
   }
+
+  // const handleUnfollow = (userRefId:string) => {
+  //   if (isMount.current) {
+  //     setisActionLoading(true);
+  //   }
+  //   const formData = new FormData();
+  //   formData.append('token', token);
+  //   formData.append('follow_userid', userRefId);
+  //   formData.append('type', 2);
+  //   followAndUnfollowService(formData)
+  //     .then(res => {
+  //       if (res.data.status === 1) {
+  //         Toast.success(res.data.msg);
+  //         dispatch(
+  //           removeFollowingUser({
+  //             user_id: othersProfile.user_id,
+  //           }),
+  //         );
+  //         // dispatch(
+  //         //   setFollowingUsersList(
+  //         //     [...followingUsersList].filter(
+  //         //       item => item.user_id !== othersProfile.user_id,
+  //         //     ),
+  //         //   ),
+  //         // );
+  //         if (isMount.current) {
+  //           setothersProfile(pre => {
+  //             return {...pre, follow: false};
+  //           });
+  //         }
+  //       } else if (res.data.status === 0) {
+  //         Toast.fail(res.data.msg);
+  //       }
+  //     })
+  //     .catch(e => {
+  //       Toast.fail(e.message);
+  //     })
+  //     .finally(() => {
+  //       if (isMount.current) {
+  //         setActionLoader(false);
+  //       }
+  //     });
+  // };
 
   function getRightIconAction(item: any) {
     if (item.user_id !== profile.user_id) {
@@ -467,12 +536,38 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       ) {
         handleSendFriendRequest(item.user_ref_id, item.user_id);
       }
-      if (userId) {
-        if (listType === 'connections' && item.friend_status === 0) {
-          handleSendFriendRequest(item.user_ref_id, item.user_id);
-        }
-        if (listType === 'influencers' && !item.follow) {
-          handleBecomeFan(item.user_ref_id);
+      {
+        if (userId) {
+          if (listType === 'connections' && item.friend_status === 0) {
+            handleSendFriendRequest(item.user_ref_id, item.user_id);
+          }
+          if (listType === 'influencers' && !item.follow) {
+            handleFollowUnfollow(item.user_ref_id, 1);
+          }
+        } else {
+          if (listType === 'influencers') {
+            Alert.alert(
+              'Un Follow!',
+              `Are you sure to un follow ${getSlicedText(
+                item.display_name,
+                20,
+              )}?`,
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => {},
+                  style: 'cancel',
+                },
+                {
+                  text: 'OK',
+                  onPress: () => {
+                    handleFollowUnfollow(item.user_ref_id, 2);
+                  },
+                },
+              ],
+              {cancelable: false},
+            );
+          }
         }
       }
     }

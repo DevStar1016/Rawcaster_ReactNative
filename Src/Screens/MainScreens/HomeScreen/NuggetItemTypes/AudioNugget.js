@@ -27,10 +27,20 @@ function AudioNugget({
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
 
+  /**
+   * Handles the error that occurs when loading a video.
+   * @param {Error} error - The error object that occurred.
+   * @returns None
+   */
   const videoError = error => {
     setisLoadingVideo(false);
   };
 
+  /**
+   * Updates the playback status with the current time and duration.
+   * @param {object} playbackStatus - The playback status object.
+   * @returns None
+   */
   const PlayBackStatusUpdate = playbackStatus => {
     try {
       let currentTime = playbackStatus.currentTime;
@@ -43,6 +53,13 @@ function AudioNugget({
     } catch (error) {}
   };
 
+  /**
+   * Callback function that is triggered when the video has finished loading.
+   * It updates the duration state with the duration of the video, sets the isLoadingVideo state to false,
+   * and seeks the audio player to the beginning of the video.
+   * @param {Event} event - The event object containing information about the loaded video.
+   * @returns None
+   */
   const onLoadComplete = event => {
     setduration(event.duration);
     setisLoadingVideo(false);
@@ -77,9 +94,7 @@ function AudioNugget({
           muted={isMuted}
           repeat={isRepeatVideo}
           onLoad={onLoadComplete}
-          onBuffer={() => {
-            // console.log('BUFFERINg');
-          }}
+          onBuffer={() => {}}
           onLoadStart={val => {
             setisLoadingVideo(true);
           }}

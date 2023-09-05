@@ -100,6 +100,10 @@ const CreateEditGroup = ({route}) => {
     }
   }, [groupsList]);
 
+  /**
+   * Returns a FormData object with common form data fields populated.
+   * @returns {FormData} - The FormData object with the common form data fields.
+   */
   function getCommonFormData() {
     const formData = new FormData();
     formData.append('token', token);
@@ -116,6 +120,17 @@ const CreateEditGroup = ({route}) => {
     return formData;
   }
 
+  /**
+   * Handles the creation of a new friend group.
+   * It calls the addFriendGroupService function with the common form data,
+   * then performs various actions based on the response.
+   * If the response status is 1, it emits a socket event to notify other users,
+   * updates the groups list, displays a success toast message, and navigates back.
+   * If the response status is 0, it displays a failure toast message.
+   * If there is an error during the process, it displays a failure toast message.
+   * Finally, it sets the isLoading state to false and clears the loaderText state.
+   * @returns None
+   */
   function handleCreateGroup() {
     addFriendGroupService(getCommonFormData())
       .then(res => {
@@ -144,6 +159,18 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles the editing of a friend group.
+   * Calls the editFriendGroupService function with the common form data.
+   * If the response status is 1, updates the corresponding group in the groupsList array with the new group details.
+   * Emits a socket event to update the group functionality.
+   * Dispatches an action to update the groupsList state with the updated tempGroupsList.
+   * Displays a success toast message with the response message.
+   * Navigates back to the previous screen.
+   * If the response status is 0, displays a failure toast message with the response message.
+   * If there is an error, displays a failure toast message with the error message.
+   * Finally, if the component is still mounted, sets isLoading to false and
+   */
   function handleEditGroup() {
     editFriendGroupService(getCommonFormData())
       .then(res => {
@@ -182,6 +209,11 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles the removal of a user from a group.
+   * @param {string} userId - The ID of the user to be removed.
+   * @returns None
+   */
   function handleRemoveUser(userId) {
     if (isMount) {
       setloaderText('Removing member from group');
@@ -232,6 +264,17 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles the deletion of a group.
+   * If the component is mounted, it sets the loader text to 'Leaving and Deleting this Group' and sets isLoading to true.
+   * Creates a new FormData object and appends the token and groupId to it.
+   * Calls the deleteFriendGroupService function with the formData.
+   * If the response status is 1, it calls the groupFunctionalitySocket function with the groupId, GROUP_PROCESS_SOCKET_TYPE.deleteGroup, and userId.
+   * Calls the handleSuccessExitGroup function with the response message and true as arguments.
+   * If the response status is 0, it displays a Toast with the response message.
+   * If there is an error, it displays a Toast with the error message.
+   * Finally,
+   */
   function handleDeleteGroup() {
     if (isMount) {
       setloaderText('Leaving and Deleting this Group');
@@ -264,6 +307,11 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles reporting and leaving from a group.
+   * @param {string} [message=''] - The message to include in the report.
+   * @returns None
+   */
   function handleReportGroup(message = '') {
     if (isMount) {
       setloaderText('Reporting and Leaving from this Group');
@@ -292,6 +340,18 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles the exit from a group.
+   * If the component is mounted, it sets the loader text to 'Leaving from this Group' and
+   * sets isLoading to true.
+   * Creates a new FormData object and appends the token and group_id to it.
+   * Calls the exitFromGroupService function with the formData.
+   * If the response status is 1, calls the handleSuccessExitGroup function with the response message.
+   * If the response status is 0, displays a Toast with the response message.
+   * If there is an error, displays a Toast with the error message.
+   * Finally, if the component is mounted, sets isLoading to false and clears the loader text.
+   * @returns None
+   */
   function handleExitGroup() {
     if (isMount) {
       setloaderText('Leaving from this Group');
@@ -319,6 +379,12 @@ const CreateEditGroup = ({route}) => {
       });
   }
 
+  /**
+   * Handles the successful exit from a group.
+   * @param {string} [successMessage=''] - The success message to display.
+   * @param {boolean} [isDelete=false] - Indicates if the group is being deleted.
+   * @returns None
+   */
   function handleSuccessExitGroup(successMessage = '', isDelete = false) {
     let filteredGroupsList = [...groupsList].filter(
       item => item.group_id !== groupId,
@@ -336,6 +402,11 @@ const CreateEditGroup = ({route}) => {
     navigation.goBack();
   }
 
+  /**
+   * Function that is called when a form is submitted.
+   * It performs validation checks and handles group creation or editing.
+   * @returns None
+   */
   function onSubmit() {
     if (getGroupNameError()) {
       Toast.fail(getGroupNameError());
@@ -354,6 +425,11 @@ const CreateEditGroup = ({route}) => {
     }
   }
 
+  /**
+   * Handles enabling or disabling member chat functionality.
+   * If member chat is currently enabled, it will be disabled and vice versa.
+   * @returns None
+   */
   function handleEnableDisableMemberChat() {
     const changedStatus = isEnabledMemberChat() ? 0 : 1;
     let tempGroupsList = [...groupsList];
@@ -374,6 +450,11 @@ const CreateEditGroup = ({route}) => {
     dispatch(setGroupsList(tempGroupsList));
   }
 
+  /**
+   * Handles the selection and unselection of a user with the given ID.
+   * @param {any} id - The ID of the user to select or unselect.
+   * @returns None
+   */
   function handleSelectUnselectUser(id) {
     let tempSelectedIdsList = [...selectedConnectionsIds];
     if (tempSelectedIdsList.includes(id)) {
@@ -561,13 +642,6 @@ const CreateEditGroup = ({route}) => {
 
   function isOtherGroup() {
     return groupDetails.group_category === GROUP_CATEGORY.other;
-  }
-  function isMyFansGroup() {
-    return groupDetails.group_category === GROUP_CATEGORY.myFans;
-  }
-
-  function isInfluencerGroup() {
-    return groupDetails.group_category === GROUP_CATEGORY.influencer;
   }
 
   function isGroupOwner(id) {

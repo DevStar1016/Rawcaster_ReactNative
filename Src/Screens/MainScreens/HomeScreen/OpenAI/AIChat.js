@@ -67,13 +67,24 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     return () => backHandler.remove();
   }, []);
 
+  /**
+   * Scrolls to the end of the chat list.
+   * If the chat list is not empty, it scrolls to the top of the list.
+   * @returns None
+   */
   const scrollToEnd = () => {
     if (chatList.length > 0) {
-      // listRef?.current?.
       listRef.current.scrollToOffset({animated: false, offset: 0});
     }
   };
 
+  /**
+   * Makes an API call to the AI chat service with the provided text and audio file.
+   * @param {string} text - The user's query text.
+   * @param {File} audioFile - The audio file to send to the AI chat service.
+   * @param {string} existingUniqueId - The unique ID of the existing chat message.
+   * @returns None
+   */
   function aiChatAPICall(text = '', audioFile, existingUniqueId) {
     if (isMount) {
       setisLoadingChat(true);
@@ -90,7 +101,6 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     aiChatService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data, 'DATAAA');
           const responseChatData = {
             id: getUniqueId(),
             msg: res.data.msg,
@@ -125,7 +135,14 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           } else {
             if (isMount) {
               setchatList(preList => {
-                return [{...responseChatData}, ...preList];
+                let tempList = [...preList];
+                const ind = [...tempList].findIndex(
+                  item => item.id === existingUniqueId,
+                );
+                if (ind !== -1) {
+                  tempList[ind] = {...tempList[ind], msgQuery: res.data.query};
+                }
+                return [{...responseChatData}, ...tempList];
               });
               setisLoadingChat(false);
             }
@@ -134,14 +151,12 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           if (isMount) {
             setisLoadingChat(false);
           }
-          console.log(res.data.msg, 'ERROR MESSAGE');
         }
       })
       .catch(e => {
         if (isMount) {
           setisLoadingChat(false);
         }
-        console.log(e.message, 'ERROR');
       });
     // .finally(() => {
     //   if (isMount) {
@@ -150,6 +165,14 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     // });
   }
 
+  /**
+   * Handles sending a message in the chat.
+   * @param {Object} options - The options for the message.
+   * @param {string} options.text - The text of the message.
+   * @param {Object} options.audioFile - The audio file object.
+   * @param {number} options.duration - The duration of the audio file.
+   * @returns None
+   */
   function handleSendMessage({text = '', audioFile, duration = 0}) {
     const uniqueId = getUniqueId();
     setchatList(preList => {
@@ -169,6 +192,10 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     aiChatAPICall(text, audioFile, uniqueId);
   }
 
+  /**
+   * Generates a unique ID by combining the user ID, current timestamp, and a random number.
+   * @returns {string} - A unique ID string.
+   */
   const getUniqueId = () => {
     return (
       profile?.user_id +
@@ -179,6 +206,12 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     );
   };
 
+  /**
+   * Adds a new audio URL to the audio list.
+   * @param {string} id - The ID of the audio.
+   * @param {string} url - The URL of the audio.
+   * @returns None
+   */
   const onGetAudioUrl = (id, url) => {
     setaudioList(preList => {
       let tempAudiosList = [...preList];
@@ -190,6 +223,12 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     });
   };
 
+  /**
+   * Updates the list of loading message IDs based on the provided ID and status.
+   * @param {any} id - The ID of the message.
+   * @param {boolean} status - The status of the message (true if loading, false if not loading).
+   * @returns None
+   */
   const onLoadingReadMessage = (id, status) => {
     setreadMessageLoadingIdsList(preList => {
       let tempList = [...preList];

@@ -97,6 +97,11 @@ function NuggetItem({
     }
   }, [shouldPauseReadAudio]);
 
+  /**
+   * A callback function that seeks the video player to the specified seek time.
+   * @param {number} seekTime - The time to seek to in seconds.
+   * @returns None
+   */
   const seekUpdate = useCallback(
     async seekTime => {
       try {

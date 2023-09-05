@@ -4,8 +4,9 @@ import SVGIcon from '../SVGIcon';
 import StyledText from '../StyledText';
 import {COLORS} from '../../Utilities/Colors';
 import {IconType} from '../../Utilities/Icons';
-import {DIMENSIONS} from '../../Utilities/Constants';
+import {DIMENSIONS, EVENT_TYPE} from '../../Utilities/Constants';
 import {FONTS} from '../../Utilities/Fonts';
+import BOX_SHADOW from '../../Utilities/BoxShadow';
 
 type Props = {
   onChangeVideoStatus: () => void;
@@ -13,16 +14,19 @@ type Props = {
   onPressMenu: () => void;
   onPressParticipants: () => void;
   onPressRaiseHand: () => void;
+  onPressEnd: () => void;
   isMuted?: boolean;
   isHandRaised?: boolean;
   isVideoEnabled: boolean;
   isVisibleRaiseHand?: boolean;
+  eventType: number;
   participantsRequestCount: number;
 };
 
 type ActionButtonProps = {
   text: string;
   icon: IconType;
+  buttonBgColor?: string;
   onPress: () => void;
   isEnableParticipantRequestsCount?: boolean;
 };
@@ -36,23 +40,40 @@ const MeetingActionsContainer = ({
   isMuted,
   isVideoEnabled,
   isHandRaised,
-  isVisibleRaiseHand,
+  isVisibleRaiseHand = true,
   participantsRequestCount = 0,
+  onPressEnd,
+  eventType,
 }: Props) => {
   const ActionButton = ({
     text = '',
     icon,
     onPress,
     isEnableParticipantRequestsCount = false,
+    buttonBgColor = COLORS.transparentDimColor,
   }: ActionButtonProps) => {
     return (
       <View
         style={[
           styles.buttonContainer,
-          !isVisibleRaiseHand && {width: (DIMENSIONS.window.width - 30) / 4},
+          !isVisibleRaiseHand &&
+            eventType !== EVENT_TYPE.talkshow && {
+              width: (DIMENSIONS.window.width - 30) / 4,
+            },
         ]}>
         <TouchableOpacity
-          style={{alignItems: 'center'}}
+          style={[
+            styles.actionButton,
+            eventType === EVENT_TYPE.talkshow && {
+              height: (DIMENSIONS.window.width - 120) / 5,
+              width: (DIMENSIONS.window.width - 120) / 5,
+              borderRadius: (DIMENSIONS.window.width - 120) / 5 / 2,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: buttonBgColor,
+              ...BOX_SHADOW,
+            },
+          ]}
           activeOpacity={0.8}
           onPress={onPress}>
           {isEnableParticipantRequestsCount && participantsRequestCount > 0 && (
@@ -64,41 +85,82 @@ const MeetingActionsContainer = ({
               </StyledText>
             </View>
           )}
-          <SVGIcon icon={icon} marginBottom={5} />
-          <StyledText style={{color: COLORS.white, fontSize: 10}}>
-            {text}
-          </StyledText>
+          <SVGIcon
+            icon={icon}
+            marginBottom={eventType === EVENT_TYPE.event ? 5 : 0}
+          />
+          {eventType === EVENT_TYPE.event && (
+            <StyledText style={{color: COLORS.white, fontSize: 10}}>
+              {text}
+            </StyledText>
+          )}
         </TouchableOpacity>
       </View>
     );
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <View
+      style={[
+        styles.mainContainer,
+        eventType === EVENT_TYPE.talkshow && {
+          borderTopWidth: 0,
+          paddingBottom: 10,
+        },
+      ]}>
       <ActionButton
         text={isMuted ? 'Un Mute' : 'Mute'}
         icon={isMuted ? 'mic_off_white' : 'mic_white'}
         onPress={onChangeMicStatus}
+        buttonBgColor={
+          !isMuted && eventType === EVENT_TYPE.talkshow
+            ? COLORS.secondary
+            : COLORS.transparentDimColor
+        }
       />
       <ActionButton
         text={isVideoEnabled ? 'Stop Video' : 'Start Video'}
         icon={isVideoEnabled ? 'video_call_white' : 'video_disabled_white'}
         onPress={onChangeVideoStatus}
+        buttonBgColor={
+          isVideoEnabled && eventType === EVENT_TYPE.talkshow
+            ? COLORS.secondary
+            : COLORS.transparentDimColor
+        }
       />
-      {isVisibleRaiseHand && (
+      {eventType === EVENT_TYPE.talkshow && (
+        <ActionButton
+          text="Stop"
+          icon="hang_off"
+          onPress={onPressEnd}
+          buttonBgColor={COLORS.red}
+        />
+      )}
+      {(isVisibleRaiseHand || eventType === EVENT_TYPE.talkshow) && (
         <ActionButton
           text={'Raise Hand'}
-          icon={isHandRaised ? 'hand_secondary' : 'hand_white'}
+          icon={
+            isHandRaised && eventType !== EVENT_TYPE.talkshow
+              ? 'hand_secondary'
+              : 'hand_white'
+          }
+          buttonBgColor={
+            eventType === EVENT_TYPE.talkshow && isHandRaised
+              ? COLORS.secondary
+              : COLORS.transparentDimColor
+          }
           onPress={onPressRaiseHand}
         />
       )}
       {/* <ActionButton text="Speaker" icon="speaker_white" onPress={() => {}} /> */}
-      <ActionButton
-        text="Participants"
-        icon="participants_white"
-        isEnableParticipantRequestsCount={true}
-        onPress={onPressParticipants}
-      />
+      {eventType !== EVENT_TYPE.talkshow && (
+        <ActionButton
+          text="Participants"
+          icon="participants_white"
+          isEnableParticipantRequestsCount={true}
+          onPress={onPressParticipants}
+        />
+      )}
       <ActionButton
         text="More"
         icon="menu_horizontal_white"
@@ -124,6 +186,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: (DIMENSIONS.window.width - 30) / 5,
     justifyContent: 'center',
+  },
+  actionButton: {
+    alignItems: 'center',
   },
   badgeContainer: {
     position: 'absolute',

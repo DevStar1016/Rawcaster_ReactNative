@@ -76,6 +76,11 @@ const ChatTextInput = ({
     }
   }, [playingSeconds]);
 
+  /**
+   * Handles the stop playing action by stopping the audio player, removing the playback listener,
+   * and setting the isPlaying state to false.
+   * @returns None
+   */
   function handleStopPlaying() {
     try {
       audioPlayer.stopPlayer();
@@ -86,6 +91,10 @@ const ChatTextInput = ({
     }
   }
 
+  /**
+   * Stops the audio recording and removes the record back listener.
+   * @returns None
+   */
   function handleStopRecording() {
     try {
       audioPlayer.stopRecorder();
@@ -96,6 +105,13 @@ const ChatTextInput = ({
     }
   }
 
+  /**
+   * Handles the deletion of audio.
+   * If audio is currently being recorded, stops the recording and resets the recording seconds.
+   * If audio is currently being played, stops the playback and resets the playing seconds.
+   * Sets the recorded audio to null.
+   * @returns None
+   */
   function handleDeleteAudio() {
     if (isRecording) {
       handleStopRecording();
@@ -107,6 +123,10 @@ const ChatTextInput = ({
     setrecordedAudio(null);
   }
 
+  /**
+   * Generates a unique ID by combining the user ID, current timestamp, and a random number.
+   * @returns {string} - A unique ID string.
+   */
   const getUniqueId = () => {
     return (
       profile?.user_id +
@@ -117,6 +137,12 @@ const ChatTextInput = ({
     );
   };
 
+  /**
+   * Handles the action of opening the camera.
+   * Requests camera and microphone permissions and sets the state of isOpenCamera to true if both permissions are granted.
+   * Displays an error toast message if any of the permissions are denied.
+   * @returns None
+   */
   const handleOpenCamera = async () => {
     try {
       const newCameraPermission = await Camera.requestCameraPermission();
@@ -141,6 +167,10 @@ const ChatTextInput = ({
     }
   };
 
+  /**
+   * Handles the selection of multiple documents using the DocumentPicker library.
+   * @returns None
+   */
   const handlePickDocument = () => {
     DocumentPicker.pick({
       allowMultiSelection: true,
@@ -163,9 +193,7 @@ const ChatTextInput = ({
             Toast.fail(e.message);
           });
       })
-      .catch(e => {
-        console.log(e, 'ERRORRR');
-      });
+      .catch(e => {});
   };
 
   return (

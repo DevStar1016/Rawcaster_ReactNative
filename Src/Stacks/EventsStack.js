@@ -6,6 +6,7 @@ import CreateEditEventSecond from '../Screens/MainScreens/Events/CreateEditEvent
 import Events from '../Screens/MainScreens/Events/Events';
 import {setIsBottomTabBarAbsolute} from '../Store/Slices/UtilitySlice';
 import StackAnimation from '../Utilities/StackAnimation';
+import EventDetailsView from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailsView';
 
 const Stack = createStackNavigator();
 
@@ -29,6 +30,7 @@ const EventsStack = () => {
         name="CreateEditEventSecond"
         component={CreateEditEventSecond}
       />
+      <Stack.Screen name="EventDetailsView" component={EventDetailsView} />
     </Stack.Navigator>
   );
 };

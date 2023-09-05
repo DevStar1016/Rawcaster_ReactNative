@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.amazonaws.services.chime.sdk.meetings.audiovideo.contentshare.ContentShareSource
+import com.amazonaws.services.chime.sdk.meetings.device.MediaDevice
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_ERROR
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_MEETING_END
 import com.amazonaws.services.chime.sdk.meetings.session.DefaultMeetingSession
@@ -15,10 +16,13 @@ import com.amazonaws.services.chime.sdk.meetings.session.MeetingSessionURLs
 import com.amazonaws.services.chime.sdk.meetings.session.defaultUrlRewriter
 import com.amazonaws.services.chime.sdk.meetings.utils.logger.ConsoleLogger
 import com.amazonaws.services.chime.sdk.meetings.utils.logger.LogLevel
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.modules.core.PermissionAwareActivity
 import com.facebook.react.modules.core.PermissionListener
 
@@ -198,13 +202,29 @@ class NativeMobileSDKBridge(
 
     @ReactMethod
     fun startScreenShare() {
-        val contentShareSource = ContentShareSource()
-        meetingSession?.audioVideo?.startContentShare(contentShareSource);
+        meetingSession?.audioVideo?.startContentShare(ContentShareSource())
     }
     @ReactMethod
     fun stopScreenShare() {
         meetingSession?.audioVideo?.stopContentShare();
     }
+    @ReactMethod
+    fun switchCamera() {
+        meetingSession?.audioVideo?.switchCamera();
+    }
+    @ReactMethod
+    fun listAudioDevices(promise: Promise) {
+       val audioDeviceList: List<MediaDevice>? = meetingSession?.audioVideo?.listAudioDevices()
+
+//        val deviceList: WritableMap = WritableNativeMap()
+//        audioDeviceList?.forEach { device ->
+//            deviceList.putString("label", device.label)
+//            deviceList.putString("id", device.id)
+//        }
+        promise.resolve(audioDeviceList)
+
+    }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?): Boolean {
         return when (requestCode) {

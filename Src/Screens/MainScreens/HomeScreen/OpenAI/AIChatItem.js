@@ -42,6 +42,12 @@ const AIChatItem = ({
     };
   }, []);
 
+  /**
+   * Handles the response from the AI service for reading text to audio.
+   * @param {string} msg - The message to be converted to audio.
+   * @param {string} id - The ID of the message.
+   * @returns None
+   */
   function handleReadAIResponse(msg, id) {
     if (isMount) {
       setreadMessageLoading(id, true);
@@ -49,10 +55,8 @@ const AIChatItem = ({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('message', msg);
-    console.log(formData, 'FORMDATAA');
     textToAudioService(formData)
       .then(res => {
-        console.log(res.data, 'KL');
         if (res.data.status === 1) {
           if (isMount) {
             setaudioUrl(id, res.data.url);
@@ -71,6 +75,12 @@ const AIChatItem = ({
       });
   }
 
+  /**
+   * Handles playing an audio file.
+   * @param {string} url - The URL of the audio file to play.
+   * @param {string} id - The ID of the audio file.
+   * @returns None
+   */
   const handlePlayAudio = async (url, id) => {
     handleStopAudio();
 
@@ -101,7 +111,6 @@ const AIChatItem = ({
         return;
       });
     } catch (e) {
-      console.log(e, 'ERROR');
       if (isMount) {
         setreadMessageLoading(id, false);
         setplayingChatId(null);
@@ -109,6 +118,13 @@ const AIChatItem = ({
     }
   };
 
+  /**
+   * Handles stopping the audio playback.
+   * Stops the audio player, removes the playback listener, and resets the progress.
+   * If an error occurs during the process, it is caught and ignored.
+   * Finally, it sets the playing chat ID to null and enables audio processing.
+   * @returns None
+   */
   const handleStopAudio = () => {
     try {
       audioPlayerRef.current?.stopPlayer();
@@ -117,7 +133,6 @@ const AIChatItem = ({
         setprogress(0);
       }
     } catch (e) {
-      console.log(e, 'ERROR STOP');
     } finally {
       if (isMount) {
         setplayingChatId(null);
@@ -126,10 +141,20 @@ const AIChatItem = ({
     }
   };
 
+  /**
+   * Checks if the given ID is included in the list of loading IDs for read messages.
+   * @param {any} id - The ID to check.
+   * @returns {boolean} - True if the ID is included in the list, false otherwise.
+   */
   const isLoadingRead = id => {
     return readMessageLoadingIdsList?.includes(id);
   };
 
+  /**
+   * Retrieves the URL of an audio file based on its ID.
+   * @param {string} id - The ID of the audio file.
+   * @returns {string | null} The URL of the audio file, or null if the ID is not found.
+   */
   const getAudioUrl = id => {
     const tempAudioList = [...audioList];
     const tempAudio = tempAudioList.find(item => item.id === id);
@@ -204,7 +229,7 @@ const AIChatItem = ({
                   style={{
                     color: COLORS.dividerColor,
                   }}>
-                  Conterting audio to text...
+                  Converting audio to text...
                 </StyledText>
               ) : (
                 false
@@ -225,7 +250,7 @@ const AIChatItem = ({
               style={{
                 color: COLORS.white,
               }}>
-              {item.msg}
+              {item.msgQuery || item.msg}
             </StyledText>
           )}
           <StyledText
@@ -261,7 +286,7 @@ const AIChatItem = ({
                   handlePlayAudio(getAudioUrl(item.id), item.id);
                 }
               } else {
-                handleReadAIResponse(item.msg, item.id);
+                handleReadAIResponse(item.msgQuery || item.msg, item.id);
               }
             }}>
             {isLoadingRead(item.id) ? (
@@ -315,7 +340,7 @@ const AIChatItem = ({
               activeOpacity={0.7}
               style={styles.button}
               onPress={() => {
-                onShareContent(item.msg);
+                onShareContent(item.msgQuery || item.msg);
               }}>
               <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
               <StyledText style={styles.buttonText}>Share</StyledText>

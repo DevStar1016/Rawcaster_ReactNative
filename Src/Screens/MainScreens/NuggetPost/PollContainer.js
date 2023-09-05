@@ -34,6 +34,11 @@ const PollContainer = ({
     };
   }, []);
 
+  /**
+   * Handles the removal of an option from the choice list.
+   * @param {number} index - The index of the option to remove.
+   * @returns None
+   */
   const handleRemoveOption = index => {
     setchoiceList(preList => {
       if (preList.length > 2) {

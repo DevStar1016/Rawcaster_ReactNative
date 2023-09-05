@@ -142,6 +142,12 @@ const CustomDateMonthYearPicker = ({
     }
   }, [dateMonthYear]);
 
+  /**
+   * Get a sliced list of dates, months, or years from the DATES_MONTHS_YEARS_DATA object.
+   * @param {string} fieldName - The field name indicating whether to get dates, months, or years.
+   * @param {number} toValue - The number of items to slice from the list.
+   * @returns {Array} - A sliced list of dates, months, or years.
+   */
   const getSlicedList = (
     fieldName: 'dates' | 'months' | 'years',
     toValue: number,
@@ -149,16 +155,32 @@ const CustomDateMonthYearPicker = ({
     return DATES_MONTHS_YEARS_DATA[fieldName].slice(0, toValue);
   };
 
+  /**
+   * Checks if the given month is the current month.
+   * @param {number} [month=dateMonthYear.month] - The month to check. Defaults to the current month.
+   * @returns {boolean} - True if the given month is the current month, false otherwise.
+   */
   const isCurrentMonth = (month = dateMonthYear.month) => {
     const date = new Date();
     return month === DATES_MONTHS_YEARS_DATA.months[date.getMonth()];
   };
 
+  /**
+   * Checks if the given year is the current year minus the age restriction.
+   * @param {number} [year=dateMonthYear.year] - The year to check. Defaults to the current year.
+   * @returns {boolean} - True if the given year is the current year minus the age restriction, false otherwise.
+   */
   const isCurrentYearWithRestrictedAge = (year = dateMonthYear.year) => {
     const date = new Date();
     return year === date.getFullYear() - AGE_RESTRICTION;
   };
 
+  /**
+   * Get the total number of days in a given month and year.
+   * @param {number} year - The year.
+   * @param {string} [month=dateMonthYear.month] - The month. Defaults to the current month.
+   * @returns {number} The total number of days in the specified month and year.
+   */
   const getTotalDaysCount = (year: number, month = dateMonthYear.month) => {
     return new Date(
       year,
@@ -169,6 +191,12 @@ const CustomDateMonthYearPicker = ({
     ).getDate();
   };
 
+  /**
+   * Get a list of months for the specified year.
+   * If no year is provided, the current year is used.
+   * @param {number} [year=dateMonthYear.year] - The year for which to get the months.
+   * @returns {Array<string>} - An array of month names.
+   */
   const getMonthsList = (year = dateMonthYear.year) => {
     const date = new Date();
     if (year && isCurrentYearWithRestrictedAge(year)) {
@@ -177,6 +205,13 @@ const CustomDateMonthYearPicker = ({
     return DATES_MONTHS_YEARS_DATA.months;
   };
 
+  /**
+   * Get a list of dates based on the given month and year.
+   * If no month and year are provided, it returns the list of all dates.
+   * @param {number} [month=dateMonthYear.month] - The month for which to get the dates.
+   * @param {number} [year=dateMonthYear.year] - The year for which to get the dates.
+   * @returns {Array<number>} - The list of dates.
+   */
   const getDatesList = (
     month = dateMonthYear.month,
     year = dateMonthYear.year,
@@ -196,6 +231,11 @@ const CustomDateMonthYearPicker = ({
     return DATES_MONTHS_YEARS_DATA.dates;
   };
 
+  /**
+   * Updates the selected month in the dateMonthYear object and handles error cases.
+   * @param {string} month - The selected month.
+   * @returns None
+   */
   const onSelectMonth = (month: string) => {
     let tempDateMonthYear = {...dateMonthYear, month};
     if (tempDateMonthYear.date) {
@@ -204,8 +244,6 @@ const CustomDateMonthYearPicker = ({
       );
       if (dateIndex === -1) {
         if (tempDateMonthYear.date) {
-          console.log('Date ERRORRR');
-
           onSelectDateMonthYearError && onSelectDateMonthYearError();
         }
         tempDateMonthYear = {...tempDateMonthYear, date: null};
@@ -214,6 +252,12 @@ const CustomDateMonthYearPicker = ({
     setdateMonthYear(tempDateMonthYear);
   };
 
+  /**
+   * Updates the selected year in the dateMonthYear state object and performs error handling
+   * if the selected date or month is invalid for the new year.
+   * @param {number} year - The new selected year.
+   * @returns None
+   */
   const onSelectYear = (year: number) => {
     let tempDateMonthYear = {...dateMonthYear, year};
     if (tempDateMonthYear.date || tempDateMonthYear.month) {
@@ -223,8 +267,6 @@ const CustomDateMonthYearPicker = ({
         );
         if (dateIndex === -1) {
           if (tempDateMonthYear.date) {
-            console.log('Date ERRORRR');
-
             onSelectDateMonthYearError && onSelectDateMonthYearError();
           }
           tempDateMonthYear = {...tempDateMonthYear, date: null};
@@ -237,7 +279,6 @@ const CustomDateMonthYearPicker = ({
 
         if (monthIndex === -1) {
           if (tempDateMonthYear.month) {
-            console.log('Month ERRORRR');
             onSelectDateMonthYearError && onSelectDateMonthYearError();
           }
           tempDateMonthYear = {...tempDateMonthYear, month: null};
@@ -247,6 +288,10 @@ const CustomDateMonthYearPicker = ({
     setdateMonthYear(tempDateMonthYear);
   };
 
+  /**
+   * Returns the first dropdown list based on the picker mode.
+   * @returns {Array} - The dropdown list.
+   */
   const getFirstDropDownList = () => {
     if (pickerMode === 'month_date_year') {
       return getMonthsList();
@@ -256,6 +301,10 @@ const CustomDateMonthYearPicker = ({
     return [];
   };
 
+  /**
+   * Returns the second dropdown list based on the picker mode.
+   * @returns {Array} - The second dropdown list.
+   */
   const getSecondDropDownList = () => {
     if (pickerMode === 'month_date_year') {
       return getDatesList();
@@ -265,6 +314,10 @@ const CustomDateMonthYearPicker = ({
     return [];
   };
 
+  /**
+   * Returns the third dropdown list based on the picker mode.
+   * @returns {Array} - The third dropdown list.
+   */
   const getThirdDropDownList = () => {
     if (pickerMode === 'month_date_year') {
       return DATES_MONTHS_YEARS_DATA.years;
@@ -274,6 +327,11 @@ const CustomDateMonthYearPicker = ({
     return [];
   };
 
+  /**
+   * Handles the selection of the first item in a picker.
+   * @param {any} selectedValue - The value of the selected item.
+   * @returns None
+   */
   const onSelectFirstItem = (selectedValue: any) => {
     if (pickerMode === 'month_date_year') {
       onSelectMonth(selectedValue);
@@ -289,6 +347,11 @@ const CustomDateMonthYearPicker = ({
     }
   };
 
+  /**
+   * Handles the selection of the second item in a picker.
+   * @param {any} selectedValue - The value of the selected item.
+   * @returns None
+   */
   const onSelectSecondItem = (selectedValue: any) => {
     if (pickerMode === 'month_date_year') {
       setdateMonthYear(pre => {
@@ -307,6 +370,11 @@ const CustomDateMonthYearPicker = ({
     }
   };
 
+  /**
+   * Handles the selection of the third item in a picker.
+   * @param {any} selectedValue - The value of the selected item.
+   * @returns None
+   */
   const onSelectThirdItem = (selectedValue: any) => {
     if (pickerMode === 'month_date_year') {
       onSelectYear(selectedValue);
@@ -320,7 +388,11 @@ const CustomDateMonthYearPicker = ({
     }
   };
 
-  const getFirstDropDownValue = () => {
+  /**
+   * Retrieves the value of the first dropdown based on the current picker mode.
+   * @returns {string | undefined} The value of the first dropdown, or undefined if the picker mode is not recognized.
+   */
+  const getFirstDropDownValue = (): string | undefined | null => {
     if (pickerMode === 'month_date_year') {
       return dateMonthYear.month;
     } else if (pickerMode === 'duration_days_hrs_mins') {
@@ -328,6 +400,10 @@ const CustomDateMonthYearPicker = ({
     }
   };
 
+  /**
+   * Retrieves the value for the second dropdown based on the current picker mode.
+   * @returns {string} The value for the second dropdown.
+   */
   const getSecondDropDownValue = () => {
     if (pickerMode === 'month_date_year') {
       return dateMonthYear.date;
@@ -336,6 +412,10 @@ const CustomDateMonthYearPicker = ({
     }
   };
 
+  /**
+   * Retrieves the value for the third dropdown based on the current picker mode.
+   * @returns The value for the third dropdown.
+   */
   const getThirdDropDownValue = () => {
     if (pickerMode === 'month_date_year') {
       return dateMonthYear.year;

@@ -78,6 +78,10 @@ const UtilitySlice = createSlice({
         }
       }
     },
+    clearUtilityReduxData: (state, action) => {
+      state.nugget_type = 1;
+      state.bottomHomeButtonType = 1;
+    },
   },
 });
 export const {
@@ -93,5 +97,6 @@ export const {
   setPremiumAlert,
   setIsOpenVerifyPopup,
   setGlobalLoaderData,
+  clearUtilityReduxData,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

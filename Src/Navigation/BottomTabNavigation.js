@@ -52,6 +52,12 @@ export default function BottomTabNavigation() {
     );
   }, [token]);
 
+  /**
+   * Handles the account verification process.
+   * This function is triggered when the user clicks on the account verification button.
+   * It performs the necessary actions based on the user's account verification status and profile information.
+   * @returns None
+   */
   const handleAccountVerification = () => {
     dispatch(setIsOpenVerifyPopup(false));
     if (user.acc_verify_status === 0 && profile?.is_profile_updated === 1) {

@@ -7,6 +7,9 @@ import com.amazonaws.services.chime.sdk.meetings.utils.logger.LogLevel
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 
 class RNVideoViewManager : SimpleViewManager<DefaultVideoRenderView>() {
     private val logger = ConsoleLogger(LogLevel.DEBUG)
@@ -26,10 +29,10 @@ class RNVideoViewManager : SimpleViewManager<DefaultVideoRenderView>() {
         return REACT_CLASS
     }
 
+
     @ReactProp(name = "tileId")
     fun setTileId(renderView: DefaultVideoRenderView, tileId: Int) {
         logger.info(TAG, "Setting tileId: $tileId")
-
         NativeMobileSDKBridge.meetingSession?.let {
             it.audioVideo.bindVideoView(renderView, tileId)
         }

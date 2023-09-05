@@ -38,7 +38,6 @@ const QRCodeScanner = () => {
         }}>
         {/* <CameraScreen
           onReadCode={scannerRes => {
-            console.log(scannerRes, 'RESPONSE SCAN');
             // dispatch(handleScannerResponse('test'));
             // navigation.goBack();
           }}
@@ -51,11 +50,9 @@ const QRCodeScanner = () => {
     // <CameraScreen
     //   actions={{rightButtonText: 'Done', leftButtonText: 'Cancel'}}
     //   onBottomButtonPressed={event => {
-    //     console.log(event, 'EVENTSSSS');
     //   }}
     //   scanBarcode={true}
     //   onReadCode={event => {
-    //     console.log(event, 'SCANNED');
     //   }}
     //   // flashImages={{
     //   //   // optional, images for flash state

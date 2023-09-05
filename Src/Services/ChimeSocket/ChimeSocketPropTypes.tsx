@@ -5,7 +5,6 @@ export type ChimeEventsType =
   | 'sendMessageToMeetingRoom'
   | 'meetingRoomMsg'
   | 'sendMessageToSingleUser'
-  | 'singleUserMsg'
   | 'allowToJoinMeeting'
   | 'rejectToJoinMeeting'
   | 'joinRequest'
@@ -15,7 +14,19 @@ export type ChimeEventsType =
   | 'inCallEvents'
   | 'userLefted'
   | 'userLeft'
-  | 'newUserJoined';
+  | 'newUserJoined'
+  | 'enableVideo'
+  | 'enableVideoAnswer'
+  | 'enableAudio'
+  | 'enableAudioAnswer'
+  | 'enableShareScreen'
+  | 'enableShareScreenAnswer'
+  | 'renameUser'
+  | 'renameUserAnswer'
+  | 'kickUser'
+  | 'kickUserAnswer'
+  | 'endMeeting'
+  | 'endMeetingAnswer';
 
 export type ChimeEventsProps = {
   joinSocket: 'joinSocket';
@@ -24,7 +35,6 @@ export type ChimeEventsProps = {
   sendMessageToMeetingRoom: 'sendMessageToMeetingRoom';
   meetingRoomMsg: 'meetingRoomMsg';
   sendMessageToSingleUser: 'sendMessageToSingleUser';
-  singleUserMsg: 'singleUserMsg';
   allowToJoinMeeting: 'allowToJoinMeeting';
   rejectToJoinMeeting: 'rejectToJoinMeeting';
   joinRequest: 'joinRequest';
@@ -35,54 +45,94 @@ export type ChimeEventsProps = {
   userLefted: 'userLefted';
   userLeft: 'userLeft';
   newUserJoined: 'newUserJoined';
+  enableVideo: 'enableVideo';
+  enableVideoAnswer: 'enableVideoAnswer';
+  enableAudio: 'enableAudio';
+  enableAudioAnswer: 'enableAudioAnswer';
+  enableShareScreen: 'enableShareScreen';
+  enableShareScreenAnswer: 'enableShareScreenAnswer';
+  renameUser: 'renameUser';
+  renameUserAnswer: 'renameUserAnswer';
+  kickUser: 'kickUser';
+  kickUserAnswer: 'kickUserAnswer';
+  endMeeting: 'endMeeting';
+  endMeetingAnswer: 'endMeetingAnswer';
 };
-
-interface UserDataProp {
-  id: number;
+export type JoinRequestStatusCodes = 'host_not_available';
+export type JoinRequestStatusCodeProp = {
+  host_not_available: 'host_not_available';
+};
+export interface UserDataProp {
+  userId: number;
   name: string;
   image?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
+  audio?: boolean;
+  video?: boolean;
+  kicked?: boolean;
+  isHost?: boolean;
+  handRaised?: boolean;
+  screenShare?: number;
+  audioDisabledByHost?: boolean;
+  videoDisabledByHost?: boolean;
+  isRequested?: boolean;
 }
 
 export type CreateMeetingRoomMessageData = {
-  meetingId: string;
+  refId: string;
 };
 
 export type JoinMeetingRoomMessageData = {
-  meetingId: string;
+  refId: string;
 };
 
 export interface MeetingRoomSendMessageData extends UserDataProp {
   message: string;
-  meetingId: string;
+  refId: string;
 }
 
 export interface SingleUserSendMessageData extends UserDataProp {
-  userId: number;
   message: string;
   isPrivate: boolean;
   send_to?: UserDataProp;
+  from_user_id: number;
 }
 
-export interface JoinMeetingRequestActionMessageData {
+export interface JoinRequestMessageData {
+  refId: string;
   userId: number;
-  meetingId: string;
+  name: string;
+  image?: string;
 }
-
-export interface JoinMeetingRequestMessageData
-  extends JoinMeetingRequestActionMessageData {
-  user_name: string;
-  user_img: string;
+export interface JoinRequestRejectActionProp {
+  userId: number;
 }
 export interface RaiseHandMessageData {
-  meetingId: string;
-  raise_hand: boolean;
-  user_id: number;
+  refId: string;
+  status: boolean;
+  userId: number;
+}
+
+export interface HostProcessProp {
+  refId: string;
+  hostId: number;
 }
 
 export interface UserLeftMessageData {
-  user_id: string;
+  refId: string;
+  userId: string;
+}
+
+export interface EnableDisableMessageData extends HostProcessProp {
+  status: boolean;
+  userId?: number;
+}
+
+export interface KickUserMessageData extends HostProcessProp {
+  userId: number;
+}
+
+export interface RenameUserMessageData extends KickUserMessageData {
+  name: string;
 }
 
 export interface InCallEventsMessageData {

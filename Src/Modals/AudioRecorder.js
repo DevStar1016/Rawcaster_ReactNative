@@ -39,6 +39,10 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
     }
   }, [playingSeconds]);
 
+  /**
+   * Stops the audio recording and removes the record back listener.
+   * @returns None
+   */
   const handleStopAudioRecord = () => {
     try {
       audioPlayer.stopRecorder();
@@ -49,6 +53,10 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
     }
   };
 
+  /**
+   * Stops the audio player and removes the playback listener. Sets the isPlaying state to false.
+   * @returns None
+   */
   const handleStopPlayer = () => {
     try {
       audioPlayer.stopPlayer();
@@ -151,7 +159,6 @@ const AudioRecorder = ({setModal, onSubmitAudio}) => {
               onPress={() => {
                 const uniqueId = getUniqueId();
                 setrecordingAudioUniqueId(uniqueId);
-                console.log('DSAFFHHJJGGHH');
                 handleAudioRecord({
                   audioPlayer,
                   setisRecording,

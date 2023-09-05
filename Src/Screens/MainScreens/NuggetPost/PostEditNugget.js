@@ -152,6 +152,11 @@ const PostEditNugget = ({route}) => {
     }
   }, []);
 
+  /**
+   * Stops the loader by setting the loadingData state to false and clearing the text.
+   * Only performs the action if the component is mounted.
+   * @returns None
+   */
   const stopLoader = () => {
     if (isMount) {
       setloadingData({
@@ -161,13 +166,17 @@ const PostEditNugget = ({route}) => {
     }
   };
 
+  /**
+   * Handles the submission of a post nugget.
+   * Constructs a FormData object and appends necessary data such as token and selectedShareType.
+   * If the selectedShareType is 3 or 4, it appends the share_with data based on the selectedShareType.
+   * If typedText or question (if isPollClicked) is not empty, it appends the content data.
+   * If isPollClicked is true, it appends the poll_option and poll_duration data.
+   * If isPollClicked is false and selectedMediaList is not empty, it appends the selectedMediaList data.
+   * Dispatches the addNugget action with the constructed formData and navigation.
+   * @returns None
+   */
   function handlePostNuggets() {
-    // if (isMount) {
-    //   setloadingData({
-    //     status: true,
-    //     text: 'Nugget being uploaded',
-    //   });
-    // }
     const formData = new FormData();
     formData.append('token', token);
     formData.append('share_type', selectedShareType.id);
@@ -236,6 +245,15 @@ const PostEditNugget = ({route}) => {
     //   });
   }
 
+  /**
+   * Handles the editing of a nugget.
+   * - Sets the loadingData state to indicate that the nugget is being edited.
+   * - Creates a FormData object and appends the necessary data (token, nugget_id, content, share_type, share_with, nuggets_media, delete_media_id) to it.
+   * - Filters the selectedMediaList to get only the items that do not have a media_id and appends them to the FormData object.
+   * - Filters the nugget.media_list to get only the items that are not in the selectedMediaList and appends their media_id values to the FormData object.
+   * - Calls the editNuggetService function with the FormData object.
+   * - If the response status is 1,
+   */
   function handleEditNugget() {
     if (isMount) {
       setloadingData({
@@ -279,7 +297,6 @@ const PostEditNugget = ({route}) => {
         JSON.stringify([...tempRemovedMediaList].map(item => item.media_id)),
       );
     }
-    console.log(JSON.stringify(formData), 'EDITED FORMDATAAAA');
     editNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -289,7 +306,6 @@ const PostEditNugget = ({route}) => {
           //   Toast.success(res.data.msg);
           // }
           Toast.success(res.data.msg);
-          console.log(res.data, 'EDITED RESPONSEEE');
           if (res.data.nugget_detail) {
             dispatch(addEditedNugget(res.data.nugget_detail));
           }
@@ -308,12 +324,22 @@ const PostEditNugget = ({route}) => {
       });
   }
 
+  /**
+   * Opens or closes the emoji picker based on the given status.
+   * @param {boolean} status - The status indicating whether to open or close the emoji picker.
+   * @returns None
+   */
   function openCloseEmojiPicker(status) {
     if (isMount) {
       setisOpenEmojiContainer(status);
     }
   }
 
+  /**
+   * Opens the emoji picker and allows the user to select media.
+   * @param {string} type - The type of media to pick (photo or video).
+   * @returns None
+   */
   function pickMedia(type) {
     openCloseEmojiPicker(false);
     ImageCropPicker.openPicker({
@@ -343,7 +369,6 @@ const PostEditNugget = ({route}) => {
         const mediaList = nugget
           ? [{...selectedMediaList}]
           : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
-        console.log(mediaList, 'SELECTED MEDIA LIST');
         if (isMount) {
           setloadingData({
             status: true,
@@ -400,11 +425,14 @@ const PostEditNugget = ({route}) => {
             }
           });
       })
-      .catch(e => {
-        console.log(e, 'ERRORRR');
-      });
+      .catch(e => {});
   }
 
+  /**
+   * Removes the selected media item from the selectedMediaList array.
+   * @param {number} selectedIndex - The index of the selected media item to remove.
+   * @returns None
+   */
   function handleRemoveSelectedMediaItem(selectedIndex) {
     const filteredSelectedMediaList = [...selectedMediaList].filter(
       (_, index) => index !== selectedIndex,
@@ -414,6 +442,11 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Handles the action of opening the camera.
+   * Requests camera and microphone permissions, and handles the different scenarios based on the permission status.
+   * @returns None
+   */
   async function handleOpenCamera() {
     try {
       // const cameraPermission = await Camera.getCameraPermissionStatus();
@@ -450,6 +483,12 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Handles the action of opening the audio recorder.
+   * Requests microphone permission and sets the state to open the audio recorder if permission is granted.
+   * Displays a toast message if microphone permission is denied.
+   * @returns None
+   */
   async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
     if (newMicrophonePermission === 'authorized') {
@@ -461,6 +500,11 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Handles the selection of media from the camera and adds it to the selected media list.
+   * @param {Object} mediaItem - The selected media item.
+   * @returns None
+   */
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
@@ -484,6 +528,13 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Handles the submission of an audio file.
+   * If `nugget` is truthy, sets the `selectedMediaList` to an array containing the `audioFile`.
+   * If `nugget` is falsy, appends the `audioFile` to the existing `selectedMediaList`.
+   * @param {Object} audioFile - The audio file to be submitted.
+   * @returns None
+   */
   function handleSubmitAudio(audioFile) {
     if (nugget) {
       setselectedMediaList([
@@ -501,6 +552,14 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Resets the selected share type based on the pre-selected share type and list.
+   * If the component is mounted, it sets the selected share type to the pre-selected
+   * share type if it exists, otherwise it sets it to the first share type in the
+   * NUGGET_SHARE_TYPE array. It also sets the share connections groups IDs list to
+   * the pre-selected list.
+   * @returns None
+   */
   function resetSelectedShareType() {
     if (isMount) {
       setselectedShareType(
@@ -512,6 +571,10 @@ const PostEditNugget = ({route}) => {
     }
   }
 
+  /**
+   * Checks if the post button should be disabled based on the current state.
+   * @returns {boolean} - true if the post button should be disabled, false otherwise.
+   */
   function isDisabledPostButton() {
     if (
       (selectedShareType.id === 3 || selectedShareType.id === 4) &&
@@ -534,6 +597,10 @@ const PostEditNugget = ({route}) => {
     return !typedText.trim() && selectedMediaList.length <= 0;
   }
 
+  /**
+   * Calculates the maximum height for a container based on various conditions.
+   * @returns {number} The maximum height for the container.
+   */
   function getMaxHeight() {
     let maxHeight =
       mainContainerHeight - topContainerHeight - buttonHeight - 20;
@@ -549,6 +616,11 @@ const PostEditNugget = ({route}) => {
     return maxHeight;
   }
 
+  /**
+   * Returns a media item component based on the type of the item.
+   * @param {object} item - The media item object.
+   * @returns A React component representing the media item.
+   */
   function getMediaItem(item) {
     if (item.type.includes('video')) {
       return (
@@ -594,6 +666,12 @@ const PostEditNugget = ({route}) => {
     );
   }
 
+  /**
+   * Renders a selected nugget item with the given item and index.
+   * @param {Object} item - The selected nugget item to render.
+   * @param {number} index - The index of the selected nugget item.
+   * @returns {JSX.Element} - The rendered selected nugget item.
+   */
   function renderSelectedNuggetItem({item, index}) {
     return (
       <View
@@ -609,16 +687,7 @@ const PostEditNugget = ({route}) => {
 
         <TouchableOpacity
           style={styles.itemActionButtonsContainer}
-          activeOpacity={1}
-          // onPress={() => {
-          //   console.log(item, 'KLKLKLK');
-          //   const type = item?.type?.split('/');
-          //   if (type) {
-          //     setmediaData({uri: item.uri, mediaType: type});
-          //     setisOpenPreview(true);
-          //   }
-          // }}
-        >
+          activeOpacity={1}>
           {(item.type.includes('video') || item.type.includes('audio')) && (
             <View style={styles.playIconContainer}>
               <SVGIcon
@@ -856,12 +925,6 @@ const PostEditNugget = ({route}) => {
                   value={typedText}
                   onChangeText={text => {
                     if (text.length > profile?.nugget_content_length) {
-                      console.log(
-                        text.length,
-                        'AAASSASA',
-                        typedText.length,
-                        profile?.nugget_content_length,
-                      );
                       Keyboard.dismiss();
                       dispatch(
                         setPremiumAlert({

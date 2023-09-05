@@ -74,6 +74,11 @@ const EventTalkshowCommonScreen = ({
     listEventsTalkshowApiCall(1);
   }, [eventFilterType]);
 
+  /**
+   * Makes an API call to retrieve a list of events based on the specified page number.
+   * @param {number} [pageNumber=1] - The page number to retrieve events from.
+   * @returns None
+   */
   const listEventsTalkshowApiCall = (pageNumber: number = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -83,7 +88,6 @@ const EventTalkshowCommonScreen = ({
 
     listEventsService(formData)
       .then(res => {
-        // console.log(res.data, 'event res');
         if (isMount) {
           if (res.data.status === 1) {
             if (pageNumber === 1) {
@@ -97,9 +101,7 @@ const EventTalkshowCommonScreen = ({
           }
         }
       })
-      .catch(e => {
-        console.log(e, 'event err');
-      })
+      .catch(e => {})
       .finally(() => {
         if (isMount) {
           setisListLoading(false);
@@ -109,6 +111,11 @@ const EventTalkshowCommonScreen = ({
       });
   };
 
+  /**
+   * Handles the delete action when the user presses the delete button.
+   * @param {any} eventId - The ID of the talkshow event to be deleted.
+   * @returns None
+   */
   const onPressDelete = (eventId: any) =>
     Alert.alert(
       'Delete!',
@@ -132,6 +139,11 @@ const EventTalkshowCommonScreen = ({
       {cancelable: false},
     );
 
+  /**
+   * Handles the delete event action by sending a request to the server to delete the event with the given eventId.
+   * @param {any} eventId - The ID of the event to be deleted.
+   * @returns None
+   */
   const handleDeleteEvent = (eventId: any) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -161,6 +173,10 @@ const EventTalkshowCommonScreen = ({
       });
   };
 
+  /**
+   * Generates the placeholder text for the search input based on the event filter type and screen type.
+   * @returns {string} The placeholder text for the search input.
+   */
   const getSearchPlaceHolderText = () => {
     let placeHolder = `Search ${eventFilterType.name.split(' ')[0]} `;
     if (screenType === 'talkshow') {
@@ -171,6 +187,12 @@ const EventTalkshowCommonScreen = ({
     return placeHolder;
   };
 
+  /**
+   * Function called when refreshing the page or data. It resets the current page and total pages
+   * variables, sets the refreshing state to true (if the component is mounted), and makes an API call
+   * to retrieve the list of events or talk shows for the first page.
+   * @returns None
+   */
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -180,6 +202,12 @@ const EventTalkshowCommonScreen = ({
     listEventsTalkshowApiCall(1);
   };
 
+  /**
+   * Function called when the end of the list is reached, indicating that more data needs to be loaded.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true and makes an API call to fetch the next page of data.
+   * @returns None
+   */
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
@@ -190,6 +218,13 @@ const EventTalkshowCommonScreen = ({
     }
   };
 
+  /**
+   * Retrieves a list of events based on the provided search text.
+   * If the search text is empty, returns the entire events list.
+   * If the search text is not empty, filters the events list based on the event name
+   * that includes the search text (case-insensitive).
+   * @returns {Array} - A filtered list of events.
+   */
   const getEventsList = () => {
     if (searchText.trim()) {
       return [...eventsList].filter(item =>

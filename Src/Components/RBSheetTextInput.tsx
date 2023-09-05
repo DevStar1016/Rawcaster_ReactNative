@@ -58,6 +58,9 @@ type Props = {
   onSendAudio?: (audioFile: FileType, duration: number) => void;
   isEnableOnSubmitEditing?: boolean;
   isDisableAudioProcess?: boolean;
+  isVisibleSendButton?: boolean;
+  isVisibleProfileImage?: boolean;
+  containerPaddingHorizontal?: number;
   inputProps?: Omit<
     TextInputProps,
     | 'ref'
@@ -94,6 +97,9 @@ const RBSheetTextInput = ({
   inputProps,
   actionsContainerPaddingTop,
   isDisableAudioProcess,
+  isVisibleSendButton = true,
+  isVisibleProfileImage = true,
+  containerPaddingHorizontal = 0,
 }: Props) => {
   const audioPlayer = useRef(new AudioRecorderPlayer()).current;
   const profile = useProfile();
@@ -217,10 +223,18 @@ const RBSheetTextInput = ({
     <View
       style={[
         styles.inputContainer,
-        {height: containerHeight, alignItems: containerAlignItems},
+        {
+          height: containerHeight,
+          alignItems: containerAlignItems,
+          paddingHorizontal: containerPaddingHorizontal,
+        },
       ]}>
       {recordedAudio || isRecording || isPlaying ? (
-        <View style={styles.recordTimerMicIconContainer}>
+        <View
+          style={[
+            styles.recordTimerMicIconContainer,
+            {paddingTop: (actionsContainerPaddingTop ?? 0) + 3},
+          ]}>
           <OpacityAnimatedView
             opacityMinimumValue={
               recordedAudio && (isRecording || isPlaying) ? 0.3 : 1
@@ -245,10 +259,12 @@ const RBSheetTextInput = ({
           </StyledText>
         </View>
       ) : (
-        <ProfileWithBadge
-          profileSize={35}
-          profileImage={profile?.profile_image}
-        />
+        isVisibleProfileImage && (
+          <ProfileWithBadge
+            profileSize={35}
+            profileImage={profile?.profile_image}
+          />
+        )
       )}
       {!recordedAudio && !isRecording && !isPlaying && (
         <BottomSheetTextInput
@@ -358,14 +374,16 @@ const RBSheetTextInput = ({
               }}
             />
           )}
-          <SVGIcon
-            icon="send"
-            marginRight={5}
-            isButton={!isDisableSend}
-            height={27}
-            width={27}
-            onPress={handleSubmit}
-          />
+          {isVisibleSendButton && (
+            <SVGIcon
+              icon="send"
+              marginRight={5}
+              isButton={!isDisableSend}
+              height={27}
+              width={27}
+              onPress={handleSubmit}
+            />
+          )}
         </View>
       )}
     </View>

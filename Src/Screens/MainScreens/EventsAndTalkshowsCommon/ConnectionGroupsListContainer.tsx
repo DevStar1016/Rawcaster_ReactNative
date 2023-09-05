@@ -77,6 +77,10 @@ const ConnectionGroupsListContainer = ({
     };
   }, []);
 
+  /**
+   * Retrieves a list based on the given type.
+   * @returns {Array} - The list of items based on the type.
+   */
   const getList = () => {
     if (type === 'connection') {
       return connectionsList;
@@ -86,6 +90,10 @@ const ConnectionGroupsListContainer = ({
     return [];
   };
 
+  /**
+   * Makes an API call to retrieve a list of connections.
+   * @returns None
+   */
   const connectionsAPICall = () => {
     if (isMount) {
       setisLoading(true);
@@ -108,6 +116,16 @@ const ConnectionGroupsListContainer = ({
       });
   };
 
+  /**
+   * Makes an API call to retrieve a list of friend groups.
+   * If the component is mounted, it sets the isLoading state to true.
+   * It creates a FormData object and appends the token and page_number to it.
+   * Then it calls the listAllFriendGroupsService function with the FormData object.
+   * If the response status is 1, it dispatches the setGroupsList action with the friend group list data.
+   * If there is an error, it catches it and does nothing.
+   * Finally, if the component is mounted, it sets the isLoading state to false.
+   * @returns None
+   */
   const groupsAPICall = () => {
     if (isMount) {
       setisLoading(true);
@@ -129,6 +147,11 @@ const ConnectionGroupsListContainer = ({
       });
   };
 
+  /**
+   * Checks if a given ID is selected in the selectedIdsList array.
+   * @param {any} selectedId - The ID to check for.
+   * @returns {boolean} - True if the ID is selected, false otherwise.
+   */
   const isSelected = (selectedId: any) => {
     const selectedIndex = selectedIdsList.findIndex(id => id === selectedId);
     if (selectedIndex === -1) {
@@ -137,10 +160,18 @@ const ConnectionGroupsListContainer = ({
     return true;
   };
 
+  /**
+   * Checks if all items in the selectedIdsList are selected.
+   * @returns {boolean} True if all items are selected, false otherwise.
+   */
   const isSelectedAll = () => {
     return selectedIdsList.length === getList().length;
   };
 
+  /**
+   * Returns the count of selected IDs as a text string.
+   * @returns {string} - The count of selected IDs in parentheses, or an empty string if no IDs are selected.
+   */
   const getSelectedCountText = () => {
     if (selectedIdsList.length > 0) {
       return ` (${selectedIdsList.length})`;
@@ -148,6 +179,11 @@ const ConnectionGroupsListContainer = ({
     return '';
   };
 
+  /**
+   * Returns a filtered list based on the search text.
+   * If the search text is empty, the original list is returned.
+   * @returns {Array} - The filtered list.
+   */
   const getFilteredList = () => {
     if (searchText.trim()) {
       return [...getList()].filter((item: any) =>

@@ -4,7 +4,10 @@ import {
   blockMultipleUserService,
   blockUnblockUserService,
   deleteNuggetService,
+  followAndUnfollowService,
   likeAndUnlikeNuggetService,
+  listAllFriendGroupsService,
+  listAllFriendsService,
   listNuggetsService,
   saveAndUnsaveNuggetService,
 } from '../Services/ApiService';
@@ -22,11 +25,22 @@ import {
   addFollowingUser,
   blockUsers,
   setConnectionsList,
+  setConnectionsListLoading,
   setFollowingUsersList,
+  setGroupListLoading,
+  setGroupsList,
   unBlockUser,
 } from './Slices/HomeSlice';
 import {setGlobalLoaderData} from './Slices/UtilitySlice';
 
+/**
+ * Asynchronously retrieves a list of nuggets based on the provided data.
+ * @param {object} data - The data object containing the necessary parameters for the request.
+ * @param {function} rejectWithValue - The function to call if the request is rejected.
+ * @param {function} dispatch - The function to dispatch actions.
+ * @returns A promise that resolves to an object containing the retrieved data, page number, and category name.
+ * @throws If the request fails or is canceled.
+ */
 export const getListNuggets = createAsyncThunk(
   'getListNuggets',
   async (data, {rejectWithValue, dispatch}) => {
@@ -81,6 +95,14 @@ export const getListNuggets = createAsyncThunk(
   },
 );
 
+/**
+ * An asynchronous thunk action creator that handles liking and unliking a nugget.
+ * @param {Object} data - The data object containing the nugget ID and total likes.
+ * @param {Function} rejectWithValue - The function to reject the thunk with a value.
+ * @param {Function} getState - The function to get the current state of the store.
+ * @param {Function} dispatch - The function to dispatch actions to the store.
+ * @returns None
+ */
 export const likeAndUnlikeNugget = createAsyncThunk(
   'likeAndUnlikeNugget',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -100,13 +122,18 @@ export const likeAndUnlikeNugget = createAsyncThunk(
     );
     try {
       const res = await likeAndUnlikeNuggetService(formData, data?.signal);
-      console.log(res.data, 'LIKED RESPONSE');
-    } catch (error) {
-      console.log(error, 'LIKED_ERROR');
-    }
+    } catch (error) {}
   },
 );
 
+/**
+ * Async thunk function that saves or unsaves a nugget.
+ * @param {Object} data - The data object containing the nugget ID.
+ * @param {Function} rejectWithValue - The function to reject the thunk with a value.
+ * @param {Function} getState - The function to get the current state of the store.
+ * @param {Function} dispatch - The function to dispatch actions to the store.
+ * @returns None
+ */
 export const saveAndUnsaveNugget = createAsyncThunk(
   'likeAndUnlikeNugget',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -116,16 +143,21 @@ export const saveAndUnsaveNugget = createAsyncThunk(
     formData.append('token', getState().auth.token);
     formData.append('nugget_id', data.nugget_id);
     formData.append('save', savedNuggetsIds.includes(data.nugget_id) ? 2 : 1);
-    console.log(formData, 'FORMDATAAA');
     try {
       const res = await saveAndUnsaveNuggetService(formData, data?.signal);
-      console.log(res.data, 'SAVED RESPONSE');
-    } catch (error) {
-      console.log(error, 'SAVED_ERROR');
-    }
+    } catch (error) {}
   },
 );
 
+/**
+ * Deletes a nugget asynchronously.
+ * @param {object} data - The data object containing the nugget ID.
+ * @param {function} rejectWithValue - The function to reject the async thunk with a value.
+ * @param {function} getState - The function to get the current state of the application.
+ * @param {function} dispatch - The function to dispatch actions to the store.
+ * @param {function} fulfillWithValue - The function to fulfill the async thunk with a value.
+ * @returns None
+ */
 export const deleteNugget = createAsyncThunk(
   'deleteNugget',
   async (data, {rejectWithValue, getState, dispatch, fulfillWithValue}) => {
@@ -162,6 +194,14 @@ export const deleteNugget = createAsyncThunk(
   },
 );
 
+/**
+ * Asynchronous thunk action creator that allows a user to become a fan of another user.
+ * @param {object} data - The data object containing the necessary information for becoming a fan.
+ * @param {function} rejectWithValue - The function to reject the promise with a specific value.
+ * @param {function} getState - The function to get the current state of the Redux store.
+ * @param {function} dispatch - The function to dispatch actions to the Redux store.
+ * @returns None
+ */
 export const becomeFan = createAsyncThunk(
   'becomeFan',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -177,13 +217,18 @@ export const becomeFan = createAsyncThunk(
     formData.append('type', 1);
     try {
       const res = await followAndUnfollowService(formData);
-      console.log(res.data, 'FOLLOW RESPONSE');
-    } catch (error) {
-      console.log(error, 'FOLLOW ERROR');
-    }
+    } catch (error) {}
   },
 );
 
+/**
+ * Async thunk function that blocks or unblocks a user.
+ * @param {object} data - The data object containing the necessary parameters.
+ * @param {function} rejectWithValue - The function to reject the promise with a value.
+ * @param {function} getState - The function to get the current state of the store.
+ * @param {function} dispatch - The function to dispatch actions to the store.
+ * @returns None
+ */
 export const blockUnblockUser = createAsyncThunk(
   'blockUnblockUser',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -228,6 +273,14 @@ export const blockUnblockUser = createAsyncThunk(
   },
 );
 
+/**
+ * Async thunk action creator that blocks multiple users.
+ * @param {object} data - The data needed to block multiple users.
+ * @param {function} rejectWithValue - The function to reject the async thunk with a value.
+ * @param {function} getState - The function to get the current state of the store.
+ * @param {function} dispatch - The function to dispatch actions to the store.
+ * @returns None
+ */
 export const blockMultipleUsers = createAsyncThunk(
   'blockMultipleUsers',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -266,6 +319,12 @@ export const blockMultipleUsers = createAsyncThunk(
   },
 );
 
+/**
+ * Asynchronously adds a nugget by dispatching actions and making an API call.
+ * @param {any} data - The data needed to add the nugget.
+ * @param {object} options - The options object containing rejectWithValue, getState, and dispatch functions.
+ * @returns None
+ */
 export const addNugget = createAsyncThunk(
   'addNugget',
   async (data, {rejectWithValue, getState, dispatch}) => {
@@ -283,25 +342,64 @@ export const addNugget = createAsyncThunk(
       //   routes: [{name: 'DashboardProfileTopTabNavigation'}],
       // });
       const res = await addNuggetsService(data.formData, {
-        onUploadProgress: progressEvent => {
-          console.log(
-            progressEvent,
-            progressEvent.loaded / progressEvent.total,
-            'UPLOAD PROGRESS',
-          );
-        },
-        onDownloadProgress: progressEvent => {
-          console.log(progressEvent, 'DOWNLOAD PROGRESS');
-        },
+        onUploadProgress: progressEvent => {},
+        onDownloadProgress: progressEvent => {},
       });
 
       Toast.success(res.data.msg);
-      console.log(res.data, 'ADD NUGGET RESPONSE');
     } catch (error) {
       Toast.fail(error.message);
-      console.log(error, 'NUGGET UPLOAD ERRORRRR');
     } finally {
       dispatch(removeUploadingNugget(uniqueId));
+    }
+  },
+);
+
+/**
+ * Asynchronously retrieves a list of all friend groups.
+ * @param {any} data - Additional data to be passed to the thunk.
+ * @param {object} options - Options object containing rejectWithValue, getState, and dispatch functions.
+ * @returns None
+ */
+export const getAllFriendsGroupsList = createAsyncThunk(
+  'getAllFriendsGroupsList',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    dispatch(setGroupListLoading(true));
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    try {
+      const res = await listAllFriendGroupsService(formData);
+      if (res.data.status === 1) {
+        dispatch(setGroupsList(res.data.friend_group_list));
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setGroupListLoading(false));
+    }
+  },
+);
+
+/**
+ * Async thunk action creator that retrieves the list of all friends.
+ * @param {any} data - Additional data to be passed to the action.
+ * @param {object} options - Options object containing rejectWithValue, getState, and dispatch functions.
+ * @returns None
+ */
+export const getAllFriendsList = createAsyncThunk(
+  'getAllFriendsList',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    dispatch(setConnectionsListLoading(true));
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('allfriends', 1);
+    try {
+      const res = await listAllFriendsService(formData);
+      if (res.data.status === 1) {
+        dispatch(setConnectionsList(res.data.friends_list));
+      }
+    } catch (error) {
+    } finally {
+      dispatch(setConnectionsListLoading(false));
     }
   },
 );

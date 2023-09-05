@@ -94,6 +94,11 @@ const NuggetsSearch = () => {
     }
   }, [isFocused]);
 
+  /**
+   * Makes an API call to search for nuggets based on the provided search key and page number.
+   * @param {number} [pageNumber=1] - The page number to retrieve the search results from.
+   * @returns None
+   */
   const nuggetsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -155,6 +160,13 @@ const NuggetsSearch = () => {
       });
   };
 
+  /**
+   * Handles playing an audio file from the given URL.
+   * Stops any currently playing audio before starting playback.
+   * Adds a playback listener to handle specific events during playback.
+   * @param {string} url - The URL of the audio file to play.
+   * @returns None
+   */
   const handlePlayAudio = async url => {
     handleStopAudio();
     try {
@@ -172,6 +184,13 @@ const NuggetsSearch = () => {
     }
   };
 
+  /**
+   * Handles stopping the audio playback.
+   * Stops the audio player and removes the playback listener.
+   * If an error occurs during the process, it is caught and ignored.
+   * Finally, sets the isReadMuted state to false.
+   * @returns None
+   */
   const handleStopAudio = () => {
     try {
       audioPlayerRef.current?.stopPlayer();
@@ -182,6 +201,11 @@ const NuggetsSearch = () => {
     }
   };
 
+  /**
+   * Function called when the page is refreshed. It resets the current page and total pages
+   * variables, and makes an API call to retrieve new data if the component is mounted.
+   * @returns None
+   */
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -191,6 +215,12 @@ const NuggetsSearch = () => {
     }
   };
 
+  /**
+   * Function called when the end of the list is reached, indicating that more data needs to be loaded.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true and makes an API call to fetch the next page of data.
+   * @returns None
+   */
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
@@ -239,6 +269,11 @@ const NuggetsSearch = () => {
     [topLayerHeight],
   );
 
+  /**
+   * Retrieves a list of nuggets based on various conditions such as blocked user IDs,
+   * deleted nugget IDs, edited nuggets list, and translated nuggets list.
+   * @returns {Array} - A list of nuggets that meet the specified conditions.
+   */
   const getNuggetsList = () => {
     let tempNuggetsList = [...searchedNuggetsList];
     if (blockedUserIds && blockedUserIds.length > 0) {

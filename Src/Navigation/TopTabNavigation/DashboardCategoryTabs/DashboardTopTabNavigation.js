@@ -38,6 +38,14 @@ function DashboardTopTabNavigation() {
     setheaderContainerHeight,
   };
 
+  /**
+   * Retrieves a filtered list of categories from the categoryList array.
+   * @returns {Array} - A new array containing only the items from categoryList where my_category is equal to 1.
+   */
+  const getCategoryList = () => {
+    return [...categoryList].filter(item => item.my_category === 1);
+  };
+
   return (
     <DashboardCategoryTopTabContext.Provider value={categoriesListData}>
       {/* {token && (
@@ -112,7 +120,7 @@ function DashboardTopTabNavigation() {
           //   fontSize: 13,
           // },
         }}>
-        {categoryList.map(item => {
+        {getCategoryList().map(item => {
           return (
             <Tab.Screen
               key={item.id.toString()}

@@ -86,6 +86,12 @@ const InfluencersList = () => {
     }
   }, [selectedInfluencersRefIds.length]);
 
+  /**
+   * Handles the selection of all influencers in a given users list.
+   * @param {Array} usersList - The list of users to select from.
+   * @param {boolean} selectAllStatus - The status of the select all checkbox.
+   * @returns None
+   */
   const handleSelectAllInfluencers = (
     usersList = [],
     selectAllStatus = isSelectedAll,
@@ -99,6 +105,11 @@ const InfluencersList = () => {
     }
   };
 
+  /**
+   * Makes an API call to retrieve a list of influencers.
+   * @param {number} [pageNumber=1] - The page number to retrieve.
+   * @returns None
+   */
   function influencerListAPICall(pageNumber = 1) {
     const formData = new FormData();
     formData.append('token', token);
@@ -132,7 +143,6 @@ const InfluencersList = () => {
         }
       })
       .catch(e => {
-        console.log(e, 'INFLUENCERS LIST ERROR');
         Toast.fail(e.message);
         if (isMount) {
           seterrorText(e.message);
@@ -148,6 +158,11 @@ const InfluencersList = () => {
       });
   }
 
+  /**
+   * Handles the filtering of the influencer list based on the provided IDs.
+   * @param {Array} [ids=[...selectedInfluencersRefIds]] - The array of IDs to filter the influencer list with.
+   * @returns None
+   */
   function handleFilterInfluencerList(ids = [...selectedInfluencersRefIds]) {
     let tempInfluencersList = [...influencersList];
     tempInfluencersList = tempInfluencersList.filter(item => {
@@ -169,6 +184,11 @@ const InfluencersList = () => {
     setselectedInfluencersRefIds([]);
   }
 
+  /**
+   * Handles the selection of an influencer by adding or removing their ID from the list of selected influencer IDs.
+   * @param {number} id - The ID of the influencer to handle selection for.
+   * @returns None
+   */
   function handleSelectInfluencer(id) {
     let tempSelectedInfluencersIds = [...selectedInfluencersRefIds];
     if (tempSelectedInfluencersIds.find(refId => refId === id)) {
@@ -184,10 +204,21 @@ const InfluencersList = () => {
     setselectedInfluencersRefIds(tempSelectedInfluencersIds);
   }
 
+  /**
+   * Checks if the given influencer ID is selected in the list of selected influencers.
+   * @param {any} id - The ID of the influencer to check.
+   * @returns {boolean} - True if the influencer is selected, false otherwise.
+   */
   function getIsSelectedInfluencer(id) {
     return [...selectedInfluencersRefIds].find(refId => refId === id);
   }
 
+  /**
+   * Handles the action of following influencers.
+   * @param {Array} ids - An array of influencer IDs to follow.
+   * @param {boolean} [isSkipScreen=false] - Indicates whether to skip the screen after following.
+   * @returns None
+   */
   function handleInfluencerFollow(
     ids = [...selectedInfluencersRefIds],
     isSkipScreen = false,
@@ -213,9 +244,9 @@ const InfluencersList = () => {
     influencerFollowService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          if (isMount) {
-            setcalledBecomeFan(true);
-          }
+          // if (isMount) {
+          //   setcalledBecomeFan(true);
+          // }
           handleFilterInfluencerList(ids);
           if (isSkipScreen) {
             dispatch(setIsVisibleInfluencers(false));
@@ -236,6 +267,12 @@ const InfluencersList = () => {
       });
   }
 
+  /**
+   * Function called when refreshing the page or data. It resets the current page and total pages
+   * variables, sets the refreshing state to true, and makes an API
+   * call to retrieve the influencer list for the first page.
+   * @returns None
+   */
   function onRefresh() {
     currentPage = 1;
     totalPages = 1;
@@ -245,6 +282,13 @@ const InfluencersList = () => {
     influencerListAPICall(1);
   }
 
+  /**
+   * Function called when reaching the end of a list or page.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true
+   * and makes an API call to load more data.
+   * @returns None
+   */
   function onEndReached() {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
@@ -320,12 +364,16 @@ const InfluencersList = () => {
           </View>
 
           <SmallButton
-            buttonText={calledBecomeFan ? 'Next' : 'Skip'}
+            buttonText={selectedInfluencersRefIds.length > 0 ? 'Next' : 'Skip'}
             isEnableIcon
             containerStyle={styles.smallButton}
             onPress={() => {
               Keyboard.dismiss();
-              dispatch(setIsVisibleInfluencers(false));
+              if (selectedInfluencersRefIds.length > 0) {
+                handleInfluencerFollow(selectedInfluencersRefIds, true);
+              } else {
+                dispatch(setIsVisibleInfluencers(false));
+              }
             }}
           />
         </View>

@@ -51,6 +51,10 @@ const MyFansChat = () => {
     };
   }, []);
 
+  /**
+   * Generates a message item object with various properties for a group chat message.
+   * @returns {Object} - The message item object.
+   */
   function getMessageItem() {
     const uniqueId =
       profile.user_id +
@@ -86,6 +90,12 @@ const MyFansChat = () => {
     };
   }
 
+  /**
+   * Handles sending a chat message.
+   * If there are uploaded media items, it sends a separate message for each item,
+   * otherwise it sends a message with just the message item.
+   * @returns None
+   */
   function handleSendChat() {
     if (uploadedMediaList.length > 0) {
       [...uploadedMediaList].map(item => {
@@ -106,6 +116,13 @@ const MyFansChat = () => {
     navigation.goBack();
   }
 
+  /**
+   * Allows the user to pick multiple media files of a specified type (photo or video).
+   * The selected media files are then compressed and returned as an array of objects
+   * containing the compressed media path, name, and type.
+   * @param {string} type - The type of media to pick (photo or video).
+   * @returns None
+   */
   function pickMedia(type) {
     ImageVideoPicker({
       mediaType: type,
@@ -145,6 +162,11 @@ const MyFansChat = () => {
       .catch(e => {});
   }
 
+  /**
+   * Handles the removal of a selected media item from the media list.
+   * @param {number} selectedIndex - The index of the selected media item to remove.
+   * @returns None
+   */
   function handleRemoveSelectedMediaItem(selectedIndex) {
     if (isMount) {
       setselectedMediaList(preList => {
@@ -153,6 +175,11 @@ const MyFansChat = () => {
     }
   }
 
+  /**
+   * Handles the process of opening the camera and requesting camera and microphone permissions.
+   * @returns None
+   * @throws {Error} If there is an error while handling the camera or permissions.
+   */
   async function handleOpenCamera() {
     try {
       const newCameraPermission = await Camera.requestCameraPermission();
@@ -189,6 +216,12 @@ const MyFansChat = () => {
     }
   }
 
+  /**
+   * Handles the action of opening the audio recorder.
+   * Requests microphone permission and sets the state to open the audio recorder if permission is granted.
+   * Displays a toast message if microphone permission is denied.
+   * @returns None
+   */
   async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
     if (newMicrophonePermission === 'authorized') {
@@ -200,6 +233,11 @@ const MyFansChat = () => {
     }
   }
 
+  /**
+   * Handles the selection of media from the camera and adds it to the selected media list.
+   * @param {Object} mediaItem - The selected media item.
+   * @returns None
+   */
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
@@ -213,6 +251,11 @@ const MyFansChat = () => {
     ]);
   }
 
+  /**
+   * Handles the submission of an audio file.
+   * @param {Object} audioFile - The audio file to be submitted.
+   * @returns None
+   */
   function handleSubmitAudio(audioFile) {
     setselectedMediaList(pre => [
       ...pre,
@@ -222,6 +265,10 @@ const MyFansChat = () => {
     ]);
   }
 
+  /**
+   * Retrieves the group ID of the "My Fans" group from the list of groups.
+   * @returns {string | null} The group ID if found, otherwise null.
+   */
   function getGroupId() {
     const fansGroupItem = [...groupsList].find(item =>
       item.group_name?.includes('My Fans'),
@@ -241,10 +288,8 @@ const MyFansChat = () => {
           setuploadedMediaList(preList => {
             return [...preList, {id: uniqueId, uri: filePath, type: type}];
           });
-          console.log(uniqueId, filePath, 'SUCCESS UPLOAD');
         }}
         onUploadFailed={(uniqueId, failedMessage = '') => {
-          console.log(item, 'FAILEDFILE');
           Toast.fail(failedMessage);
           handleRemoveSelectedMediaItem(index);
         }}

@@ -11,14 +11,23 @@ import {
   ISLOGIN,
   USER_DATA,
 } from './Src/Utilities/EncryptedStoreConstants';
-import {setToken, setUserData} from './Src/Store/Slices/AuthSlice';
+import {
+  setMyProfile,
+  setSettings,
+  setToken,
+  setUserData,
+} from './Src/Store/Slices/AuthSlice';
 import {useToken} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
 import RootStack from './Src/Stacks/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import CustomStatusBar from './Src/Components/CustomStatusBar';
 import axios from 'axios';
-import {removeToken} from './Src/Utilities/Methods';
+import {
+  getAuthCode,
+  htmlDecodeText,
+  removeToken,
+} from './Src/Utilities/Methods';
 import Toast from './Src/Components/Toast';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
@@ -31,6 +40,11 @@ import {
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from './Src/Services/APIKeysIds';
 import DefaultBackground from './Src/Components/DefaultBackground';
+import {
+  getMyProfileService,
+  getUserSettingsService,
+} from './Src/Services/ApiService';
+import {setUnreadNotificationCount} from './Src/Store/Slices/HomeSlice';
 
 const Stack = createStackNavigator();
 // var tokenFetchingTimer = undefined;
@@ -72,9 +86,6 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (!IS_IOS) {
-      SplashScreen.hide();
-    }
     async function getIsIntroSeen() {
       try {
         const intro = await EncryptedStorage.getItem(INTRO_SCREEN_SEEN);
@@ -83,16 +94,16 @@ const App = () => {
         }
         const token = await EncryptedStorage.getItem(ISLOGIN);
         const userData = await EncryptedStorage.getItem(USER_DATA);
-        if (userData) {
+        if (userData && token) {
           const parsedUserData = JSON.parse(userData);
           dispatch(setUserData(parsedUserData));
-        }
-        if (token) {
           dispatch(setToken(token));
+        } else {
+          setisFetchingToken(false);
+          SplashScreen.hide();
         }
 
         // setTokenFetched();
-        setisFetchingToken(false);
       } catch (e) {
         // setTokenFetched();
         setisFetchingToken(false);
@@ -100,6 +111,12 @@ const App = () => {
     }
     getIsIntroSeen();
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      splashAPICalls(token);
+    }
+  }, [token]);
 
   // function setTokenFetched() {
   //   tokenFetchingTimer = setTimeout(() => {
@@ -114,6 +131,47 @@ const App = () => {
       await EncryptedStorage.setItem(INTRO_SCREEN_SEEN, 'true');
     } catch (error) {}
   }
+
+  const splashAPICalls = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    Promise.all([
+      getMyProfileService(formData),
+      getUserSettingsService(formData),
+    ])
+      .then(res => {
+        if (res[0].data.status === 1) {
+          let profile = {...res[0].data.profile};
+          profile = {
+            ...profile,
+            name: htmlDecodeText(profile?.name),
+            first_name: htmlDecodeText(profile?.first_name),
+            last_name: htmlDecodeText(profile?.last_name),
+            bio_data: htmlDecodeText(profile?.bio_data),
+          };
+
+          dispatch(setMyProfile(profile));
+          dispatch(
+            setUnreadNotificationCount(
+              profile?.unread_notification_count ?? null,
+            ),
+          );
+        }
+        return res;
+      })
+      .then(res => {
+        if (res[1].data.status === 1) {
+          dispatch(setSettings(res[1].data.settings));
+        }
+        return res;
+      })
+      .catch(e => {})
+      .finally(() => {
+        setisFetchingToken(false);
+        SplashScreen.hide();
+      });
+  };
 
   axios.interceptors.response.use(
     async response => {

@@ -37,6 +37,10 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
   const animatedButtonScale = new Animated.Value(1);
   const insets = useInsets();
 
+  /**
+   * Retrieves the camera type based on the camera setting.
+   * @returns {string} The camera type (either "back" or "front").
+   */
   const getCameraType = () => {
     switch (cameraSetting.cameraType) {
       case 1:
@@ -48,6 +52,10 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     }
   };
 
+  /**
+   * Returns the appropriate flash icon based on the current flash mode setting.
+   * @returns {string} - The name of the flash icon to display.
+   */
   const getFlashIcon = () => {
     if (cameraSetting.flashMode === 0) {
       return 'flash_off';
@@ -57,6 +65,10 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     return 'flash_auto';
   };
 
+  /**
+   * Get the flash mode based on the camera setting.
+   * @returns {string} The flash mode ('off', 'on', 'auto').
+   */
   const getFlashMode = () => {
     switch (cameraSetting.flashMode) {
       case 0:
@@ -70,6 +82,10 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     }
   };
 
+  /**
+   * Handles taking a picture using the camera.
+   * @returns None
+   */
   const handleTakePicture = async () => {
     if (camera.current) {
       try {
@@ -82,23 +98,37 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
           mediaType: 'image',
         });
         setisOpenPreview(true);
-      } catch (e) {
-        console.log(e, 'ERROR');
-      }
+      } catch (e) {}
     }
   };
 
+  /**
+   * Callback function called when video recording is finished.
+   * @param {object} data - The data object containing information about the recorded video.
+   * @returns None
+   */
   const onVideoRecordFinished = data => {
     setisVideoRecording(false);
     setmediaData({uri: getUrlWithFilePrefix(data.path), mediaType: 'video'});
     setisOpenPreview(true);
   };
 
+  /**
+   * Handles the error that occurs during video recording.
+   * @param {Error} error - The error that occurred during video recording.
+   * @returns None
+   */
   const onVideoRecordError = error => {
-    console.log(error, 'RECORD ERROR');
     setisVideoRecording(false);
   };
 
+  /**
+   * Handles the stop video recording functionality.
+   * Stops the video recording using the camera reference and updates the state
+   * to indicate that video recording has stopped.
+   * @returns None
+   * @throws {Error} If there is an error stopping the video recording.
+   */
   const handleStopVideoRecording = async () => {
     try {
       await camera.current.stopRecording();
@@ -108,6 +138,10 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     }
   };
 
+  /**
+   * Handles the action of recording a video using the camera.
+   * @returns None
+   */
   const handleRecordVideo = async () => {
     if (camera.current) {
       try {
@@ -119,7 +153,6 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         };
         camera.current.startRecording(options);
       } catch (e) {
-        console.log(e, 'ERROR RECORDING');
         setisVideoRecording(false);
       }
     }

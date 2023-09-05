@@ -76,7 +76,8 @@ const EditProfile = ({route}) => {
       .min(2, 'Enter Valid Display name')
       .max(50, 'Display name is too long')
       .required('Required'),
-    gender: yup.object().nullable().required('Required'),
+    sex: yup.object().nullable().required('Required'),
+    gender: yup.string().max(20, 'Maximum 20 characters allowed'),
     dob: yup.string().required('Date of birth is required'),
     mobileNumber: yup
       .string()
@@ -124,7 +125,8 @@ const EditProfile = ({route}) => {
       firstName: profile?.first_name ?? '',
       lastName: profile?.last_name ?? '',
       displayName: profile?.name ?? '',
-      gender: GENDER_LIST.find(item => item.id === profile?.gender) ?? null,
+      sex: GENDER_LIST.find(item => item.id === profile?.gender) ?? null,
+      gender: profile?.other_gender ?? '',
       dob: profile?.dob ?? '',
       mobileNumber: profile?.mobile ?? '',
       email: profile?.email_id ?? '',
@@ -134,7 +136,6 @@ const EditProfile = ({route}) => {
     },
     validationSchema: validationSchema,
     onSubmit: values => {
-      console.log(values, 'VALUESS');
       if (isMount) {
         setisLoading(true);
         handleUpdateProfile();
@@ -152,6 +153,10 @@ const EditProfile = ({route}) => {
     };
   }, []);
 
+  /**
+   * Handles the update of the user's profile by sending a request to the server with the updated profile data.
+   * @returns None
+   */
   const handleUpdateProfile = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -164,7 +169,8 @@ const EditProfile = ({route}) => {
     formData.append('name', values.displayName.trim());
     formData.append('mobile_no', values.mobileNumber.toString().trim());
     formData.append('email_id', values.email.trim());
-    formData.append('gender', values.gender.id);
+    formData.append('gender', values.sex.id);
+    formData.append('other_gender', values.gender);
     formData.append('dob', values.dob);
     formData.append('geo_location', values.location);
     formData.append('work_at', values.workAt);
@@ -230,6 +236,10 @@ const EditProfile = ({route}) => {
       });
   };
 
+  /**
+   * Opens the image picker to allow the user to select a profile photo.
+   * @returns None
+   */
   const onSelectProfilePhoto = () => {
     ImagePicker.openPicker({
       width: 512,
@@ -264,6 +274,15 @@ const EditProfile = ({route}) => {
       .catch(err => {});
   };
 
+  /**
+   * Handles getting the current location address.
+   * If the component is mounted, it sets the isFetchingLocation state to true.
+   * It then calls the getLocationAddress function to retrieve the location address.
+   * If the component is still mounted, it sets the 'location' field value to the retrieved geoLocation.
+   * If there is an error, it catches the error and does nothing.
+   * Finally, if the component is still mounted, it sets the isFetchingLocation state to false.
+   * @returns None
+   */
   const handleGetCurrentLocationAddress = () => {
     if (isMount) {
       setisFetchingLocation(true);
@@ -350,17 +369,29 @@ const EditProfile = ({route}) => {
         />
         <DropDownPicker
           dataList={GENDER_LIST}
-          title={'Gender'}
-          errorText={touched.gender && errors.gender}
-          value={values.gender}
+          title={'Sex'}
+          errorText={touched.sex && errors.sex}
+          value={values.sex}
           fieldName="name"
           onSelectItem={item => {
-            setFieldValue('gender', item);
+            setFieldValue('sex', item);
           }}
           titlePaddingVertical={3}
           inputContainerMarginVertical={0}
-          placeHolderText={'Select gender'}
+          placeHolderText={'Select Sex'}
         />
+
+        <TextBox
+          title="Gender"
+          errorText={touched.gender && errors.gender}
+          value={values.gender}
+          onChangeText={handleChange('gender')}
+          titlePaddingVertical={3}
+          maxLength={20}
+          inputContainerMarginVertical={0}
+          placeHolder={'Enter your gender'}
+        />
+
         <TextBox
           title="Study"
           errorText={touched.studyAt && errors.studyAt}

@@ -14,39 +14,43 @@ import ProfileWithBadge from '../ProfileWithBadge';
 import RoundedIconButton from '../RoundedIconButton';
 import {getSlicedText} from '../../Utilities/Methods';
 import RBSheetTextInput from '../RBSheetTextInput';
-
-export interface ParticipantProp {
-  id: number;
-  name: string;
-  image?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-  isRequested?: boolean;
-  isMuted?: boolean;
-  isHandRaised?: boolean;
-  tileId?: number | string;
-}
+import {
+  JoinRequestMessageData,
+  UserDataProp,
+} from '../../Services/ChimeSocket/ChimeSocketPropTypes';
+import {UserVideoItemDetailsProp} from './MeetingVideoView';
 
 type renderProps = {
-  item: ParticipantProp;
+  item: UserVideoItemDetailsProp | UserDataProp | undefined;
   index: number;
+};
+
+type GlobalSettingsProps = {
+  participantsAudio: boolean;
+  participantsVideo: boolean;
 };
 
 type Props = {
   onClose?: () => void;
-  participantsList: ParticipantProp[];
-  onPressAccept?: (userId: number) => void;
+  participantsList: (UserVideoItemDetailsProp | UserDataProp | undefined)[];
+  onPressAccept?: (data: JoinRequestMessageData) => void;
   onPressReject?: (userId: number) => void;
   onPressMic?: (userId: number, requestStatus: boolean) => void;
   onPressVideo?: (userId: number, requestStatus: boolean) => void;
+  onPressGlobalMic?: (requestStatus: boolean) => void;
+  onPressGlobalVideo?: (requestStatus: boolean) => void;
   isLoading?: boolean;
+  meetingRefId: string;
   hostUserId?: number;
   selfUserId?: number;
   isShowActionsButtons?: boolean;
   isEnableItemPress?: boolean;
-  onPressItem?: (item: ParticipantProp) => void;
+  onPressItem?: (
+    item: UserVideoItemDetailsProp | UserDataProp | undefined,
+  ) => void;
   listTitle?: string;
   isShowCount?: boolean;
+  globalSettingsData?: GlobalSettingsProps;
 };
 
 const ParticipantsList = ({
@@ -59,38 +63,56 @@ const ParticipantsList = ({
   isLoading,
   hostUserId,
   selfUserId,
+  meetingRefId,
   isShowActionsButtons = true,
   isEnableItemPress = false,
   onPressItem,
+  onPressGlobalMic,
+  onPressGlobalVideo,
+  globalSettingsData,
   listTitle = 'Participants',
   isShowCount = true,
 }: Props) => {
   const [searchText, setsearchText] = useState('');
 
-  const getParticipantsList = () => {
+  /**
+   * Retrieves a list of participants based on the search text.
+   * If a search text is provided, it filters the participants list based on the name
+   * that includes the search text (case-insensitive).
+   * If no search text is provided, it returns the entire participants list.
+   * @returns {Array} - A list of participants that match the search text (if provided) or the entire participants list.
+   */
+  const getParticipantsList = (): Array<
+    UserVideoItemDetailsProp | UserDataProp | undefined
+  > => {
     if (searchText) {
       return [...participantsList].filter(item =>
-        item.name.toLowerCase().includes(searchText.toLowerCase()),
+        item?.name.toLowerCase().includes(searchText.toLowerCase()),
       );
     }
     return [...participantsList];
   };
 
   const renderParticipant = ({item, index}: renderProps) => {
-    const isHost = hostUserId === item.id;
-    const isSelf = selfUserId === item.id;
+    if (!item) {
+      return null;
+    }
+    const isHost = hostUserId === item.userId;
+    const isSelf = selfUserId === item.userId;
     const isVideoEnabled =
-      typeof item.tileId === 'number' || typeof item.tileId === 'string';
+      //@ts-ignore
+      (typeof item.tileId === 'number' || typeof item.tileId === 'string') &&
+      item.video;
     const isEnableAudioVideoActions =
-      hostUserId === selfUserId || selfUserId === item.id;
+      hostUserId === selfUserId || selfUserId === item.userId;
 
     return (
       <TouchableOpacity
         style={styles.itemContainer}
-        activeOpacity={0.7}
+        activeOpacity={item.isRequested ? 1 : 0.7}
         disabled={!isEnableItemPress}
         onPress={() => {
-          if (onPressItem) {
+          if (onPressItem && !item.isRequested) {
             onPressItem(item);
           }
         }}>
@@ -121,7 +143,12 @@ const ParticipantsList = ({
                   iconSize={17}
                   onPress={() => {
                     if (onPressAccept) {
-                      onPressAccept(item.id);
+                      onPressAccept({
+                        name: item.name,
+                        image: item.image,
+                        userId: item.userId,
+                        refId: meetingRefId,
+                      });
                     }
                   }}
                 />
@@ -132,14 +159,14 @@ const ParticipantsList = ({
                   iconSize={13}
                   onPress={() => {
                     if (onPressReject) {
-                      onPressReject(item.id);
+                      onPressReject(item.userId);
                     }
                   }}
                 />
               </>
             ) : (
               <>
-                {item.isHandRaised && (
+                {item.handRaised && (
                   <SVGIcon
                     icon={'hand_secondary'}
                     height={22}
@@ -152,20 +179,20 @@ const ParticipantsList = ({
                   <View
                     style={[
                       styles.hostTextContainer,
-                      {marginLeft: item.isHandRaised ? 0 : 10},
+                      {marginLeft: item.handRaised ? 0 : 10},
                     ]}>
                     <StyledText style={styles.hostText}>Host</StyledText>
                   </View>
                 )}
 
                 <SVGIcon
-                  icon={item.isMuted ? 'mic_off_white' : 'mic_white'}
+                  icon={item.audio ? 'mic_white' : 'mic_off_white'}
                   height={22}
                   width={22}
                   marginRight={10}
                   onPress={() => {
                     if (onPressMic) {
-                      onPressMic(item.id, item.isMuted ?? false);
+                      onPressMic(item.userId, !item.audio);
                     }
                   }}
                   isButton={isEnableAudioVideoActions}
@@ -177,7 +204,7 @@ const ParticipantsList = ({
                   isButton={isEnableAudioVideoActions}
                   onPress={() => {
                     if (onPressVideo) {
-                      onPressVideo(item.id, !isVideoEnabled);
+                      onPressVideo(item.userId, !isVideoEnabled);
                     }
                   }}
                 />
@@ -223,7 +250,48 @@ const ParticipantsList = ({
                 text={searchText}
               />
             </View>
-
+            {isShowActionsButtons && hostUserId === selfUserId && (
+              <View style={styles.globalSettingsContainer}>
+                <StyledText style={styles.globalSettingsText}>
+                  Global Settings
+                </StyledText>
+                <View style={styles.actionButtonsContainer}>
+                  <SVGIcon
+                    icon={
+                      globalSettingsData?.participantsAudio
+                        ? 'mic_white'
+                        : 'mic_off_white'
+                    }
+                    height={22}
+                    width={22}
+                    marginRight={10}
+                    onPress={() => {
+                      if (onPressGlobalMic) {
+                        onPressGlobalMic(
+                          !globalSettingsData?.participantsAudio,
+                        );
+                      }
+                    }}
+                    isButton={true}
+                  />
+                  <SVGIcon
+                    icon={
+                      globalSettingsData?.participantsVideo
+                        ? 'video_call_white'
+                        : 'video_disabled_white'
+                    }
+                    isButton={true}
+                    onPress={() => {
+                      if (onPressGlobalVideo) {
+                        onPressGlobalVideo(
+                          !globalSettingsData?.participantsVideo,
+                        );
+                      }
+                    }}
+                  />
+                </View>
+              </View>
+            )}
             {getParticipantsList().length > 0 ? (
               <BottomSheetFlatList
                 data={getParticipantsList()}
@@ -284,7 +352,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     paddingVertical: 5,
   },
   profileImgNameContainer: {
@@ -315,5 +383,20 @@ const styles = StyleSheet.create({
   hostText: {
     color: COLORS.white,
     fontSize: 13,
+  },
+  globalSettingsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    marginHorizontal: 5,
+    marginBottom: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  globalSettingsText: {
+    color: COLORS.white,
+    fontSize: 16,
   },
 });

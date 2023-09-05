@@ -30,32 +30,6 @@ const TagsSearch = () => {
   const [isLoadMore, setisLoadMore] = useState(false);
   const [listContainerHeight, setlistContainerHeight] = useState(undefined);
   const [isRefreshing, setisRefreshing] = useState(false);
-  let testObj = [
-    {
-      total_nuggets: 10,
-      hours: 10,
-    },
-    {
-      total_nuggets: 30,
-      hours: 13,
-    },
-    {
-      total_nuggets: 10,
-      hours: 5,
-    },
-    {
-      total_nuggets: 15,
-      hours: 19,
-    },
-    {
-      total_nuggets: 58,
-      hours: 2,
-    },
-    {
-      total_nuggets: 18,
-      hours: 27,
-    },
-  ];
 
   const [isListLoading, setisListLoading] = useState(false);
 
@@ -77,6 +51,11 @@ const TagsSearch = () => {
     // }
   }, [searchText]);
 
+  /**
+   * Makes an API call to search for tags using the provided search text and page number.
+   * @param {number} [pageNumber=1] - The page number to retrieve results from.
+   * @returns None
+   */
   const tagsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -112,6 +91,11 @@ const TagsSearch = () => {
       });
   };
 
+  /**
+   * Function called when refreshing the page or data. It resets the current page number
+   * and total number of pages, and then makes an API call to search for tags.
+   * @returns None
+   */
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -121,6 +105,13 @@ const TagsSearch = () => {
     tagsSearchAPICall(1);
   };
 
+  /**
+   * Function called when the end of the list is reached, indicating that more items should be loaded.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true
+   * and makes an API call to fetch the next page of tags.
+   * @returns None
+   */
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {

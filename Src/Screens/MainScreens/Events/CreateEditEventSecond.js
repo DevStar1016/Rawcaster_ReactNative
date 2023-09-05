@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useToken} from '../../../Utilities/StoreData';
 import {addEventService, editEventService} from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
+import {createMeetingRoom} from '../../../Services/ChimeSocket/ChimeSocketRequests';
 
 var isMount = true;
 const CreateEditEventSecond = ({route}) => {
@@ -43,6 +44,10 @@ const CreateEditEventSecond = ({route}) => {
     };
   }, []);
 
+  /**
+   * Returns a FormData object with the default create/edit form data.
+   * @returns {FormData} - The FormData object with the default form data.
+   */
   const getDefaultCreateEditFormData = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -83,17 +88,46 @@ const CreateEditEventSecond = ({route}) => {
     return formData;
   };
 
+  /**
+   * Resets the navigation stack to the view screen of the event details.
+   * @param {object} eventDetails - The details of the event.
+   * @returns None
+   */
+  const resetStackToViewScreen = eventDetails => {
+    navigation.reset({
+      routes: [
+        {name: isFromEventSearch ? 'EventsSearch' : 'Events'},
+        {
+          name: isFromEventSearch
+            ? 'SearchEventDetailsView'
+            : 'EventDetailsView',
+          params: {eventDetail: eventDetails},
+        },
+      ],
+    });
+  };
+
+  /**
+   * Handles the create event functionality. It retrieves the default form data,
+   * adds the event using the addEventService function, and performs additional actions
+   * based on the response.
+   * @returns None
+   */
   function handleCreateEvent() {
     const formData = getDefaultCreateEditFormData();
-    console.log(JSON.stringify(formData), 'DATA CREATE EVENT');
     addEventService(formData)
       .then(res => {
-        console.log(res.data, 'EVENT CREATE RESPONSE');
         if (res.data.status === 1) {
+          if (res.data.event_detail?.reference_id) {
+            createMeetingRoom({
+              refId: res.data.event_detail.reference_id,
+            });
+          }
           Toast.success(res.data.msg);
-          navigation.reset({
-            routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
-          });
+          resetStackToViewScreen(res.data.event_detail);
+          // navigation.reset({
+          //   routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
+          // });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -108,6 +142,10 @@ const CreateEditEventSecond = ({route}) => {
       });
   }
 
+  /**
+   * Handles the edit event functionality by sending a request to the server with the updated form data.
+   * @returns None
+   */
   function handleEditEvent() {
     const formData = getDefaultCreateEditFormData();
     formData.append('event_id', eventId);
@@ -139,14 +177,14 @@ const CreateEditEventSecond = ({route}) => {
         JSON.stringify(tempRemovedGroupsIdsList),
       );
     }
-    console.log(JSON.stringify(formData), 'dsdfsdfsdfsdfsf');
     editEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          navigation.reset({
-            routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
-          });
+          resetStackToViewScreen(res.data.event_detail);
+          // navigation.reset({
+          //   routes: [{name: isFromEventSearch ? 'EventsSearch' : 'Events'}],
+          // });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -161,6 +199,10 @@ const CreateEditEventSecond = ({route}) => {
       });
   }
 
+  /**
+   * Checks if there is a type error in the event visibility.
+   * @returns {boolean} - true if there is a type error, false otherwise.
+   */
   const eventVisibilityTypeError = () => {
     return (
       submitedData?.eventVisibilityTypeId === 2 &&
@@ -170,6 +212,11 @@ const CreateEditEventSecond = ({route}) => {
     );
   };
 
+  /**
+   * Adds invited users to the list of invited users.
+   * Validates the email format and checks for duplicates before adding.
+   * @returns None
+   */
   const addInvitedUsers = () => {
     let newMail = [];
     let mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -216,6 +263,11 @@ const CreateEditEventSecond = ({route}) => {
     }
   };
 
+  /**
+   * Removes the specified mail text from the invited users list and updates the state.
+   * @param {string} removeMailText - The mail text to be removed from the invited users list.
+   * @returns None
+   */
   const handleRemoveInvitedUser = removeMailText => {
     let filteredInvitedUsersList = [...invitedUsersList].filter(
       mailText => mailText !== removeMailText,
@@ -225,6 +277,11 @@ const CreateEditEventSecond = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection and deselection of a connection.
+   * @param {any} selectedId - The ID of the connection to select or deselect.
+   * @returns None
+   */
   const onSelectUnSelectConnection = selectedId => {
     let tempList = [...selectedConnectionsIdsList];
     if (tempList.includes(selectedId)) {
@@ -237,6 +294,11 @@ const CreateEditEventSecond = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection and deselection of a group.
+   * @param {selectedId} selectedId - The ID of the group being selected or deselected.
+   * @returns None
+   */
   const onSelectUnSelectGroup = selectedId => {
     let tempList = [...selectedGroupsIdsList];
     if (tempList.includes(selectedId)) {
@@ -249,6 +311,15 @@ const CreateEditEventSecond = ({route}) => {
     }
   };
 
+  /**
+   * Function called when the "Create Event" button is pressed.
+   * Dismisses the keyboard and checks if there is an error with the event visibility type.
+   * If there is an error, displays a toast message.
+   * If there is no error, sets the loader text and isLoading state accordingly.
+   * If there is an eventId, calls the handleEditEvent function.
+   * If there is no eventId, calls the handleCreateEvent function.
+   * @returns None
+   */
   function onPressCreateEvent() {
     Keyboard.dismiss();
     if (eventVisibilityTypeError()) {

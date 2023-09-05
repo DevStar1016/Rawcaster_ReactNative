@@ -1,13 +1,12 @@
 import {
   ActivityIndicator,
   Image,
-  Modal,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import Video from 'react-native-video';
+import Video, {OnLoadData, OnProgressData} from 'react-native-video';
 import SVGIcon from '../Components/SVGIcon';
 import StyledText from '../Components/StyledText';
 import {FONTS} from '../Utilities/Fonts';
@@ -17,30 +16,60 @@ import AudioPlayingGif from '../Assets/Gif/audio_playing.gif';
 import LoaderGif from '../Assets/Gif/loader.gif';
 import AudioStopedImage from '../Assets/Jpeg/audio_stoped.jpeg';
 import {Slider} from '@miblanchard/react-native-slider';
-import {chimeSocketListen} from '../Services/ChimeSocket/ChimeSocket';
-import {ChimeSocketEvents} from '../Services/ChimeSocket/ChimeSocketEvents';
-import {
-  createMeetingRoom,
-  joinMeetingRoom,
-  joinRequest,
-} from '../Services/ChimeSocket/ChimeSocketRequests';
 import {useProfile} from '../Utilities/StoreData';
-import Toast from '../Components/Toast';
-import {getChimeTestUserId} from '../Utilities/Methods';
+import {
+  JoinRequestStatusCodes,
+  UserDataProp,
+} from '../Services/ChimeSocket/ChimeSocketPropTypes';
+import {JOIN_REQUEST_STATUS_CODE} from '../Services/ChimeSocket/ChimeSocketEvents';
+import {MeetingSettingProp} from '../Components/Meeting/MeetingUI';
+
+export type JoiningStatusProp = {
+  text?: string;
+  statusCode?: number | JoinRequestStatusCodes;
+};
+
+type MeetingDetailsProp = {
+  Attendee: any;
+  meeting: any;
+};
+
+type JoinInfoProp = {
+  result?: MeetingDetailsProp;
+  message: string;
+};
+
+export type MeetingJoinedDataProp = {
+  joinInfo: JoinInfoProp;
+  meetingSetting: MeetingSettingProp;
+  joinRequests: any[];
+  AttendeeList: UserDataProp[];
+  message?: string; // if meeting join error - message
+  statusCode?: number | JoinRequestStatusCodes;
+};
+
+type Props = {
+  onClose: () => void;
+  eventItem: any;
+  isRequestingMeeting: boolean;
+  meetingJoiningStatus: JoiningStatusProp;
+  onStartHosting: (eventItem: any) => void;
+};
 
 var isMount = true;
 const StartJoinEventWaitingRoom = ({
   onClose,
   eventItem,
-  handleStartJoinMeeting,
-}) => {
+  onStartHosting,
+  meetingJoiningStatus,
+  isRequestingMeeting = false,
+}: Props) => {
   const profile = useProfile();
-  const videoPlayer = useRef(null);
+  const videoPlayer = useRef<Video>(null);
   const [paused, setpaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
   const [isLoadingMedia, setisLoadingMedia] = useState(true);
-  const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
 
   useEffect(() => {
     isMount = true;
@@ -50,62 +79,18 @@ const StartJoinEventWaitingRoom = ({
     };
   }, []);
 
-  // Meeting Room - Host Accept or Reject Join Request Response Received here - Socket
-  useEffect(() => {
-    chimeSocketListen.on(
-      ChimeSocketEvents.joinRequestAnswer,
-      joinedData => {
-        console.log(joinedData, 'Meeting JOINED DATATTATAA joinRequestAnswer');
-        const meetingJoinedResult = joinedData?.result;
-        if (isMount) {
-          setisRequestingMeeting(false);
-        }
-        if (meetingJoinedResult) {
-          handleStartJoinMeeting(
-            meetingJoinedResult.meeting,
-            meetingJoinedResult.Attendee,
-          );
-        } else {
-          if (joinedData.allow === false) {
-            Toast.fail(joinedData.msg);
-          }
-          onClose();
-        }
-      },
-      [],
-    );
-    return () => {
-      chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
-    };
-  }, []);
-
-  const onStartHosting = () => {
-    if (isMount) {
-      setisRequestingMeeting(true);
-    }
-    if (getIsOwner()) {
-      console.log(eventItem.chime_meeting_id, 'OWNERRRR');
-      createMeetingRoom({
-        meetingId: eventItem.chime_meeting_id,
-      });
-    } else {
-      console.log(eventItem.chime_meeting_id, 'ATTENDEEEEE');
-      joinMeetingRoom({
-        meetingId: eventItem.chime_meeting_id,
-      });
-    }
-    console.log(eventItem.chime_meeting_id, 'REQUESTTTTT');
-    joinRequest({
-      meetingId: eventItem.chime_meeting_id,
-      userId: profile.user_id,
-      user_img: profile.profile_image,
-      user_name: profile.name,
-    });
-  };
-
+  /**
+   * Callback function that is triggered when an error occurs while playing a video.
+   * @returns None
+   */
   function onVideoError() {}
 
-  const getDurationFormat = tempDuration => {
+  /**
+   * Converts a duration in milliseconds to a formatted string in the format "mm:ss".
+   * @param {number} tempDuration - The duration in milliseconds.
+   * @returns {string} - The formatted duration string.
+   */
+  const getDurationFormat = (tempDuration: number) => {
     let time = tempDuration / 1000;
     let minutes = Math.floor(time / 60);
     let timeForSeconds = time - minutes * 60;
@@ -114,7 +99,12 @@ const StartJoinEventWaitingRoom = ({
     return `${minutes}:${secondsReadable}`;
   };
 
-  const playBackStatusUpdate = playbackStatus => {
+  /**
+   * Updates the playback status based on the provided OnProgressData object.
+   * @param {OnProgressData} playbackStatus - The playback status data.
+   * @returns None
+   */
+  const playBackStatusUpdate = (playbackStatus: OnProgressData) => {
     try {
       let currentTime = Math.round(playbackStatus.currentTime);
       let duration = Math.round(playbackStatus.seekableDuration);
@@ -123,16 +113,25 @@ const StartJoinEventWaitingRoom = ({
     } catch (error) {}
   };
 
-  const onLoadComplete = event => {
+  /**
+   * Callback function that is triggered when the loading of data is complete.
+   * It sets the duration of the event in milliseconds.
+   * @param {OnLoadData} event - The event object containing the loaded data.
+   * @returns None
+   */
+  const onLoadComplete = (event: OnLoadData) => {
     try {
       setduration(event.duration * 1000);
-    } catch (error) {
-      console.log(error, 'ONLOAD COMPLETE ERROR');
-    }
+    } catch (error) {}
   };
 
+  /**
+   * A callback function that seeks the video player to the specified seek time.
+   * @param {number} seekTime - The time to seek to, in milliseconds.
+   * @returns None
+   */
   const seekUpdate = useCallback(
-    async seekTime => {
+    async (seekTime: number) => {
       try {
         if (videoPlayer.current)
           videoPlayer.current.seek((seekTime * duration) / 100 / 1000);
@@ -141,8 +140,12 @@ const StartJoinEventWaitingRoom = ({
     [duration],
   );
 
+  /**
+   * Checks if the current user is the owner of the event item.
+   * @returns {boolean} - true if the current user is the owner, false otherwise.
+   */
   const getIsOwner = () => {
-    return profile?.user_id === getChimeTestUserId(eventItem.original_user_id);
+    return profile?.user_id === eventItem.original_user_id;
   };
 
   const getSlider = useMemo(
@@ -285,11 +288,9 @@ const StartJoinEventWaitingRoom = ({
   return (
     <View style={styles.mainContainer}>
       <View style={styles.headerContainer}>
-        {!isRequestingMeeting && (
-          <TouchableOpacity activeOpacity={0.8} onPress={onClose}>
-            <SVGIcon icon="close" />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity activeOpacity={0.8} onPress={onClose}>
+          <SVGIcon icon="close" />
+        </TouchableOpacity>
       </View>
       <View style={styles.titleMessageContainer}>
         <StyledText style={styles.titleText}>
@@ -315,22 +316,68 @@ const StartJoinEventWaitingRoom = ({
           renderMediaControllers()
         )}
       </View>
+      {meetingJoiningStatus.text ? (
+        <View style={styles.statusTextContainer}>
+          <StyledText style={styles.statusText}>
+            {meetingJoiningStatus.text}
+          </StyledText>
+        </View>
+      ) : null}
       {isRequestingMeeting ? (
         <Image
           source={LoaderGif}
           resizeMode="contain"
           style={{width: '80%', height: 50, alignSelf: 'center'}}
         />
+      ) : meetingJoiningStatus.statusCode ===
+        JOIN_REQUEST_STATUS_CODE.host_not_available ? (
+        <View style={styles.rowButtonsContainer}>
+          <SubmitButton
+            buttonText={'Try Again'}
+            bgColor={COLORS.white}
+            borderColor={COLORS.primary}
+            marginHorizontal={10}
+            borderWidth={1}
+            textColor={COLORS.primary}
+            buttonWidth={'30%'}
+            padding={5}
+            onPress={() => {
+              onStartHosting(eventItem);
+            }}
+          />
+          <SubmitButton
+            buttonText={'Cancel'}
+            bgColor={COLORS.white}
+            borderColor={COLORS.primary}
+            marginHorizontal={10}
+            borderWidth={1}
+            textColor={COLORS.primary}
+            buttonWidth={'30%'}
+            padding={5}
+            onPress={onClose}
+          />
+        </View>
       ) : (
         <SubmitButton
-          buttonText={getIsOwner() ? 'START HOSTING' : 'JOIN MEETING'}
+          buttonText={
+            meetingJoiningStatus.text
+              ? 'CLOSE'
+              : getIsOwner()
+              ? 'START HOSTING'
+              : 'JOIN MEETING'
+          }
           bgColor={COLORS.white}
           borderColor={COLORS.primary}
           marginHorizontal={10}
           borderWidth={1}
           textColor={COLORS.primary}
-          marginTop={5}
-          onPress={onStartHosting}
+          onPress={() => {
+            if (meetingJoiningStatus.text) {
+              onClose();
+            } else {
+              onStartHosting(eventItem);
+            }
+          }}
         />
       )}
     </View>
@@ -398,7 +445,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 25,
     backgroundColor: COLORS.white,
-    shadowOffset: {width: 1, height: 13},
     shadowColor: '#18AEDB',
     shadowOffset: {
       width: 0,
@@ -438,5 +484,19 @@ const styles = StyleSheet.create({
     bottom: 10,
     paddingVertical: 5,
     fontFamily: FONTS.DMSans.medium,
+  },
+  statusTextContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  statusText: {
+    fontFamily: FONTS.DMSans.bold,
+    textAlign: 'center',
+    fontSize: 15,
+  },
+  rowButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -31,6 +31,11 @@ const CommentItem = ({
 
   const profile = useProfile();
 
+  /**
+   * Handles the like or unlike action for a comment.
+   * @param {boolean} status - The status indicating whether to like or unlike the comment.
+   * @returns None
+   */
   const handleLikeComment = status => {
     const formData = new FormData();
     formData.append('token', token);

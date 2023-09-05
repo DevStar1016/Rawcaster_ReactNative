@@ -30,6 +30,11 @@ const InviteFanModal = ({setModal}) => {
     };
   }, []);
 
+  /**
+   * Makes an API call to invite a user to Rawcaster.
+   * @param {string} [email=null] - The email of the user to invite.
+   * @returns None
+   */
   const inviteToRawcasterApiCall = (email = null) => {
     if (isMount) {
       setinviteUserText('');
@@ -60,7 +65,6 @@ const InviteFanModal = ({setModal}) => {
         })
         .catch(err => {
           Toast.fail(err.message);
-          console.log(err);
         })
         .finally(e => {
           if (isMount) {
@@ -70,6 +74,11 @@ const InviteFanModal = ({setModal}) => {
     }
   };
 
+  /**
+   * Adds invited users to a list and performs validation checks before adding.
+   * @param {boolean} [isSend=false] - Indicates whether the invitation is being sent or not.
+   * @returns None
+   */
   const addInvitedUsers = (isSend = false) => {
     let newMail = [];
     let mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -119,6 +128,11 @@ const InviteFanModal = ({setModal}) => {
     }
   };
 
+  /**
+   * Removes the specified mail text from the invited users list and updates the state.
+   * @param {string} removeMailText - The mail text to be removed from the invited users list.
+   * @returns None
+   */
   const handleRemoveInvitedUser = removeMailText => {
     let filteredInvitedUsersList = [...invitedUsersList].filter(
       mailText => mailText !== removeMailText,

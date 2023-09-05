@@ -23,7 +23,7 @@ import {useToken} from '../../../Utilities/StoreData';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
 import Toast from '../../../Components/Toast';
-import StartEventHosting from '../../../Modals/StartJoinEventWaitingRoom';
+import StartJoinEventWaitingRoom from '../../../Modals/StartJoinEventWaitingRoom';
 
 var isMount = true;
 var currentPage = 1;
@@ -56,6 +56,11 @@ const EventsSearch = () => {
     eventsSearchAPICall(1);
   }, [searchText]);
 
+  /**
+   * Makes an API call to search for events using the provided search key and page number.
+   * @param {number} [pageNumber=1] - The page number to retrieve events from. Default is 1.
+   * @returns None
+   */
   const eventsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -90,65 +95,11 @@ const EventsSearch = () => {
       });
   };
 
-  const onDeleteEvent = eventId => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('event_id', eventId);
-    deleteEventService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          Toast.success(res.data.msg);
-          if (isMount) {
-            seteventsList(preEventsList => {
-              return [...preEventsList].filter(
-                item => item.event_id !== eventId,
-              );
-            });
-          }
-        } else if (res.data.status === 0) {
-          Toast.fail(res.data.msg);
-        }
-      })
-      .catch(e => {
-        Toast.fail(e.message);
-      })
-      .finally(() => {
-        if (isMount) {
-          setisActionLoading(false);
-        }
-      });
-  };
-
-  const onEditEvent = id => {
-    navigation.navigate('CreateEditSearchEvent', {
-      eventId: id,
-      isFromEventSearch: true,
-    });
-  };
-
-  const onPressDelete = eventId =>
-    Alert.alert(
-      'Delete!',
-      'Do you want to delete this talkshow?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => {},
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => {
-            if (isMount) {
-              setisActionLoading(true);
-            }
-            onDeleteEvent(eventId);
-          },
-        },
-      ],
-      {cancelable: false},
-    );
-
+  /**
+   * Handles the start join event button press event.
+   * @param {object} eventDetails - The details of the event.
+   * @returns None
+   */
   const onPressStartJoinEvent = eventDetails => {
     if (isMount) {
       setstartEventDetails(eventDetails);
@@ -156,6 +107,12 @@ const EventsSearch = () => {
     }
   };
 
+  /**
+   * Function called when refreshing the page or data. It resets the current page number
+   * and total number of pages, and then makes an API call to retrieve the events data
+   * for the first page.
+   * @returns None
+   */
   const onRefresh = () => {
     currentPage = 1;
     totalPages = 1;
@@ -165,6 +122,12 @@ const EventsSearch = () => {
     eventsSearchAPICall(1);
   };
 
+  /**
+   * Callback function triggered when the end of the list is reached.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages, it sets the isLoadMore state to true and makes an API call to fetch the events for the next page.
+   * @returns None
+   */
   const onEndReached = () => {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
@@ -174,6 +137,7 @@ const EventsSearch = () => {
       }
     }
   };
+
   const renderFooter = () => {
     return isLoadMore ? (
       <ActivityIndicator size={'small'} color={COLORS.primary} />
@@ -217,12 +181,6 @@ const EventsSearch = () => {
                 isEnableBorder
                 item={item}
                 isFromGlobalSearch={true}
-                // onPressEdit={() => {
-                //   onEditEvent(item?.event_id);
-                // }}
-                // onPressDelete={() => {
-                //   onPressDelete(item?.event_id);
-                // }}
                 onPressStartJoinEvent={() => {
                   onPressStartJoinEvent(item);
                 }}
@@ -255,7 +213,7 @@ const EventsSearch = () => {
         }}
         style={{backgroundColor: COLORS.white}}>
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
-          <StartEventHosting
+          <StartJoinEventWaitingRoom
             eventItem={startEventDetails}
             onStartHosting={() => {}}
             onClose={() => {
@@ -276,12 +234,10 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    // paddingVertical: 5,
-    // paddingHorizontal: 15,
   },
   divider: {
     backgroundColor: COLORS.borderColor,
-    height: 1,
+    height: 15,
   },
   emptyComponent: {
     flex: 1,

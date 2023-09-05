@@ -83,11 +83,21 @@ const ConectionRequestModal = ({onClose, socketData}) => {
     }
   }, [responseList]);
 
+  /**
+   * Retrieves the user ID from the selected index in the requests list.
+   * @param {number} selectedIndex - The index of the selected item in the requests list.
+   * @returns The user ID associated with the selected index, or undefined if not found.
+   */
   const getUserId = selectedIndex => {
     return [...requestsList].find((_, index) => index === selectedIndex)
       ?.user_id;
   };
 
+  /**
+   * Scrolls the connections list to the specified index.
+   * @param {number} index - The index to scroll to.
+   * @returns None
+   */
   const scrollToIndex = index => {
     conectionsListRef.current?.scrollToIndex({
       index,
@@ -97,6 +107,12 @@ const ConectionRequestModal = ({onClose, socketData}) => {
     setindex(index);
   };
 
+  /**
+   * Handles the response to a friend request.
+   * @param {string} responseType - The type of response (accept or reject).
+   * @param {number} selectedIndex - The index of the selected friend request.
+   * @returns None
+   */
   const handleResponseFriendRequest = (responseType, selectedIndex) => {
     // 1-accept, 2 - reject, 3 - block
     setresponseList(preList => [
@@ -112,7 +128,6 @@ const ConectionRequestModal = ({onClose, socketData}) => {
     formData.append('response', responseType);
     respondToFriendRequestsService(formData)
       .then(res => {
-        console.log(res.data, 'RESPONSE');
         if (res.data.status === 0) {
           setresponseList(preList => {
             return [...preList].filter(
@@ -131,6 +146,11 @@ const ConectionRequestModal = ({onClose, socketData}) => {
       .finally(() => {});
   };
 
+  /**
+   * Returns the count of pending requests.
+   * If the count is greater than 99, it returns '99+'.
+   * @returns {string | number} - The count of pending requests.
+   */
   const getPendingRequestsCount = () => {
     if (requestsList.length > 99) {
       return '99+';
@@ -138,6 +158,10 @@ const ConectionRequestModal = ({onClose, socketData}) => {
     return requestsList.length;
   };
 
+  /**
+   * Retrieves the completed action type from the response list based on the user's index.
+   * @returns The completed action type if found, otherwise 0.
+   */
   const getCompletedAction = () => {
     const ind = [...responseList].findIndex(
       item => item.id === getUserId(index),

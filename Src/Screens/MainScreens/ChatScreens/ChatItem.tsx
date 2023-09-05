@@ -49,6 +49,10 @@ const ChatItem = ({
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const videoPlayerRef = useRef<any>(null);
 
+  /**
+   * A dummy view component that renders a View element with custom styles.
+   * @returns {JSX.Element} - The rendered dummy view component.
+   */
   const DummyView = () => {
     return (
       <View
@@ -60,6 +64,11 @@ const ChatItem = ({
     );
   };
 
+  /**
+   * Handles playing audio from the given URL.
+   * @param {any} url - The URL of the audio file to play.
+   * @returns None
+   */
   const handlePlayAudio = async (url: any) => {
     handleStopAudio();
     try {
@@ -79,6 +88,12 @@ const ChatItem = ({
     }
   };
 
+  /**
+   * Handles stopping the audio playback.
+   * Stops the audio player and removes the playback listener.
+   * Sets the isPaused and isPlaying states to false.
+   * @returns None
+   */
   const handleStopAudio = () => {
     try {
       audioPlayerRef.current?.stopPlayer();

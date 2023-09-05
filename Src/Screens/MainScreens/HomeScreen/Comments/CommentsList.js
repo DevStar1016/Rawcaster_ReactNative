@@ -62,6 +62,14 @@ const CommentsList = ({
   }, []);
 
   useEffect(() => {
+    /**
+     * Handles the back action when the user presses the back button.
+     * This function updates the state of isOpenEmojiContainer and enables/disables
+     * content panning gesture based on the current state.
+     * If isOpenEmojiContainer is true, it sets isOpenEmojiContainer to false and enables
+     * content panning gesture. If isOpenEmojiContainer is false, it calls onPressBack().
+     * @returns {boolean} - Returns true after handling the back action.
+     */
     const backAction = () => {
       let tempIsOpenedEmoji;
       setisOpenEmojiContainer(pre => {
@@ -92,6 +100,10 @@ const CommentsList = ({
     commentsListAPICall();
   }, []);
 
+  /**
+   * Makes an API call to retrieve the comments list for a specific nugget.
+   * @returns None
+   */
   const commentsListAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -113,6 +125,14 @@ const CommentsList = ({
       });
   };
 
+  /**
+   * Handles the posting of a comment to the server.
+   * @param {string} commentText - The text of the comment to be posted.
+   * @param {object} replyCommentData - The data of the comment being replied to, if any.
+   * @param {string} generatedTempId - The temporary ID assigned to the comment before it is posted.
+   * @param {array} updatedCommentsList - The updated list of comments.
+   * @returns None
+   */
   const handlepostComment = (
     commentText = '',
     replyCommentData = null,
@@ -165,6 +185,10 @@ const CommentsList = ({
       .finally(() => {});
   };
 
+  /**
+   * Handles the action of sending a comment.
+   * @returns None
+   */
   const onSendComment = () => {
     settypedText(preText => {
       const tempReplyData = replyData ? {...replyData} : null;
@@ -210,42 +234,55 @@ const CommentsList = ({
     });
   };
 
+  /**
+   * Handles the deletion of a comment.
+   * @param {string} commentId - The ID of the comment to be deleted.
+   * @param {Array} preCommentsList - The list of comments before the deletion.
+   * @returns None
+   */
   const handleDeleteComment = (commentId, preCommentsList) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('comment_id', commentId);
-    console.log(formData, 'DELETE');
     deleteNuggetCommentService(formData)
-      .then(res => {
-        console.log(res.data, 'DELETE');
-      })
+      .then(res => {})
       .catch(e => {
         if (isMount) {
           setcommentsList(preCommentsList);
         }
         Toast.fail(e.message);
-        console.log(e, 'ERROR');
       });
   };
 
+  /**
+   * Handles the editing of a comment by sending a request to the server to update the comment.
+   * @param {string} commentId - The ID of the comment to be edited.
+   * @param {string} comment - The updated content of the comment.
+   * @param {Array} preCommentsList - The previous list of comments before the edit.
+   * @returns None
+   */
   const handleEditComment = (commentId, comment, preCommentsList) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('comment_id', commentId);
     formData.append('comment', comment);
     editNuggetCommentService(formData)
-      .then(res => {
-        console.log(res.data, 'EDITTTT RESPONSE');
-      })
+      .then(res => {})
       .catch(e => {
         if (isMount) {
           setcommentsList(preCommentsList);
         }
         Toast.fail(e.message);
-        console.log(e, 'ERROR');
       });
   };
 
+  /**
+   * Handles the deletion of a comment.
+   * @param {object} parentItem - The parent comment object.
+   * @param {object} deleteItem - The comment object to be deleted.
+   * @param {boolean} isReply - Indicates whether the comment is a reply or not.
+   * @returns None
+   */
   const onDeleteComment = (parentItem, deleteItem, isReply) => {
     const preCommentsList = [...commentsList]; // for API Catch Error
     let updatedCommentsList = [...preCommentsList];
@@ -283,6 +320,11 @@ const CommentsList = ({
     handleDeleteComment(deleteItem.comment_id, preCommentsList);
   };
 
+  /**
+   * Handles the editing of a comment by updating the comments list and calling the
+   * handleEditComment function.
+   * @returns None
+   */
   const onEditComment = () => {
     settypedText(preTypedText => {
       const editedItem = {...editData};

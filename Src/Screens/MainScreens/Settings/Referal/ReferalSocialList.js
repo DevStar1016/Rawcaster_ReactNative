@@ -139,7 +139,6 @@ const ReferalSocialList = () => {
         })
         .catch(err => {
           Toast.fail(err.message);
-          console.log(err);
         })
         .finally(e => {
           if (isMount) {
@@ -164,30 +163,21 @@ const ReferalSocialList = () => {
         type: 'text/*',
         subject: 'Rawcaster - Invite from ' + profile?.name,
       })
-        .then(res => {
-          console.log(socialMedia, 'Share RESPONSE', res);
-        })
-        .catch(err => {
-          console.log(socialMedia, 'Share Error', err);
-        });
+        .then(res => {})
+        .catch(err => {});
     } else {
       Linking.openURL(socialUrl)
         .then(() => {})
         .catch(e => {
-          console.log(e, 'ERROR IN');
           if (isWhatsApp) {
             if (IS_IOS) {
               Linking.openURL(APPSTORE_WHATSAPP_LINK)
                 .then(() => {})
-                .catch(e => {
-                  console.log(e, 'ERROR IN WHATSAPP');
-                });
+                .catch(e => {});
             } else {
               Linking.openURL(PLAYSTORE_WHATSAPP_LINK)
                 .then(() => {})
-                .catch(e => {
-                  console.log(e, 'ERROR IN WHATSAPP');
-                });
+                .catch(e => {});
             }
           }
         });
@@ -285,7 +275,6 @@ const ReferalSocialList = () => {
         )
           .then(response => {
             //statement
-            console.log(response);
             getEmail(token);
           })
           .catch(error => {
@@ -295,7 +284,6 @@ const ReferalSocialList = () => {
               setisLoadMore(false);
             }
             //Error Response
-            console.log(error);
           });
       }
     }
@@ -323,7 +311,6 @@ const ReferalSocialList = () => {
       })
       .catch(error => {
         //Error Response
-        console.log('sdsfsfsdfds', error);
       })
       .finally(() => {
         if (isMount) {
@@ -340,7 +327,6 @@ const ReferalSocialList = () => {
     } else {
       PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS)
         .then(res => {
-          console.log(res);
           if (res === PermissionsAndroid.RESULTS.GRANTED) {
             if (isMount) {
               getPhoneContacts();

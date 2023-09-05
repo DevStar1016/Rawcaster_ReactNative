@@ -105,6 +105,10 @@ const ClaimAccount = ({route}) => {
     };
   }, []);
 
+  /**
+   * Handles the process of claiming an account.
+   * @returns None
+   */
   function handleClaimAccount() {
     const formData = new FormData();
     formData.append('token', token);
@@ -118,17 +122,19 @@ const ClaimAccount = ({route}) => {
     addClaimAccountService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          let tempUnclaimedList = [...unclaimedAccountsList];
-          const tempIndex = tempUnclaimedList.findIndex(
-            item => item.user_id === influencerId,
-          );
-          if (tempIndex !== -1) {
-            tempUnclaimedList[tempIndex] = {
-              ...tempUnclaimedList[tempIndex],
-              unclaimed_status: 1,
-            };
+          if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
+            let tempUnclaimedList = [...unclaimedAccountsList];
+            const tempIndex = tempUnclaimedList.findIndex(
+              item => item.user_id === influencerId,
+            );
+            if (tempIndex !== -1) {
+              tempUnclaimedList[tempIndex] = {
+                ...tempUnclaimedList[tempIndex],
+                unclaimed_status: 1,
+              };
+            }
+            dispatch(setUnclaimedAccountsList(tempUnclaimedList));
           }
-          dispatch(setUnclaimedAccountsList(tempUnclaimedList));
 
           setmessageBoxData({
             isOpen: true,
@@ -148,6 +154,10 @@ const ClaimAccount = ({route}) => {
       });
   }
 
+  /**
+   * Handles the verification of a user account by sending the necessary form data to the server.
+   * @returns None
+   */
   function handleVerifyAccount() {
     const formData = new FormData();
     formData.append('token', token);
@@ -180,6 +190,15 @@ const ClaimAccount = ({route}) => {
       });
   }
 
+  /**
+   * Handles getting the current location address.
+   * If the component is mounted, it sets the isFetchingLocation state to true.
+   * It then calls the getLocationAddress function to retrieve the location address.
+   * If the component is still mounted, it sets the 'location' field value to the retrieved geoLocation.
+   * If there is an error, it displays a toast message with the error message.
+   * Finally, if the component is still mounted, it sets the isFetchingLocation state to false.
+   * @returns None
+   */
   const handleGetCurrentLocationAddress = () => {
     if (isMount) {
       setisFetchingLocation(true);
@@ -200,6 +219,11 @@ const ClaimAccount = ({route}) => {
       });
   };
 
+  /**
+   * Closes the message box and navigates back to the previous screen.
+   * If the message box is mounted, it sets the message box data to indicate that it is closed.
+   * @returns None
+   */
   function closeMessageBox() {
     if (isMount) {
       setmessageBoxData({

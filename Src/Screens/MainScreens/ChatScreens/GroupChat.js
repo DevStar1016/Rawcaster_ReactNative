@@ -163,6 +163,11 @@ const GroupChat = ({route}) => {
     };
   }, []);
 
+  /**
+   * Handles the selection of media from the camera and adds it to the selected media list.
+   * @param {Object} mediaItem - The selected media item.
+   * @returns None
+   */
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
@@ -176,6 +181,11 @@ const GroupChat = ({route}) => {
     ]);
   }
 
+  /**
+   * Handles the selection of a message by toggling its ID in the selectedMsgIds array.
+   * @param {string} msgId - The ID of the message to be selected/deselected.
+   * @returns None
+   */
   function handleSelectMessage(msgId) {
     let tempSelectedIds = [...selectedMsgIds];
     if (tempSelectedIds.includes(msgId)) {
@@ -186,6 +196,10 @@ const GroupChat = ({route}) => {
     setselectedMsgIds([...tempSelectedIds]);
   }
 
+  /**
+   * Checks if the chat list includes any media items that have been selected.
+   * @returns {boolean} - true if there is at least one selected media item in the chat list, false otherwise.
+   */
   function isIncludeMedia() {
     return [...chatList].reduce((resultValue, item) => {
       if (
@@ -198,6 +212,10 @@ const GroupChat = ({route}) => {
     }, false);
   }
 
+  /**
+   * Determines whether the copy functionality is enabled based on the selected message IDs.
+   * @returns {boolean} - True if the copy functionality is enabled, false otherwise.
+   */
   function getIsEnableCopy() {
     if (selectedMsgIds.length > 0) {
       return !isIncludeMedia();
@@ -205,6 +223,11 @@ const GroupChat = ({route}) => {
     return false;
   }
 
+  /**
+   * Checks if the given message ID belongs to the current user.
+   * @param {number} msgId - The ID of the message to check.
+   * @returns {boolean} - True if the message belongs to the current user, false otherwise.
+   */
   function isSelfMsgId(msgId) {
     const tempChatList = [...chatList];
     const tempMessage = tempChatList.find(item => item.msgId === msgId);
@@ -214,6 +237,13 @@ const GroupChat = ({route}) => {
     return false;
   }
 
+  /**
+   * Checks if the edit feature is enabled based on the following conditions:
+   * - There is only one selected message ID
+   * - The selected message does not include media
+   * - The selected message ID belongs to the current user
+   * @returns {boolean} True if the edit feature is enabled, false otherwise.
+   */
   function getIsEnableEdit() {
     return (
       selectedMsgIds.length === 1 &&
@@ -222,6 +252,17 @@ const GroupChat = ({route}) => {
     );
   }
 
+  /**
+   * Handles copying selected messages to the clipboard.
+   * - Filters the chatList array to include only the selected messages.
+   * - Maps the selected messages to extract their content.
+   * - Reverses the order of the contents.
+   * - Converts the contents to a comma-separated string.
+   * - Sets the string to the clipboard.
+   * - Displays a success toast message indicating the number of messages copied.
+   * - Clears the selectedMsgIds array.
+   * @returns None
+   */
   function handleCopyOnClipboard() {
     const tempContentsList = [...chatList]
       .filter(item => selectedMsgIds.includes(item.msgId))
@@ -238,6 +279,11 @@ const GroupChat = ({route}) => {
     setselectedMsgIds([]);
   }
 
+  /**
+   * Retrieves the username associated with a given message ID.
+   * @param {string} msgId - The ID of the message.
+   * @returns {string} The username associated with the message, or an empty string if the message is from the current user or if the message ID is not found in the chat list.
+   */
   function getMsgUserNameText(msgId) {
     if (isSelfMsgId(msgId)) {
       return '';
@@ -250,6 +296,14 @@ const GroupChat = ({route}) => {
     return '';
   }
 
+  /**
+   * Handles the deletion of messages.
+   * Checks if the selected message IDs contain messages from other users.
+   * Constructs an array of button options for the Alert dialog.
+   * If there are no messages from other users, adds an additional button option to delete for everyone.
+   * Displays an Alert dialog to confirm the deletion of the selected messages.
+   * @returns None
+   */
   function onDeleteMessages() {
     const isContainOtherUsersMessageIds = [...selectedMsgIds].reduce(
       (result, id) => {
@@ -281,6 +335,10 @@ const GroupChat = ({route}) => {
     );
   }
 
+  /**
+   * Retrieves the list of display names from the group members list.
+   * @returns {string} A comma-separated string of display names.
+   */
   function getMembersListText() {
     return groupData?.group_members_list
       ?.map(item => item.display_name)
@@ -310,7 +368,6 @@ const GroupChat = ({route}) => {
       />
     );
   };
-  console.log(groupData, 'groupData');
 
   return (
     <HOCView

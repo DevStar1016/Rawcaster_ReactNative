@@ -26,6 +26,10 @@ const FansProfilesContainer = ({profileSize = 40, userId}) => {
     return () => (isMount = false);
   }, []);
 
+  /**
+   * Makes an API call to retrieve the follow list.
+   * @returns None
+   */
   const getFollowListAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -50,6 +54,11 @@ const FansProfilesContainer = ({profileSize = 40, userId}) => {
       });
   };
 
+  /**
+   * Calculates the number of fans based on the count in the fansListData object.
+   * If the count is greater than 99, it returns '99+'.
+   * @returns {number|string} - The number of fans or '99+' if the count is greater than 99.
+   */
   const getFansCount = () => {
     let tempCount = fansListData.count - 3;
     if (tempCount > 99) {
@@ -93,7 +102,6 @@ export default FansProfilesContainer;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
     paddingHorizontal: 20,
     flexDirection: 'row',
   },

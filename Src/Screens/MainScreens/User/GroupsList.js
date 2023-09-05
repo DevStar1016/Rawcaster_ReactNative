@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   LayoutAnimation,
   RefreshControl,
@@ -10,7 +11,11 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
-import {useGroupsList, useToken} from '../../../Utilities/StoreData';
+import {
+  useGroupListLoading,
+  useGroupsList,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {COLORS} from '../../../Utilities/Colors';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import StyledText from '../../../Components/StyledText';
@@ -27,6 +32,7 @@ const GroupsList = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
+  const isGroupListLoading = useGroupListLoading();
   const groupsList = useGroupsList();
   const {searchText} = useMyConnections();
   const [refreshing, setrefreshing] = useState(false);
@@ -41,6 +47,10 @@ const GroupsList = () => {
     };
   }, []);
 
+  /**
+   * Makes an API call to retrieve a list of friend groups.
+   * @returns None
+   */
   function groupsListAPICall() {
     const formData = new FormData();
     formData.append('token', token);
@@ -59,6 +69,11 @@ const GroupsList = () => {
       });
   }
 
+  /**
+   * Function called when refreshing the page.
+   * If the component is mounted, it sets the refreshing state to true and makes an API call to retrieve the list of groups.
+   * @returns None
+   */
   function onRefresh() {
     if (isMount) {
       setrefreshing(true);
@@ -66,6 +81,11 @@ const GroupsList = () => {
     }
   }
 
+  /**
+   * Event handler for the scroll event.
+   * @param {Object} event - The scroll event object.
+   * @returns None
+   */
   const onScrollEvent = event => {
     const CustomLayoutAnimation = {
       duration: 300,
@@ -96,6 +116,13 @@ const GroupsList = () => {
     listViewOffset.current = currentOffset;
   };
 
+  /**
+   * Retrieves a list of groups based on the provided search text.
+   * If the search text is provided and not empty, it filters the groups list
+   * based on the group name that includes the search text (case-insensitive).
+   * If the search text is not provided or empty, it returns the entire groups list.
+   * @returns {Array} - A list of groups that match the search text (if provided).
+   */
   function getList() {
     if (searchText && searchText.trim()) {
       return [...groupsList].filter(item =>
@@ -180,7 +207,11 @@ const GroupsList = () => {
         />
       ) : (
         <View style={styles.emptyListContainer}>
-          <StyledText style={styles.emptyListText}>No data found</StyledText>
+          {isGroupListLoading ? (
+            <ActivityIndicator size={'large'} color={COLORS.white} />
+          ) : (
+            <StyledText style={styles.emptyListText}>No data found</StyledText>
+          )}
         </View>
       )}
       {isShowAddButton && (

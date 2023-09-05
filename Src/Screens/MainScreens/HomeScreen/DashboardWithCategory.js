@@ -46,6 +46,10 @@ import {
   setNuggetsLoading,
 } from '../../../Store/Slices/NuggetsListSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import {
+  resetFollowingUsersList,
+  setFollowingUsersList,
+} from '../../../Store/Slices/HomeSlice';
 
 var currentPage = 1;
 const DashboardWithCategory = ({route}) => {
@@ -84,7 +88,14 @@ const DashboardWithCategory = ({route}) => {
     minimumViewTime: 500,
     viewAreaCoveragePercentThreshold: 70,
   });
+  const nuggetContentController = useRef(null);
 
+  /**
+   * Callback function that is called when the viewable items change in a FlatList component. It updates the focusedNuggetUserId state based on the
+   * selected nugget and updates the viewableItem state with the currently viewable item.
+   * @param {Array} viewableItems - An array of viewable items in the list.
+   * @returns None
+   */
   const onViewRef = useRef(viewableItems => {
     if (viewableItems?.viewableItems?.length > 0) {
       const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
@@ -106,7 +117,6 @@ const DashboardWithCategory = ({route}) => {
       });
     }
   });
-  const nuggetContentController = useRef(null);
 
   useEffect(() => {
     dispatch(setIsBottomTabBarAbsolute(true));
@@ -145,11 +155,13 @@ const DashboardWithCategory = ({route}) => {
   useEffect(() => {
     if (nuggetType === 1 || nuggetType === 2) {
       currentPage = 1;
+      dispatch(resetFollowingUsersList([]));
       dispatch(resetNuggetsTotalPages(categoryName));
       dispatch(setNuggetsLoading({categoryName, status: true}));
       dispatch(
         setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
       );
+      resetViewabilityItem();
       listNuggetsAPICall(1);
     }
   }, [token, nuggetType]);
@@ -175,10 +187,19 @@ const DashboardWithCategory = ({route}) => {
     return headerContainerHeight ?? headerHeight;
   }
 
+  /**
+   * Scrolls the nuggets list to the top.
+   * @returns None
+   */
   function scrollNuggetsListToTop() {
     flatlistRef.current.scrollToOffset({animated: false, offset: 0});
   }
 
+  /**
+   * Makes an API call to retrieve a list of nuggets.
+   * @param {number} [pageNumber=1] - The page number of the results to retrieve.
+   * @returns None
+   */
   function listNuggetsAPICall(pageNumber = 1) {
     if (controller) {
       controller.abort();
@@ -199,6 +220,11 @@ const DashboardWithCategory = ({route}) => {
     );
   }
 
+  /**
+   * Updates the view status and total views count of a nugget with the given ID.
+   * @param {string} nuggetId - The ID of the nugget to view.
+   * @returns None
+   */
   function onViewNugget(nuggetId) {
     let tempNuggetsList = [...getNuggetsList()];
 
@@ -223,6 +249,10 @@ const DashboardWithCategory = ({route}) => {
     handleViewNugget(nuggetId);
   }
 
+  /**
+   * Resets the viewability item by setting the nugget_id to an empty string and viewed to false.
+   * @returns None
+   */
   const resetViewabilityItem = () => {
     setviewableItem({
       nugget_id: '',
@@ -230,6 +260,11 @@ const DashboardWithCategory = ({route}) => {
     });
   };
 
+  /**
+   * Handles playing audio from the given URL.
+   * @param {string} url - The URL of the audio file to play.
+   * @returns None
+   */
   const handlePlayAudio = async url => {
     handleStopAudio();
     try {
@@ -247,6 +282,12 @@ const DashboardWithCategory = ({route}) => {
     }
   };
 
+  /**
+   * Stops the audio playback and removes the playback listener.
+   * If an error occurs during the process, it is caught and ignored.
+   * Finally, sets the 'isReadMuted' state to false.
+   * @returns None
+   */
   const handleStopAudio = () => {
     try {
       audioPlayerRef.current?.stopPlayer();
@@ -257,17 +298,24 @@ const DashboardWithCategory = ({route}) => {
     }
   };
 
+  /**
+   * Handles the view of a nugget by sending a request to the server.
+   * @param {number} nuggetId - The ID of the nugget to view.
+   * @returns None
+   */
   function handleViewNugget(nuggetId) {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', JSON.stringify([nuggetId]));
     addNuggetViewService(formData)
       .then(res => {})
-      .catch(e => {
-        console.log(e, 'Nugget VIEW ERRORRRR');
-      });
+      .catch(e => {});
   }
 
+  /**
+   * Retrieves a list of nuggets, applying any necessary filters and modifications.
+   * @returns {Array} - The filtered and modified list of nuggets.
+   */
   function getNuggetsList() {
     let tempNuggetsList = [...nuggetsList];
 
@@ -316,8 +364,20 @@ const DashboardWithCategory = ({route}) => {
     return tempNuggetsList;
   }
 
+  /**
+   * Function called when refreshing the page.
+   * Resets the current page number to 1.
+   * Resets the following users list.
+   * Resets the total pages for nuggets in the specified category.
+   * Sets the loading status for nuggets in the specified category to true.
+   * Resets the nuggets list for the specified category.
+   * Resets the viewability item.
+   * Calls the API to list nuggets with page number 1.
+   * @returns None
+   */
   function onRefresh() {
     currentPage = 1;
+    dispatch(resetFollowingUsersList([]));
     dispatch(resetNuggetsTotalPages(categoryName));
     dispatch(setNuggetsLoading({categoryName, status: true}));
     dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
@@ -325,6 +385,12 @@ const DashboardWithCategory = ({route}) => {
     listNuggetsAPICall(1);
   }
 
+  /**
+   * Function called when reaching the end of a list or page.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages, it sets the isLoadMore state to true and makes an API call to load the next page of data.
+   * @returns None
+   */
   function onEndReached() {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {

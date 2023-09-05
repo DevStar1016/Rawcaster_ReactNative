@@ -69,6 +69,11 @@ const CustomHomeHeader = ({
   const insets = useInsets();
   const profile = useProfile();
 
+  /**
+   * Checks if a user is logged in by verifying the presence of a token.
+   * If the user is not logged in, it dispatches an action to set the isOpenLoginAlert state to true.
+   * @returns {boolean} - true if the user is logged in, false otherwise.
+   */
   const isLogin = () => {
     if (token) {
       return true;

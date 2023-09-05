@@ -127,6 +127,11 @@ RCT_EXPORT_METHOD(setCameraOn:(BOOL)isOn)
 
 }
 
+RCT_EXPORT_METHOD(switchCamera)
+{
+  [meetingSession.audioVideo switchCamera];
+}
+
 RCT_EXPORT_METHOD(bindVideoView:(NSNumber * _Nonnull)viewIdentifier tileId:(NSNumber * _Nonnull)tileId)
 {
   dispatch_async(dispatch_get_main_queue(), ^{

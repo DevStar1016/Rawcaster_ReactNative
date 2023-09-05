@@ -74,6 +74,10 @@ const EmailPhoneVerification = ({route}) => {
     }
   }, []);
 
+  /**
+   * Resends an OTP (One-Time Password) API call to the server.
+   * @returns None
+   */
   const resendOTPAPICall = () => {
     if (isMount) {
       setisLoading(true);
@@ -111,6 +115,11 @@ const EmailPhoneVerification = ({route}) => {
       });
   };
 
+  /**
+   * Handles the OTP verification process.
+   * @param {object} values - The values containing the OTP and other necessary data.
+   * @returns None
+   */
   const handleOtpVerification = values => {
     if (isMount) {
       setisLoading(true);
@@ -125,7 +134,6 @@ const EmailPhoneVerification = ({route}) => {
     if (alt_token_id) {
       formData.append('alt_token_id', alt_token_id);
     }
-    console.log(formData, 'FORMDATA SIGNUP VERIFY');
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {

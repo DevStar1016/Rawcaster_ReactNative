@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   LayoutAnimation,
   Modal,
@@ -12,6 +13,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   useBlockedUserIds,
   useConnectionsList,
+  useConnectionsListLoading,
   usePendingFriendRequests,
   useToken,
 } from '../../../Utilities/StoreData';
@@ -47,6 +49,7 @@ const ConnectionsList = () => {
   const blockedUserIds = useBlockedUserIds();
   const pendingConnectionRequests = usePendingFriendRequests();
   const connectionsList = useConnectionsList();
+  const isLoadingConnectionsList = useConnectionsListLoading();
   const {searchText} = useMyConnections();
   const [refreshing, setrefreshing] = useState(false);
   const [actionLoaderText, setactionLoaderText] = useState('');
@@ -127,9 +130,7 @@ const ConnectionsList = () => {
           dispatch(setPendingFriendRequests(res[1].data.pending_requests));
         }
       })
-      .catch(e => {
-        console.log(e, 'ERROR');
-      })
+      .catch(e => {})
       .finally(() => {
         if (isMount) {
           setrefreshing(false);
@@ -205,7 +206,6 @@ const ConnectionsList = () => {
         activeOpacity={0.8}
         disabled={typeof item.online === typeof undefined}
         onPress={() => {
-          console.log(item, 'ITEM');
           // navigation.navigate('UserChat', {
           //   userData: item,
           // });
@@ -296,7 +296,11 @@ const ConnectionsList = () => {
         />
       ) : (
         <View style={styles.emptyListContainer}>
-          <StyledText style={styles.emptyListText}>No data found</StyledText>
+          {isLoadingConnectionsList ? (
+            <ActivityIndicator size={'large'} color={COLORS.white} />
+          ) : (
+            <StyledText style={styles.emptyListText}>No data found</StyledText>
+          )}
         </View>
       )}
       {isShowAddButton && (

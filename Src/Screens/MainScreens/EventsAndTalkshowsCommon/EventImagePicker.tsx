@@ -49,6 +49,12 @@ const EventImagePicker = ({
 }: Props) => {
   const settings = useSettings();
 
+  /**
+   * Handles the image picker functionality.
+   * Opens the image picker and allows the user to select a photo.
+   * Sets the selected image to the chosen photo.
+   * @returns None
+   */
   const handleImagePicker = () => {
     ImageVideoPicker({
       mediaType: 'photo',
@@ -61,6 +67,10 @@ const EventImagePicker = ({
       .catch(e => {});
   };
 
+  /**
+   * Retrieves the image URI based on the selected image and settings.
+   * @returns {string | null} The image URI, or null if no image is found.
+   */
   const getImage = () => {
     if (selectedImage) {
       return selectedImage.uri;

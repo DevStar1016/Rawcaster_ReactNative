@@ -95,6 +95,10 @@ const DropDownPicker = ({
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
   const [isOpenDatePicker, setisOpenDatePicker] = useState(false);
 
+  /**
+   * Returns the text value based on the provided conditions.
+   * @returns {string} The text value.
+   */
   const getValueText = () => {
     if (value) {
       if (fieldName) {

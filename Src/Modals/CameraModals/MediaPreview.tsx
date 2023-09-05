@@ -65,6 +65,11 @@ const MediaPreview = ({
   const [progress, setProgress] = useState(0);
   const [duration, setduration] = useState(0);
 
+  /**
+   * Opens the photo editor and allows the user to edit the given media data.
+   * @returns None
+   * @throws None
+   */
   const openEditer = async () => {
     try {
       const resultUri: any = await PhotoEditor.open({
@@ -80,11 +85,14 @@ const MediaPreview = ({
         ...pre,
         uri: getUrlWithFilePrefix(resultUri),
       }));
-    } catch (e) {
-      console.log(e, 'ERRORR');
-    }
+    } catch (e) {}
   };
 
+  /**
+   * Converts a duration in milliseconds to a formatted string in the format "mm:ss".
+   * @param {number} tempDuration - The duration in milliseconds.
+   * @returns {string} The formatted duration string.
+   */
   const getDurationFormat = (tempDuration: any) => {
     let time = tempDuration / 1000;
     let minutes = Math.floor(time / 60);
@@ -94,6 +102,11 @@ const MediaPreview = ({
     return `${minutes}:${secondsReadable}`;
   };
 
+  /**
+   * A callback function that seeks to a specific time in the video.
+   * @param {any} seekTime - The time to seek to in the video.
+   * @returns None
+   */
   const seekUpdate = useCallback(
     async (seekTime: any) => {
       try {
@@ -103,6 +116,11 @@ const MediaPreview = ({
     [duration],
   );
 
+  /**
+   * Updates the playback status of a media player.
+   * @param {any} playbackStatus - The current playback status object.
+   * @returns None
+   */
   const playBackStatusUpdate = (playbackStatus: any) => {
     try {
       let currentTime = Math.round(playbackStatus.currentTime);
@@ -112,15 +130,18 @@ const MediaPreview = ({
     } catch (error) {}
   };
 
+  /**
+   * Callback function that is triggered when the video has finished loading.
+   * @param {any} event - The event object containing information about the video.
+   * @returns None
+   */
   const onLoadComplete = (event: any) => {
     try {
       if (videoPlayer.current) {
         videoPlayer.current.seek(0);
       }
       setduration(event.duration * 1000);
-    } catch (error) {
-      console.log(error, 'ONLOAD COMPLETE ERROR');
-    }
+    } catch (error) {}
   };
 
   const TopActionButton = ({

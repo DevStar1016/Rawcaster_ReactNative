@@ -411,6 +411,10 @@ export const attendees = (data: FormData) => {
   return axios.post('attendees', data);
 };
 
-export const deleteMeeting = (data: FormData) => {
-  return axios.post('delete_meeting', data);
+export const endMeeting = (data: FormData) => {
+  return axios.post('end_meeting', data);
+};
+
+export const exitMeeting = (data: FormData) => {
+  return axios.post('exit_meeting', data);
 };

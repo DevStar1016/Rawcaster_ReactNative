@@ -21,9 +21,7 @@ const WebUrlLoaderModal = ({url, setModal}) => {
         onLoadStart={() => {
           setisLoading(true);
         }}
-        onError={e => {
-          console.log(e, 'ERRORR');
-        }}
+        onError={e => {}}
         onLoadEnd={() => {
           setisLoading(false);
         }}

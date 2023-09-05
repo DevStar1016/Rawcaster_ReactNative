@@ -4,20 +4,34 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {createRef} from 'react';
 import {requireNativeComponent, findNodeHandle} from 'react-native';
 import {Meeting} from '../Bridges/ChimeMeetingBridge';
+import {IS_IOS} from '../../Utilities/Constants';
 
 var timer = undefined;
 export class MeetingVideo extends React.Component {
+  constructor(props) {
+    super(props);
+    this.videoRef = createRef();
+  }
   componentDidMount() {
     // we need to delay the bind video
     // Because "componentDidMount" will be called "immediately after the initial rendering occurs"
     // This is *before* RCTUIManager add this view to register (so that viewForReactTag() can return a view)
     // So we need to dispatch bindVideoView after this function complete
     timer = setTimeout(() => {
-      Meeting.bindVideoView(findNodeHandle(this), this.props.tileId);
-    });
+      if (this.videoRef.current && !IS_IOS) {
+        this.videoRef.current.setNativeProps({
+          tileId: this.props.tileId,
+        });
+      }
+      try {
+        if (this && findNodeHandle(this)) {
+          Meeting.bindVideoView(findNodeHandle(this), this.props.tileId);
+        }
+      } catch (e) {}
+    }, 2000);
   }
 
   componentWillUnmount() {
@@ -28,7 +42,7 @@ export class MeetingVideo extends React.Component {
   }
 
   render() {
-    return <RNVideoRenderViewNative {...this.props} />;
+    return <RNVideoRenderViewNative ref={this.videoRef} {...this.props} />;
   }
 }
 

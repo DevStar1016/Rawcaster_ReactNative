@@ -89,7 +89,6 @@ const ReferalDashboardHeader = ({
         })
         .catch(err => {
           Toast.fail(err.message);
-          console.log(err);
         })
         .finally(e => {
           if (isMount) {

@@ -111,6 +111,7 @@ const EventSettings = () => {
     keyText,
     valueText,
     reduxData = undefined,
+    anotherData = null,
   ) {
     if (isMount) {
       setisUpdating(true);
@@ -118,24 +119,46 @@ const EventSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append(keyText, valueText);
+    if (anotherData) {
+      formData.append(anotherData.keyText, anotherData.valueText);
+    }
 
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          dispatch(
-            setSettings({...settings, [keyText]: reduxData ?? valueText}),
-          );
+          let tempSettings = {...settings, [keyText]: reduxData ?? valueText};
+          if (anotherData) {
+            tempSettings = {
+              ...tempSettings,
+              [anotherData.keyText]: anotherData.valueText,
+            };
+          }
+          dispatch(setSettings({...tempSettings}));
           Toast.success(res.data.msg);
         } else if (res.data.status === 0) {
           setsettingsData(preData => {
-            return {...preData, [keyText]: settings[keyText]};
+            let tempSettingsData = {...preData, [keyText]: settings[keyText]};
+            if (anotherData) {
+              tempSettingsData = {
+                ...preData,
+                [anotherData.keyText]: settings[anotherData.keyText],
+              };
+            }
+            return {...tempSettingsData};
           });
           Toast.fail(res.data.msg);
         }
       })
       .catch(e => {
         setsettingsData(preData => {
-          return {...preData, [keyText]: settings[keyText]};
+          let tempSettingsData = {...preData, [keyText]: settings[keyText]};
+          if (anotherData) {
+            tempSettingsData = {
+              ...preData,
+              [anotherData.keyText]: settings[anotherData.keyText],
+            };
+          }
+          return {...tempSettingsData};
         });
         Toast.fail(e.message);
       })
@@ -165,11 +188,20 @@ const EventSettings = () => {
     ];
   }
 
-  function onChangeCheckStatus(keyName) {
+  function onChangeCheckStatus(keyName, opositeValueKeyName) {
     setsettingsData(preData => {
       let tempData = {...preData};
       const changedStatus = Boolean(tempData[keyName]) ? 0 : 1;
-      updateUsersSettingsAPICall(keyName, changedStatus);
+      const anotherChangedStatus = Boolean(changedStatus) ? 0 : 1;
+      if (opositeValueKeyName) {
+        updateUsersSettingsAPICall(keyName, changedStatus, undefined, {
+          keyText: opositeValueKeyName,
+          valueText: anotherChangedStatus,
+        });
+        tempData[opositeValueKeyName] = anotherChangedStatus;
+      } else {
+        updateUsersSettingsAPICall(keyName, changedStatus);
+      }
       tempData[keyName] = changedStatus;
       return {...tempData};
     });
@@ -217,8 +249,6 @@ const EventSettings = () => {
     }
     return 0;
   }
-
-  console.log(settingsData, 'SETTINGSSSS');
 
   function handleUploadMelody() {
     DocumentPicker.pick({
@@ -417,7 +447,7 @@ const EventSettings = () => {
             admits them individually"
             titleStyle={{fontSize: 15}}
             onPressTitleCheck={() => {
-              onChangeCheckStatus('waiting_room');
+              onChangeCheckStatus('waiting_room', 'join_before_host');
             }}
           />
           <TitleDescriptionContainer
@@ -428,7 +458,7 @@ const EventSettings = () => {
             arrives. This will disable the waiting room feature."
             titleStyle={{fontSize: 15}}
             onPressTitleCheck={() => {
-              onChangeCheckStatus('join_before_host');
+              onChangeCheckStatus('join_before_host', 'waiting_room');
             }}
           />
 
@@ -467,7 +497,6 @@ const EventSettings = () => {
               if (isMount) {
                 setsettingsData(preData => {
                   const keyName = id === 1 ? 'host_audio' : 'participant_audio';
-                  console.log(keyName, 'KLI');
                   const changedStatus = Boolean(settingsData[keyName]) ? 0 : 1;
                   updateUsersSettingsAPICall(keyName, changedStatus);
                   return {
@@ -488,7 +517,6 @@ const EventSettings = () => {
             )}
             onChangeButtonStatus={id => {
               if (isMount) {
-                console.log(id, 'ID');
                 setsettingsData(preData => {
                   const keyName = id === 1 ? 'host_video' : 'participant_video';
                   const changedStatus = Boolean(settingsData[keyName]) ? 0 : 1;

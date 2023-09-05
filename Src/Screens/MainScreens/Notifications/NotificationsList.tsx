@@ -74,6 +74,11 @@ const NotificationsList = ({
     };
   }, []);
 
+  /**
+   * Makes an API call to retrieve a list of notifications.
+   * @param {number} [pageNumber=1] - The page number of the notifications to retrieve.
+   * @returns None
+   */
   function listNotificationsAPICall(pageNumber = 1) {
     const formData = new FormData();
     formData.append('token', token);
@@ -117,6 +122,11 @@ const NotificationsList = ({
       });
   }
 
+  /**
+   * Handles the response to a friend request.
+   * @param {ConnectionResponseProp} - The object containing the response type, friend request ID, and notification ID.
+   * @returns None
+   */
   const handleResponseFriendRequest = ({
     responseType,
     friendRequestId,
@@ -172,6 +182,10 @@ const NotificationsList = ({
       });
   };
 
+  /**
+   * Makes an API call to retrieve the list of connections.
+   * @returns None
+   */
   const connectionsListAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -190,6 +204,11 @@ const NotificationsList = ({
       });
   };
 
+  /**
+   * Makes an API call to mark a notification as read.
+   * @param {number} notificationId - The ID of the notification to mark as read.
+   * @returns None
+   */
   const readNotificationApiCall = (notificationId: number) => {
     if (isMount) {
       setisActionLoading(true);
@@ -197,7 +216,6 @@ const NotificationsList = ({
     const formData = new FormData();
     formData.append('token', token);
     formData.append('notification_id', notificationId);
-    console.log(formData, 'READ');
 
     readNotificationService(formData)
       .then(res => {
@@ -233,6 +251,13 @@ const NotificationsList = ({
       });
   };
 
+  /**
+   * Function called when refreshing the page or data.
+   * It resets the current page and total pages to 1, and if the component is mounted,
+   * it sets the refreshing state to true. Then it calls the listNotificationsAPICall
+   * function to fetch the updated list of notifications.
+   * @returns None
+   */
   function onRefresh() {
     currentPage = 1;
     totalPages = 1;
@@ -242,6 +267,12 @@ const NotificationsList = ({
     listNotificationsAPICall(1);
   }
 
+  /**
+   * Function called when the end of the list is reached, indicating that more data needs to be loaded.
+   * It increments the currentPage variable by 1 and checks if there are more pages to load.
+   * If there are more pages and the component is mounted, it sets the isLoadMore state to true and makes an API call to fetch the next page of notifications.
+   * @returns None
+   */
   function onEndReached() {
     currentPage = currentPage + 1;
     if (currentPage <= totalPages) {
@@ -252,6 +283,10 @@ const NotificationsList = ({
     }
   }
 
+  /**
+   * Retrieves a list of sections for notifications based on their creation date.
+   * @returns An array of sections, each containing a title and a list of notifications.
+   */
   function getListSections() {
     const tempNotificationsList = [...notificationsList];
     const todayStart = moment().startOf('day');

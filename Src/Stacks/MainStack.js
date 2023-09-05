@@ -9,11 +9,7 @@ import {
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import {
-  getAuthCode,
-  getChimeTestUserId,
-  htmlDecodeText,
-} from '../Utilities/Methods';
+import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
 import {
   getInfluencerCategoryService,
   getMyProfileService,
@@ -50,11 +46,15 @@ import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
-import ChimeSocketListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketListener';
+import ChimeSocketConnectionListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketConnectionListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
 import {setPremiumAlert} from '../Store/Slices/UtilitySlice';
 import {useNavigation} from '@react-navigation/native';
+import {
+  getAllFriendsGroupsList,
+  getAllFriendsList,
+} from '../Store/ThunkAPIServices';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -77,91 +77,53 @@ const MainStack = () => {
     return formData;
   }
 
-  function getFriendsFormData() {
-    const formData = getCommonFormData();
-    formData.append('allfriends', 1);
-    return formData;
-  }
+  // function getFriendsFormData() {
+  //   const formData = getCommonFormData();
+  //   formData.append('allfriends', 1);
+  //   return formData;
+  // }
 
   function initialAPICall() {
     Promise.all([
-      getMyProfileService(getCommonFormData()),
-      getUserSettingsService(getCommonFormData()),
-      listAllFriendsService(getFriendsFormData()),
-      listAllFriendGroupsService(getCommonFormData()),
+      // listAllFriendsService(getFriendsFormData()),
+      // listAllFriendGroupsService(getCommonFormData()),
       listAllFriendRequestsService(getCommonFormData()),
       getInfluencerCategoryService(getCommonFormData()),
-      listUnClaimAccountService(getCommonFormData()),
     ])
+      // .then(res => {
+      //   if (res[0].data.status === 1) {
+      //     dispatch(setConnectionsList(res[0].data.friends_list));
+      //   }
+      //   return res;
+      // })
+      // .then(res => {
+      //   if (res[1].data.status === 1) {
+      //     dispatch(setGroupsList(res[1].data.friend_group_list));
+      //   }
+      //   return res;
+      // })
       .then(res => {
-        console.log(res[0].data, 'PROFILE DATAA RESPONSE');
         if (res[0].data.status === 1) {
-          let profile = {...res[0].data.profile};
-          profile = {
-            ...profile,
-            name: htmlDecodeText(profile?.name),
-            first_name: htmlDecodeText(profile?.first_name),
-            last_name: htmlDecodeText(profile?.last_name),
-            bio_data: htmlDecodeText(profile?.bio_data),
-            user_id: getChimeTestUserId(profile?.user_id), //Testing Purpose remove this after testing chime meeting
-          };
-
-          dispatch(setMyProfile(profile));
-          dispatch(
-            setUnreadNotificationCount(
-              profile?.unread_notification_count ?? null,
-            ),
-          );
+          dispatch(setPendingFriendRequests(res[0].data.pending_requests));
         }
         return res;
       })
       .then(res => {
         if (res[1].data.status === 1) {
-          dispatch(setSettings(res[1].data.settings));
-        }
-        return res;
-      })
-      .then(res => {
-        if (res[2].data.status === 1) {
-          dispatch(setConnectionsList(res[2].data.friends_list));
-        }
-        return res;
-      })
-      .then(res => {
-        if (res[3].data.status === 1) {
-          dispatch(setGroupsList(res[3].data.friend_group_list));
-        }
-        return res;
-      })
-      .then(res => {
-        if (res[4].data.status === 1) {
-          dispatch(setPendingFriendRequests(res[4].data.pending_requests));
-        }
-        return res;
-      })
-      .then(res => {
-        if (res[5].data.status === 1) {
-          dispatch(setInfluencerCategoryList(res[5].data.influencer_category));
+          dispatch(setInfluencerCategoryList(res[1].data.influencer_category));
           dispatch(
             initiateAllNuggetsLoadingTotalPages(
-              res[5].data.influencer_category,
+              res[1].data.influencer_category,
             ),
           );
         }
         return res;
       })
-      .then(res => {
-        if (res[6].data.status === 1) {
-          dispatch(setUnclaimedAccountsList(res[6].data.unclaim_accounts));
-        }
-        return res;
-      })
-      .catch(e => {
-        console.log(e?.response, 'ERROR');
-        console.log(e, 'INITIAL API ERROR');
-      })
+      .catch(e => {})
       .finally(() => {
         setisLoading(false);
+        dispatch(getAllFriendsGroupsList());
+        dispatch(getAllFriendsList());
       });
   }
 
@@ -173,7 +135,7 @@ const MainStack = () => {
   ) : (
     <>
       {/* <SocketListener /> */}
-      <ChimeSocketListener />
+      <ChimeSocketConnectionListener />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

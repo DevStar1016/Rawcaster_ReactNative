@@ -46,7 +46,6 @@ const ReferalDashboard = () => {
     formData.append('page_number', pageNumber);
     getReferralListService(formData)
       .then(res => {
-        console.log(res.data);
         if (res.data.status === 1) {
           if (isMount) {
             if (pageNumber === 1) {
@@ -68,9 +67,7 @@ const ReferalDashboard = () => {
         } else if (res.data.status === 0) {
         }
       })
-      .catch(e => {
-        console.log(e, 'ERROR');
-      })
+      .catch(e => {})
       .finally(() => {
         if (isMount) {
           setisLoading(false);

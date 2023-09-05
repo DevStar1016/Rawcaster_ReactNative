@@ -34,6 +34,10 @@ const InfluencerItem = ({
   const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
     useState<boolean>(false);
 
+  /**
+   * Retrieves the list of selected categories from the item object.
+   * @returns {Array} - An array containing the selected categories. If no categories are selected, an empty array is returned.
+   */
   function getSelectedCategoriesList() {
     if (item.category && item.category.length > 0) {
       return [...item.category];
@@ -41,6 +45,12 @@ const InfluencerItem = ({
     return [];
   }
 
+  /**
+   * Returns the length of the display name based on the length of the item's category.
+   * If the category length is greater than 0 and the category length is greater than or equal to 15,
+   * the display name length is set to 18. Otherwise, the display name length is set to 23.
+   * @returns {number} The length of the display name.
+   */
   function getDisplayNameLength() {
     if (item.category.length > 0 && item.category.toString().length >= 15) {
       return 18;
@@ -48,6 +58,10 @@ const InfluencerItem = ({
     return 23;
   }
 
+  /**
+   * Calculates the length of the text for categories.
+   * @returns {number} The length of the text for categories.
+   */
   function getCategoriesTextLength() {
     if (
       htmlDecodeText(item.display_name) &&
@@ -58,6 +72,10 @@ const InfluencerItem = ({
     return 20;
   }
 
+  /**
+   * Retrieves the bio data from the given item.
+   * @returns {string} The bio data if it exists, otherwise an empty string.
+   */
   function getBioData() {
     if (item.bio_data) {
       return item.bio_data;

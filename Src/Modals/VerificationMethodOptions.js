@@ -9,6 +9,11 @@ import {FONTS} from '../Utilities/Fonts';
 const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
   const profile = useProfile();
 
+  /**
+   * Returns a partially hidden email address by replacing all characters after the third character
+   * in the email name with asterisks.
+   * @returns {string} - The partially hidden email address.
+   */
   const getPartialHiddenEmail = () => {
     let emailSplitedList = profile?.email_id.toString().split('@');
     let emailNameText = '';
@@ -26,6 +31,10 @@ const VerificationMethodChoose = ({onSubmitOption, onClose}) => {
     return emailNameText + '@' + emailSplitedList[1];
   };
 
+  /**
+   * Returns a partially hidden mobile number by replacing the middle digits with asterisks.
+   * @returns {string} - The partially hidden mobile number.
+   */
   const getPartialHiddenMobileNumber = () => {
     let splitedNumbersList = profile?.mobile.toString().split('');
     let phoneNumber = '';

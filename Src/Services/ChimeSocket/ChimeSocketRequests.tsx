@@ -2,13 +2,18 @@ import {sendChimeSocketMessage} from './ChimeSocket';
 import {ChimeSocketEvents} from './ChimeSocketEvents';
 import {
   CreateMeetingRoomMessageData,
+  EnableDisableMessageData,
+  HostProcessProp,
   InCallEventsMessageData,
-  JoinMeetingRequestActionMessageData,
-  JoinMeetingRequestMessageData,
   JoinMeetingRoomMessageData,
+  JoinRequestMessageData,
+  JoinRequestRejectActionProp,
+  KickUserMessageData,
   MeetingRoomSendMessageData,
   RaiseHandMessageData,
+  RenameUserMessageData,
   SingleUserSendMessageData,
+  UserDataProp,
   UserLeftMessageData,
 } from './ChimeSocketPropTypes';
 
@@ -60,9 +65,7 @@ export const sendMessageToSingleUser = (
  * Accept user to Join Meeting Socket
  * @param messageData Request Meeting Data
  */
-export const allowToJoinMeeting = (
-  messageData: JoinMeetingRequestActionMessageData,
-) => {
+export const allowToJoinMeeting = (messageData: JoinRequestMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.allowToJoinMeeting);
 };
 
@@ -71,7 +74,7 @@ export const allowToJoinMeeting = (
  * @param messageData Request Meeting Data
  */
 export const rejectToJoinMeeting = (
-  messageData: Omit<JoinMeetingRequestActionMessageData, 'meetingId'>,
+  messageData: JoinRequestRejectActionProp,
 ) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.rejectToJoinMeeting);
 };
@@ -80,7 +83,7 @@ export const rejectToJoinMeeting = (
  * Meeting Join Request Socket
  * @param messageData Request Meeting Data
  */
-export const joinRequest = (messageData: JoinMeetingRequestMessageData) => {
+export const joinRequest = (messageData: JoinRequestMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.joinRequest);
 };
 
@@ -106,4 +109,52 @@ export const inCallEvents = (messageData: InCallEventsMessageData) => {
  */
 export const userLeft = (messageData: UserLeftMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.userLeft);
+};
+
+/**
+ *
+ * @param messageData EnableDisableMessageData Props
+ */
+export const enableAudio = (messageData: EnableDisableMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.enableAudio);
+};
+
+/**
+ *
+ * @param messageData EnableDisableMessageData Props
+ */
+export const enableVideo = (messageData: EnableDisableMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.enableVideo);
+};
+
+/**
+ *
+ * @param messageData EnableDisableMessageData Props
+ */
+export const enableShareScreen = (messageData: EnableDisableMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.enableShareScreen);
+};
+
+/**
+ *
+ * @param messageData KickUserMessageData Props
+ */
+export const kickUser = (messageData: KickUserMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.kickUser);
+};
+
+/**
+ *
+ * @param messageData RenameUserMessageData Props
+ */
+export const renameUser = (messageData: RenameUserMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.renameUser);
+};
+
+/**
+ *
+ * @param messageData Prop includes hostId and refId
+ */
+export const endMeetingEvent = (messageData: HostProcessProp) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.endMeeting);
 };

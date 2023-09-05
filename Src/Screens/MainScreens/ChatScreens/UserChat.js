@@ -12,7 +12,6 @@ import {compressMedia, getFileName} from '../../../Utilities/Methods';
 import ChatItem from './ChatItem';
 import Toast from '../../../Components/Toast';
 
-var isMount = true;
 const UserChat = ({route}) => {
   const {userData} = route.params ?? {};
   const [headerHeight, setheaderHeight] = useState(20);
@@ -167,14 +166,17 @@ const UserChat = ({route}) => {
   ]);
 
   useEffect(() => {
-    isMount = true;
     AvoidSoftInput.setAdjustResize();
     return () => {
       AvoidSoftInput.setAdjustPan();
-      isMount = false;
     };
   }, []);
 
+  /**
+   * Handles the selection of media from the camera and adds it to the selected media list.
+   * @param {Object} mediaItem - The selected media item.
+   * @returns None
+   */
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
@@ -188,6 +190,11 @@ const UserChat = ({route}) => {
     ]);
   }
 
+  /**
+   * Handles the selection of a message by adding or removing its ID from the selectedMsgIds array.
+   * @param {string} msgId - The ID of the message to be selected or deselected.
+   * @returns None
+   */
   function handleSelectMessage(msgId) {
     let tempSelectedIds = [...selectedMsgIds];
     if (tempSelectedIds.includes(msgId)) {
@@ -198,6 +205,10 @@ const UserChat = ({route}) => {
     setselectedMsgIds([...tempSelectedIds]);
   }
 
+  /**
+   * Checks if the chat list includes any media items that have been selected.
+   * @returns {boolean} - true if there is at least one selected media item in the chat list, false otherwise.
+   */
   function isIncludeMedia() {
     return [...chatList].reduce((resultValue, item) => {
       if (
@@ -210,6 +221,11 @@ const UserChat = ({route}) => {
     }, false);
   }
 
+  /**
+   * Determines whether the copy action is enabled based on the selected message IDs and
+   * the presence of media in the selected messages.
+   * @returns {boolean} - true if the copy action is enabled, false otherwise.
+   */
   function getIsEnableCopy() {
     if (selectedMsgIds.length > 0) {
       return !isIncludeMedia();
@@ -217,6 +233,11 @@ const UserChat = ({route}) => {
     return false;
   }
 
+  /**
+   * Checks if the given message ID belongs to the current user.
+   * @param {number} msgId - The ID of the message to check.
+   * @returns {boolean} - True if the message belongs to the current user, false otherwise.
+   */
   function isSelfMsgId(msgId) {
     const tempChatList = [...chatList];
     const tempMessage = tempChatList.find(item => item.msgId === msgId);
@@ -226,6 +247,10 @@ const UserChat = ({route}) => {
     return false;
   }
 
+  /**
+   * Checks if the edit feature is enabled for the currently selected message.
+   * @returns {boolean} - true if the edit feature is enabled, false otherwise.
+   */
   function getIsEnableEdit() {
     return (
       selectedMsgIds.length === 1 &&
@@ -234,6 +259,10 @@ const UserChat = ({route}) => {
     );
   }
 
+  /**
+   * Handles copying selected messages to the clipboard.
+   * @returns None
+   */
   function handleCopyOnClipboard() {
     const tempContentsList = [...chatList]
       .filter(item => selectedMsgIds.includes(item.msgId))
@@ -250,6 +279,11 @@ const UserChat = ({route}) => {
     setselectedMsgIds([]);
   }
 
+  /**
+   * Retrieves the username associated with a given message ID.
+   * @param {string} msgId - The ID of the message.
+   * @returns {string} The username associated with the message, or an empty string if the message is from the current user or if the message ID is not found in the chat list.
+   */
   function getMsgUserNameText(msgId) {
     if (isSelfMsgId(msgId)) {
       return '';
@@ -262,6 +296,12 @@ const UserChat = ({route}) => {
     return '';
   }
 
+  /**
+   * Deletes selected messages based on the message IDs.
+   * If the selected messages contain messages from other users, it prompts the user to choose
+   * whether to delete the messages for themselves only or for everyone.
+   * @returns None
+   */
   function onDeleteMessages() {
     const isContainOtherUsersMessageIds = [...selectedMsgIds].reduce(
       (result, id) => {
@@ -334,12 +374,6 @@ const UserChat = ({route}) => {
         isEnableDeleteIcon: selectedMsgIds.length > 0,
         isEnableEditIcon: getIsEnableEdit(),
         isEnableCopyIcon: getIsEnableCopy(),
-        // isEnableRightIcon: true,
-        // rightIcon: 'menu_vertical_white',
-        // rightIconSize: 19,
-        // rightIconAdditionalProps: {
-        //   marginBottom: 2,
-        // },
         isEnableshareIcon: selectedMsgIds.length === 1,
         onPressShareButton: () => {},
         onPressDeleteButton: onDeleteMessages,

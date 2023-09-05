@@ -47,6 +47,12 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       .catch(e => {});
   }, []);
 
+  /**
+   * Handles the API call for social signup.
+   * @param {object} values - The values from the signup form.
+   * @param {string} signin_type - The type of social signin (e.g. "google", "facebook").
+   * @returns None
+   */
   const handleSocialSignupAPICall = (values, signin_type) => {
     setisLoading(true);
     const formData = new FormData();
@@ -91,6 +97,11 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       });
   };
 
+  /**
+   * Handles the social signup process based on the provided ID.
+   * @param {string} id - The ID of the social signup type.
+   * @returns None
+   */
   const onPressSocialSignup = id => {
     switch (id) {
       case SIGNUP_TYPE.google:
@@ -108,6 +119,11 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     }
   };
 
+  /**
+   * Performs a Google sign up process.
+   * @returns None
+   * @throws {Error} - If an error occurs during the sign up process.
+   */
   const googleSignUp = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -138,6 +154,11 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     }
   };
 
+  /**
+   * Performs a sign up using Apple authentication.
+   * @returns None
+   * @throws {Error} if an error occurs during the sign up process.
+   */
   const appleSignUp = async () => {
     try {
       const appleAuthRequestResponse = await appleAuth.performRequest({
@@ -155,12 +176,13 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       // }
       handleSocialSignupAPICall(values, SIGNUP_TYPE.apple);
       const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
-      console.log(values, tempToken, 'REPONSE');
-    } catch (err) {
-      console.log(err, 'error');
-    }
+    } catch (err) {}
   };
 
+  /**
+   * Performs the sign-up process for Instagram.
+   * @returns {Promise<void>} A promise that resolves when the sign-up process is complete.
+   */
   const instagramSignUp = async () => {};
 
   const twitterSignUp = async () => {
@@ -170,10 +192,8 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     // );
     // TwitterLogin.logIn()
     //   .then(res => {
-    //     console.log(res, 'RESPONSE');
     //   })
     //   .catch(e => {
-    //     console.log(e, 'ERRORRRR');
     //   });
   };
 

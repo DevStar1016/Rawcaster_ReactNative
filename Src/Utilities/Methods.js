@@ -18,11 +18,25 @@ import {decode as htmldecode} from 'html-entities';
 import {getTimezone} from 'countries-and-timezones';
 import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
 import {clearNuggetsListReduxData} from '../Store/Slices/NuggetsListSlice';
+import {clearNuggetActionsReduxData} from '../Store/Slices/NuggetActionsSlice';
+import {clearUtilityReduxData} from '../Store/Slices/UtilitySlice';
 
+/**
+ * Generates an authentication code by hashing the given value with a salt key.
+ * @param {string} [value=''] - The value to be hashed.
+ * @returns {string} The hashed authentication code.
+ */
 export const getAuthCode = (value = '') => {
   return sha1(SALT_KEY + value);
 };
 
+/**
+ * Stores the token in encrypted storage, saves user data, and dispatches the token to the store.
+ * @param {string} token - The token to store.
+ * @param {object} user - The user data to save.
+ * @param {function} dispatch - The dispatch function from the Redux store.
+ * @returns None
+ */
 export const storeToken = async (token, user, dispatch) => {
   try {
     await EncryptedStorage.setItem(ISLOGIN, token);
@@ -31,6 +45,12 @@ export const storeToken = async (token, user, dispatch) => {
   } catch (error) {}
 };
 
+/**
+ * Stores user data in encrypted storage and dispatches an action to update the user data in the Redux store.
+ * @param {object} user - The user data to be stored.
+ * @param {function} dispatch - The dispatch function from the Redux store.
+ * @returns None
+ */
 export const storeUserData = async (user, dispatch) => {
   try {
     await EncryptedStorage.setItem(USER_DATA, JSON.stringify(user));
@@ -38,11 +58,19 @@ export const storeUserData = async (user, dispatch) => {
   } catch (error) {}
 };
 
+/**
+ * Removes the user token and clears all relevant Redux data and stored user data.
+ * @param {function} dispatch - The Redux dispatch function.
+ * @returns None
+ */
 export const removeToken = async dispatch => {
   dispatch(setToken(null));
   dispatch(clearAuthReduxData());
   dispatch(clearHomeReduxData());
   dispatch(clearNuggetsListReduxData());
+  dispatch(clearNuggetActionsReduxData());
+  dispatch(clearUtilityReduxData());
+
   try {
     await EncryptedStorage.removeItem(ISLOGIN);
     await EncryptedStorage.removeItem(USER_DATA);
@@ -53,6 +81,13 @@ export const removeToken = async dispatch => {
   } catch (error) {}
 };
 
+/**
+ * Returns a sliced version of the given text with optional ellipsis.
+ * @param {string} value - The text to be sliced.
+ * @param {number} [sliceValue=40] - The number of characters to slice the text.
+ * @param {boolean} [isEnableDots=true] - Whether to add ellipsis if the text is longer than the slice value.
+ * @returns {string} - The sliced text.
+ */
 export const getSlicedText = (
   value = '',
   sliceValue = 40,
@@ -68,6 +103,13 @@ export const getSlicedText = (
   return '';
 };
 
+/**
+ * Calculates an array of years based on the starting year and the number of decreased years.
+ * @param {Object} options - The options object.
+ * @param {number} [options.startingYear=1900] - The starting year for the calculation.
+ * @param {number} [options.decreasedYears=0] - The number of years to decrease from the current year.
+ * @returns {number[]} An array of years.
+ */
 export function getyears({startingYear = 1900, decreasedYears = 0}) {
   let thisYear = new Date().getFullYear() - decreasedYears;
   const offset = thisYear - startingYear;
@@ -78,22 +120,44 @@ export function getyears({startingYear = 1900, decreasedYears = 0}) {
   return allYears;
 }
 
+/**
+ * Converts a given number of milliseconds to a string representation of minutes and seconds.
+ * @param {number} millis - The number of milliseconds to convert.
+ * @returns {string} A string representation of minutes and seconds in the format "mm:ss".
+ */
 export const secondsToMinutesAndSeconds = millis => {
   var minutes = Math.floor(millis / 60);
   var seconds = (millis % 60).toFixed(0);
   return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 };
 
+/**
+ * Extracts the file name from a given URL.
+ * @param {string} url - The URL from which to extract the file name.
+ * @returns {string} The file name extracted from the URL.
+ */
 export const getFileName = url => {
   let name = url.split('/').pop();
   return name;
 };
 
+/**
+ * Get the media MIME type for the given URL and type.
+ * @param {string} url - The URL of the media file.
+ * @param {string} type - The type of the media file (e.g., "image", "video", "audio").
+ * @returns {string} The MIME type of the media file.
+ */
 export const getMediaMimeType = (url, type) => {
   let fileExtension = getFileName(url).split('.').pop();
   return `${type}/${fileExtension}`;
 };
 
+/**
+ * Returns a filtered list of duplicates from the given data list based on the specified field name.
+ * @param {Array} dataList - The list of data to filter for duplicates.
+ * @param {string} fieldName - The field name to check for duplicates. If not provided, the entire object will be checked for duplicates.
+ * @returns {Array} - A filtered list of duplicates.
+ */
 export const getFilteredDuplicatesList = (dataList = [], fieldName) => {
   return dataList.reduce((acc, current) => {
     const x = acc.find(item =>
@@ -107,12 +171,15 @@ export const getFilteredDuplicatesList = (dataList = [], fieldName) => {
   }, []);
 };
 
+/**
+ * Determines whether friend requests are enabled based on the given status.
+ * @param {number} status - The status code indicating the current state of friend requests.
+ * @returns {boolean} - True if friend requests are enabled, false otherwise.
+ */
 export const getIsEnableFriendRequest = status => {
   switch (status) {
     case 0:
-      return false;
     case 1:
-      return false;
     case 3:
       return false;
     default:
@@ -120,6 +187,10 @@ export const getIsEnableFriendRequest = status => {
   }
 };
 
+/**
+ * Checks if the app has been granted location permission.
+ * @returns {Promise<boolean>} - A promise that resolves to true if location permission is granted, false otherwise.
+ */
 const getIsGrantedLocationPermission = async () => {
   let result;
   if (Platform.OS === 'ios') {
@@ -156,6 +227,11 @@ const getIsGrantedLocationPermission = async () => {
   return result;
 };
 
+/**
+ * Retrieves the latitude and longitude coordinates of the current device location.
+ * @returns {Promise<{latitude: number, longitude: number}>} - A promise that resolves to an object containing the latitude and longitude coordinates.
+ * @throws {Error} - If there is an error retrieving the location or if permission is not granted.
+ */
 const getLatitudeLongitude = async () => {
   const promise = new Promise(async (resolve, reject) => {
     try {
@@ -184,6 +260,10 @@ const getLatitudeLongitude = async () => {
   return promise;
 };
 
+/**
+ * Retrieves the address of the current location using latitude and longitude coordinates.
+ * @returns {Promise} A promise that resolves to an object containing the latitude, longitude, and address of the location.
+ */
 export const getLocationAddress = () => {
   const promise = new Promise(async (resolve, reject) => {
     getLatitudeLongitude()
@@ -220,14 +300,17 @@ export const getLocationAddress = () => {
           },
         );
       })
-      .catch(e => {
-        console.log(e, 'ERROROROOROORR');
-      });
+      .catch(e => {});
   });
 
   return promise;
 };
 
+/**
+ * Returns a double-digit representation of the given value.
+ * @param {number} value - The value to convert to double-digit representation.
+ * @returns {string} - The double-digit representation of the value.
+ */
 export const getDoubleDigit = value => {
   if (value < 10) {
     return '0' + value;
@@ -235,6 +318,11 @@ export const getDoubleDigit = value => {
   return value;
 };
 
+/**
+ * Converts a given date and time to a short date format.
+ * @param {Date} dateTime - The date and time to convert.
+ * @returns {string} The short date format of the given date and time, followed by "ago".
+ */
 export const dateToShortDate = dateTime => {
   var localTime = moment.utc(dateTime).toDate();
   return (
@@ -243,6 +331,26 @@ export const dateToShortDate = dateTime => {
   );
 };
 
+/**
+ * Converts a given date and time to a short text date format.
+ * @param {Date} dateTime - The date and time to convert.
+ * @param {string} timeZone - The time zone to use for the conversion.
+ * @param {boolean} [isShowYear=false] - Whether to include the year in the output.
+ * @returns {string} The formatted short text date.
+ */
+export const dateToShortTextDate = (dateTime, timeZone, isShowYear = false) => {
+  let userTime = utcToUserTimezone(dateTime, timeZone);
+  return isShowYear
+    ? userTime.format('MMM D YYYY [ • ] h:mm A ')
+    : userTime.format('MMM D [ • ] h:mm A ');
+};
+
+/**
+ * Formats a given number into a more readable format by adding suffixes like 'K', 'M', or 'B'
+ * to represent thousands, millions, or billions respectively.
+ * @param {number} num - The number to format.
+ * @returns {string} The formatted number with the appropriate suffix.
+ */
 export const bigNumberFormater = num => {
   if (num >= 1000000000) {
     // Divide by 1 billion and round to one decimal place
@@ -269,6 +377,11 @@ export const bigNumberFormater = num => {
   return num;
 };
 
+/**
+ * Adds a file prefix to a given URL if it does not already have one.
+ * @param {string} fileUrl - The URL to add the file prefix to.
+ * @returns {string} The URL with the file prefix added.
+ */
 export const getUrlWithFilePrefix = (fileUrl = '') => {
   let url = fileUrl ?? '';
 
@@ -283,6 +396,12 @@ export const getUrlWithFilePrefix = (fileUrl = '') => {
   return `file://${url}`;
 };
 
+/**
+ * Compresses media files based on their type.
+ * @param {number} mediaType - The type of media file (1 for image, 2 for video).
+ * @param {string} mediaPath - The path to the media file.
+ * @returns {Promise<string>} - The compressed media file path.
+ */
 export const compressMedia = async (mediaType, mediaPath) => {
   // mediaType --- 1 - image , 2 - Video
   mediaPath = getUrlWithFilePrefix(mediaPath);
@@ -306,10 +425,20 @@ export const compressMedia = async (mediaType, mediaPath) => {
   return result;
 };
 
+/**
+ * Decodes HTML entities in the given text.
+ * @param {string} text - The text to decode.
+ * @returns The decoded text.
+ */
 export const htmlDecodeText = text => {
   return htmldecode(text);
 };
 
+/**
+ * Extracts the timezone name from a string.
+ * @param {string} str - The string containing the timezone information.
+ * @returns {string} The extracted timezone name.
+ */
 export const getTimezoneName = str => {
   let index;
   try {
@@ -319,6 +448,12 @@ export const getTimezoneName = str => {
   else return str;
 };
 
+/**
+ * Converts a UTC time to the user's timezone with the timezone abbreviation.
+ * @param {string} time - The UTC time to convert in the format 'YYYY-MM-DD HH:mm:ss'.
+ * @param {string} zonename - The name of the user's timezone.
+ * @returns The timezone abbreviation for the converted time.
+ */
 export const utctoUserTimezonewithAbbr = (time, zonename) => {
   let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
   let displayCutoff = momentTZ(utcCutoff).tz(getTimezoneName(zonename));
@@ -326,6 +461,12 @@ export const utctoUserTimezonewithAbbr = (time, zonename) => {
   return timezoneabbrs; // this return time zone i.e IST or GMT
 };
 
+/**
+ * Converts a UTC time to the user's timezone.
+ * @param {string} time - The UTC time to convert in the format 'YYYY-MM-DD HH:mm:ss'.
+ * @param {string} zonename - The name of the user's timezone.
+ * @returns {moment.Moment} - The converted time in the user's timezone.
+ */
 export const utcToUserTimezone = (time, zonename) => {
   let utcCutoff = moment.utc(time, 'YYYY-MM-DD HH:mm:ss');
   let displayCutoff = momentTZ(utcCutoff)
@@ -334,14 +475,29 @@ export const utcToUserTimezone = (time, zonename) => {
   return moment(displayCutoff);
 };
 
+/**
+ * Converts a UTC date and time to the system's local date and time.
+ * @param {string} dateTime - The UTC date and time in the format 'YYYY-MM-DD HH:mm:ss'.
+ * @returns {Date} - The converted local date and time.
+ */
 export const getUtcToSystemTime = dateTime => {
   return moment(dateTime, 'YYYY-MM-DD HH:mm:ss')
     .subtract(-moment().utcOffset(), 'minutes')
     .toDate();
 };
 
+/**
+ * Retrieves the UTC offset string for the current timezone.
+ * @param {string} moment.tz.guess() - The guessed timezone string.
+ * @returns The UTC offset string for the current timezone.
+ */
 export const {utcOffsetStr} = getTimezone(moment.tz.guess());
 
+/**
+ * Converts a given time string to a formatted display event time.
+ * @param {string} time - The time string to convert.
+ * @returns {string} - The formatted display event time.
+ */
 export const getDisplayEventTime = time => {
   if (time) {
     return moment(time, 'YYYY-MM-DD hh:mm:ss').format('hh:mm A');
@@ -349,6 +505,11 @@ export const getDisplayEventTime = time => {
   return '';
 };
 
+/**
+ * Converts a given duration in milliseconds to a formatted string in the format "minutes:seconds".
+ * @param {number} tempDuration - The duration in milliseconds.
+ * @returns {string} - The formatted duration string.
+ */
 export const getMediaDurationFormat = tempDuration => {
   let time = tempDuration / 1000;
   let minutes = Math.floor(time / 60);
@@ -358,6 +519,12 @@ export const getMediaDurationFormat = tempDuration => {
   return `${minutes}:${secondsReadable}`;
 };
 
+/**
+ * Returns the formatted display event date based on the received date and the specified date format.
+ * @param {Date} receivedDate - The received date of the event.
+ * @param {string} [dateFormat='MM/DD/YYYY'] - The format to use for the date. Defaults to 'MM/DD/YYYY'.
+ * @returns {string} The formatted display event date.
+ */
 export const getDisplayEventDate = (
   receivedDate,
   dateFormat = 'MM/DD/YYYY',
@@ -375,6 +542,11 @@ export const getDisplayEventDate = (
   return '';
 };
 
+/**
+ * Returns the default page for the given value.
+ * @param {number} val - The value to determine the default page.
+ * @returns {string} The default page based on the given value.
+ */
 export const getDefaultRawcasterPage = val => {
   switch (val) {
     case 1:
@@ -388,6 +560,11 @@ export const getDefaultRawcasterPage = val => {
   }
 };
 
+/**
+ * Returns a notification message based on the given type.
+ * @param {number} type - The type of notification.
+ * @returns {string} The notification message.
+ */
 export const getNotificationMessage = type => {
   switch (parseInt(type)) {
     case 1:
@@ -427,6 +604,12 @@ export const getNotificationMessage = type => {
   }
 };
 
+/**
+ * Generates a unique ID by combining the provided user ID (if any), the current UTC timestamp,
+ * and a random number.
+ * @param {string} [userId=''] - The user ID to include in the unique ID. Defaults to an empty string.
+ * @returns {string} A unique ID string.
+ */
 export const getUniqueId = (userId = '') => {
   return (
     (userId ?? '') +
@@ -437,6 +620,11 @@ export const getUniqueId = (userId = '') => {
   );
 };
 
+/**
+ * Calculates the age based on the given date of birth.
+ * @param {Date} dob - The date of birth.
+ * @returns The calculated age.
+ */
 export const calcualteAge = dob => {
   var diff_ms = Date.now() - dob;
   var age_dt = new Date(diff_ms);
@@ -444,10 +632,20 @@ export const calcualteAge = dob => {
   return Math.abs(age_dt.getUTCFullYear() - 1970);
 };
 
+/**
+ * Checks if a character is an alphabet letter.
+ * @param {string} char - The character to check.
+ * @returns {boolean} - True if the character is an alphabet letter, false otherwise.
+ */
 export function isAlphabet(char) {
   return /[a-zA-Z]/.test(char);
 }
 
+/**
+ * Returns the corresponding notification type based on the given type value.
+ * @param {number} type - The type value of the notification.
+ * @returns {string} The notification type.
+ */
 export const getNotificationType = type => {
   switch (parseInt(type)) {
     case 1:
@@ -468,6 +666,13 @@ export const getNotificationType = type => {
   }
 };
 
+/**
+ * Formats the data for the Redux store by creating an object with the given category name
+ * and nuggets list.
+ * @param {string} categoryName - The name of the category.
+ * @param {Array} nuggetsList - The list of nuggets.
+ * @returns {Object} - The formatted data object for the Redux store.
+ */
 export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
   return {
     categoryName,
@@ -475,28 +680,11 @@ export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
   };
 };
 
+/**
+ * Converts milliseconds to minutes as a number.
+ * @param {number} millis - The number of milliseconds to convert.
+ * @returns {number} The converted value in minutes.
+ */
 export const getMillisToMinutesNumber = millis => {
   return parseFloat(parseFloat(millis) / 60000);
-};
-
-// for Chime integration After that remove this
-export const getChimeTestUserId = userId => {
-  switch (userId) {
-    case 88:
-      return 11;
-    case 67:
-      return 22;
-    case 21:
-      return 33;
-    case 728:
-      return 44;
-    case 164:
-      return 55;
-    case 684:
-      return 66;
-    case 682:
-      return 77;
-    default:
-      return userId;
-  }
 };

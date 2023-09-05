@@ -69,6 +69,11 @@ const Login = () => {
       .catch(e => {});
   }, []);
 
+  /**
+   * Handles the login process by sending a request to the login service with the provided data.
+   * @param {object} data - The login data object containing login_id and password.
+   * @returns None
+   */
   function handleLogin(data) {
     let formData = new FormData();
     formData.append('auth_code', getAuthCode(data.login_id));
@@ -81,9 +86,7 @@ const Login = () => {
     formData.append('app_type', IS_IOS ? 2 : 1);
     loginService(formData)
       .then(res => {
-        console.log(res.data, 'LOGINDATA');
         if (res.data.status === 1) {
-          console.log(res.data.first_time, 'FIRSTTIME');
           if (parseInt(res.data.first_time) === 1) {
             dispatch(setIsVisibleInfluencers(true));
           }

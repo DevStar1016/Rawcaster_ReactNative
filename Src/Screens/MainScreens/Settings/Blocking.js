@@ -162,7 +162,6 @@ const Blocking = () => {
   }
 
   function onBlockusers(list) {
-    console.log(list, 'BLOCK');
     Alert.alert(
       'Block!',
       'Do you want to block the selected Users?',
@@ -209,8 +208,6 @@ const Blocking = () => {
   }
 
   const getBlockedUsersList = () => {
-    console.log(blockedUserIds, 'IDSSSS');
-
     return [...blockedUsersList].filter(item =>
       [...blockedUserIds].includes(item.user_id),
     );

@@ -60,12 +60,27 @@ const ResetPasswordOTP = ({route}) => {
     AvoidSoftInput.setAdjustResize();
   }, []);
 
+  /**
+   * Function to handle the resend OTP functionality.
+   * It resets the timer, sets the isLoading state to true, and calls the handleResendOTP function.
+   * @returns None
+   */
   function onResendOtp() {
     settimer(0);
     setisLoading(true);
     handleResendOTP();
   }
 
+  /**
+   * Handles the resend OTP functionality.
+   * Creates a new FormData object and appends the otp_ref_id and auth_code to it.
+   * Calls the resendOTPService function with the formData.
+   * If the response status is 1, displays a success toast message and updates the timer.
+   * If the response status is 0, displays a failure toast message.
+   * If there is an error, displays a failure toast message with the error message.
+   * Finally, sets the isLoading state to false.
+   * @returns None
+   */
   function handleResendOTP() {
     const formData = new FormData();
     formData.append('otp_ref_id', otp_ref_id);
@@ -87,6 +102,11 @@ const ResetPasswordOTP = ({route}) => {
       });
   }
 
+  /**
+   * Handles the verification of OTP and resetting of password.
+   * @param {Object} values - An object containing the values needed for verification and password reset.
+   * @returns None
+   */
   function handleVerifyOtpResetPassword(values) {
     let formData = new FormData();
     formData.append('otp_ref_id', otp_ref_id);

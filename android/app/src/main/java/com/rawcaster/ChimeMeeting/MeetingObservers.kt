@@ -1,5 +1,6 @@
 package com.rawcaster.ChimeMeeting
 
+import android.util.Log
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_ATTENDEES_JOIN
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_ATTENDEES_LEAVE
 import com.rawcaster.ChimeMeeting.RNEventEmitter.Companion.RN_EVENT_ATTENDEES_MUTE
@@ -76,6 +77,7 @@ class MeetingObservers(private val eventEmitter: RNEventEmitter) : RealtimeObser
     }
 
     override fun onVideoTilePaused(tileState: VideoTileState) {
+        Log.d(TAG, "onVideoTilePaused: "+tileState)
         // Not implemented for demo purposes
     }
 
@@ -85,6 +87,7 @@ class MeetingObservers(private val eventEmitter: RNEventEmitter) : RealtimeObser
     }
 
     override fun onVideoTileResumed(tileState: VideoTileState) {
+        Log.d(TAG, "onVideoTilePaused: "+tileState)
         // Not implemented for demo purposes
     }
 
@@ -151,4 +154,6 @@ class MeetingObservers(private val eventEmitter: RNEventEmitter) : RealtimeObser
     override fun onRemoteVideoSourceUnavailable(sources: List<RemoteVideoSource>) {
         // Not implemented for demo purposes
     }
+
+
 }

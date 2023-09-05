@@ -4,10 +4,12 @@ import {getFilteredDuplicatesList} from '../../Utilities/Methods';
 export const initialState = {
   searchedNuggetsList: [],
   connectionsList: [],
+  connectionsListLoading: true,
   groupsList: [],
+  groupListLoading: true,
   pendingFriendRequests: [],
   influencerCategoryList: [],
-  unclaimedAccountsList: [],
+  unclaimedAccountsList: null,
   unreadNotificationCount: null,
   typeWiseNotificationCount: {
     fans: 0,
@@ -34,8 +36,14 @@ const HomeSlice = createSlice({
     setConnectionsList: (state, action) => {
       state.connectionsList = action.payload;
     },
+    setConnectionsListLoading: (state, action) => {
+      state.connectionsListLoading = action.payload;
+    },
     setGroupsList: (state, action) => {
       state.groupsList = action.payload;
+    },
+    setGroupListLoading: (state, action) => {
+      state.groupListLoading = action.payload;
     },
     setPendingFriendRequests: (state, action) => {
       state.pendingFriendRequests = action.payload;
@@ -79,10 +87,13 @@ const HomeSlice = createSlice({
         'user_id',
       );
     },
+    resetFollowingUsersList: (state, action) => {
+      state.followingUsersList = [];
+    },
     addFollowingUser: (state, action) => {
       let tempFollowingUsersList = [...state.followingUsersList];
       let tempIndex = tempFollowingUsersList.findIndex(
-        item => item.id === action.payload.user_id,
+        item => item.user_id === action.payload.user_id,
       );
 
       if (tempIndex === -1) {
@@ -100,32 +111,32 @@ const HomeSlice = createSlice({
         'user_id',
       );
     },
+    removeFollowingUser: (state, action) => {
+      let tempFollowingUsersList = [...state.followingUsersList];
+      let tempIndex = tempFollowingUsersList.findIndex(
+        item => item.user_id === action.payload.user_id,
+      );
+      if (tempIndex !== -1) {
+        tempFollowingUsersList = [...tempFollowingUsersList].filter(
+          item => item.user_id !== action.payload.user_id,
+        );
+      }
+      state.followingUsersList = getFilteredDuplicatesList(
+        [...tempFollowingUsersList],
+        'user_id',
+      );
+    },
     clearHomeReduxData: (state, action) => {
-      state.nuggetsList = [];
-      state.searchedNuggetsList = [];
-      state.connectionsList = [];
-      state.groupsList = [];
-      state.pendingFriendRequests = [];
-      state.influencerCategoryList = [];
-      state.unreadNotificationCount = null;
-      state.typeWiseNotificationCount = {
-        nuggets: 0,
-        events: 0,
-        connections: 0,
-        groups: 0,
-        fans: 0,
-        poll_results: 0,
-      };
-      state.otherConnectionsRequestList = [];
-      state.otherInfluencersRequestList = [];
-      state.savedNuggetsList = [];
+      return {...initialState};
     },
   },
 });
 export const {
   setSearchedNuggetsList,
   setConnectionsList,
+  setConnectionsListLoading,
   setGroupsList,
+  setGroupListLoading,
   setPendingFriendRequests,
   setInfluencerCategoryList,
   setUnclaimedAccountsList,
@@ -136,7 +147,9 @@ export const {
   setOtherInfluencersRequestList,
   setSavedNuggetsList,
   setFollowingUsersList,
+  resetFollowingUsersList,
   addFollowingUser,
+  removeFollowingUser,
   blockUsers,
   unBlockUser,
 } = HomeSlice.actions;

@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
   useConnectionsList,
   useDeletedNuggetsIds,
   useEditedNuggetsList,
+  useFollowingUsersList,
   useInsets,
   useProfile,
   useSavedNuggetsList,
@@ -24,11 +26,17 @@ import {
   useUnclaimedAccountsList,
   useUploadingNuggets,
 } from '../../../Utilities/StoreData';
-import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
 import {
+  getAuthCode,
+  getSlicedText,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
+import {
+  followAndUnfollowService,
   getOthersProfileService,
   listNuggetsService,
   sendFriendRequestsService,
+  unfriendService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import ProfilesListContainerWithSeeAll from './ProfilesListContainerWithSeeAll';
@@ -48,7 +56,10 @@ import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
-import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
+import {
+  removeFollowingUser,
+  setFollowingUsersList,
+} from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
@@ -74,6 +85,7 @@ const Profile = ({route}) => {
   const blockedUserIds = useBlockedUserIds();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const insets = useInsets();
+  const followingUsersList = useFollowingUsersList();
 
   const [userId, setuserId] = useState(
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
@@ -89,7 +101,10 @@ const Profile = ({route}) => {
   const [nuggetsCount, setnuggetsCount] = useState(0);
   const [isMuted, setisMuted] = useState(true);
   const [isLoading, setisLoading] = useState(userId ? true : false);
-  const [isActionLoading, setisActionLoading] = useState(false);
+  const [isActionLoading, setisActionLoading] = useState({
+    status: false,
+    text: '',
+  });
   const [othersProfile, setothersProfile] = useState(null);
   const [emptyText, setemptyText] = useState(null);
   const [viewableItem, setviewableItem] = useState({
@@ -156,7 +171,6 @@ const Profile = ({route}) => {
       if (isMount.current) {
         setisLoading(true);
       }
-
       getOthersProfileAPI();
     }
   }, [userId]);
@@ -227,9 +241,16 @@ const Profile = ({route}) => {
       });
   };
 
+  const setActionLoader = (status = false, text = '') => {
+    setisActionLoading({
+      status,
+      text,
+    });
+  };
+
   const sendFriendRequestsAPICall = () => {
     if (isMount.current) {
-      setisActionLoading(true);
+      setActionLoader(true);
     }
     const formData = new FormData();
     formData.append('token', token);
@@ -241,7 +262,7 @@ const Profile = ({route}) => {
           Toast.success(res.data.msg);
           if (isMount.current) {
             setothersProfile(pre => {
-              return {...pre, friend_status: '1'};
+              return {...pre, friend_status: 1};
             });
           }
           if (res.data?.friend_request_ids?.length > 0) {
@@ -262,7 +283,7 @@ const Profile = ({route}) => {
       })
       .finally(() => {
         if (isMount.current) {
-          setisActionLoading(false);
+          setActionLoader(false);
         }
       });
   };
@@ -278,7 +299,6 @@ const Profile = ({route}) => {
   }
 
   const listNuggetsAPICall = (pageNumber = 1, tab = 1) => {
-    console.log(pageNumber, 'page', tab, 'tab');
     if (nuggetsController) {
       nuggetsController.abort();
     }
@@ -329,7 +349,6 @@ const Profile = ({route}) => {
         }
       })
       .catch(e => {
-        console.log(e, 'ERROR');
         if (isMount.current) {
           setnuggetsCount(0);
           setnuggetsList([]);
@@ -340,6 +359,102 @@ const Profile = ({route}) => {
           }
         }
       });
+  };
+
+  const handleRemoveFriend = () => {
+    if (isMount.current) {
+      setActionLoader(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('user_id', othersProfile?.user_ref_id);
+    unfriendService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          if (isMount.current) {
+            setothersProfile(pre => {
+              return {...pre, friend_status: null};
+            });
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount.current) {
+          setActionLoader(false);
+        }
+      });
+  };
+
+  const handleUnfollow = () => {
+    if (isMount.current) {
+      setActionLoader(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('follow_userid', othersProfile?.user_ref_id);
+    formData.append('type', 2);
+    followAndUnfollowService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          Toast.success(res.data.msg);
+          dispatch(
+            removeFollowingUser({
+              user_id: othersProfile.user_id,
+            }),
+          );
+          // dispatch(
+          //   setFollowingUsersList(
+          //     [...followingUsersList].filter(
+          //       item => item.user_id !== othersProfile.user_id,
+          //     ),
+          //   ),
+          // );
+          if (isMount.current) {
+            setothersProfile(pre => {
+              return {...pre, follow: false};
+            });
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount.current) {
+          setActionLoader(false);
+        }
+      });
+  };
+
+  const onUnfollow = () => {
+    if (userId) {
+      Alert.alert(
+        'Un Follow!',
+        `Are you sure to un follow ${getSlicedText(othersProfile?.name, 20)}?`,
+        [
+          {
+            text: 'Cancel',
+            onPress: () => {},
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => {
+              handleUnfollow();
+            },
+          },
+        ],
+        {cancelable: false},
+      );
+    }
   };
 
   const isShowProfile = () => {
@@ -408,12 +523,14 @@ const Profile = ({route}) => {
   };
 
   function getIsEnableClaimAccount() {
-    let tempUnclaimedList = [...unclaimedAccountsList];
-    const tempUnclaimedUser = tempUnclaimedList.find(
-      item => item.user_id === getProfileData().user_id,
-    );
-    if (tempUnclaimedUser) {
-      return tempUnclaimedUser.unclaimed_status === 0;
+    if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
+      let tempUnclaimedList = [...unclaimedAccountsList];
+      const tempUnclaimedUser = tempUnclaimedList.find(
+        item => item.user_id === getProfileData().user_id,
+      );
+      if (tempUnclaimedUser) {
+        return tempUnclaimedUser.unclaimed_status === 0;
+      }
     }
     return false;
   }
@@ -549,10 +666,19 @@ const Profile = ({route}) => {
         <ProfileTopSection
           userId={userId}
           profile={getProfileData()}
+          isEnableRemoveFriend={
+            userId && othersProfile && othersProfile.friend_status === 1
+          }
           isEnableFansList={
             !(userId ? Boolean(parseInt(getProfileData().lock_fans)) : false)
           }
           paddingHorizontal={PADDING_HORIZONTAL}
+          onRemoveFriend={() => {
+            if (userId) {
+              handleRemoveFriend();
+            }
+          }}
+          onUnfollow={onUnfollow}
         />
         <ProfileNameBioContainer
           userId={userId}
@@ -581,9 +707,7 @@ const Profile = ({route}) => {
           isDisableVerifyAccount={getIsDisableVerifyAccount()}
           verifyAccountButtonText={getVerifyAccountButtonText()}
           onPressVerifyAccount={() => {
-            console.log('VERIFYYY');
             if (parseInt(profile?.user_status_id) === 4) {
-              console.log('IFFF');
               navigation.navigate('ClaimAccount', {
                 isVerifyAccount: true,
               });
@@ -603,7 +727,7 @@ const Profile = ({route}) => {
             <Divider />
             <ProfilesListContainerWithSeeAll
               listType="unclaimed_influencers"
-              list={unclaimedAccountsList}
+              list={unclaimedAccountsList ?? []}
               isExternalListOnly
               title={'Unclaimed Influencers Account'}
               paddingHorizontal={PADDING_HORIZONTAL}
@@ -845,7 +969,7 @@ const Profile = ({route}) => {
             <Modal
               onRequestClose={() => {}}
               transparent
-              visible={isActionLoading}>
+              visible={isActionLoading.status}>
               <Loader bgColor={COLORS.transparentDimColor} />
             </Modal>
           </>

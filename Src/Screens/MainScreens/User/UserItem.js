@@ -27,6 +27,10 @@ const UserItem = ({
 }) => {
   const followingUsersList = useFollowingUsersList();
 
+  /**
+   * Checks if the current user is a fan of the item.
+   * @returns {boolean} - true if the user is a fan, false otherwise.
+   */
   const isFan = () => {
     const tempFollowingUsersList = [...followingUsersList];
     return tempFollowingUsersList.find(ele => ele.user_id === item.user_id)

@@ -36,6 +36,17 @@ import VideoDisabledWhiteIcon from '../Assets/Svg/video_disabled_white.svg';
 import HandWhiteIcon from '../Assets/Svg/hand_white.svg';
 import HandSecondaryIcon from '../Assets/Svg/hand_secondary.svg';
 import ExitWhiteIcon from '../Assets/Svg/exit_white.svg';
+import HangOffWhiteIcon from '../Assets/Svg/hang_off.svg';
+import SwitchCameraWhiteIcon from '../Assets/Svg/switch_camera.svg';
+import ScreenShareEnableWhiteIcon from '../Assets/Svg/screen_share_enable.svg';
+import ScreenShareDisableWhiteIcon from '../Assets/Svg/screen_share_disable.svg';
+import ScreenShareDisablePinkIcon from '../Assets/Svg/screen_share_disable_pink.svg';
+import EditNameWhiteIcon from '../Assets/Svg/edit_name_white.svg';
+import RemoveUserWhiteIcon from '../Assets/Svg/remove_user_white.svg';
+import ClipboardCopySecondaryIcon from '../Assets/Svg/clipboard_copy_secondary.svg';
+import ClipboardCopyPrimaryDarkIcon from '../Assets/Svg/clipboard_copy_primary_dark.svg';
+import FullScreenWhiteIcon from '../Assets/Svg/full_screen_white.svg';
+import MiniScreenWhiteIcon from '../Assets/Svg/mini_screen_white.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -348,7 +359,18 @@ export type IconType =
   | 'video_disabled_white'
   | 'hand_white'
   | 'hand_secondary'
-  | 'exit_white';
+  | 'exit_white'
+  | 'hang_off'
+  | 'switch_camera'
+  | 'screen_share_enable'
+  | 'screen_share_disable'
+  | 'screen_share_disable_pink'
+  | 'edit_name_white'
+  | 'remove_user_white'
+  | 'clipboard_copy_secondary'
+  | 'clipboard_copy_primary_dark'
+  | 'full_screen_white'
+  | 'mini_screen_white';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -523,4 +545,15 @@ export const ICONS = {
   hand_white: HandWhiteIcon,
   hand_secondary: HandSecondaryIcon,
   exit_white: ExitWhiteIcon,
+  hang_off: HangOffWhiteIcon,
+  switch_camera: SwitchCameraWhiteIcon,
+  screen_share_enable: ScreenShareEnableWhiteIcon,
+  screen_share_disable: ScreenShareDisableWhiteIcon,
+  screen_share_disable_pink: ScreenShareDisablePinkIcon,
+  edit_name_white: EditNameWhiteIcon,
+  remove_user_white: RemoveUserWhiteIcon,
+  clipboard_copy_secondary: ClipboardCopySecondaryIcon,
+  clipboard_copy_primary_dark: ClipboardCopyPrimaryDarkIcon,
+  full_screen_white: FullScreenWhiteIcon,
+  mini_screen_white: MiniScreenWhiteIcon,
 };

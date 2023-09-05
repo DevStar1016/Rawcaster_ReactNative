@@ -128,6 +128,9 @@ const NuggetActionsSlice = createSlice({
         item => item.id !== action.payload,
       );
     },
+    clearNuggetActionsReduxData: (state, action) => {
+      return {...initialState};
+    },
   },
 });
 export const {
@@ -139,5 +142,6 @@ export const {
   setTranslatedNuggets,
   addUpdateUploadingNugget,
   removeUploadingNugget,
+  clearNuggetActionsReduxData,
 } = NuggetActionsSlice.actions;
 export default NuggetActionsSlice.reducer;

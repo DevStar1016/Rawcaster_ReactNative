@@ -66,6 +66,12 @@ export const useOtherInfluencersRequestList = () => {
 export const useGroupsList = () => {
   return useSelector(state => state.home.groupsList);
 };
+export const useGroupListLoading = () => {
+  return useSelector(state => state.home.groupListLoading);
+};
+export const useConnectionsListLoading = () => {
+  return useSelector(state => state.home.connectionsListLoading);
+};
 export const usePendingFriendRequests = () => {
   return useSelector(state => state.home.pendingFriendRequests);
 };

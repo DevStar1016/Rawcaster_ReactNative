@@ -40,6 +40,11 @@ const ForgotPassword = () => {
     AvoidSoftInput.setAdjustResize();
   }, []);
 
+  /**
+   * Handles the forgot password functionality by sending a request to the server with the provided data.
+   * @param {object} data - The data object containing the login ID.
+   * @returns None
+   */
   function handleForgotPassword(data) {
     let formData = new FormData();
     formData.append('username', data.login_id?.trim());

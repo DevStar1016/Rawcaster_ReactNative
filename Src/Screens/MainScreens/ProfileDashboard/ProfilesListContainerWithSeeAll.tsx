@@ -12,6 +12,7 @@ import {
   useOtherInfluencersRequestList,
   useProfile,
   useToken,
+  useUnclaimedAccountsList,
 } from '../../../Utilities/StoreData';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
@@ -23,6 +24,7 @@ import {
   followAndUnfollowService,
   getFollowListService,
   listAllFriendsService,
+  listUnClaimAccountService,
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
@@ -33,6 +35,7 @@ import {useDispatch} from 'react-redux';
 import {
   setOtherConnectionsRequestList,
   setOtherInfluencersRequestList,
+  setUnclaimedAccountsList,
 } from '../../../Store/Slices/HomeSlice';
 
 type Props = {
@@ -71,6 +74,7 @@ const ProfilesListContainerWithSeeAll = ({
   const dispatch = useDispatch();
   const token = useToken();
   const profile = useProfile();
+  const unclaimedAccountsList = useUnclaimedAccountsList();
   const otherInfluencersRequestList = useOtherInfluencersRequestList();
   const otherConnectionsRequestList = useOtherConnectionsRequestList();
   const [isLoading, setisLoading] = useState(
@@ -102,6 +106,11 @@ const ProfilesListContainerWithSeeAll = ({
           case 'influencers':
             fansListAPICall();
             return;
+          case 'unclaimed_influencers':
+            if (!unclaimedAccountsList) {
+              unclaimedAccountsListAPICall();
+              return;
+            }
           default:
             if (isMount) {
               setisLoading(false);
@@ -140,6 +149,23 @@ const ProfilesListContainerWithSeeAll = ({
         if (res.data.status === 1) {
           setusersTotalCount(res.data.friends_count);
           setusersList(res.data.friends_list);
+        }
+      })
+      .catch(e => {})
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
+
+  const unclaimedAccountsListAPICall = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    listUnClaimAccountService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(setUnclaimedAccountsList(res.data.unclaim_accounts));
         }
       })
       .catch(e => {})

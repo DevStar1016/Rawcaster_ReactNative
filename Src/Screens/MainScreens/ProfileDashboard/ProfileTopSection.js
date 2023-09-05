@@ -1,7 +1,11 @@
 import {Image, Modal, StyleSheet, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
-import {useProfile, useToken} from '../../../Utilities/StoreData';
+import {
+  useFollowingUsersList,
+  useProfile,
+  useToken,
+} from '../../../Utilities/StoreData';
 import FansProfilesContainer from './FansProfilesContainer';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {getAuthCode} from '../../../Utilities/Methods';
@@ -12,6 +16,13 @@ import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
+import SVGIcon from '../../../Components/SVGIcon';
+import MenuContainer from '../../../Modals/MenuContainer';
+
+const MENU_LIST = [
+  {id: 1, buttonName: 'Remove Friend'},
+  {id: 2, buttonName: 'Un Follow'},
+];
 
 const BANNER_IMAGE_HEIGHT = 140;
 const PROFILE_SIZE = 100;
@@ -22,15 +33,29 @@ const ProfileTopSection = ({
   onLayout,
   isEnableFansList = true,
   isEnableEdit = true,
+  isEnableRemoveFriend = false,
+  onRemoveFriend,
+  onUnfollow,
 }) => {
   const dispatch = useDispatch();
   const token = useToken();
+  const myProfile = useProfile();
+  const [isOpenMenuList, setisOpenMenuList] = useState(false);
   const [profileImage, setprofileImage] = useState(null);
   const [coverImage, setcoverImage] = useState(null);
   const [actionLoadingData, setactionLoadingData] = useState({
     isLoading: false,
     loaderText: '',
   });
+
+  const followingUsersList = useFollowingUsersList();
+
+  const isFan = () => {
+    const tempFollowingUsersList = [...followingUsersList];
+    return tempFollowingUsersList.find(ele => ele.user_id === profile.user_id)
+      ? true
+      : false;
+  };
 
   const setActionLoader = (status = false, text = '') => {
     setactionLoadingData({
@@ -80,6 +105,17 @@ const ProfileTopSection = ({
       .finally(() => {
         setActionLoader(false);
       });
+  };
+
+  const getOptionsList = () => {
+    let tempMenuList = [...MENU_LIST];
+    if (!isEnableRemoveFriend) {
+      tempMenuList = tempMenuList.filter(item => item.id !== 1);
+    }
+    if (!isFan()) {
+      tempMenuList = tempMenuList.filter(item => item.id !== 2);
+    }
+    return [...tempMenuList];
   };
 
   return (
@@ -133,17 +169,65 @@ const ProfileTopSection = ({
           }
           topRightIconAsButton={false}
         />
-        {isEnableFansList && (
-          <FansProfilesContainer
-            userId={userId}
-            profileSize={PROFILE_SIZE / 2 - 5}
-          />
-        )}
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          {isEnableFansList && (
+            <FansProfilesContainer
+              userId={userId}
+              profileSize={PROFILE_SIZE / 2 - 5}
+            />
+          )}
+          {myProfile?.user_id !== profile?.user_id &&
+            getOptionsList().length > 0 && (
+              <View
+                style={{
+                  padding: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <SVGIcon
+                  icon="menu_horizontal"
+                  isButton
+                  onPress={() => {
+                    setisOpenMenuList(true);
+                  }}
+                />
+              </View>
+            )}
+        </View>
       </View>
+
       <Modal transparent visible={actionLoadingData.isLoading}>
         <Loader
           bgColor={COLORS.transparentDimColor}
           loaderText={actionLoadingData.loaderText}
+        />
+      </Modal>
+      <Modal
+        visible={isOpenMenuList}
+        transparent
+        onRequestClose={() => {
+          setisOpenMenuList(false);
+        }}>
+        <MenuContainer
+          setModal={status => {
+            setisOpenMenuList(status);
+          }}
+          buttonsOptions={getOptionsList()}
+          onPressOption={selectedId => {
+            setisOpenMenuList(false);
+            if (selectedId === 1) {
+              onRemoveFriend();
+            } else if (selectedId === 2) {
+              onUnfollow();
+            }
+          }}
+          // buttonsOptions={getMenuOptions()}
+          // onPressOption={onPressNuggetAction}
         />
       </Modal>
     </View>

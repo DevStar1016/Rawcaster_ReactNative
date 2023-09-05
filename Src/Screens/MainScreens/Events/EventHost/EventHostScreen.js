@@ -1,4 +1,4 @@
-import {ActivityIndicator, BackHandler, StyleSheet, View} from 'react-native';
+import {BackHandler, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HOCView from '../../../../Components/HOCView';
 import {COLORS} from '../../../../Utilities/Colors';
@@ -11,8 +11,10 @@ import {useNavigation} from '@react-navigation/native';
 import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import MeetingUI from '../../../../Components/Meeting/MeetingUI';
 import Toast from '../../../../Components/Toast';
-import {deleteMeeting} from '../../../../Services/ApiService';
-import {getChimeTestUserId, getSlicedText} from '../../../../Utilities/Methods';
+import {endMeeting} from '../../../../Services/ApiService';
+import {getSlicedText} from '../../../../Utilities/Methods';
+import {EVENT_TYPE} from '../../../../Utilities/Constants';
+import {userLeft} from '../../../../Services/ChimeSocket/ChimeSocketRequests';
 
 var isMount = true;
 var onMeetingStartSubscription = undefined;
@@ -22,22 +24,32 @@ var onErrorSubscription = undefined;
 const EventHostScreen = ({route}) => {
   const navigation = useNavigation();
   const profile = useProfile();
-  const {meetingData, attendeeData, eventDetails} = route.params ?? {};
+
+  const {
+    meetingData,
+    attendeeData,
+    eventType,
+    meetingSetting,
+    requestsList,
+    usersList,
+  } = route.params ?? {};
   const token = useToken();
   const [loaderData, setloaderData] = useState({
     status: true,
     text: 'Meeting being started',
   });
   const [isInMeeting, setisInMeeting] = useState(false);
+  const [isKicked, setisKicked] = useState(false);
+
   useEffect(() => {
-    Meeting.start(meetingData, attendeeData);
     isMount = true;
+    Meeting.start(meetingData, attendeeData);
     return () => {
-      Meeting.stop();
       isMount = false;
     };
   }, []);
 
+  // User will not be back with physical back actions. So that will restricted with this.
   useEffect(() => {
     const backAction = () => {
       return true;
@@ -53,11 +65,16 @@ const EventHostScreen = ({route}) => {
     };
   }, []);
 
+  // Chime Meeting SDK - Meeting Start, Stop and Error Listeners
   useEffect(() => {
+    /**
+     * Subscribe to the "onStart" event of the MeetingEmitter to perform actions when a meeting starts.
+     * @param {function} callback - The callback function to be executed when the meeting starts.
+     * @returns None
+     */
     onMeetingStartSubscription = MeetingEmitter.addListener(
       MeetingEvent.onStart,
       () => {
-        console.log('MEETING START');
         if (isMount) {
           setisInMeeting(true);
           stopLoader();
@@ -65,6 +82,12 @@ const EventHostScreen = ({route}) => {
       },
     );
 
+    /**
+     * Subscribe to the "onEnd" event emitted by the MeetingEmitter when a meeting ends.
+     * Perform necessary actions such as updating the meeting status, stopping the loader,
+     * notifying other users, displaying appropriate toast messages, and navigating back.
+     * @returns None
+     */
     onMeetingEndSubscription = MeetingEmitter.addListener(
       MeetingEvent.onEnd,
       () => {
@@ -72,11 +95,28 @@ const EventHostScreen = ({route}) => {
           setisInMeeting(false);
           stopLoader();
         }
-        Toast.success('Meeting has been end');
+        userLeft({
+          user_id: profile.user_id,
+          meetingId: meetingData.MeetingId,
+          user_name: getSlicedText(profile.name, 18),
+        });
+        if (isKicked) {
+          Toast.fail('You are removed from the meeting by host.');
+        } else {
+          Toast.success('Meeting has been ended');
+        }
         navigation.goBack();
       },
     );
 
+    /**
+     * Subscribe to the onError event emitted by the MeetingEmitter.
+     * When an error occurs during a meeting, this callback function will be executed.
+     * It updates the isInMeeting state to false, stops the loader, displays an error toast message,
+     * and navigates back to the previous screen.
+     * @param {Function} message - The error message received from the MeetingEmitter.
+     * @returns None
+     */
     onErrorSubscription = MeetingEmitter.addListener(
       MeetingEvent.onError,
       message => {
@@ -86,10 +126,11 @@ const EventHostScreen = ({route}) => {
         }
         if (message) {
           Toast.fail(message.toString());
-          navigation.goBack();
         }
+        navigation.goBack();
       },
     );
+
     return () => {
       if (onMeetingEndSubscription) {
         onMeetingEndSubscription.remove();
@@ -101,7 +142,16 @@ const EventHostScreen = ({route}) => {
         onErrorSubscription.remove();
       }
     };
-  }, []);
+  }, [isKicked]);
+
+  const startLoader = (message = '') => {
+    if (isMount) {
+      setloaderData({
+        status: true,
+        text: message,
+      });
+    }
+  };
 
   const stopLoader = () => {
     if (isMount) {
@@ -112,7 +162,12 @@ const EventHostScreen = ({route}) => {
     }
   };
 
+  /**
+   * Handles the process of ending a meeting.
+   * @returns None
+   */
   const handleEndMeeting = () => {
+    startLoader('Meeting being ended');
     if (isMount) {
       setloaderData({
         status: true,
@@ -122,7 +177,7 @@ const EventHostScreen = ({route}) => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('meeting_id', meetingData.MeetingId);
-    deleteMeeting(formData)
+    endMeeting(formData)
       .then(res => {
         if (res.data.status === 1) {
           Meeting.stop();
@@ -137,13 +192,44 @@ const EventHostScreen = ({route}) => {
       });
   };
 
+  // If it is Talkshow then the header will be different. So this will return the header props according to the event type
+  const talkshowHeaderProps = () => {
+    if (eventType === EVENT_TYPE.talkshow) {
+      return {
+        rightButtonType: 'text',
+        rightButtonText: 'Talkshow',
+        rightTextButtonLeftIcon: 'record_white',
+        isEnableRightIcon: true,
+        rightTextButtonStyle: {
+          flexDirection: 'row',
+          alignItems: 'center',
+        },
+      };
+    }
+    return {
+      isEnableRightIcon: true,
+      rightIconSize: 23,
+      rightIcon: 'switch_camera',
+      onPressRightIcon: () => {
+        Meeting.switchCamera();
+      },
+    };
+  };
+
   return (
     <HOCView
       backHeaderProps={{
-        title: getSlicedText(eventDetails?.event_name, 20),
+        title: getSlicedText(meetingSetting?.title, 20),
         bgColor: COLORS.transparent,
         isTitleCenter: true,
-        isEnableBackButton: false,
+        isEnableBackButton: eventType === EVENT_TYPE.talkshow,
+        backIcon: 'switch_camera',
+        backIconSize: 23,
+        backIconMarginLeft: 15,
+        onPressBack: () => {
+          Meeting.switchCamera();
+        },
+        ...talkshowHeaderProps(),
       }}
       isLoading={loaderData.status}
       loaderProps={{
@@ -153,23 +239,26 @@ const EventHostScreen = ({route}) => {
       isEnableDefaultBackground
       paddingHorizontal={0}>
       {isInMeeting && (
+        // This is the Meeting UI If the Meeting Started then this component will be rendered
         <MeetingUI
-          meetingId={meetingData.MeetingId}
-          hostUserId={getChimeTestUserId(
-            parseInt(eventDetails.original_user_id),
-          )}
-          selfUserId={profile.user_id}
-          handleEndMeeting={() => {
-            if (
-              getChimeTestUserId(eventDetails.original_user_id) ===
-              profile.user_id
-            ) {
+          eventType={eventType}
+          handleEndMeeting={isHost => {
+            if (isHost) {
               handleEndMeeting();
             } else {
               Meeting.stop();
             }
           }}
+          handleExitMeeting={isKicked => {
+            if (isMount) {
+              setisKicked(isKicked);
+            }
+            Meeting.stop();
+          }}
           selfAttendeeId={attendeeData.AttendeeId}
+          membersList={usersList}
+          eventSettings={meetingSetting}
+          requestsList={requestsList}
         />
       )}
     </HOCView>
@@ -177,11 +266,3 @@ const EventHostScreen = ({route}) => {
 };
 
 export default EventHostScreen;
-
-const styles = StyleSheet.create({
-  loaderContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

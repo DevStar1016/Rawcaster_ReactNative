@@ -5,6 +5,7 @@ import {
   StyleSheet,
   StatusBar,
   ScrollView,
+  Image,
 } from 'react-native';
 import {COLORS} from '../../../Utilities/Colors';
 import {DIMENSIONS} from '../../../Utilities/Constants';
@@ -19,6 +20,7 @@ import {useNavigation} from '@react-navigation/native';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import Badges from '../../../Utilities/Badges';
 import Toast from '../../../Components/Toast';
+import LiveGif from '../../../Assets/Gif/live.gif';
 
 function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
   const dispatch = useDispatch();
@@ -33,6 +35,11 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
     scrollViewRef.current.scrollTo({x: state.index * 50, y: 0, animated: true});
   }, [state.index]);
 
+  /**
+   * Checks if a user is logged in by verifying the presence of a token.
+   * If the user is not logged in, it dispatches an action to set the isOpenLoginAlert state to true.
+   * @returns {boolean} - true if the user is logged in, false otherwise.
+   */
   const isLogin = () => {
     if (token) {
       return true;
@@ -51,8 +58,13 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
       ]}>
       <TouchableOpacity
         // onPress={() => {
-        //   Toast.success('Someone wants to join.', {
-        //     position: 'top',
+        //   // Toast.success('Someone wants to join.', {
+        //   //   position: 'top',
+        //   // });
+        //   Toast.normal('Senthalan', {
+        //     position: 'bottom',
+        //     visibilityTime: 6000,
+        //     description: 'Hii I am ready to Join',
         //   });
         // }}
         disabled
@@ -64,6 +76,13 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
           flexGrow: 1,
           flex: 1,
           paddingVertical: 10,
+        }}
+        onContentSizeChange={() => {
+          scrollViewRef?.current?.scrollTo({
+            x: state.routes.length * 50,
+            y: 0,
+            animated: true,
+          });
         }}
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -145,6 +164,15 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
             }
           }}
         />
+        <TouchableOpacity
+          onPress={() => {
+            if (isLogin()) {
+            }
+          }}
+          activeOpacity={0.7}
+          style={styles.gifContainer}>
+          <Image source={LiveGif} style={styles.gif} />
+        </TouchableOpacity>
         <ProfileWithBadge
           profileImage={profile?.profile_image}
           profileSize={28}
@@ -191,5 +219,18 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: FONTS.DMSans.medium,
     fontSize: 14,
+  },
+  gifContainer: {
+    height: 28,
+    width: 28,
+    marginLeft: 5,
+    borderRadius: 14,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  gif: {
+    height: 28,
+    width: 28,
+    borderRadius: 14,
   },
 });

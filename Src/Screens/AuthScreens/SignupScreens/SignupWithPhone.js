@@ -60,7 +60,8 @@ const SignupWithPhone = ({route}) => {
       ? Yup.string().required('Phone number is required')
       : Yup.string().email('Enter valid email').required('Email is required'),
     dob: Yup.string().required('Date of birth is required'),
-    gender: Yup.object().nullable().required('Gender is required'),
+    sex: Yup.object().nullable().required('Sex is required'),
+    gender: Yup.string().max(20, 'Maximum 20 characters allowed'),
   });
 
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
@@ -70,7 +71,7 @@ const SignupWithPhone = ({route}) => {
         login_id: loginId ?? '',
         password: '',
         dob: '',
-        gender: null,
+        sex: null,
       },
       validationSchema: validationSchema,
       onSubmit: values => {
@@ -92,6 +93,11 @@ const SignupWithPhone = ({route}) => {
     };
   }, []);
 
+  /**
+   * Handles the signup process with phone number.
+   * @param {object} values - The form values submitted for signup.
+   * @returns None
+   */
   const handleSignupWithPhone = values => {
     const formData = new FormData();
     formData.append('auth_code', getAuthCode(values.login_id));
@@ -99,7 +105,8 @@ const SignupWithPhone = ({route}) => {
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
     formData.append('dob', values.dob);
-    formData.append('gender', values.gender?.id);
+    formData.append('gender', values.sex?.id);
+    formData.append('other_gender', values.gender);
     formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
@@ -114,7 +121,6 @@ const SignupWithPhone = ({route}) => {
 
     signupService(formData)
       .then(res => {
-        console.log(res.data, 'SIGNUPDATA');
         if (res.data.status === 1) {
           if (res.data.acc_verify_status === 1) {
             if (parseInt(res.data.first_time) === 1) {
@@ -253,17 +259,25 @@ const SignupWithPhone = ({route}) => {
           />
           <DropDownPicker
             dataList={GENDER_LIST}
-            title={'Gender'}
-            errorText={touched.gender && errors.gender}
-            value={values.gender}
+            title={'Sex'}
+            errorText={touched.sex && errors.sex}
+            value={values.sex}
             fieldName="name"
             onSelectItem={item => {
-              console.log(item, 'GGGGG');
-              setFieldValue('gender', item);
+              setFieldValue('sex', item);
             }}
             titlePaddingVertical={3}
             inputContainerMarginVertical={0}
-            placeHolderText={'Select gender'}
+            placeHolderText={'Select Sex'}
+          />
+          <TextBox
+            iconColor={COLORS.placeHolderColor}
+            placeHolder="Enter your gender"
+            title="Gender"
+            maxLength={20}
+            onChangeText={handleChange('gender')}
+            errorText={errors.gender && touched.gender ? errors.gender : ''}
+            value={values.gender}
           />
           <View
             style={{flexDirection: 'row', flexWrap: 'wrap', paddingTop: 15}}>

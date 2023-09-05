@@ -4,12 +4,14 @@ import {
   Linking,
   Modal,
   ScrollView,
+  Share,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {encode} from 'base-64';
 import LinearGradient from 'react-native-linear-gradient';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
@@ -67,6 +69,7 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
+import {SOCIAL_SHARE_LINK} from '../../../Services/ServiceConstants';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -162,6 +165,7 @@ function NuggetActionsOverlay({
   const followingUsersList = useFollowingUsersList();
   const unLikedNuggetsFromLikedNuggets = useUnLikedNuggetsFromLikedNuggets();
   const savedNuggetsIds = useSavedNuggetsIds();
+  const shareLinkTimer = useRef<any>(undefined);
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
@@ -186,6 +190,14 @@ function NuggetActionsOverlay({
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
+
+  useEffect(() => {
+    return () => {
+      if (shareLinkTimer.current) {
+        clearTimeout(shareLinkTimer.current);
+      }
+    };
+  }, []);
 
   const getIsFocused = useMemo(() => {
     return (
@@ -223,6 +235,10 @@ function NuggetActionsOverlay({
 
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
+  /**
+   * Retrieves the name of the nugget share type based on the nugget's share_type ID.
+   * @returns {string} The name of the nugget share type, or an empty string if not found.
+   */
   const getNuggetType = () => {
     const nuggetType = NUGGET_SHARE_TYPE.find(
       item => item.id === nugget.share_type,
@@ -233,6 +249,11 @@ function NuggetActionsOverlay({
     return '';
   };
 
+  /**
+   * Makes an API call to vote on a poll option.
+   * @param {number} optionId - The ID of the poll option to vote for.
+   * @returns None
+   */
   const pollVotingAPICall = (optionId: number) => {
     const formData = new FormData();
     formData.append('token', token);
@@ -250,6 +271,11 @@ function NuggetActionsOverlay({
       });
   };
 
+  /**
+   * Makes an API call to retrieve audio content for a nugget.
+   * @param {number} [type=1] - The type of audio content to retrieve. Default is 1.
+   * @returns None
+   */
   const nuggetContentAudioAPICall = (type = 1) => {
     if (
       nuggetContentController &&
@@ -297,12 +323,20 @@ function NuggetActionsOverlay({
       });
   };
 
+  /**
+   * Calculates the total number of votes for a poll.
+   * @returns {number} The total number of votes.
+   */
   const getTotalVotes = () => {
     return pollVotedData.votedOptionID
       ? parseInt(nugget.total_vote) + 1
       : nugget.total_vote;
   };
 
+  /**
+   * Retrieves the poll options and calculates the vote count and percentage for each option.
+   * @returns An array of poll options with updated vote count and percentage.
+   */
   const getPollOptions = () => {
     let tempPollOptions = [...nugget.poll_option].map(item => {
       let votes = item.votes;
@@ -320,6 +354,13 @@ function NuggetActionsOverlay({
     return [...tempPollOptions];
   };
 
+  /**
+   * Handles the onPress event for a URL value.
+   * If the value includes 'rawcaster', it opens the URL using the Linking API.
+   * Otherwise, it sets the openUrlConfirmation state to true and sets the url state to the given value.
+   * @param {any} value - The URL value to handle onPress event for.
+   * @returns None
+   */
   const onPressUrl = (value: any) => {
     if (value) {
       if (value.includes('rawcaster')) {
@@ -333,6 +374,10 @@ function NuggetActionsOverlay({
     }
   };
 
+  /**
+   * Retrieves the menu options based on the current state of the nugget.
+   * @returns {Array} An array of menu options.
+   */
   const getMenuOptions = () => {
     let result = [];
     if (nugget.is_nugget_owner === 1) {
@@ -354,6 +399,37 @@ function NuggetActionsOverlay({
     return result;
   };
 
+  /**
+   * Handles the sharing of a link using the Share API.
+   * @returns None
+   */
+  const onShareLink = async () => {
+    const shareMessage = `${SOCIAL_SHARE_LINK}` + `${encode(nugget.nugget_id)}`;
+    try {
+      const result = await Share.share({
+        message: shareMessage,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      if (setpaused) {
+        setpaused(false);
+      }
+    }
+  };
+
+  /**
+   * Handles the action to be performed when a nugget is pressed.
+   * @param {number} id - The ID of the pressed nugget.
+   * @returns None
+   */
   const onPressNuggetAction = (id: number) => {
     setopenMenuOptions(false);
     switch (id) {
@@ -370,9 +446,23 @@ function NuggetActionsOverlay({
         onReportAbouseNugget();
         break;
       case 5:
+        if (setpaused) {
+          setpaused(true);
+        }
+        shareLinkTimer.current = setTimeout(() => {
+          onShareLink();
+          clearTimeout(shareLinkTimer.current);
+        }, 200);
         break;
     }
   };
+
+  /**
+   * Checks if the translated content exists in the nugget object. If it does, it sets the
+   * isTranslated state to true. If it doesn't, it sets the isTranslateLoading state to true
+   * and makes an API call to retrieve the translated content.
+   * @returns None
+   */
   const getTranslatedContent = () => {
     if (nugget.translated_content) {
       setisTranslated(true);
@@ -382,6 +472,10 @@ function NuggetActionsOverlay({
     }
   };
 
+  /**
+   * Checks if the user is verified.
+   * @returns {boolean} - Returns true if the user is verified, false otherwise.
+   */
   const isVerified = () => {
     if (user && user.acc_verify_status === 1) {
       return true;
@@ -393,6 +487,10 @@ function NuggetActionsOverlay({
     return false;
   };
 
+  /**
+   * Checks if the user is logged in.
+   * @returns {boolean} - true if the user is logged in, false otherwise.
+   */
   const isLogin = () => {
     if (token) {
       return true;
@@ -404,6 +502,10 @@ function NuggetActionsOverlay({
     return false;
   };
 
+  /**
+   * Calculates the bottom value of the content container based on various conditions.
+   * @returns {number} - The calculated bottom value.
+   */
   const getBottomValueOfContentContainer = () => {
     if (isFromGlobalSearch) {
       let bottomValue = 0;
@@ -421,6 +523,10 @@ function NuggetActionsOverlay({
     return 85;
   };
 
+  /**
+   * Retrieves the total number of likes for a nugget.
+   * @returns {number} The total number of likes for the nugget.
+   */
   const getTotalLikes = () => {
     if (isNuggetLiked()) {
       const tempLikedNuggets = [...likedNuggets];
@@ -439,6 +545,11 @@ function NuggetActionsOverlay({
     return nugget.total_likes;
   };
 
+  /**
+   * Checks if a nugget is liked by comparing its ID to the IDs of the nuggets in the
+   * `likedNuggets` array.
+   * @returns {boolean} - `true` if the nugget is liked, `false` otherwise.
+   */
   const isNuggetLiked = () => {
     const tempLikedNuggets = [...likedNuggets];
     return tempLikedNuggets.find(item => item.id === nugget.nugget_id)
@@ -446,6 +557,10 @@ function NuggetActionsOverlay({
       : false;
   };
 
+  /**
+   * Checks if the current user is a fan of the nugget.
+   * @returns {boolean} - true if the user is a fan, false otherwise.
+   */
   const isFan = () => {
     const tempFollowingUsersList = [...followingUsersList];
     return tempFollowingUsersList.find(item => item.user_id === nugget.user_id)
@@ -453,10 +568,18 @@ function NuggetActionsOverlay({
       : false;
   };
 
+  /**
+   * Checks if the given nugget is saved.
+   * @returns {boolean} - True if the nugget is saved, false otherwise.
+   */
   const isNuggetSaved = () => {
     return [...savedNuggetsIds].includes(nugget.nugget_id);
   };
 
+  /**
+   * Retrieves the fan count for a user.
+   * @returns {number} - The fan count of the user.
+   */
   const getFansCount = () => {
     if (isFan()) {
       const tempFollowingUsersList = [...followingUsersList];
@@ -679,7 +802,8 @@ function NuggetActionsOverlay({
                     />
                   ) : (
                     <SVGIcon
-                      height={15.5}
+                      // height={15.5}
+                      height={17.5}
                       icon={
                         !isReadLoading
                           ? !isReadMuted
@@ -697,10 +821,7 @@ function NuggetActionsOverlay({
                             if (setisMuted) {
                               setisMuted(true);
                             }
-                            console.log(
-                              nuggetContentController.current,
-                              'before',
-                            );
+
                             if (
                               nuggetContentController &&
                               nuggetContentController.current
@@ -735,7 +856,8 @@ function NuggetActionsOverlay({
                     />
                   ) : (
                     <SVGIcon
-                      height={15.5}
+                      // height={15.5}
+                      height={17.5}
                       icon={
                         !isTranslateLoading
                           ? isTranslated
@@ -898,7 +1020,9 @@ function NuggetActionsOverlay({
                   <StyledText style={{color: COLORS.white}}>Nugget</StyledText>
                 </>
               )}
-              {token && !isFan() ? (
+              {token &&
+              !isFan() &&
+              profile?.user_id !== nugget?.original_user_id ? (
                 <SubmitButton
                   buttonText="Become a Fan"
                   marginTop={0}
@@ -1142,6 +1266,7 @@ function NuggetActionsOverlay({
         ref={aiChatBottomSheetModalRef}
         handleStyle={{display: 'none'}}
         enableOverDrag={false}
+        enableContentPanningGesture={false}
         enablePanDownToClose={false}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
         bottomInset={insets.bottom}

@@ -1,10 +1,11 @@
-import {EmitterSubscription, StyleSheet, Text, View} from 'react-native';
+import {EmitterSubscription} from 'react-native';
 import {useEffect} from 'react';
 import {
   MeetingEvent,
   MeetingEmitter,
 } from '../../Native/Bridges/ChimeMeetingBridge';
-import {IS_IOS} from '../../Utilities/Constants';
+import {UserDataProp} from '../../Services/ChimeSocket/ChimeSocketPropTypes';
+import {AttendeeDetailProp} from './MeetingVideoView';
 
 export type DataMessage = {
   topic: string;
@@ -17,23 +18,20 @@ export type DataMessage = {
 
 type Props = {
   onJoinAttendee: (attendeeId: string, externalUserId: number) => void;
-  onLeaveAttendee: (attendeeId: string) => void;
-  onMuteAttendee: (attendeeId: string) => void;
-  onUnMuteAttendee: (attendeeId: string) => void;
-  onEnableScreenShare: (tileId: string | number, attendeeId: string) => void;
+  onLeaveAttendee: (attendeeId: string, externalUserId: number) => void;
+  onMuteUnMuteAttendee: (attendeeId: string, isMute: boolean) => void;
+  onEnableScreenShare: (tileId: number, attendeeId: string) => void;
   onAddVideoTile: (
-    tileId: string | number,
+    tileId: number,
     isLocal: boolean,
     attendeeId: string,
   ) => void;
-  onRemoveScreenShare: () => void;
-  onRemoveVideoTile: (
-    tileId: string | number,
-    isLocal: boolean,
-    attendeeId: string,
-  ) => void;
+  onRemoveScreenShare: (attendeeId: string) => void;
+  onRemoveVideoTile: (isLocal: boolean, attendeeId: string) => void;
   onReceiveDataMessage: (data: DataMessage) => void;
   onError: (error: string) => void;
+  attendeesList: AttendeeDetailProp[];
+  usersList: UserDataProp[];
 };
 
 type AttendeeJoinResponseProps = {
@@ -54,63 +52,81 @@ var onErrorSubscription: EmitterSubscription | undefined = undefined;
 const MeetingActionsListener = ({
   onJoinAttendee,
   onLeaveAttendee,
-  onMuteAttendee,
-  onUnMuteAttendee,
+  onMuteUnMuteAttendee,
   onEnableScreenShare,
   onAddVideoTile,
   onRemoveScreenShare,
   onRemoveVideoTile,
   onReceiveDataMessage,
   onError,
+  attendeesList = [],
+  usersList = [],
 }: Props) => {
   useEffect(() => {
     /**
-     * Attendee Join and Leave handler
+     * Adds a listener for the "onAttendeesJoin" event emitted by the MeetingEmitter.
+     * When the event is triggered, it calls the onJoinAttendee function with the attendeeId
+     * and externalUserId as arguments.
+     * @param {function} onJoinAttendee - The function to be called when the event is triggered.
+     * @returns None
      */
     onAttendeesJoinSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesJoin,
       ({attendeeId, externalUserId}: AttendeeJoinResponseProps) => {
-        // const attendeeNameMap: any = {};
-        // if (!(attendeeId in attendeeNameMap)) {
-        //   // The externalUserId will be a format such as c19587e7#Alice
-        //   attendeeNameMap[attendeeId] = externalUserId.split('#')[1];
-        // }
-
         onJoinAttendee(attendeeId, parseInt(externalUserId));
       },
     );
 
+    /**
+     * Subscribe to the onAttendeesLeave event and execute the onLeaveAttendee function
+     * when the event is triggered.
+     * @param {function} onLeaveAttendee - The function to be executed when an attendee leaves.
+     * @returns None
+     */
     onAttendeesLeaveSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesLeave,
-      ({attendeeId}) => {
-        onLeaveAttendee(attendeeId);
+      ({attendeeId, externalUserId}) => {
+        onLeaveAttendee(attendeeId, parseInt(externalUserId));
       },
     );
 
     /**
-     * Attendee Mute & Unmute handler
+     * Subscribe to the "onAttendeesMute" event and execute the "onMuteUnMuteAttendee" function
+     * when the event is triggered.
+     * @param {function} attendeeId - The ID of the attendee who was muted.
+     * @returns None
      */
     onAttendeesMuteSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesMute,
       attendeeId => {
-        onMuteAttendee(attendeeId);
-      },
-    );
-
-    onAttendeesUnmuteSubscription = MeetingEmitter.addListener(
-      MeetingEvent.onAttendeesUnmute,
-      attendeeId => {
-        onUnMuteAttendee(attendeeId);
+        onMuteUnMuteAttendee(attendeeId, true);
       },
     );
 
     /**
-     * Video tile Add & Remove Handler
+     * Subscribe to the "onAttendeesUnmute" event and execute the provided callback function
+     * when the event is triggered.
+     * @param {Function} attendeeId - The callback function to be executed when the event is triggered.
+     * @returns None
+     */
+    onAttendeesUnmuteSubscription = MeetingEmitter.addListener(
+      MeetingEvent.onAttendeesUnmute,
+      attendeeId => {
+        onMuteUnMuteAttendee(attendeeId, false);
+      },
+    );
+
+    /**
+     * Adds a subscription to the MeetingEmitter for the onAddVideoTile event.
+     * When the event is triggered, it checks if the tileState represents a screen share
+     * or a regular video tile, and calls the appropriate functions accordingly.
+     * @param {function} onEnableScreenShare - The function to call when a screen share tile is added.
+     * @param {function} onAddVideoTile - The function to call when a regular video tile is added.
+     * @returns None
      */
     onAddVideoTileSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAddVideoTile,
       tileState => {
-        console.log(tileState, 'STATE TILE');
         if (tileState.isScreenShare) {
           onEnableScreenShare(tileState.tileId, tileState.attendeeId);
         } else {
@@ -123,27 +139,31 @@ const MeetingActionsListener = ({
       },
     );
 
+    /**
+     * Adds a listener for the "onRemoveVideoTile" event emitted by the MeetingEmitter.
+     * When the event is triggered, it checks if the tileState represents a screen share
+     * and calls the onRemoveScreenShare function with the attendeeId. Otherwise, it calls
+     * the onRemoveVideoTile function with the isLocal and attendeeId parameters.
+     * @param {Function} onRemoveScreenShare - The function to call when a screen share is removed.
+     * @param {Function} onRemoveVideoTile - The function to call when a video tile is removed.
+     * @returns None
+     */
     onRemoveVideoTileSubscription = MeetingEmitter.addListener(
       MeetingEvent.onRemoveVideoTile,
       tileState => {
         if (tileState.isScreenShare) {
-          onRemoveScreenShare();
+          onRemoveScreenShare(tileState.attendeeId);
         } else {
-          if (!IS_IOS) {
-            console.log(tileState, 'TILESTATE CHECK VIDEO');
-          }
-
-          onRemoveVideoTile(
-            tileState.tileId,
-            tileState.isLocal,
-            tileState.attendeeId,
-          );
+          onRemoveVideoTile(tileState.isLocal, tileState.attendeeId);
         }
       },
     );
 
     /**
-     * Data message handler
+     * Subscribe to the onDataMessageReceived event and execute the onReceiveDataMessage function
+     * when a data message is received.
+     * @param {DataMessage} dataMessage - The data message received.
+     * @returns None
      */
     onDataMessageReceivedSubscription = MeetingEmitter.addListener(
       MeetingEvent.onDataMessageReceive,
@@ -153,7 +173,11 @@ const MeetingActionsListener = ({
     );
 
     /**
-     * General Error handler
+     * Subscribe to the MeetingEmitter's onError event and execute the onError function
+     * when the event is triggered.
+     * @param {string} MeetingEvent.onError - The name of the onError event.
+     * @param {Function} onError - The function to execute when the onError event is triggered.
+     * @returns A subscription object that can be used to unsubscribe from the event.
      */
     onErrorSubscription = MeetingEmitter.addListener(
       MeetingEvent.onError,
@@ -161,9 +185,11 @@ const MeetingActionsListener = ({
         onError(errorType);
       },
     );
-  }, []);
 
-  useEffect(() => {
+    /**
+     * Returns a function that removes all event subscriptions related to attendees in a meeting.
+     * @returns None
+     */
     return () => {
       if (onAttendeesJoinSubscription) {
         onAttendeesJoinSubscription.remove();
@@ -190,7 +216,7 @@ const MeetingActionsListener = ({
         onErrorSubscription.remove();
       }
     };
-  }, []);
+  }, [attendeesList, usersList]);
 
   return null;
 };

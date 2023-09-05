@@ -51,7 +51,7 @@ const NuggetsListSlice = createSlice({
       }
     },
     clearNuggetsListReduxData: (state, action) => {
-      state = {...initialState};
+      return {...initialState};
     },
   },
   extraReducers: builder => {

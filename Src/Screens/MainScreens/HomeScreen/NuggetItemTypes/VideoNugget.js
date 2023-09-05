@@ -27,11 +27,20 @@ function VideoNugget({
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
 
+  /**
+   * Handles the error that occurs when loading a video.
+   * @param {Error} error - The error object that occurred.
+   * @returns None
+   */
   const videoError = error => {
-    console.log(error, 'ERROR VIDEO');
     setisLoadingVideo(false);
   };
 
+  /**
+   * Updates the playback status based on the provided playback status object.
+   * @param {object} playbackStatus - The playback status object.
+   * @returns None
+   */
   const playBackStatusUpdate = playbackStatus => {
     try {
       let currentTime = playbackStatus.currentTime;
@@ -44,6 +53,13 @@ function VideoNugget({
     } catch (error) {}
   };
 
+  /**
+   * Callback function that is triggered when the video has finished loading.
+   * It updates the duration state variable with the duration of the loaded video
+   * and sets the isLoadingVideo state variable to false.
+   * @param {Event} event - The event object containing information about the loaded video.
+   * @returns None
+   */
   const onLoadComplete = event => {
     setduration(event.duration);
     setisLoadingVideo(false);
@@ -73,9 +89,7 @@ function VideoNugget({
           paused={paused}
           muted={isMuted}
           repeat={isRepeatVideo}
-          onBuffer={() => {
-            // console.log('BUFFERINg');
-          }}
+          onBuffer={() => {}}
           onLoadStart={val => {
             setisLoadingVideo(true);
           }}

@@ -23,7 +23,6 @@ import {
 import PollNugget from './NuggetItemTypes/PollNugget';
 import {
   nuggetAbuseReportService,
-  nuggetContentAudioService,
   shareNuggetService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
@@ -54,10 +53,7 @@ import {
   likeAndUnlikeNugget,
   saveAndUnsaveNugget,
 } from '../../../Store/ThunkAPIServices';
-import {
-  addEditedNugget,
-  setTranslatedNuggets,
-} from '../../../Store/Slices/NuggetActionsSlice';
+import {setTranslatedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
 
 const Nugget = ({nugget, nuggetIndex}) => {
   const {
@@ -109,6 +105,10 @@ const Nugget = ({nugget, nuggetIndex}) => {
     };
   }, []);
 
+  /**
+   * Updates the like status of a nugget with a debounce function to prevent multiple rapid updates.
+   * @returns None
+   */
   const updateLike = useCallback(
     lodash.debounce(() => {
       if (likeUnlikeController) {
@@ -126,6 +126,11 @@ const Nugget = ({nugget, nuggetIndex}) => {
     [],
   );
 
+  /**
+   * Updates the save state of a nugget with a debounce of 100 milliseconds.
+   * If there is an ongoing save or unsave operation, it will be aborted.
+   * @returns None
+   */
   const updateSave = useCallback(
     lodash.debounce(() => {
       if (saveUnsaveController) {
@@ -142,6 +147,10 @@ const Nugget = ({nugget, nuggetIndex}) => {
     [],
   );
 
+  /**
+   * Updates the "isFan" status of a user by dispatching a "becomeFan" action.
+   * @returns None
+   */
   function updateIsFan() {
     dispatch(
       becomeFan({
@@ -152,6 +161,10 @@ const Nugget = ({nugget, nuggetIndex}) => {
     );
   }
 
+  /**
+   * Displays an alert dialog with a confirmation message for deleting a nugget.
+   * @returns None
+   */
   const deleteButtonAlert = () =>
     Alert.alert(
       'Delete!',
@@ -175,6 +188,11 @@ const Nugget = ({nugget, nuggetIndex}) => {
       {cancelable: false},
     );
 
+  /**
+   * Displays an alert asking the user if they want to block a certain user.
+   * If the user confirms, the function calls the handleBlockUser function with the user_id parameter.
+   * @returns None
+   */
   const onBlockUser = () =>
     Alert.alert(
       'Block!',
@@ -195,6 +213,10 @@ const Nugget = ({nugget, nuggetIndex}) => {
       {cancelable: false},
     );
 
+  /**
+   * Navigates to the 'PostEditNugget' screen with the specified parameters.
+   * @returns None
+   */
   const onEditNugget = () => {
     navigation.navigate('PostEditNugget', {
       nugget: nugget,
@@ -203,6 +225,11 @@ const Nugget = ({nugget, nuggetIndex}) => {
     });
   };
 
+  /**
+   * Handles blocking a user by dispatching a blockUnblockUser action with the provided user ID.
+   * @param {string} userId - The ID of the user to block.
+   * @returns None
+   */
   const handleBlockUser = userId => {
     dispatch(
       blockUnblockUser({
@@ -212,6 +239,12 @@ const Nugget = ({nugget, nuggetIndex}) => {
     );
   };
 
+  /**
+   * Handles the sharing of a nugget based on the given type and shared list.
+   * @param {number} type - The type of sharing (3 for groups, 4 for friends).
+   * @param {Array} sharedList - The list of groups or friends to share the nugget with.
+   * @returns None
+   */
   const handleSharNugget = (type, sharedList) => {
     setloaderText('Sharing Nugget...');
     setisActionLoading(true);
@@ -245,6 +278,13 @@ const Nugget = ({nugget, nuggetIndex}) => {
       });
   };
 
+  /**
+   * Handles the action of sharing a nugget based on the given type.
+   * If the type is 3 or 4, it sets the selectedShareTypeId and opens the selection modal.
+   * Otherwise, it displays an alert asking the user if they want to share the nugget.
+   * @param {number} type - The type of sharing action to perform.
+   * @returns None
+   */
   const onShareNugget = type => {
     if (type === 3 || type === 4) {
       setselectedShareTypeId(type);
@@ -270,6 +310,13 @@ const Nugget = ({nugget, nuggetIndex}) => {
       );
     }
   };
+
+  /**
+   * Updates the translated content of a nugget in the nuggets list and dispatches
+   * the updated list of translated nuggets.
+   * @param {string} translatedText - The translated text to update the nugget's content with.
+   * @returns None
+   */
   function handleNuggetContentTranslate(translatedText) {
     let tempList = [...nuggetsList];
     let temp = tempList.find(ele => ele.nugget_id === nugget.nugget_id);
@@ -282,6 +329,12 @@ const Nugget = ({nugget, nuggetIndex}) => {
     }
   }
 
+  /**
+   * Handles the reporting of a nugget.
+   * @param {string} nuggetId - The ID of the nugget to report.
+   * @param {string} [message=''] - The optional message to include in the report.
+   * @returns None
+   */
   function handleReportNugget(nuggetId, message = '') {
     setloaderText('Reporting this Nugget');
     setisActionLoading(true);
@@ -337,10 +390,20 @@ const Nugget = ({nugget, nuggetIndex}) => {
       });
   }
 
+  /**
+   * Sets the isOpenSharTypeList state to true, triggering the display of the share type list.
+   * @returns None
+   */
   const onPressShare = () => {
     setisOpenSharTypeList(true);
   };
 
+  /**
+   * Handles the onPress event for the share type.
+   * If the share type is 3 or 4 and there is a shared detail available,
+   * it sets the selectedShareTypeId to the share type and opens the view only selection modal.
+   * @returns None
+   */
   const onPressShareType = () => {
     if (
       (nugget.share_type === 3 || nugget.share_type === 4) &&
@@ -352,6 +415,15 @@ const Nugget = ({nugget, nuggetIndex}) => {
     }
   };
 
+  /**
+   * Retrieves a list of selections based on the current state of the application.
+   * If the view-only selection modal is open, it returns a list of items from the shared_detail
+   * property of the nugget object. If the selectedShareTypeId is 3, it returns an array of objects
+   * with group_name and group_icon properties. Otherwise, it returns an array of objects with
+   * display_name and profile_img properties. If the view-only selection modal is not open, it
+   * returns either the groupsList or the connectionsList based on the value of selectedShareTypeId.
+   * @returns {Array} - An array of objects representing the selections.
+   */
   const getSelectionList = () => {
     if (isOpenViewOnlySelectionModal) {
       return nugget?.shared_detail?.map(item => {
@@ -394,8 +466,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     },
   };
 
-  const keyExtractor = useCallback(item => item.media_id.toString(), []);
-
   function renderItem({item, index}) {
     return (
       <NuggetItem
@@ -421,23 +491,6 @@ const Nugget = ({nugget, nuggetIndex}) => {
     <NuggetItemActionsContext.Provider value={nuggetItemActions}>
       <View style={styles.mainContainer}>
         {nugget?.media_list?.length > 0 ? (
-          // <BigList
-          //   ref={flatlistRef}
-          //   showsHorizontalScrollIndicator={false}
-          //   style={[
-          //     styles.listContainer,
-          //     {height: mediaHeight ?? insets.mediaHeight},
-          //   ]}
-          //   data={nugget.media_list ?? []}
-          //   horizontal
-          //   bounces={false}
-          //   keyExtractor={keyExtractor}
-          //   renderItem={renderItem}
-          //   pagingEnabled
-          //   itemHeight={mediaHeight ?? insets.mediaHeight}
-          //   onViewableItemsChanged={onViewRef.current}
-          // />
-
           <FlatList
             ref={flatlistRef}
             nestedScrollEnabled

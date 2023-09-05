@@ -7,7 +7,6 @@ import {FONTS} from '../../../Utilities/Fonts';
 import SVGIcon from '../../../Components/SVGIcon';
 import {EVENT_TYPE} from '../../../Utilities/Constants';
 import {
-  getChimeTestUserId,
   getSlicedText,
   htmlDecodeText,
   utcToUserTimezone,
@@ -25,6 +24,11 @@ const EventListItem = ({
 }) => {
   const profile = useProfile();
   const settings = useSettings();
+
+  /**
+   * Returns the background color based on the current theme.
+   * @returns {string} The background color.
+   */
   const getBgColor = () => {
     if (isDarkTheme) {
       return COLORS.whiteTransparent;
@@ -32,6 +36,10 @@ const EventListItem = ({
     return COLORS.white;
   };
 
+  /**
+   * Returns the appropriate text color based on the current theme.
+   * @returns {string} The color value for the text.
+   */
   const getTextColor = () => {
     if (isDarkTheme) {
       return COLORS.white;
@@ -39,6 +47,10 @@ const EventListItem = ({
     return COLORS.black;
   };
 
+  /**
+   * Returns the text representation of the event type based on the value of the 'type' property of the 'item' object.
+   * @returns {string} The text representation of the event type.
+   */
   const getEventTypeText = () => {
     if (item.type === EVENT_TYPE.event) {
       return 'Event';
@@ -50,8 +62,12 @@ const EventListItem = ({
     return '';
   };
 
+  /**
+   * Checks if the current user is the owner of the item.
+   * @returns {boolean} True if the current user is the owner, false otherwise.
+   */
   const isOwner = () => {
-    return getChimeTestUserId(item?.original_user_id) === profile?.user_id;
+    return item?.original_user_id === profile?.user_id;
   };
 
   return (
@@ -69,7 +85,7 @@ const EventListItem = ({
           borderRadius: 10,
         }}
       />
-      {item.type !== 1 && (
+      {item.type === 2 && (
         <View style={styles.eventTypeBadgeContainer}>
           <SVGIcon icon="record_white" height={15} width={15} marginRight={5} />
           <StyledText style={styles.text}>{getEventTypeText()}</StyledText>

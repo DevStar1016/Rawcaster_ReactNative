@@ -18,17 +18,20 @@ type TomatoToastOptions = {
 
 type CustomToastProps = {
   text: string;
+  description?: string;
   toastType: ToastTypes;
   normalActionButton?: ToastActionButtonProp;
 };
 
 interface TomatoToastProps {
   text1: string;
+  text2?: string;
   props: TomatoToastOptions;
 }
 
 const CustomToast = ({
   text = '',
+  description = '',
   toastType,
   normalActionButton,
 }: CustomToastProps) => {
@@ -75,42 +78,53 @@ const CustomToast = ({
               <View
                 style={{
                   backgroundColor: COLORS.white,
-                  flexDirection: 'row',
                   borderRadius: 6,
                   paddingVertical: 5,
                   paddingHorizontal: 10,
-                  alignItems: 'center',
                 }}>
-                <StyledText
-                  style={{fontFamily: FONTS.DMSans.medium, paddingVertical: 5}}>
-                  {text}
-                </StyledText>
-                {normalActionButton ? (
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    style={{marginLeft: 10}}
-                    onPress={() => {
-                      if (normalActionButton.onPress) {
-                        normalActionButton.onPress();
-                      }
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <StyledText
+                    style={{
+                      fontFamily: FONTS.DMSans.medium,
+                      paddingVertical: description ? 0 : 5,
                     }}>
-                    <StyledText
-                      style={{
-                        color: COLORS.secondary,
-                        fontFamily: FONTS.DMSans.medium,
+                    {text}
+                  </StyledText>
+
+                  {normalActionButton ? (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={{marginLeft: 10}}
+                      onPress={() => {
+                        if (normalActionButton.onPress) {
+                          normalActionButton.onPress();
+                        }
                       }}>
-                      {normalActionButton.buttonName}
-                    </StyledText>
-                  </TouchableOpacity>
+                      <StyledText
+                        style={{
+                          color: COLORS.secondary,
+                          fontFamily: FONTS.DMSans.medium,
+                        }}>
+                        {normalActionButton.buttonName}
+                      </StyledText>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
+                {description ? (
+                  <StyledText style={{paddingVertical: 5}}>
+                    {description}
+                  </StyledText>
                 ) : null}
               </View>
             </View>
           </>
         ) : (
-          <StyledText
-            style={{fontFamily: FONTS.DMSans.medium, paddingVertical: 5}}>
-            {text}
-          </StyledText>
+          <>
+            <StyledText
+              style={{fontFamily: FONTS.DMSans.medium, paddingVertical: 5}}>
+              {text}
+            </StyledText>
+          </>
         )}
       </View>
     </View>
@@ -118,9 +132,10 @@ const CustomToast = ({
 };
 
 export default {
-  tomatoToast: ({text1, props}: TomatoToastProps) => (
+  tomatoToast: ({text1, text2, props}: TomatoToastProps) => (
     <CustomToast
       text={text1}
+      description={text2}
       toastType={props.toastType}
       normalActionButton={props.normalActionButton}
     />

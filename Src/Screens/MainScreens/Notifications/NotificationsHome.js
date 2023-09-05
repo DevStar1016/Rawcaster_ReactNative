@@ -29,6 +29,18 @@ const NotificationsHome = () => {
     setisActionLoading: setisActionLoading,
   };
 
+  /**
+   * Handles the action of marking all notifications as read.
+   * Sets the isActionLoading state to true.
+   * Creates a new FormData object and appends the token and mark_all_as_read parameters.
+   * Calls the readNotificationService function with the formData.
+   * If the response status is 1, dispatches the setUnreadNotificationCount action with null as the parameter
+   * and displays a success toast message.
+   * If the response status is not 1, displays a failure toast message.
+   * If an error occurs during the API call, displays a failure toast message with the error message.
+   * Finally, sets the isActionLoading state to false.
+   * @returns None
+   */
   const handleMarkAllRead = () => {
     setisActionLoading(true);
     const formData = new FormData();

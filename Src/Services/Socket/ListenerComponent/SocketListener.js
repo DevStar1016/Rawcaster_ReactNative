@@ -42,7 +42,6 @@ const SocketListener = () => {
     socketListen.on(
       'groupchatting',
       message => {
-        console.log('SocketListen  groupchatting on in Dashboard');
         switch (message.event) {
           case 'groupchatmessage':
             break;

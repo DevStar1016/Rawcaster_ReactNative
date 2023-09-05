@@ -108,6 +108,10 @@ const CreateEditTalkshow = ({route}) => {
     };
   }, []);
 
+  /**
+   * Makes an API call to retrieve the event visibility types.
+   * @returns None
+   */
   const getEventVisibilityTypesAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -131,6 +135,10 @@ const CreateEditTalkshow = ({route}) => {
       });
   };
 
+  /**
+   * Makes an API call to retrieve the details of an event if edit.
+   * @returns None
+   */
   const getEventDetailsAPICall = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -138,7 +146,6 @@ const CreateEditTalkshow = ({route}) => {
     viewEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(JSON.stringify(res.data.event_detail, 'EVENT DETAILSSS'));
           if (res.data.event_detail.banner_image) {
             setbannerImage({
               uri: res.data.event_detail.banner_image,
@@ -186,6 +193,27 @@ const CreateEditTalkshow = ({route}) => {
       });
   };
 
+  /**
+   * Resets the navigation stack to the view screen for the given event details.
+   * @param {object} eventDetails - The details of the event to navigate to.
+   * @returns None
+   */
+  const resetStackToViewScreen = eventDetails => {
+    navigation.reset({
+      routes: [
+        {name: 'Talkshow'},
+        {
+          name: 'EventDetailsView',
+          params: {eventDetail: eventDetails},
+        },
+      ],
+    });
+  };
+
+  /**
+   * Returns a FormData object with default values for creating or editing an event.
+   * @returns {FormData} - The FormData object with the default values.
+   */
   const getDefaultCreateEditFormData = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -217,6 +245,10 @@ const CreateEditTalkshow = ({route}) => {
     return formData;
   };
 
+  /**
+   * Creates an API call to add a live event using the Talkshow API.
+   * @returns None
+   */
   const createTalkshowAPICall = () => {
     const formData = getDefaultCreateEditFormData();
 
@@ -224,9 +256,7 @@ const CreateEditTalkshow = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          navigation.reset({
-            routes: [{name: 'Talkshow'}],
-          });
+          resetStackToViewScreen(res.data.event_detail);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -241,6 +271,10 @@ const CreateEditTalkshow = ({route}) => {
       });
   };
 
+  /**
+   * Edits a talkshow API call by sending a request to the server with the updated form data.
+   * @returns None
+   */
   const editTalkshowAPICall = () => {
     const formData = getDefaultCreateEditFormData();
     formData.append('event_id', eventId);
@@ -272,14 +306,11 @@ const CreateEditTalkshow = ({route}) => {
         JSON.stringify(tempRemovedGroupsIdsList),
       );
     }
-    console.log(JSON.stringify(formData), 'EDIT FORMDATA');
     editLiveEventService(formData)
       .then(res => {
         if (res.data.status === 1) {
           Toast.success(res.data.msg);
-          navigation.reset({
-            routes: [{name: 'Talkshow'}],
-          });
+          resetStackToViewScreen(res.data.event_detail);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -294,6 +325,11 @@ const CreateEditTalkshow = ({route}) => {
       });
   };
 
+  /**
+   * Handles the selection of a live event time.
+   * @param {string} selectedTime - The selected time for the live event.
+   * @returns None
+   */
   const onSelectLiveEventTime = selectedTime => {
     if (
       moment().format('DD:MM:YYYY') ==
@@ -312,6 +348,11 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection of a live event date.
+   * @param {Date} selectedDate - The selected date for the live event.
+   * @returns None
+   */
   const onSelectLiveEventDate = selectedDate => {
     if (isMount) {
       setliveEventDate(selectedDate);
@@ -328,6 +369,11 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Adds invited users to the list of invited users.
+   * Validates the email format and checks for duplicates before adding.
+   * @returns None
+   */
   const addInvitedUsers = () => {
     let newMail = [];
     let mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -374,6 +420,11 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Removes the specified mail text from the invited users list and updates the state.
+   * @param {string} removeMailText - The mail text to be removed from the invited users list.
+   * @returns None
+   */
   const handleRemoveInvitedUser = removeMailText => {
     let filteredInvitedUsersList = [...invitedUsersList].filter(
       mailText => mailText !== removeMailText,
@@ -383,6 +434,11 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection and deselection of a connection.
+   * @param {any} selectedId - The ID of the connection to select or deselect.
+   * @returns None
+   */
   const onSelectUnSelectConnection = selectedId => {
     let tempList = [...selectedConnectionsIdsList];
     if (tempList.includes(selectedId)) {
@@ -395,6 +451,11 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Handles the selection and deselection of a group.
+   * @param {selectedId} selectedId - The ID of the group being selected or deselected.
+   * @returns None
+   */
   const onSelectUnSelectGroup = selectedId => {
     let tempList = [...selectedGroupsIdsList];
     if (tempList.includes(selectedId)) {
@@ -407,6 +468,10 @@ const CreateEditTalkshow = ({route}) => {
     }
   };
 
+  /**
+   * Checks if the event visibility type error condition is met.
+   * @returns {boolean} True if the event visibility type error condition is met, false otherwise.
+   */
   const eventVisibilityTypeError = () => {
     return (
       eventVisibilityTypeId === 2 &&
@@ -416,6 +481,11 @@ const CreateEditTalkshow = ({route}) => {
     );
   };
 
+  /**
+   * Retrieves the event visibility type based on the provided event type ID.
+   * @param {string} [eventTypeId=eventVisibilityTypeId] - The ID of the event type.
+   * @returns {object | undefined} - The event visibility type object that matches the provided ID, or undefined if no match is found.
+   */
   const getEventVisibilityType = (eventTypeId = eventVisibilityTypeId) => {
     return [...eventTypesList].find(item => item.id === eventTypeId);
   };

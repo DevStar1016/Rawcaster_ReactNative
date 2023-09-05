@@ -6,6 +6,11 @@ import {
   groupFunctionalitySocketProps,
 } from './SocketTypes';
 
+/**
+ * Sends a friend request socket message to the specified user.
+ * @param {FriendRequestSocketProps} props - The properties for the friend request socket.
+ * @returns None
+ */
 export const friendRequestSocket = ({
   user_id,
   data,
@@ -18,6 +23,11 @@ export const friendRequestSocket = ({
   sendSocketMessage(socketMessage, 'message');
 };
 
+/**
+ * Sends a socket message related to group functionality.
+ * @param {groupFunctionalitySocketProps} props - The properties for the socket message.
+ * @returns None
+ */
 export const groupFunctionalitySocket = ({
   groupId,
   userId,
@@ -41,6 +51,11 @@ export const groupFunctionalitySocket = ({
   sendSocketMessage(socketMessage, 'groupchatting');
 };
 
+/**
+ * Sends a socket message to enable or disable group chat for a specific user in a group.
+ * @param {GroupChatEnableDisableProps} props - The properties needed to enable or disable group chat.
+ * @returns None
+ */
 export const groupChatEnableDisableSocket = ({
   groupId,
   userId,

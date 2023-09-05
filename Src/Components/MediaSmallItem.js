@@ -62,7 +62,6 @@ const MediaSmallItem = ({
   const onUploadProgress = progressEvent => {
     setprogressValue(progressEvent.loaded / progressEvent.total);
     progressRefValue.current = progressEvent.loaded / progressEvent.total;
-    console.log(progressEvent.loaded / progressEvent.total, 'PROGRESS');
   };
 
   const uploadChatAttachmentAPICall = async uniqueId => {

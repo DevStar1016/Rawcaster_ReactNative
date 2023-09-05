@@ -52,4 +52,5 @@ export const Meeting = {
   bindVideoView: NativeModules.ChimeMeetingSDKBridge.bindVideoView,
   unbindVideoView: NativeModules.ChimeMeetingSDKBridge.unbindVideoView,
   sendDataMessage: NativeModules.ChimeMeetingSDKBridge.sendDataMessage,
+  switchCamera: NativeModules.ChimeMeetingSDKBridge.switchCamera,
 };

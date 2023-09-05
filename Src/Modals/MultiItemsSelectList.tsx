@@ -75,6 +75,12 @@ const MultiItemsSelectList = ({
   );
   const [searchText, setsearchText] = useState('');
 
+  /**
+   * Returns a filtered list based on the search text and display field name.
+   * If search text is provided, it filters the list based on the display field name
+   * or the item itself if display field name is not provided.
+   * @returns {Array} - The filtered list.
+   */
   const getList = () => {
     if (searchText) {
       if (displayFieldName) {
@@ -91,6 +97,14 @@ const MultiItemsSelectList = ({
     return [...list];
   };
 
+  /**
+   * Handles the selection of an item with the given ID.
+   * If the item is already selected, it will be deselected.
+   * If the item is not selected and the maximum selection count has not been reached,
+   * it will be selected.
+   * @param {any} id - The ID of the item to handle selection for.
+   * @returns None
+   */
   const handleSelectItem = (id: any) => {
     if (isSelected(id)) {
       setselectedIdsList(preList =>
@@ -106,6 +120,11 @@ const MultiItemsSelectList = ({
     }
   };
 
+  /**
+   * Checks if the given ID is selected in the selectedIdsList array.
+   * @param {any} id - The ID to check for.
+   * @returns {boolean} - True if the ID is selected, false otherwise.
+   */
   const isSelected = (id: any) => {
     const tempItemIndex = [...selectedIdsList].findIndex(
       (itemId: any) => itemId === id,
@@ -116,6 +135,11 @@ const MultiItemsSelectList = ({
     return false;
   };
 
+  /**
+   * Determines if an item is disabled for selection based on the given conditions.
+   * @param {any} item - The item to check for selection.
+   * @returns {boolean} - True if the item is disabled for selection, false otherwise.
+   */
   const getIsDisabledItemSelect = (item: any) => {
     if (isEnableMaxSelection) {
       if (selectedIdsList.length < maxSelectedCount) {

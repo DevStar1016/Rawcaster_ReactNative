@@ -50,7 +50,7 @@ const Signup = ({route}) => {
           </View>
 
           <SubmitButton
-            buttonText="Signup with phone number or email"
+            buttonText="Sign up with phone number or email"
             buttonTextStyle={{fontSize: 17}}
             onPress={() => {
               navigation.navigate('SignupWithPhone', {pushId: pushId});

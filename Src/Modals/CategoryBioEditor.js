@@ -25,6 +25,10 @@ const CategoryBioEditor = ({
     useState(false);
   const [bioText, setbioText] = useState(preBioText);
 
+  /**
+   * Retrieves the names of the selected categories from the influencer category list.
+   * @returns {string} A comma-separated string of the selected category names.
+   */
   function getSelectedCategories() {
     return [...influencerCategoryList]
       .filter(item => [...selectedCategoryIdsList].includes(item.id))
