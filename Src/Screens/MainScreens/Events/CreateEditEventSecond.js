@@ -100,7 +100,7 @@ const CreateEditEventSecond = ({route}) => {
         {
           name: isFromEventSearch
             ? 'SearchEventDetailsView'
-            : 'EventDetailsView',
+            : 'EventCreateSuccess',
           params: {eventDetail: eventDetails},
         },
       ],

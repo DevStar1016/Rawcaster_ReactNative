@@ -203,7 +203,7 @@ const CreateEditTalkshow = ({route}) => {
       routes: [
         {name: 'Talkshow'},
         {
-          name: 'EventDetailsView',
+          name: 'EventCreateSuccess',
           params: {eventDetail: eventDetails},
         },
       ],

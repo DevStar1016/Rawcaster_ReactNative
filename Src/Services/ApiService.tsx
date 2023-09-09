@@ -302,6 +302,9 @@ export const eventJoinValidationService = (data: FormData) => {
 export const getEventDetailsService = (data: FormData) => {
   return axios.post('geteventdetails', data);
 };
+export const viewEventsService = (data: FormData) => {
+  return axios.post('viewevent', data);
+};
 
 export const getTimeZoneService = (data: FormData) => {
   return axios.post('gettimezone', data);

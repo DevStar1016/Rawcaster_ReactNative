@@ -12,6 +12,7 @@ import {
   utcToUserTimezone,
 } from '../../../Utilities/Methods';
 import {useProfile, useSettings} from '../../../Utilities/StoreData';
+import {useNavigation} from '@react-navigation/native';
 
 const EventListItem = ({
   item,
@@ -22,6 +23,7 @@ const EventListItem = ({
   isEnableBorder = false,
   onPressStartJoinEvent,
 }) => {
+  const navigation = useNavigation();
   const profile = useProfile();
   const settings = useSettings();
 
@@ -71,7 +73,13 @@ const EventListItem = ({
   };
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => {
+        navigation.navigate('EventDetailScreen', {
+          eventId: item.event_id,
+        });
+      }}
       style={[
         styles.mainContainer,
         {backgroundColor: getBgColor()},
@@ -173,7 +181,7 @@ const EventListItem = ({
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
