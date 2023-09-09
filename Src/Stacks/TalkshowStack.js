@@ -5,7 +5,7 @@ import CreateEditTalkshow from '../Screens/MainScreens/Talkshow/CreateEditTalksh
 import Talkshow from '../Screens/MainScreens/Talkshow/Talkshow';
 import {setIsBottomTabBarAbsolute} from '../Store/Slices/UtilitySlice';
 import StackAnimation from '../Utilities/StackAnimation';
-import EventDetailsView from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailsView';
+import EventCreateSuccess from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventCreateSuccess';
 
 const Stack = createStackNavigator();
 
@@ -25,7 +25,7 @@ const TalkshowStack = () => {
       }}>
       <Stack.Screen name="Talkshow" component={Talkshow} />
       <Stack.Screen name="CreateEditTalkshow" component={CreateEditTalkshow} />
-      <Stack.Screen name="EventDetailsView" component={EventDetailsView} />
+      <Stack.Screen name="EventCreateSuccess" component={EventCreateSuccess} />
     </Stack.Navigator>
   );
 };

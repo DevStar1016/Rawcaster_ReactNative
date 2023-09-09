@@ -47,6 +47,7 @@ import {
 } from '../Store/ThunkAPIServices';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import {decode} from 'base-64';
+import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -204,6 +205,10 @@ const MainStack = () => {
             <Stack.Screen
               name="AddNewConnection"
               component={AddNewConnection}
+            />
+            <Stack.Screen
+              name="EventDetailScreen"
+              component={EventDetailScreen}
             />
             <Stack.Screen name="PlansAndPrice" component={PlansAndPrice} />
           </>

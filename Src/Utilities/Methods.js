@@ -688,3 +688,9 @@ export const getNuggetsReduxStoreDataFormate = (categoryName, nuggetsList) => {
 export const getMillisToMinutesNumber = millis => {
   return parseFloat(parseFloat(millis) / 60000);
 };
+
+export const eventDisplayDuration = time => {
+  let dur = time.split(':');
+  let hr = parseInt(dur[0]) > 0 ? `${dur[0]} hrs ` : '';
+  return `${hr}  ${dur[1]}  mins`;
+};

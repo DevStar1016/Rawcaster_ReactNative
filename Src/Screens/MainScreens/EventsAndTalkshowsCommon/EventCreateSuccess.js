@@ -13,7 +13,7 @@ import {useSettings} from '../../../Utilities/StoreData';
 import {FONTS} from '../../../Utilities/Fonts';
 import DefaultBackground from '../../../Components/DefaultBackground';
 
-const EventDetailsView = ({route}) => {
+const EventCreateSuccess = ({route}) => {
   const {eventDetail} = route.params;
   const navigation = useNavigation();
   const userSettings = useSettings();
@@ -132,4 +132,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventDetailsView;
+export default EventCreateSuccess;
