@@ -1,22 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
 import {COLORS} from '../../../Utilities/Colors';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import Clipboard from '@react-native-community/clipboard';
 import {MEETING_URL} from '../../../Services/ServiceConstants';
-import {dateToShortTextDate, htmlDecodeText} from '../../../Utilities/Methods';
+import {
+  dateToShortTextDate,
+  eventDisplayDuration,
+  htmlDecodeText,
+} from '../../../Utilities/Methods';
 import {useSettings, useToken} from '../../../Utilities/StoreData';
 import Toast from '../../../Components/Toast';
 import {EventDataProp} from './types';
 import SVGIcon from '../../../Components/SVGIcon';
 import {viewEventsService} from '../../../Services/ApiService';
+import {DIMENSIONS} from '../../../Utilities/Constants';
+import BOX_SHADOW from '../../../Utilities/BoxShadow';
+import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 
 const EventDetailScreen = ({route}: any) => {
   const {eventId} = route.params;
   const [eventDetail, seteventDetail] = useState<EventDataProp | null>(null);
-  const [Errormessage, setErrormessage] = useState<string | null>(null);
+  const [errormessage, seterrormessage] = useState<string>('');
+  const [isLoading, setisLoading] = useState(true);
   const token = useToken();
   const userSettings = useSettings();
 
@@ -25,11 +33,11 @@ const EventDetailScreen = ({route}: any) => {
    * @returns {string} The meeting URL.
    */
   const getMeetingUrl = () => {
-    return (
-      MEETING_URL +
-      `${eventDetail?.type === 2 ? 'talkshow' : 'event'}/` +
-      eventDetail?.reference_id
-    );
+    return eventDetail
+      ? MEETING_URL +
+          `${eventDetail.type === 2 ? 'talkshow' : 'event'}/` +
+          eventDetail.reference_id
+      : '';
   };
 
   /**
@@ -51,11 +59,14 @@ const EventDetailScreen = ({route}: any) => {
           const eventdetails = response.data.event_detail;
           seteventDetail(eventdetails);
         } else {
-          setErrormessage(response.data.msg);
+          seterrormessage(response.data.msg);
         }
       })
       .catch(error => {
-        setErrormessage(error.message);
+        seterrormessage(error.message);
+      })
+      .finally(() => {
+        setisLoading(false);
       });
   };
 
@@ -67,25 +78,37 @@ const EventDetailScreen = ({route}: any) => {
 
   return (
     <View style={styles.mainContainer}>
-      <DefaultBackground isEnableRLogo={false} bgColor={COLORS.primaryDark} />
-      {eventDetail ? (
+      <DefaultBackground
+        isEnableRLogo={false}
+        isEnableLoading={isLoading}
+        bgColor={COLORS.primaryDark}
+        centerText={isLoading ? 'Fetching Details' : errormessage}
+      />
+      {eventDetail && (
         <>
           <StyledText
             style={[
               styles.textLabel,
               {fontSize: 16, fontFamily: FONTS.DMSans.bold},
             ]}>
-            {htmlDecodeText(eventDetail?.event_name)}
+            {htmlDecodeText(eventDetail.event_name)}
           </StyledText>
 
           <StyledText style={styles.textLabel}>
             {dateToShortTextDate(
               //@ts-ignore
-              eventDetail?.start_date_time,
-              userSettings?.time_zone,
+              eventDetail.start_date_time,
+              userSettings.time_zone,
               true,
             )}
           </StyledText>
+
+          <View style={styles.bannerImageContainer}>
+            <Image
+              source={{uri: eventDetail.banner_image}}
+              style={styles.bannerImage}
+            />
+          </View>
           <View style={styles.meetingLinkContainer}>
             <View style={{flex: 1}}>
               <StyledText
@@ -100,15 +123,46 @@ const EventDetailScreen = ({route}: any) => {
               onPress={handleCopyToClipboard}
             />
           </View>
+          <View style={{marginTop: 10}}>
+            <StyledText
+              style={[
+                styles.textLabel,
+                {
+                  fontSize: 16,
+                  fontFamily: FONTS.DMSans.bold,
+                  textAlign: 'center',
+                },
+              ]}>
+              {` Maximun Participants : ${eventDetail.no_of_participants.toString()}`}
+            </StyledText>
+            <StyledText
+              style={[
+                styles.textLabel,
+                {fontSize: 16, fontFamily: FONTS.DMSans.bold},
+              ]}>
+              {` Total Duration : ${eventDisplayDuration(
+                eventDetail.duration,
+              )}`}
+            </StyledText>
+          </View>
+          <View style={styles.profileContainer}>
+            <ProfileWithBadge
+              profileImage={eventDetail.original_user_image}
+              profileSize={40}
+            />
+            <StyledText
+              style={[
+                styles.textLabel,
+                {
+                  fontSize: 16,
+                  fontFamily: FONTS.DMSans.bold,
+                  marginHorizontal: 10,
+                },
+              ]}>
+              {htmlDecodeText(eventDetail.original_user_name)}
+            </StyledText>
+          </View>
         </>
-      ) : (
-        <StyledText
-          style={[
-            styles.textLabel,
-            {fontSize: 16, fontFamily: FONTS.DMSans.bold},
-          ]}>
-          {Errormessage ? Errormessage : 'No Data Found'}
-        </StyledText>
       )}
     </View>
   );
@@ -135,6 +189,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  bannerImageContainer: {
+    height: '25%',
+    width: DIMENSIONS.window.width - 40,
+    marginTop: 20,
+    marginHorizontal: 10,
+    borderRadius: 10,
+    overflow: 'hidden',
+    ...BOX_SHADOW,
+  },
+  bannerImage: {
+    height: '100%',
+    width: '100%',
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+    borderRadius: 50,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    marginTop: 10,
+  },
   meetingLinkContainer: {
     backgroundColor: '#F2F2F2',
     paddingHorizontal: 10,
@@ -142,7 +219,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
     flexDirection: 'row',
     borderRadius: 10,
   },

@@ -32,7 +32,7 @@ const EventsStack = () => {
         component={CreateEditEventSecond}
       />
       <Stack.Screen name="EventCreateSuccess" component={EventCreateSuccess} />
-      <Stack.Screen name="EventDetailScreen" component={EventDetailScreen} />
+      {/* <Stack.Screen name="EventDetailScreen" component={EventDetailScreen} /> */}
     </Stack.Navigator>
   );
 };
