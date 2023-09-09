@@ -38,6 +38,109 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+<!--          <intent-filter>-->
+<!--              <action android:name="android.intent.action.VIEW" />-->
+<!--              <category android:name="android.intent.category.DEFAULT" />-->
+<!--              <category android:name="android.intent.category.BROWSABLE" />-->
+<!--              <data android:scheme="rawcaster" />-->
+<!--          </intent-filter>-->
+
+          <!--TODO: Add this filter, if you want to support sharing images into your app-->
+          <intent-filter>
+              <action android:name="android.intent.action.SEND" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <data android:mimeType="image/*" />
+          </intent-filter>
+
+          <intent-filter>
+              <action android:name="android.intent.action.SEND_MULTIPLE" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <data android:mimeType="image/*" />
+          </intent-filter>
+
+          <!--TODO: Add this filter, if you want to support sharing videos into your app-->
+          <intent-filter>
+              <action android:name="android.intent.action.SEND" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <data android:mimeType="video/*" />
+          </intent-filter>
+          <intent-filter>
+              <action android:name="android.intent.action.SEND_MULTIPLE" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <data android:mimeType="video/*" />
+          </intent-filter>
+
+          <!--TODO: Add this filter, if you want to support sharing any type of files-->
+          <intent-filter>
+              <action android:name="android.intent.action.SEND" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <data android:mimeType="*/*" />
+          </intent-filter>
+
+          <intent-filter android:label="@string/app_name">
+              <action android:name="android.intent.action.VIEW" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <category android:name="android.intent.category.BROWSABLE" />
+              <data android:scheme="rawcaster" />
+          </intent-filter>
+          <intent-filter android:autoVerify="true">
+              <action android:name="android.intent.action.VIEW" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <category android:name="android.intent.category.BROWSABLE" />
+
+              <!-- DeepLinking with Dynamic Pre Start url Start -->
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
+                  android:pathPrefix="/join/event" />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
+                  android:pathPrefix="/join/golive" />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
+                  android:pathPrefix="/join/talkshow" />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
+                  android:pathPrefix="/index.php" />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
+                  />
+              <!-- DeepLinking with Dynamic Pre Start url End -->
+
+              <!-- Production DeepLinking Start -->
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/join/event" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/join/golive" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/join/talkshow" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/share/index.php" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/share" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  />
+          </intent-filter>
+          <!-- Production DeepLinking End-->
+
+          <!--  Below intent is for :> when user press the sign button from gmail after account verification, the app will be opened   -->
+          <intent-filter android:autoVerify="true">
+              <action android:name="android.intent.action.VIEW" />
+              <category android:name="android.intent.category.DEFAULT" />
+              <category android:name="android.intent.category.BROWSABLE" />
+              <data android:scheme="https" />
+              <data android:host="rawcaster.com"
+                  android:pathPrefix="/home" />
+              <data android:host="rawcaster.com"
+                  android:pathPrefix="/signin" />
+          </intent-filter>
+          <!--End account verification intent  -->
+
       </activity>
         <meta-data
             android:name="android.webkit.WebView.ZoomDensity"

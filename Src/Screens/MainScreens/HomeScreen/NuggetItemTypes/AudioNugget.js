@@ -92,7 +92,8 @@ function AudioNugget({
           useTextureView={true}
           paused={paused}
           muted={isMuted}
-          repeat={isRepeatVideo}
+          // repeat={isRepeatVideo}
+          repeat={false}
           onLoad={onLoadComplete}
           onBuffer={() => {}}
           onLoadStart={val => {

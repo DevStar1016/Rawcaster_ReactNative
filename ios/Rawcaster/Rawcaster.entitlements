@@ -14,9 +14,7 @@
 		<string>applinks:rawcaster.com</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
-	<array>
-		<string>group.com.rawcaster.app</string>
-	</array>
+	<array/>
 	<key>keychain-access-groups</key>
 	<array/>
 </dict>

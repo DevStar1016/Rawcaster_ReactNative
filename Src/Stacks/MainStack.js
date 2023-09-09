@@ -1,7 +1,8 @@
-import {Modal, StyleSheet} from 'react-native';
+import {Linking, Modal} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Loader from '../Components/Loader';
+import queryString from 'query-string';
 import {
   useGlobalLoaderData,
   useIsVisibleInfluencers,
@@ -9,33 +10,22 @@ import {
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import {getAuthCode, htmlDecodeText} from '../Utilities/Methods';
+import {getAuthCode} from '../Utilities/Methods';
 import {
   getInfluencerCategoryService,
-  getMyProfileService,
-  getUserSettingsService,
-  listAllFriendGroupsService,
   listAllFriendRequestsService,
-  listAllFriendsService,
-  listUnClaimAccountService,
 } from '../Services/ApiService';
 import {useDispatch} from 'react-redux';
-import {setMyProfile, setSettings} from '../Store/Slices/AuthSlice';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
-  setConnectionsList,
-  setGroupsList,
   setInfluencerCategoryList,
   setPendingFriendRequests,
-  setUnclaimedAccountsList,
-  setUnreadNotificationCount,
 } from '../Store/Slices/HomeSlice';
 import GlobalSearchStack from './GlobalSearchStack';
 import SettingsStack from './SettingsStack';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ProfileStack from './ProfileStack';
-import SocketListener from '../Services/Socket/ListenerComponent/SocketListener';
 import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
@@ -55,6 +45,8 @@ import {
   getAllFriendsGroupsList,
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
+import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
+import {decode} from 'base-64';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -69,6 +61,41 @@ const MainStack = () => {
   useEffect(() => {
     initialAPICall();
   }, []);
+
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', event =>
+      handleOpenUrl(event.url),
+    );
+    Linking?.getInitialURL()
+      .then(handleOpenUrl)
+      .catch(e => {
+        console.log(e, 'ERROR LINK');
+      });
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, []);
+
+  const handleOpenUrl = url => {
+    if (url && !url.includes('rawcaster://')) {
+      console.log(url, 'URLLLLLLLLLLRRRR');
+      if (url?.includes('share')) {
+        const parsed = queryString.parseUrl(url);
+        console.log(decode(parsed.query.id), 'PARSED URLLLLLLL');
+        Linking.openURL(`rawcaster://viewnugget/${decode(parsed.query.id)}`)
+          .then(res => {
+            console.log(res, 'LINKING RESPONSEE');
+          })
+          .catch(e => {
+            console.log(e, 'ERROR   CATCH');
+          });
+        // Linking.openURL()
+      }
+    }
+  };
 
   function getCommonFormData() {
     const formData = new FormData();
@@ -150,6 +177,7 @@ const MainStack = () => {
               component={DashboardProfileTopTabNavigation}
             />
             <Stack.Screen name="PostEditNugget" component={PostEditNugget} />
+            <Stack.Screen name="ViewNugget" component={ViewNugget} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
             <Stack.Screen name="SettingsStack" component={SettingsStack} />
             <Stack.Screen

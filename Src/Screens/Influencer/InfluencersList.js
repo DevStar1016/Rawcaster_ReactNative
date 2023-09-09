@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../Components/StyledText';
 import SearchInput from '../../Components/SearchInput';
@@ -42,6 +42,7 @@ const InfluencersList = () => {
   const token = useToken();
   const dispatch = useDispatch();
   const profile = useProfile();
+  const controller = useRef();
   const [isLoading, setisLoading] = useState(true);
   const [searchText, setsearchText] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -64,6 +65,9 @@ const InfluencersList = () => {
       isMount = false;
       currentPage = 1;
       totalPages = 1;
+      if (controller.current) {
+        controller.current.abort();
+      }
     };
   }, []);
 
@@ -111,6 +115,10 @@ const InfluencersList = () => {
    * @returns None
    */
   function influencerListAPICall(pageNumber = 1) {
+    if (controller.current) {
+      controller.current.abort();
+    }
+    controller.current = new AbortController();
     const formData = new FormData();
     formData.append('token', token);
     formData.append('auth_code', getAuthCode(token));
@@ -121,7 +129,7 @@ const InfluencersList = () => {
     if (selectedCategoryId) {
       formData.append('category', selectedCategoryId);
     }
-    influencerListService(formData)
+    influencerListService(formData, controller.current?.signal)
       .then(res => {
         if (res.data.status === 1) {
           if (isMount) {
@@ -134,28 +142,39 @@ const InfluencersList = () => {
               setinfluencersList(pre => [...pre, ...res.data.users_list]);
             }
             handleSelectAllInfluencers(res.data.users_list);
+            setisLoadMore(false);
+            setrefreshing(false);
+            setisLoading(false);
           }
         } else if (res.data.status === 0) {
           if (isMount) {
             seterrorText(res.data.msg);
             setinfluencersList([]);
+            setisLoadMore(false);
+            setrefreshing(false);
+            setisLoading(false);
           }
         }
       })
       .catch(e => {
-        Toast.fail(e.message);
-        if (isMount) {
-          seterrorText(e.message);
-          setinfluencersList([]);
-        }
-      })
-      .finally(() => {
-        if (isMount) {
-          setisLoadMore(false);
-          setrefreshing(false);
-          setisLoading(false);
+        if (!e.message.includes('canceled')) {
+          Toast.fail(e.message);
+          if (isMount) {
+            seterrorText(e.message);
+            setisLoadMore(false);
+            setrefreshing(false);
+            setisLoading(false);
+            setinfluencersList([]);
+          }
         }
       });
+    // .finally(() => {
+    //   if (isMount) {
+    //     setisLoadMore(false);
+    //     setrefreshing(false);
+    //     setisLoading(false);
+    //   }
+    // });
   }
 
   /**

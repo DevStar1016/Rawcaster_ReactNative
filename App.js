@@ -45,6 +45,7 @@ import {
   getUserSettingsService,
 } from './Src/Services/ApiService';
 import {setUnreadNotificationCount} from './Src/Store/Slices/HomeSlice';
+import {deeplinking1} from './Src/Utilities/LinkingConfig';
 
 const Stack = createStackNavigator();
 // var tokenFetchingTimer = undefined;
@@ -204,7 +205,7 @@ const App = () => {
         <DefaultBackground />
       ) : // <AsyncFetchIntro />
       isIntroSeen ? (
-        <NavigationContainer>
+        <NavigationContainer linking={deeplinking1}>
           <Stack.Navigator>
             {token ? (
               <Stack.Screen

@@ -363,8 +363,11 @@ export const getInfluencerCategoryService = (data: FormData) => {
   return axios.post('getinfluencercategory', data);
 };
 
-export const influencerListService = (data: FormData) => {
-  return axios.post('influencerlist', data);
+export const influencerListService = (
+  data: FormData,
+  signal: GenericAbortSignal,
+) => {
+  return axios.post('influencerlist', data, {signal});
 };
 
 export const influencerFollowService = (data: FormData) => {

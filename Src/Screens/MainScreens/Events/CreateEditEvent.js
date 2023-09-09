@@ -109,7 +109,9 @@ const CreateEditEvent = ({route}) => {
         eventTime: moment().add(15, 'minute'),
       },
       validationSchema: validationSchema,
-      onSubmit: onSubmit,
+      onSubmit: values => {
+        onSubmit(values);
+      },
     });
 
   useEffect(() => {

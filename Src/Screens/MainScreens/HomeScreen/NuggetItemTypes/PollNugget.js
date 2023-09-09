@@ -25,11 +25,11 @@ const PollNugget = ({
     nuggetContentController,
     handleStopAudio,
     isReadMuted,
+    isFocused,
   } = useNuggetParentActions();
   const {nugget, viewableItem, parentNuggetIndex} = useNuggetItemActions();
   const insets = useInsets();
   const isAppForeground = useIsAppForeground();
-  const isFocused = useIsFocused();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
 

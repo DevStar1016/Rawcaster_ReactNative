@@ -6,13 +6,15 @@ import {StatusBar, View} from 'react-native';
 import {
   useInfluencerCategoryList,
   useInsets,
+  useNuggetsList,
+  useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
 import {
   DashboardCategoryTopTabContext,
   useDashboardProfile,
 } from '../../../Utilities/Contexts';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {getSlicedText} from '../../../Utilities/Methods';
@@ -22,9 +24,10 @@ const Tab = createMaterialTopTabNavigator();
 
 function DashboardTopTabNavigation() {
   const insets = useInsets();
+  const profile = useProfile();
   const categoryList = useInfluencerCategoryList();
   const token = useToken();
-  const {setswipeEnabled} = useDashboardProfile() ?? {};
+  const {setswipeEnabled, setfocusedNuggetUserId} = useDashboardProfile() ?? {};
   const [
     headerRightButtonsContainerWidth,
     setheaderRightButtonsContainerWidth,
@@ -32,10 +35,59 @@ function DashboardTopTabNavigation() {
   const [headerLeftButtonContainerWidth, setheaderLeftButtonContainerWidth] =
     useState(0);
   const [headerContainerHeight, setheaderContainerHeight] = useState(0);
+  const [tabNuggetsList, settabNuggetsList] = useState([]);
+  const [viewableItem, setviewableItem] = useState({
+    nugget_id: '',
+    viewed: false,
+  });
+
+  const [preCategoryName, setpreCategoryName] = useState('');
+  const [categoryName, setcategoryName] = useState('ForYou');
+
+  /**
+   * Callback function that is called when the viewable items change in a FlatList component. It updates the focusedNuggetUserId state based on the
+   * selected nugget and updates the viewableItem state with the currently viewable item.
+   * @param {Array} viewableItems - An array of viewable items in the list.
+   * @returns None
+   */
+  const onViewRef = useRef(viewableItems => {
+    if (viewableItems?.viewableItems?.length > 0) {
+      const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
+      if (
+        setfocusedNuggetUserId &&
+        token &&
+        profile &&
+        profile.user_id !== selectedNuggetUserId
+      ) {
+        setfocusedNuggetUserId(selectedNuggetUserId);
+      } else {
+        if (setfocusedNuggetUserId) {
+          setfocusedNuggetUserId(null);
+        }
+      }
+      setviewableItem({
+        nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
+        viewed: viewableItems?.viewableItems[0]?.item.viewed,
+      });
+    }
+  });
+
+  const resetViewabilityItem = () => {
+    setviewableItem({
+      nugget_id: '',
+      viewed: false,
+    });
+  };
 
   const categoriesListData = {
     headerContainerHeight,
     setheaderContainerHeight,
+    setviewableItem,
+    viewableItem,
+    onViewRef,
+    resetViewabilityItem: () => {
+      resetViewabilityItem();
+    },
   };
 
   /**
@@ -73,6 +125,12 @@ function DashboardTopTabNavigation() {
         backBehavior="initialRoute"
         screenListeners={{
           focus: e => {
+            setcategoryName(preName => {
+              setpreCategoryName(preName);
+              return e.target.split('-')[0];
+            });
+
+            // resetViewabilityItem();
             if (setswipeEnabled) {
               if (e.target.includes('ForYou')) {
                 setswipeEnabled(true);

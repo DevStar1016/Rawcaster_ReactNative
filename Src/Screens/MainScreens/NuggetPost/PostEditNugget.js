@@ -2,10 +2,12 @@ import {
   Image,
   Keyboard,
   Modal,
+  Pressable,
   SafeAreaView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   UIManager,
   View,
 } from 'react-native';
@@ -125,6 +127,7 @@ const PostEditNugget = ({route}) => {
   ]);
 
   useEffect(() => {
+    Keyboard.dismiss();
     AvoidSoftInput.setAdjustPan();
     return () => {
       Keyboard.dismiss();
@@ -612,8 +615,10 @@ const PostEditNugget = ({route}) => {
       maxHeight = maxHeight - EMOJI_CONTAINER_HEIGHT;
       maxHeight = maxHeight + mediaListHeight + buttonHeight;
     }
-
-    return maxHeight;
+    if (maxHeight >= 0) {
+      return maxHeight;
+    }
+    return 0;
   }
 
   /**
@@ -718,7 +723,7 @@ const PostEditNugget = ({route}) => {
         loaderText: loadingData.text,
       }}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
-      isEnableKeyboardAware={isPollClicked ? true : false}
+      isEnableKeyboardAware={isPollClicked}
       paddingHorizontal={5}
       backHeaderProps={{
         bgColor: COLORS.transparent,
@@ -732,8 +737,7 @@ const PostEditNugget = ({route}) => {
         },
       }}
       isEnableDefaultBackground>
-      <TouchableOpacity
-        activeOpacity={1}
+      <Pressable
         onLayout={e => {
           setmainContainerHeight(e.nativeEvent.layout.height - 10); // 10 is paddingVertical of 5
         }}
@@ -822,18 +826,7 @@ const PostEditNugget = ({route}) => {
               />
             </View>
             <View style={styles.subContainer}>
-              {/* <ProfileWithBadge
-                badge={Badges(profile?.user_status_id)}
-                isEnableGradient={false}
-                profileImage={profile?.profile_image}
-                padding={0}
-                profileSize={38}
-                badgeSize={16}
-              /> */}
               <View style={styles.nameContainer}>
-                {/* <StyledText style={styles.nameText}>
-                  {getSlicedText(profile?.name, 10)}
-                </StyledText> */}
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                   <SubmitButton
                     buttonText={getSlicedText(selectedShareType.name, 10)}
@@ -896,56 +889,40 @@ const PostEditNugget = ({route}) => {
                   maxHeight: getMaxHeight(),
                 },
               ]}>
-              {parseInt(profile?.user_status_id) === 4 ? (
-                <TextInput
-                  placeholder={`What’s on your mind, ${profile?.name}!`}
-                  style={styles.textInput}
-                  multiline
-                  maxLength={profile?.nugget_content_length}
-                  onFocus={() => {
-                    setisFocusedTextInput(true);
-                    openCloseEmojiPicker(false);
-                  }}
-                  value={typedText}
-                  onChangeText={settypedText}
-                  numberOfLines={5}
-                  textAlignVertical={'top'}
-                  placeholderTextColor={COLORS.placeHolderColor}
-                />
-              ) : (
-                <TextInput
-                  placeholder={`What’s on your mind, ${profile?.name}!`}
-                  style={styles.textInput}
-                  multiline
-                  // maxLength={profile?.nugget_content_length}
-                  onFocus={() => {
-                    setisFocusedTextInput(true);
-                    openCloseEmojiPicker(false);
-                  }}
-                  value={typedText}
-                  onChangeText={text => {
-                    if (text.length > profile?.nugget_content_length) {
-                      Keyboard.dismiss();
-                      dispatch(
-                        setPremiumAlert({
-                          status: true,
-                          text: 'You have reached your character limit, to increase the limit upgrade your membership',
-                        }),
-                      );
-                    } else {
-                      settypedText(text);
-                    }
-                  }}
-                  numberOfLines={5}
-                  textAlignVertical={'top'}
-                  placeholderTextColor={COLORS.placeHolderColor}
-                />
-              )}
+              <TextInput
+                placeholder={`What’s on your mind, ${profile?.name}!`}
+                style={styles.textInput}
+                multiline
+                maxLength={profile?.nugget_content_length}
+                onFocus={() => {
+                  setisFocusedTextInput(true);
+                  openCloseEmojiPicker(false);
+                }}
+                value={typedText}
+                onChangeText={text => {
+                  if (
+                    text.length > profile?.nugget_content_length &&
+                    profile?.user_status_id !== 4
+                  ) {
+                    Keyboard.dismiss();
+                    dispatch(
+                      setPremiumAlert({
+                        status: true,
+                        text: 'You have reached your character limit, to increase the limit upgrade your membership',
+                      }),
+                    );
+                  } else {
+                    settypedText(text);
+                  }
+                }}
+                numberOfLines={5}
+                textAlignVertical={'top'}
+                placeholderTextColor={COLORS.placeHolderColor}
+              />
+
               <View style={styles.emojiIconContainer}>
                 <SVGIcon
                   icon={'emojee'}
-                  // height={30}
-                  // width={30}
                   isButton
                   onPress={() => {
                     Keyboard.dismiss();
@@ -1017,12 +994,6 @@ const PostEditNugget = ({route}) => {
             borderTopStartRadius: 10,
             borderTopEndRadius: 10,
           }}>
-          {/* <EmojiModal
-              onEmojiSelected={emoji => {}}
-              containerStyle={{width: '100%'}}
-              columns={8}
-
-            /> */}
           <EmojiContainer
             emojisContainerWidth={DIMENSIONS.window.width - 10}
             titleTextStyle={{
@@ -1041,27 +1012,8 @@ const PostEditNugget = ({route}) => {
               }
             }}
           />
-          {/* <EmojiKeyboard
-              onEmojiSelected={res => {
-                if (isMount) {
-                  settypedText(pre => {
-                    if (pre.length < 500) {
-                      return pre + res.emoji;
-                    }
-                    return pre;
-                  });
-                }
-              }}
-              disabledCategories={['people_body', 'flags']}
-              categoryPosition="bottom"
-              enableCategoryChangeGesture={false}
-              defaultHeight={DIMENSIONS.window.height / 2 + 10}
-              styles={{
-                header: {fontFamily: FONTS.DMSans.medium},
-              }}
-            /> */}
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
       <Modal
         visible={isOpenSharTypeList}
@@ -1210,7 +1162,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainContainer: {
-    flexGrow: 1,
+    flex: 1,
     paddingHorizontal: 8,
     paddingVertical: 5,
     paddingBottom: 20,

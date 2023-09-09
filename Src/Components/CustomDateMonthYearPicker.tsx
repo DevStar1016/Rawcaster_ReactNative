@@ -322,6 +322,9 @@ const CustomDateMonthYearPicker = ({
     if (pickerMode === 'month_date_year') {
       return DATES_MONTHS_YEARS_DATA.years;
     } else if (pickerMode === 'duration_days_hrs_mins') {
+      if (durationData.days === 0 && durationData.hours === 0) {
+        return Array.from({length: 55}, (_, index) => 5 + index);
+      }
       return [...Array(60)].map((_, index) => index);
     }
     return [];

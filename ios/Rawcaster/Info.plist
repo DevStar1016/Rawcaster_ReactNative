@@ -30,6 +30,17 @@
 				<string>com.googleusercontent.apps.749429188201-hr5vbe4pr5j0pq2ghg0el9abp03hqmck</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>rawcaster</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>rawcaster</string>
+			</array>
+		</dict>
+		<dict/>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

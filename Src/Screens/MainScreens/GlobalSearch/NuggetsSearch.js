@@ -236,6 +236,7 @@ const NuggetsSearch = () => {
     isMuted: isMuted,
     isFrom: 'search',
     searchFocused: isFocused,
+    isFocused,
     categoryName: 'forYou',
     isAutoPlay: true,
     setisMuted: setisMuted,

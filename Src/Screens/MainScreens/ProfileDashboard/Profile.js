@@ -609,6 +609,7 @@ const Profile = ({route}) => {
     setisMuted: setisMuted,
     isAutoPlay: false,
     isFrom: 'profile',
+    isFocused,
     profileFocused: isFocused,
     categoryName: 'forYou',
     scrollNuggetsListToTop: scrollNuggetsListToTop,

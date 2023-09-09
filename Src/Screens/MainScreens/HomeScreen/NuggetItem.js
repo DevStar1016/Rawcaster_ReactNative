@@ -30,7 +30,10 @@ function NuggetItem({
     nuggetContentController,
     handleStopAudio,
     isReadMuted,
+    // isFocused,
   } = useNuggetParentActions();
+
+  const isFocused = useIsFocused();
 
   const {isRepeatVideo, nugget, viewableItem, parentNuggetIndex} =
     useNuggetItemActions();
@@ -38,7 +41,6 @@ function NuggetItem({
   const [paused, setpaused] = useState(true);
   const [progress, setprogress] = useState(0);
   const [duration, setduration] = useState(0);
-  const isFocused = useIsFocused();
 
   const videoPlayer = useRef(null);
   const [isLoadingVideo, setisLoadingVideo] = useState(false);
@@ -46,9 +48,9 @@ function NuggetItem({
   const isAppForeground = useIsAppForeground();
 
   const shouldPauseVideo = useMemo(() => {
-    if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
-      return true;
-    }
+    // if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
+    //   return true;
+    // }
     return (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&

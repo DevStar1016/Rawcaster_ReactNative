@@ -456,13 +456,14 @@ const Nugget = ({nugget, nuggetIndex}) => {
     viewableItem: viewableItem,
     handleNuggetContentTranslate: handleNuggetContentTranslate,
     onFinishPlaying: index => {
-      if (index < nugget?.media_list?.length - 1) {
-        flatlistRef.current.scrollToIndex({
-          index: index + 1,
-        });
-      } else {
-        onFinishPlaying(nuggetIndex);
-      }
+      // if (index < nugget?.media_list?.length - 1) {
+      //   flatlistRef.current.scrollToIndex({
+      //     index: index + 1,
+      //   });
+      // } else {
+      //   onFinishPlaying(nuggetIndex);
+      // }
+      onFinishPlaying(nuggetIndex);
     },
   };
 

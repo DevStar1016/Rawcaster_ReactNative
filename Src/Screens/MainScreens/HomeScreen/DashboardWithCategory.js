@@ -66,7 +66,13 @@ const DashboardWithCategory = ({route}) => {
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const blockedUserIds = useBlockedUserIds();
   const followingUsersList = useFollowingUsersList();
-  const {headerContainerHeight} = useDashboardTopTabCategories() ?? {};
+  const {
+    headerContainerHeight,
+    viewableItem,
+    setviewableItem,
+    resetViewabilityItem,
+    onViewRef,
+  } = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
   const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
@@ -74,10 +80,7 @@ const DashboardWithCategory = ({route}) => {
   const token = useToken();
   const flatlistRef = useRef(null);
   const nuggetType = useNuggetType();
-  const [viewableItem, setviewableItem] = useState({
-    nugget_id: '',
-    viewed: false,
-  });
+
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
   const [refreshing, setrefreshing] = useState(false);
@@ -89,34 +92,6 @@ const DashboardWithCategory = ({route}) => {
     viewAreaCoveragePercentThreshold: 70,
   });
   const nuggetContentController = useRef(null);
-
-  /**
-   * Callback function that is called when the viewable items change in a FlatList component. It updates the focusedNuggetUserId state based on the
-   * selected nugget and updates the viewableItem state with the currently viewable item.
-   * @param {Array} viewableItems - An array of viewable items in the list.
-   * @returns None
-   */
-  const onViewRef = useRef(viewableItems => {
-    if (viewableItems?.viewableItems?.length > 0) {
-      const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
-      if (
-        setfocusedNuggetUserId &&
-        token &&
-        profile &&
-        profile.user_id !== selectedNuggetUserId
-      ) {
-        setfocusedNuggetUserId(selectedNuggetUserId);
-      } else {
-        if (setfocusedNuggetUserId) {
-          setfocusedNuggetUserId(null);
-        }
-      }
-      setviewableItem({
-        nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
-        viewed: viewableItems?.viewableItems[0]?.item.viewed,
-      });
-    }
-  });
 
   useEffect(() => {
     dispatch(setIsBottomTabBarAbsolute(true));
@@ -131,10 +106,10 @@ const DashboardWithCategory = ({route}) => {
   }, []);
 
   useEffect(() => {
-    if (token && viewableItem.nugget_id && !viewableItem.viewed) {
+    if (token && viewableItem?.nugget_id && !viewableItem?.viewed) {
       onViewNugget(viewableItem.nugget_id);
     }
-  }, [viewableItem.nugget_id]);
+  }, [viewableItem?.nugget_id]);
 
   useEffect(() => {
     if (isFocused) {
@@ -161,7 +136,9 @@ const DashboardWithCategory = ({route}) => {
       dispatch(
         setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
       );
-      resetViewabilityItem();
+      if (resetViewabilityItem) {
+        resetViewabilityItem();
+      }
       listNuggetsAPICall(1);
     }
   }, [token, nuggetType]);
@@ -169,7 +146,7 @@ const DashboardWithCategory = ({route}) => {
   useEffect(() => {
     if (
       currentPage === 1 &&
-      !viewableItem.nugget_id &&
+      !viewableItem?.nugget_id &&
       nuggetsList?.length > 0 &&
       isFocused &&
       token &&
@@ -253,12 +230,6 @@ const DashboardWithCategory = ({route}) => {
    * Resets the viewability item by setting the nugget_id to an empty string and viewed to false.
    * @returns None
    */
-  const resetViewabilityItem = () => {
-    setviewableItem({
-      nugget_id: '',
-      viewed: false,
-    });
-  };
 
   /**
    * Handles playing audio from the given URL.
@@ -423,12 +394,13 @@ const DashboardWithCategory = ({route}) => {
     isMuted: isMuted,
     isFrom: 'dashboard',
     dashboardFocused: isFocused,
+    isFocused,
     setisMuted: setisMuted,
     categoryName: categoryName ?? 'forYou',
     isAutoPlay: true,
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
-    viewableNuggetItem: viewableItem.nugget_id,
+    viewableNuggetItem: viewableItem?.nugget_id,
     isFromGlobalSearch: false,
     isEnableADDButton: true,
     isEnableTopInsetsPadding: true,
@@ -532,7 +504,7 @@ const DashboardWithCategory = ({route}) => {
               onEndReached={onEndReached}
               itemHeight={insets.mediaHeight}
               footerHeight={50}
-              onViewableItemsChanged={onViewRef.current}
+              onViewableItemsChanged={onViewRef?.current}
               renderFooter={renderFooter}
             />
           )

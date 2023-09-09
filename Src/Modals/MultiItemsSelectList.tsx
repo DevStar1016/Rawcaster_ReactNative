@@ -1,4 +1,5 @@
 import {
+  Keyboard,
   StyleSheet,
   TextStyle,
   TouchableOpacity,
@@ -254,6 +255,9 @@ const MultiItemsSelectList = ({
               showsVerticalScrollIndicator={false}
               ItemSeparatorComponent={() => {
                 return <View style={{height: 10}} />;
+              }}
+              onScrollBeginDrag={() => {
+                Keyboard.dismiss();
               }}
             />
           </View>
