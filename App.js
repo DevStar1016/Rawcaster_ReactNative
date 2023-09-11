@@ -1,4 +1,4 @@
-import {AppState} from 'react-native';
+import {AppState, LogBox} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
@@ -41,7 +41,7 @@ import {
   getUserSettingsService,
 } from './Src/Services/ApiService';
 import {setUnreadNotificationCount} from './Src/Store/Slices/HomeSlice';
-import {deeplinking1} from './Src/Utilities/LinkingConfig';
+import {deepLinking} from './Src/Utilities/LinkingConfig';
 
 const Stack = createStackNavigator();
 // var tokenFetchingTimer = undefined;
@@ -75,6 +75,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    LogBox.ignoreAllLogs();
     GoogleSignin.configure({
       iosClientId: GOOGLE_SIGNIN_IOS_CLIENT_ID,
     });
@@ -199,7 +200,7 @@ const App = () => {
         <DefaultBackground />
       ) : // <AsyncFetchIntro />
       isIntroSeen ? (
-        <NavigationContainer linking={deeplinking1}>
+        <NavigationContainer linking={deepLinking}>
           <Stack.Navigator>
             {token ? (
               <Stack.Screen

@@ -14,7 +14,7 @@ export const DEEP_LINKING_URL = [
   DEEP_LINK_URL + 'join/talkshow',
 ];
 
-export const deeplinking1 = {
+export const deepLinking = {
   prefixes: ['rawcaster://', ...DEEP_LINKING_URL],
   config: {
     initialRouteName: 'MainStack',
