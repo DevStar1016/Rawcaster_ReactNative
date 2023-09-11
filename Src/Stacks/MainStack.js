@@ -82,10 +82,8 @@ const MainStack = () => {
 
   const handleOpenUrl = url => {
     if (url && !url.includes('rawcaster://')) {
-      console.log(url, 'URLLLLLLLLLLRRRR');
       if (url?.includes('share')) {
         const parsed = queryString.parseUrl(url);
-        console.log(decode(parsed.query.id), 'PARSED URLLLLLLL');
         Linking.openURL(`rawcaster://viewnugget/${decode(parsed.query.id)}`)
           .then(res => {
             console.log(res, 'LINKING RESPONSEE');
