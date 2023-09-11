@@ -3,7 +3,7 @@ import {CHIME_SOCKET_URL} from './ChimeSocketConstants';
 import {ChimeEventsType} from './ChimeSocketPropTypes';
 import {ChimeSocketEvents} from './ChimeSocketEvents';
 const chimeSocket = io(CHIME_SOCKET_URL, {
-  secure: false,
+  secure: true,
   reconnection: true,
   rejectUnauthorized: false,
 });

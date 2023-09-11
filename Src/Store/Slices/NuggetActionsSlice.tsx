@@ -1,7 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {getFilteredDuplicatesList} from '../../Utilities/Methods';
+import {NuggetActionsDataProp} from '../SliceTypes/NuggetTypes';
 
-export const initialState = {
+export const initialState: NuggetActionsDataProp = {
   likedNuggets: [], //{ id:nugget_id,total_likes:TOTAL_LIKES}
   savedNuggetsIds: [],
   unLikedNuggetsFromLikedNuggets: [],
@@ -80,7 +81,10 @@ const NuggetActionsSlice = createSlice({
           ...action.payload.savedNuggetsIds,
         ];
 
-        state.savedNuggetsIds = getFilteredDuplicatesList(tempSavedNuggetsIds);
+        state.savedNuggetsIds = getFilteredDuplicatesList(
+          tempSavedNuggetsIds,
+          '',
+        );
       }
     },
     addEditedNugget: (state, action) => {
@@ -100,10 +104,10 @@ const NuggetActionsSlice = createSlice({
       );
     },
     addDeletedNuggetId: (state, action) => {
-      state.deletedNuggetsIds = getFilteredDuplicatesList([
-        ...state.deletedNuggetsIds,
-        action.payload,
-      ]);
+      state.deletedNuggetsIds = getFilteredDuplicatesList(
+        [...state.deletedNuggetsIds, action.payload],
+        '',
+      );
     },
     setTranslatedNuggets: (state, action) => {
       state.translatedNuggets = getFilteredDuplicatesList(

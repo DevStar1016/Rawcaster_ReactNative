@@ -91,13 +91,7 @@ const Login = () => {
             dispatch(setIsVisibleInfluencers(true));
           }
           if (res.data.acc_verify_status === 1) {
-            const userData = {
-              name: res.data.name,
-              user_id: res.data.user_id,
-              profile_image: res.data.profile_image,
-              acc_verify_status: res.data.acc_verify_status,
-            };
-            storeToken(res.data.token, userData, dispatch);
+            storeToken(res.data.token, dispatch);
           } else {
             navigation.navigate('EmailPhoneVerification', {
               otpType: parseInt(res.data.signup_type) === 1 ? 'email' : 'sms',

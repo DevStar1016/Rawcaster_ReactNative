@@ -4,7 +4,7 @@ import AnimatedBgFillContainer from './AnimatedBgFillContainer';
 import SubmitButton from './SubmitButton';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
-import {useToken, useUserData} from '../Utilities/StoreData';
+import {useProfile, useToken} from '../Utilities/StoreData';
 import {useDispatch} from 'react-redux';
 import {
   setIsOpenLoginAlert,
@@ -45,7 +45,7 @@ const PollDataDisplay = ({
   onLayoutHeight,
 }: Props) => {
   const token = useToken();
-  const user = useUserData();
+  const profile = useProfile();
   const dispatch = useDispatch();
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
     isVoted: isVoted,
@@ -127,7 +127,7 @@ const PollDataDisplay = ({
   };
 
   const isVerified = () => {
-    if (user && user.acc_verify_status === 1) {
+    if (profile && profile.acc_verify_status === 1) {
       return true;
     }
     dispatch(setIsOpenVerifyPopup(true));

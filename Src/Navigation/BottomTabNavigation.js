@@ -8,7 +8,6 @@ import {
   useIsOpenVerifyPopup,
   useProfile,
   useToken,
-  useUserData,
 } from '../Utilities/StoreData';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
 import {useEffect, useState} from 'react';
@@ -32,7 +31,6 @@ export default function BottomTabNavigation() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
-  const user = useUserData();
   const profile = useProfile();
   const isOpenLoginALert = useIsOpenLoginAlert();
   const isOpenVerifyPopup = useIsOpenVerifyPopup();
@@ -44,10 +42,7 @@ export default function BottomTabNavigation() {
   useEffect(() => {
     dispatch(
       setIsOpenVerifyPopup(
-        token &&
-          user &&
-          user?.acc_verify_status === 0 &&
-          profile?.acc_verify_status === 0,
+        token && profile && profile?.acc_verify_status === 0,
       ),
     );
   }, [token]);
@@ -60,7 +55,7 @@ export default function BottomTabNavigation() {
    */
   const handleAccountVerification = () => {
     dispatch(setIsOpenVerifyPopup(false));
-    if (user.acc_verify_status === 0 && profile?.is_profile_updated === 1) {
+    if (profile?.acc_verify_status === 0 && profile?.is_profile_updated === 1) {
       if (
         profile?.two_type_verification === 1 &&
         profile?.mobile &&
@@ -132,7 +127,8 @@ export default function BottomTabNavigation() {
           }}
           onPressPositiveButton={handleAccountVerification}
           content={
-            user?.acc_verify_status === 0 && profile?.is_profile_updated === 1
+            profile?.acc_verify_status === 0 &&
+            profile?.is_profile_updated === 1
               ? 'You need to complete your account validation before you can do this. Do you want to validate it now?'
               : 'Do you want to complete your profile now?'
           }

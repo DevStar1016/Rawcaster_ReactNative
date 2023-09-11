@@ -21,59 +21,10 @@ export const deeplinking1 = {
     screens: {
       MainStack: {
         screens: {
-          PostEditNugget: 'Composer/:files',
+          PostEditNugget: 'posteditnugget/:files',
           ViewNugget: 'viewnugget/:id',
         },
       },
-    },
-  },
-};
-
-export const deeplinking = {
-  prefixes: ['rawcaster://', ...DEEP_LINKING_URL],
-  config: {
-    screens: {
-      Dashboard: {
-        screens: {
-          Home: {
-            screens: {
-              ViewPost: 'share/:nuggetId',
-              ViewEvent: 'ViewEvent/:eventId',
-              Composer: 'Composer/:files',
-            },
-          },
-          Event: {
-            screens: {
-              Event: 'null/:id',
-            },
-          },
-          User: {
-            screens: {
-              Connection: {
-                screens: {
-                  UserTabStack: {
-                    screens: {
-                      UserList: 'UserList/:id',
-                    },
-                  },
-                },
-              },
-            },
-          },
-          Setting: {
-            screens: {
-              ReferalPage: 'ReferalPage/:inviteuser',
-            },
-          },
-        },
-      },
-      ExternalUrlJoinMeeting: 'join/event/:id',
-      ExternalUrlJoinMeetingTalkShow: 'join/talkshow/:id',
-      ExternalUrlJoinMeetingGolive: 'join/golive/:id',
-      Chat: 'chat/:id',
-      GroupChatScreen: 'groupchat/:id',
-      AnsweringCall: 'voipCall/:callData',
-      StartCallFromCallLog: 'startCallFromCallLog/:callData',
     },
   },
 };

@@ -9,13 +9,11 @@ import LoginIntro from './Src/Screens/IntroScreens.js/LoginIntro';
 import {
   INTRO_SCREEN_SEEN,
   ISLOGIN,
-  USER_DATA,
 } from './Src/Utilities/EncryptedStoreConstants';
 import {
   setMyProfile,
   setSettings,
   setToken,
-  setUserData,
 } from './Src/Store/Slices/AuthSlice';
 import {useToken} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
@@ -33,8 +31,6 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import {createStackNavigator} from '@react-navigation/stack';
 import {setInsets, setIsAppForeground} from './Src/Store/Slices/UtilitySlice';
-import {IS_IOS} from './Src/Utilities/Constants';
-import AsyncFetchIntro from './Src/Screens/IntroScreens.js/AsyncFetchIntro';
 import {
   GOOGLE_PLACES_API_KEY,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
@@ -94,10 +90,7 @@ const App = () => {
           setisIntroSeen(true);
         }
         const token = await EncryptedStorage.getItem(ISLOGIN);
-        const userData = await EncryptedStorage.getItem(USER_DATA);
-        if (userData && token) {
-          const parsedUserData = JSON.parse(userData);
-          dispatch(setUserData(parsedUserData));
+        if (token) {
           dispatch(setToken(token));
         } else {
           setisFetchingToken(false);
@@ -151,6 +144,7 @@ const App = () => {
             last_name: htmlDecodeText(profile?.last_name),
             bio_data: htmlDecodeText(profile?.bio_data),
           };
+          console.log(profile, 'PROFILE');
 
           dispatch(setMyProfile(profile));
           dispatch(

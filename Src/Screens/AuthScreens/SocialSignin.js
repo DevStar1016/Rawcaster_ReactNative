@@ -74,14 +74,8 @@ const SocialSignin = ({pushId, isLogin = false}) => {
           if (parseInt(res.data.first_time) === 1) {
             dispatch(setIsVisibleInfluencers(true));
           }
-          const userData = {
-            name: res.data.name,
-            user_id: res.data.user_id,
-            profile_image: res.data.profile_image,
-            acc_verify_status: res.data.acc_verify_status,
-          };
 
-          storeToken(res.data.token, userData, dispatch);
+          storeToken(res.data.token, dispatch);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         } else if (res.data.status === 2) {

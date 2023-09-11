@@ -1,7 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {getFilteredDuplicatesList} from '../../Utilities/Methods';
+import {HomeDataProp} from '../SliceTypes/HomeTypes';
 
-export const initialState = {
+export const initialState: HomeDataProp = {
   searchedNuggetsList: [],
   connectionsList: [],
   connectionsListLoading: true,
@@ -70,10 +71,10 @@ const HomeSlice = createSlice({
       state.savedNuggetsList = action.payload;
     },
     blockUsers: (state, action) => {
-      state.blockedUserIds = getFilteredDuplicatesList([
-        ...state.blockedUserIds,
-        ...action.payload,
-      ]);
+      state.blockedUserIds = getFilteredDuplicatesList(
+        [...state.blockedUserIds, ...action.payload],
+        '',
+      );
     },
     unBlockUser: (state, action) => {
       state.blockedUserIds = [...state.blockedUserIds].filter(

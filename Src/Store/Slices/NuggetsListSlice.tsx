@@ -1,8 +1,10 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {getListNuggets} from '../ThunkAPIServices';
 import {htmlDecodeText} from '../../Utilities/Methods';
+import {NuggetsListDataProp} from '../SliceTypes/NuggetsListTypes';
+import {InfluencerCategoryProp} from '../SliceTypes/HomeTypes';
 
-export const initialState = {
+export const initialState: NuggetsListDataProp = {
   totalPages: {
     influencing: 1,
     forYou: 1,
@@ -23,7 +25,7 @@ const NuggetsListSlice = createSlice({
   reducers: {
     initiateAllNuggetsLoadingTotalPages: (state, action) => {
       if (action.payload) {
-        action.payload.map(item => {
+        action.payload.map((item: InfluencerCategoryProp) => {
           state.nuggetsLoading[item.name?.split(' ').join('')] = true;
           state.totalPages[item.name?.split(' ').join('')] = 1;
         });
@@ -92,7 +94,9 @@ const NuggetsListSlice = createSlice({
         state.nuggetsLoading[categoryName] = false;
       })
       .addCase(getListNuggets.rejected, (state, action) => {
+        // @ts-ignore
         if (action.payload && action.payload.categoryName) {
+          // @ts-ignore
           const {categoryName} = action.payload;
           state.nuggetsLoading[categoryName] = false;
         }

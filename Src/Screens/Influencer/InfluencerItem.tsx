@@ -58,6 +58,8 @@ const InfluencerItem = ({
     return 23;
   }
 
+  console.log(item, 'ITEM');
+
   /**
    * Calculates the length of the text for categories.
    * @returns {number} The length of the text for categories.
@@ -131,15 +133,14 @@ const InfluencerItem = ({
           )}
         </View>
 
-        <StyledText
-          style={{paddingVertical: 5}}
-          textMode="read_more"
-          numberOfLines={2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book.
-        </StyledText>
+        {item.bio_data && (
+          <StyledText
+            style={{paddingVertical: 5}}
+            textMode="read_more"
+            numberOfLines={2}>
+            {item.bio_data}
+          </StyledText>
+        )}
         {/* {getBioData() ? (
           <StyledText
             style={{paddingVertical: 5}}

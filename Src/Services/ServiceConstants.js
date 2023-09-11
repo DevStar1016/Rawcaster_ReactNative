@@ -11,8 +11,7 @@ export const APP_VERSION = DeviceInfo.getVersion();
 // Development
 export const BASE_URL = 'https://devapi.rawcaster.com/rawcaster/';
 export const MEETING_URL = 'https://dev.rawcaster.com/join/';
-export const SOCIAL_SHARE_LINK =
-  'https://dev.rawcaster.com/share/index.php?id=';
+export const SOCIAL_SHARE_LINK = 'https://devshare.rawcaster.com/index.php?id=';
 
 //Live
 // export const BASE_URL = 'https://rawcaster.com/rawadmin/webservice/';

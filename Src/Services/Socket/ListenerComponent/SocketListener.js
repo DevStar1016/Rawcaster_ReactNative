@@ -4,7 +4,7 @@ import {useDispatch, useStore} from 'react-redux';
 import moment from 'moment';
 import ConnectSocket, {socketListen} from '../Socket';
 import ConectionRequestModal from '../../../Modals/ConectionRequestModal';
-import {useUserData} from '../../../Utilities/StoreData';
+import {useProfile} from '../../../Utilities/StoreData';
 import {
   setConnectionsList,
   setGroupsList,
@@ -15,15 +15,15 @@ import {GROUP_PROCESS_SOCKET_TYPE} from '../SocketConstants';
 const SocketListener = () => {
   const dispatch = useDispatch();
   const store = useStore();
-  const user = useUserData();
+  const profile = useProfile();
   const [isShowFriendRequestModal, setisShowFriendRequestModal] =
     useState(false);
   const [socketFriendRequestData, setsocketFriendRequestData] = useState(null);
 
   //Socket Connect and Disconnect
   useEffect(() => {
-    if (user) {
-      ConnectSocket(user.user_id);
+    if (profile) {
+      ConnectSocket(profile.user_id);
     }
   }, []);
 

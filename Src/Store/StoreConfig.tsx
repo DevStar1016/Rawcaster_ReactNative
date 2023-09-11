@@ -13,3 +13,4 @@ export const store = configureStore({
     nugget_list_data: NuggetsListSlice,
   },
 });
+export type RootState = ReturnType<typeof store.getState>;

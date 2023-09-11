@@ -7,13 +7,9 @@ import Geocode from 'react-geocode';
 import sha1 from 'sha1';
 import Compressor from 'react-native-compressor';
 import {SALT_KEY} from '../Services/ServiceConstants';
-import {
-  clearAuthReduxData,
-  setToken,
-  setUserData,
-} from '../Store/Slices/AuthSlice';
+import {clearAuthReduxData, setToken} from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
-import {ISLOGIN, USER_DATA} from './EncryptedStoreConstants';
+import {ISLOGIN} from './EncryptedStoreConstants';
 import {decode as htmldecode} from 'html-entities';
 import {getTimezone} from 'countries-and-timezones';
 import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
@@ -37,24 +33,10 @@ export const getAuthCode = (value = '') => {
  * @param {function} dispatch - The dispatch function from the Redux store.
  * @returns None
  */
-export const storeToken = async (token, user, dispatch) => {
+export const storeToken = async (token, dispatch) => {
   try {
     await EncryptedStorage.setItem(ISLOGIN, token);
-    await storeUserData(user, dispatch);
     dispatch(setToken(token));
-  } catch (error) {}
-};
-
-/**
- * Stores user data in encrypted storage and dispatches an action to update the user data in the Redux store.
- * @param {object} user - The user data to be stored.
- * @param {function} dispatch - The dispatch function from the Redux store.
- * @returns None
- */
-export const storeUserData = async (user, dispatch) => {
-  try {
-    await EncryptedStorage.setItem(USER_DATA, JSON.stringify(user));
-    dispatch(setUserData(user));
   } catch (error) {}
 };
 
@@ -73,7 +55,6 @@ export const removeToken = async dispatch => {
 
   try {
     await EncryptedStorage.removeItem(ISLOGIN);
-    await EncryptedStorage.removeItem(USER_DATA);
     const isGoogleSignedIn = await GoogleSignin.isSignedIn();
     if (isGoogleSignedIn) {
       await GoogleSignin.signOut();

@@ -1,6 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {UtilityDataProp} from '../SliceTypes/UtilityTypes';
 
-export const initialState = {
+export const initialState: UtilityDataProp = {
   insets: {
     bottom: 0,
     top: 0,

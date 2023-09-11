@@ -6,8 +6,8 @@ import {useFormik} from 'formik';
 import * as Yup from 'yup';
 import {useNavigation} from '@react-navigation/native';
 import {resendOTPService, signupVerifyService} from '../../Services/ApiService';
-import {getAuthCode, storeToken, storeUserData} from '../../Utilities/Methods';
-import {useProfile, useToken, useUserData} from '../../Utilities/StoreData';
+import {getAuthCode, storeToken} from '../../Utilities/Methods';
+import {useProfile, useToken} from '../../Utilities/StoreData';
 import Toast from '../../Components/Toast';
 import {useDispatch} from 'react-redux';
 import {setMyProfile} from '../../Store/Slices/AuthSlice';
@@ -34,7 +34,6 @@ const EmailPhoneVerification = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
-  const user = useUserData();
   const {
     otpType,
     emailMobile,
@@ -141,13 +140,7 @@ const EmailPhoneVerification = ({route}) => {
             if (parseInt(res.data.first_time) === 1) {
               dispatch(setIsVisibleInfluencers(true));
             }
-            const userData = {
-              name: res.data.name,
-              user_id: res.data.user_id,
-              profile_image: res.data.profile_image,
-              acc_verify_status: res.data.acc_verify_status,
-            };
-            storeToken(res.data.token, userData, dispatch);
+            storeToken(res.data.token, dispatch);
           } else {
             if (otpType) {
               if (otpType === 'sms') {
@@ -176,8 +169,6 @@ const EmailPhoneVerification = ({route}) => {
                 }),
               );
             }
-            const userData = {...user, acc_verify_status: 1};
-            storeUserData(userData, dispatch);
             if (isGoBack) {
               navigation.goBack();
             } else {

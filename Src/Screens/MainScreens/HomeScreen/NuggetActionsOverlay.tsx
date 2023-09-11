@@ -42,7 +42,6 @@ import {
   useSavedNuggetsIds,
   useToken,
   useUnLikedNuggetsFromLikedNuggets,
-  useUserData,
 } from '../../../Utilities/StoreData';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
@@ -157,7 +156,6 @@ function NuggetActionsOverlay({
 
   const navigation = useNavigation();
   const token = useToken();
-  const user = useUserData();
   const profile = useProfile();
   const dispatch = useDispatch();
   const insets = useInsets();
@@ -477,7 +475,7 @@ function NuggetActionsOverlay({
    * @returns {boolean} - Returns true if the user is verified, false otherwise.
    */
   const isVerified = () => {
-    if (user && user.acc_verify_status === 1) {
+    if (profile && profile.acc_verify_status === 1) {
       return true;
     }
     if (setpaused) {
@@ -533,7 +531,7 @@ function NuggetActionsOverlay({
       const tempLikedNuggetData = tempLikedNuggets.find(
         item => item.id === nugget.nugget_id,
       );
-      return tempLikedNuggetData.total_likes;
+      return tempLikedNuggetData?.total_likes;
     }
     const tempUnlikedNuggets = [...unLikedNuggetsFromLikedNuggets];
     const tempUnLikedNuggetData = tempUnlikedNuggets.find(
@@ -585,7 +583,7 @@ function NuggetActionsOverlay({
       const tempFollowingUsersList = [...followingUsersList];
       return tempFollowingUsersList.find(
         item => item.user_id === nugget.user_id,
-      ).follow_count;
+      )?.follow_count;
     }
     return nugget.follow_count;
   };
@@ -921,7 +919,7 @@ function NuggetActionsOverlay({
               buttonSize={40}
               buttonStyle={{marginVertical: 5}}
               onPress={() => {
-                if (parseInt(profile?.user_status_id) > 1) {
+                if (profile?.user_status_id && profile?.user_status_id > 1) {
                   handlePresentAIChatModal();
                 } else {
                   dispatch(
@@ -1067,7 +1065,7 @@ function NuggetActionsOverlay({
           {token && isEnableADDButton ? (
             <RoundedPlusButton
               onPress={() => {
-                if (token && user && user?.acc_verify_status === 0) {
+                if (token && profile && profile?.acc_verify_status === 0) {
                   dispatch(setIsOpenVerifyPopup(true));
                 } else {
                   /* @ts-ignore */
@@ -1081,7 +1079,9 @@ function NuggetActionsOverlay({
             icon={isNuggetLiked() ? 'heart_pink' : 'heart_white'}
             text={bigNumberFormater(getTotalLikes())}
             onPress={updateLike}
-            isEnableTextButton={bigNumberFormater(getTotalLikes())}
+            isEnableTextButton={
+              bigNumberFormater(getTotalLikes()) ? true : false
+            }
             onPressText={() => {
               /* @ts-ignore */
               navigation.navigate('ProfileStack', {
