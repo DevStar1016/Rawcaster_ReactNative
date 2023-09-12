@@ -119,7 +119,7 @@ export interface HostProcessProp {
 
 export interface UserLeftMessageData {
   refId: string;
-  userId: string;
+  userId: number;
 }
 
 export interface EnableDisableMessageData extends HostProcessProp {

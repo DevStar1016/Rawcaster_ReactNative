@@ -136,16 +136,16 @@ export const GetMeetingOptionsMenuList = ({
     },
     {
       id: 'exit_meeting',
-      buttonText: `${hostUserId === selfUserId ? 'End' : 'Exit'} Meeting`,
+      buttonText: `Exit Meeting`,
       icon: 'exit_white',
       isShow: true,
     },
-    // {
-    //   id: 'end_meeting',
-    //   buttonText: `End Meeting`,
-    //   icon: 'exit_white',
-    //   isShow: hostUserId === selfUserId,
-    // },
+    {
+      id: 'end_meeting',
+      buttonText: `End Meeting`,
+      icon: 'exit_white',
+      isShow: hostUserId === selfUserId,
+    },
   ];
   menuList = [...menuList].filter(
     item => visibleMenuIds.includes(item.id) && item.isShow,

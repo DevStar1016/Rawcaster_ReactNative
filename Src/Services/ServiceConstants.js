@@ -17,4 +17,4 @@ export const SOCIAL_SHARE_LINK = 'https://devshare.rawcaster.com/index.php?id=';
 // export const BASE_URL = 'https://rawcaster.com/rawadmin/webservice/';
 // export const MEETING_URL = 'https://rawcaster.com/join/';
 // export const SOCIAL_SHARE_LINK =
-//   'https://rawcaster.com/share/index.php?id=';
+//   'https://share.rawcaster.com/index.php?id=';

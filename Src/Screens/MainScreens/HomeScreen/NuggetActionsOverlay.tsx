@@ -385,7 +385,9 @@ function NuggetActionsOverlay({
       ) {
         result = [...NUGGET_ACTIONS].filter(item => item.id === 2);
       } else {
-        result = [...NUGGET_ACTIONS].filter(item => item.id < 3);
+        result = [...NUGGET_ACTIONS].filter(
+          item => item.id < 3 || item.id === 5,
+        );
       }
     } else {
       if (nugget.type === 2) {

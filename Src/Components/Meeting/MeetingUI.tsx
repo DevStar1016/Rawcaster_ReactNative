@@ -505,7 +505,7 @@ const MeetingUI = ({
   }, []);
 
   const getHostUserId = () => meetingSetting?.created_by;
-  const getSelfUserId = () => profile?.user_id;
+  const getSelfUserId = () => profile?.user_id ?? 0;
 
   /**
    * Meeting notifications Toast Message with action buttons - displayed at the bottom
@@ -1148,11 +1148,23 @@ const MeetingUI = ({
    * the user is the host or not.
    * @returns None
    */
-  const onExitEndMeeting = () => {
+  const onExitEndMeeting = (isEnd = false) => {
     const isHost = getHostUserId() === getSelfUserId();
+    const alertConfig = {
+      title: 'Exit Meeting!',
+      message: 'Are you sure you want to exit from this meeting?',
+    };
+    if (isEnd && isHost) {
+      alertConfig.title = 'End Meeting';
+      alertConfig.message = 'Are you sure you want to end this meeting?';
+    } else if (isHost) {
+      alertConfig.message =
+        'Please make someone as host before leaving the meeting.';
+    }
+
     Alert.alert(
-      `${isHost ? 'End' : 'Exit'} Meeting!`,
-      `Are you sure you want to ${isHost ? 'end' : 'exit from'} this meeting?`,
+      alertConfig.title,
+      alertConfig.message,
       [
         {
           text: 'Cancel',
@@ -1163,7 +1175,11 @@ const MeetingUI = ({
           text: 'OK',
           onPress: () => {
             if (isHost) {
-              handleEndMeeting(true);
+              if (isEnd) {
+                handleEndMeeting(true);
+              } else {
+                handleOpenParticipantsModal();
+              }
             } else {
               userLeft({
                 refId: meetingSetting.ref_id,
@@ -1176,6 +1192,32 @@ const MeetingUI = ({
       ],
       {cancelable: false},
     );
+    // Alert.alert(
+    //   `${isHost ? 'End' : 'Exit'} Meeting!`,
+    //   `Are you sure you want to ${isHost ? 'end' : 'exit from'} this meeting?`,
+    //   [
+    //     {
+    //       text: 'Cancel',
+    //       onPress: () => {},
+    //       style: 'cancel',
+    //     },
+    //     {
+    //       text: 'OK',
+    //       onPress: () => {
+    //         if (isHost) {
+    //           handleEndMeeting(true);
+    //         } else {
+    //           userLeft({
+    //             refId: meetingSetting.ref_id,
+    //             userId: getSelfUserId(),
+    //           });
+    //           handleExitMeeting();
+    //         }
+    //       },
+    //     },
+    //   ],
+    //   {cancelable: false},
+    // );
   };
 
   /**
@@ -1346,7 +1388,7 @@ const MeetingUI = ({
         refId: meetingSetting?.ref_id,
         handRaised: !getIsSelfHandRaised(),
         userId: getSelfUserId(),
-        name: profile?.name,
+        name: profile?.name ?? 'User',
       },
       true,
     );
@@ -1576,6 +1618,23 @@ const MeetingUI = ({
     });
   }
 
+  const getVisibleMainMenuIds = () => {
+    const tempVisibleIdsList: MEETING_MENU_IDS[] = [
+      'in_call_message',
+      'participants',
+      'screenshare_permission',
+      'end_meeting',
+    ];
+    if (
+      (getHostUserId() === getSelfUserId() &&
+        getAttendeesUsersTileList().length > 1) ||
+      getHostUserId() !== getSelfUserId()
+    ) {
+      tempVisibleIdsList.push('exit_meeting');
+    }
+    return [...tempVisibleIdsList];
+  };
+
   return (
     <View style={styles.mainContainer}>
       {/* Chime Meeting SDK Listeners */}
@@ -1796,6 +1855,9 @@ const MeetingUI = ({
             } else if (buttonId === 'exit_meeting') {
               handleCloseMoreOptionsModal();
               onExitEndMeeting();
+            } else if (buttonId === 'end_meeting') {
+              handleCloseMoreOptionsModal();
+              onExitEndMeeting(true);
             }
             //  else if (buttonId === 'end_meeting') {
             //   handleCloseMoreOptionsModal();
@@ -1809,13 +1871,7 @@ const MeetingUI = ({
           hostUserId={getHostUserId()}
           isAllowedScreenShare={meetingSetting.user_screenshare === 1}
           eventType={eventType}
-          visibleMenuIds={[
-            'in_call_message',
-            'participants',
-            'screenshare_permission',
-            'exit_meeting',
-            // 'end_meeting',
-          ]}
+          visibleMenuIds={getVisibleMainMenuIds()}
         />
       </CustomBottomSheetModal>
 
