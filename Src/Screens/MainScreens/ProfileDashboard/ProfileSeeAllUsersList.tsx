@@ -523,7 +523,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   // };
 
   function getRightIconAction(item: any) {
-    if (item.user_id !== profile.user_id) {
+    if (item.user_id !== profile?.user_id) {
       if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
         //@ts-ignore
         navigation.navigate('ClaimAccount', {

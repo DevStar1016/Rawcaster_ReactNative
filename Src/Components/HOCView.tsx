@@ -125,11 +125,11 @@ const HOCView = ({
                 if (onLayoutHeaderHeight) {
                   onLayoutHeaderHeight(
                     event.nativeEvent.layout.height +
-                      (IS_IOS
-                        ? insets.top
-                          ? insets.top
+                      (IS_IOS && insets
+                        ? insets?.top
+                          ? insets?.top
                           : 20
-                        : StatusBar.currentHeight),
+                        : StatusBar.currentHeight ?? 0),
                   );
                 }
               }}

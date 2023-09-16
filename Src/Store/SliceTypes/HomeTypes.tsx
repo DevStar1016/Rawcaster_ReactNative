@@ -118,6 +118,7 @@ type GroupDataProp = {
   last_msg_datetime: string;
   result_list: number;
   group_member_ids: number[];
+  my_group: number;
   group_members_list: GroupMemberDataProp[];
 };
 

@@ -90,9 +90,11 @@ const CommentItem = ({
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.rowContainer}>
-          <View style={{flex: 1}}>
-            <StyledText style={styles.nameText}>
-              {getSlicedText(htmlDecodeText(item.name), 22)}
+          <View style={{flex: 1, paddingRight: 10}}>
+            <StyledText
+              style={styles.nameText}
+              normalTextModeTextProps={{numberOfLines: 1}}>
+              {htmlDecodeText(item.name)}
             </StyledText>
           </View>
           <View style={{paddingLeft: 5}}>

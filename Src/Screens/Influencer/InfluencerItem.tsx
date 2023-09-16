@@ -58,8 +58,6 @@ const InfluencerItem = ({
     return 23;
   }
 
-  console.log(item, 'ITEM');
-
   /**
    * Calculates the length of the text for categories.
    * @returns {number} The length of the text for categories.

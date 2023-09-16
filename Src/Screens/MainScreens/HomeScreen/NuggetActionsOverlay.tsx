@@ -3,6 +3,7 @@ import {
   Image,
   Linking,
   Modal,
+  PermissionsAndroid,
   ScrollView,
   Share,
   StatusBar,
@@ -24,11 +25,14 @@ import SubmitButton from '../../../Components/SubmitButton';
 import {
   bigNumberFormater,
   dateToShortDate,
+  getFileName,
+  getLinkInfo,
   getSlicedText,
   htmlDecodeText,
 } from '../../../Utilities/Methods';
 import {
   DIMENSIONS,
+  IS_IOS,
   NUGGET_ACTIONS,
   NUGGET_SHARE_TYPE,
 } from '../../../Utilities/Constants';
@@ -69,6 +73,8 @@ import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
 import {SOCIAL_SHARE_LINK} from '../../../Services/ServiceConstants';
+import RNFetchBlob from 'rn-fetch-blob';
+import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 type Props = {
   nuggetType: 'video' | 'image' | 'audio' | 'other';
@@ -106,6 +112,11 @@ type NuggetDetailsProps = {
 type PollVotedDataProp = {
   isVoted: boolean;
   votedOptionID: any;
+};
+
+type DownloadFileProp = {
+  path: string;
+  fileName: string;
 };
 
 function NuggetActionsOverlay({
@@ -168,6 +179,7 @@ function NuggetActionsOverlay({
     useState(true);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
   const [url, seturl] = useState('');
+  const [urlConfirmationMetaData, seturlConfirmationMetaData] = useState(null);
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
     isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
     votedOptionID: null,
@@ -177,6 +189,7 @@ function NuggetActionsOverlay({
   const [nuggetDataBottomContainerHeight, setnuggetDataBottomContainerHeight] =
     useState(0);
   const [pollDataHeight, setpollDataHeight] = useState(0);
+  const [metaDataHeight, setmetaDataHeight] = useState(0);
   const [mainContentContainerHeight, setmainContentContainerHeight] =
     useState(0);
   const [mainContentContainerWidth, setmainContentContainerWidth] = useState(0);
@@ -366,8 +379,13 @@ function NuggetActionsOverlay({
           .then(res => {})
           .catch(e => {});
       } else {
-        setopenUrlConfirmation(true);
+        if (nugget.media_list && nugget.media_list.length > 0) {
+          if (nugget.metadata) {
+            seturlConfirmationMetaData(JSON.parse(nugget.metadata));
+          }
+        }
         seturl(value);
+        setopenUrlConfirmation(true);
       }
     }
   };
@@ -394,6 +412,17 @@ function NuggetActionsOverlay({
         result = [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 5);
       } else {
         result = [...NUGGET_ACTIONS].filter(item => item.id > 2 && item.id < 6);
+      }
+    }
+
+    if (
+      nugget.media_list &&
+      nugget.media_list[0] &&
+      nugget.media_list[0]?.media_type?.includes('image')
+    ) {
+      const downloadOption = [...NUGGET_ACTIONS].find(item => item.id === 6);
+      if (downloadOption) {
+        result.push({...downloadOption});
       }
     }
     return result;
@@ -425,6 +454,103 @@ function NuggetActionsOverlay({
     }
   };
 
+  const downloadMedia = async (url: string, fileName: string) => {
+    Toast.success('Downloading Media');
+    if (IS_IOS) {
+      CameraRoll.save(url, {
+        album: 'Rawcaster',
+        type: 'photo',
+      })
+        .then(res => {
+          Toast.success('Media Downloaded');
+        })
+        .catch(e => {
+          Toast.fail(e.message);
+        });
+    } else {
+      const {config, fs} = RNFetchBlob;
+      let downloadDir = fs.dirs.PictureDir;
+      let options = {
+        fileCache: true,
+        path: downloadDir + '/Rawcaster/' + fileName,
+        notification: true,
+        title: fileName,
+        addAndroidDownloads: {
+          //Related to the Android only
+          useDownloadManager: true,
+          notification: true,
+          path: downloadDir + '/Rawcaster/' + fileName,
+          description: 'Nugget Download',
+        },
+      };
+      config(options)
+        .fetch('GET', url)
+        .then(res => {
+          Toast.success('Media Downloaded');
+        })
+        .catch(e => {
+          Toast.success(e.message);
+        });
+    }
+  };
+
+  // const handleDownloadMedia = async (item: DownloadFileProp) => {
+  //   console.log(item, 'ITEM DOWNLOAD');
+
+  //   if (IS_IOS) {
+  //     downloadMedia(item.path, item.fileName);
+  //   } else {
+  //     try {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  //         {
+  //           title: 'Storage Permission Required',
+  //           message:
+  //             'Rawcaster needs access to your storage to download Photos',
+  //           buttonPositive: 'OK',
+  //         },
+  //       );
+  //       console.log(granted, 'GRANTED');
+
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+
+  //       } else {
+  //         Toast.fail('Storage Permission Not Granted');
+  //       }
+  //     } catch (err: any) {
+  //       if (err?.message) {
+  //         Toast.fail(err.message);
+  //       }
+  //     }
+
+  //     // try {
+  //     //   PermissionsAndroid.request(
+  //     //     PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  //     //     {
+  //     //       title: 'Rawcaster Storage Permission',
+  //     //       message:
+  //     //         'Rawcaster needs access to your storage ' +
+  //     //         'so you can download files.',
+  //     //       buttonNeutral: 'Ask Me Later',
+  //     //       buttonNegative: 'Cancel',
+  //     //       buttonPositive: 'OK',
+  //     //     },
+  //     //   ).then(granted => {
+  //     //     downloadMedia(item.path, item.fileName);
+  //     //     // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //     //     //   downloadMedia(item.path, item.fileName);
+  //     //     // } else {
+  //     //     //   Toast.fail('Storage Permission Denied');
+  //     //     // }
+  //     //   });
+  //     // } catch (err: any) {
+  //     //   if (err?.message) {
+  //     //     Toast.fail(err.message);
+  //     //   }
+  //     // }
+  //   }
+  // };
+
   /**
    * Handles the action to be performed when a nugget is pressed.
    * @param {number} id - The ID of the pressed nugget.
@@ -453,6 +579,16 @@ function NuggetActionsOverlay({
           onShareLink();
           clearTimeout(shareLinkTimer.current);
         }, 200);
+        break;
+      case 6:
+        if (nugget?.media_list && nugget?.media_list[0]) {
+          const mediaFile = nugget?.media_list[0];
+          downloadMedia(mediaFile.path, getFileName(mediaFile.path));
+          // handleDownloadMedia({
+          //   fileName: getFileName(mediaFile.path),
+          //   path: mediaFile.path,
+          // });
+        }
         break;
     }
   };
@@ -633,7 +769,6 @@ function NuggetActionsOverlay({
   const Dot = () => {
     return <View style={styles.dotContainer} />;
   };
-
   const MediaControllers = () => {
     return isLoadingVideo ? (
       <View>
@@ -675,6 +810,43 @@ function NuggetActionsOverlay({
       </>
     );
   }, [pollVotedData, getPollOptions(), nugget]);
+
+  const MetaDataContainer = () => {
+    const metaData = JSON.parse(nugget.metadata);
+
+    return (
+      <TouchableOpacity
+        style={styles.metaDataContainer}
+        activeOpacity={0.7}
+        onLayout={e => {
+          setmetaDataHeight(e.nativeEvent.layout.height);
+        }}
+        onPress={() => {
+          const url = getLinkInfo(nugget.content);
+          onPressUrl(url);
+        }}>
+        {metaData?.image && (
+          <Image source={{uri: metaData?.image}} style={styles.metaDataImage} />
+        )}
+        <View style={{flex: 1, paddingLeft: 10}}>
+          {metaData.title && (
+            <StyledText
+              style={styles.metaDataTitle}
+              normalTextModeTextProps={{numberOfLines: 2}}>
+              {metaData.title}
+            </StyledText>
+          )}
+          {metaData.title && (
+            <StyledText
+              style={styles.metaDataDescription}
+              normalTextModeTextProps={{numberOfLines: 2}}>
+              {metaData.title}
+            </StyledText>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <TouchableOpacity
@@ -881,7 +1053,13 @@ function NuggetActionsOverlay({
               </ScrollView>
             </TouchableOpacity>
           ) : null}
-          {nugget.poll_option && nugget.poll_option.length > 0 && PollData()}
+
+          {nugget.poll_option && nugget.poll_option.length > 0
+            ? PollData()
+            : nugget.metadata &&
+              nugget.media_list &&
+              nugget.media_list.length <= 0 &&
+              MetaDataContainer()}
         </View>
         <View style={[styles.topRightButtonsContainer]}>
           <TouchableOpacity
@@ -889,6 +1067,8 @@ function NuggetActionsOverlay({
             activeOpacity={0.7}
             onPress={() => {
               if (isLogin() && isVerified()) {
+                console.log(nugget.media_list[0], 'NUGGET');
+
                 setopenMenuOptions(true);
                 if (setpaused) {
                   setpaused(true);
@@ -1172,9 +1352,11 @@ function NuggetActionsOverlay({
 
       <Modal visible={openUrlConfirmation} transparent>
         <ConfirmationPopup
+          metaData={urlConfirmationMetaData}
           onClose={() => {
             setopenUrlConfirmation(false);
             seturl('');
+            seturlConfirmationMetaData(null);
           }}
           onPressPositiveButton={() => {
             if (url) {
@@ -1186,6 +1368,7 @@ function NuggetActionsOverlay({
           }}
           onPressNegativeButton={() => {
             setopenUrlConfirmation(false);
+            seturlConfirmationMetaData(null);
             seturl('');
           }}
           positiveButtonText="Continue"
@@ -1383,5 +1566,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 5,
+  },
+  metaDataContainer: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    flexDirection: 'row',
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  metaDataImage: {
+    height: DIMENSIONS.window.width / 5,
+    width: DIMENSIONS.window.width / 5,
+    borderRadius: 10,
+  },
+  metaDataTitle: {
+    fontFamily: FONTS.DMSans.bold,
+    color: COLORS.white,
+  },
+  metaDataDescription: {
+    color: COLORS.white,
   },
 });

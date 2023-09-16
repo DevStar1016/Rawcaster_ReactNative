@@ -71,7 +71,6 @@ const DashboardWithCategory = ({route}) => {
     viewableItem,
     setviewableItem,
     resetViewabilityItem,
-    onViewRef,
   } = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
@@ -80,6 +79,10 @@ const DashboardWithCategory = ({route}) => {
   const token = useToken();
   const flatlistRef = useRef(null);
   const nuggetType = useNuggetType();
+  const [viewableItemBeforLogin, setviewableItemBeforLogin] = useState({
+    nugget_id: '',
+    viewed: false,
+  });
 
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
@@ -92,6 +95,43 @@ const DashboardWithCategory = ({route}) => {
     viewAreaCoveragePercentThreshold: 70,
   });
   const nuggetContentController = useRef(null);
+
+  /**
+   * Callback function that is called when the viewable items change in a FlatList component. It updates the focusedNuggetUserId state based on the
+   * selected nugget and updates the viewableItem state with the currently viewable item.
+   * @param {Array} viewableItems - An array of viewable items in the list.
+   * @returns None
+   */
+  const onViewRef = useRef(viewableItems => {
+    if (viewableItems?.viewableItems?.length > 0) {
+      const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
+      if (
+        setfocusedNuggetUserId &&
+        token &&
+        profile &&
+        profile.user_id !== selectedNuggetUserId
+      ) {
+        setfocusedNuggetUserId(selectedNuggetUserId);
+      } else {
+        if (setfocusedNuggetUserId) {
+          setfocusedNuggetUserId(null);
+        }
+      }
+      if (token) {
+        if (setviewableItem) {
+          setviewableItem({
+            nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
+            viewed: viewableItems?.viewableItems[0]?.item.viewed,
+          });
+        }
+      } else {
+        setviewableItemBeforLogin({
+          nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
+          viewed: viewableItems?.viewableItems[0]?.item.viewed,
+        });
+      }
+    }
+  });
 
   useEffect(() => {
     dispatch(setIsBottomTabBarAbsolute(true));
@@ -106,10 +146,38 @@ const DashboardWithCategory = ({route}) => {
   }, []);
 
   useEffect(() => {
-    if (token && viewableItem?.nugget_id && !viewableItem?.viewed) {
-      onViewNugget(viewableItem.nugget_id);
+    if (getNuggetsList() && getNuggetsList().length > 0 && !isNuggetsLoading) {
+      if (token) {
+        setviewableItem({
+          nugget_id: getNuggetsList()[0].nugget_id || 0,
+          viewed: getNuggetsList()[0].viewed,
+        });
+      } else {
+        setviewableItemBeforLogin({
+          nugget_id: getNuggetsList()[0].nugget_id || 0,
+          viewed: getNuggetsList()[0].viewed,
+        });
+      }
+    } else {
+      if (token) {
+        if (resetViewabilityItem) {
+          resetViewabilityItem();
+        }
+      }
     }
-  }, [viewableItem?.nugget_id]);
+  }, [nuggetsList, isNuggetsLoading]);
+
+  useEffect(() => {
+    if (token && viewableItem?.nugget_id && !viewableItem?.viewed) {
+      onViewNugget(viewableItem?.nugget_id);
+    } else if (
+      !token &&
+      viewableItemBeforLogin?.nugget_id &&
+      !viewableItemBeforLogin?.viewed
+    ) {
+      onViewNugget(viewableItemBeforLogin.nugget_id);
+    }
+  }, [viewableItem?.nugget_id, viewableItemBeforLogin?.nugget_id]);
 
   useEffect(() => {
     if (isFocused) {
@@ -136,8 +204,10 @@ const DashboardWithCategory = ({route}) => {
       dispatch(
         setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
       );
-      if (resetViewabilityItem) {
-        resetViewabilityItem();
+      if (token) {
+        if (resetViewabilityItem) {
+          resetViewabilityItem();
+        }
       }
       listNuggetsAPICall(1);
     }
@@ -146,7 +216,8 @@ const DashboardWithCategory = ({route}) => {
   useEffect(() => {
     if (
       currentPage === 1 &&
-      !viewableItem?.nugget_id &&
+      ((token && !viewableItem?.nugget_id) ||
+        (!token && !viewableItemBeforLogin.nugget_id)) &&
       nuggetsList?.length > 0 &&
       isFocused &&
       token &&
@@ -223,7 +294,9 @@ const DashboardWithCategory = ({route}) => {
         getNuggetsReduxStoreDataFormate(categoryName, tempNuggetsList),
       ),
     );
-    handleViewNugget(nuggetId);
+    if (token) {
+      handleViewNugget(nuggetId);
+    }
   }
 
   /**
@@ -352,7 +425,11 @@ const DashboardWithCategory = ({route}) => {
     dispatch(resetNuggetsTotalPages(categoryName));
     dispatch(setNuggetsLoading({categoryName, status: true}));
     dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
-    resetViewabilityItem();
+    if (token) {
+      if (resetViewabilityItem) {
+        resetViewabilityItem();
+      }
+    }
     listNuggetsAPICall(1);
   }
 
@@ -386,6 +463,7 @@ const DashboardWithCategory = ({route}) => {
     followingUsersList,
     isMuted,
     viewableItem,
+    viewableItemBeforLogin,
     getHeaderHeight(),
   ]);
 
@@ -400,7 +478,9 @@ const DashboardWithCategory = ({route}) => {
     isAutoPlay: true,
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
-    viewableNuggetItem: viewableItem?.nugget_id,
+    viewableNuggetItem: token
+      ? viewableItem?.nugget_id
+      : viewableItemBeforLogin?.nugget_id,
     isFromGlobalSearch: false,
     isEnableADDButton: true,
     isEnableTopInsetsPadding: true,
@@ -504,6 +584,7 @@ const DashboardWithCategory = ({route}) => {
               onEndReached={onEndReached}
               itemHeight={insets.mediaHeight}
               footerHeight={50}
+              initialScrollIndex={0}
               onViewableItemsChanged={onViewRef?.current}
               renderFooter={renderFooter}
             />

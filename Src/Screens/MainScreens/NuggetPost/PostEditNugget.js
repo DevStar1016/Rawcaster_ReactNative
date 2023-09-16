@@ -36,10 +36,12 @@ import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
 import {
   addNuggetsService,
   editNuggetService,
+  getUrlMetaDataService,
 } from '../../../Services/ApiService';
 import {
   compressMedia,
   getFileName,
+  getLinkInfo,
   getMediaMimeType,
   getMillisToMinutesNumber,
   getSlicedText,
@@ -59,6 +61,8 @@ import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
 import EmojiContainer from 'react-native-emoji-container';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {addNugget} from '../../../Store/ThunkAPIServices';
+import StyledText from '../../../Components/StyledText';
+import RoundedIconButton from '../../../Components/RoundedIconButton';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -75,10 +79,12 @@ const PostEditNugget = ({route}) => {
   const profile = useProfile();
   const token = useToken();
   const videoPlayerRef = useRef(null);
+  const controller = useRef(null);
   const [mainContainerHeight, setmainContainerHeight] = useState(0);
   const [topContainerHeight, settopContainerHeight] = useState(0);
   const [mediaListHeight, setmediaListHeight] = useState(0);
   const [buttonHeight, setbuttonHeight] = useState(0);
+  const [metaDataContainerHeight, setmetaDataContainerHeight] = useState(0);
   const [isFocusedTextInput, setisFocusedTextInput] = useState(false);
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
@@ -94,6 +100,12 @@ const PostEditNugget = ({route}) => {
       item => item.id === (nugget ? parseInt(nugget.share_type) : 1),
     ),
   );
+
+  const [urlMetaData, seturlMetaData] = useState(
+    nugget?.metadata ? JSON.parse(nugget?.metadata) : null,
+  );
+  const [oldUrl, setoldUrl] = useState(null);
+
   const [isMediaAbove5Min, setisMediaAbove5Min] = useState(false);
   const [mediaData, setmediaData] = useState({
     uri: '',
@@ -131,8 +143,41 @@ const PostEditNugget = ({route}) => {
     AvoidSoftInput.setAdjustPan();
     return () => {
       Keyboard.dismiss();
+      if (controller.current) {
+        controller.current.abort();
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (typedText && typedText.trim()) {
+      const url = getLinkInfo(typedText);
+      if (url) {
+        if (oldUrl !== url) {
+          console.log(url, 'URLLLL');
+          if (isMount) {
+            setoldUrl(url);
+          }
+          getUrlMetaDataAPICall(url);
+        }
+      } else {
+        if (isMount) {
+          seturlMetaData(null);
+        }
+      }
+    } else {
+      if (isMount) {
+        seturlMetaData(null);
+      }
+    }
+  }, [typedText]);
+
+  useEffect(() => {
+    if (urlMetaData) {
+    }
+    if (selectedMediaList && selectedMediaList.length) {
+    }
+  }, [urlMetaData, selectedMediaList]);
 
   useEffect(() => {
     if (nugget) {
@@ -154,6 +199,33 @@ const PostEditNugget = ({route}) => {
       }
     }
   }, []);
+
+  const getUrlMetaDataAPICall = url => {
+    if (controller.current) {
+      controller.current.abort();
+    }
+    controller.current = new AbortController();
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('url', url);
+    getUrlMetaDataService(formData, controller.current.signal)
+      .then(res => {
+        console.log(res.data.data, 'URL DATAAA');
+        if (res.data.status === 1) {
+          if (isMount) {
+            seturlMetaData(res.data.data);
+          }
+        } else if (res.data.status === 0) {
+          if (isMount) {
+            seturlMetaData(null);
+          }
+        }
+      })
+      .catch(e => {
+        console.log(e, 'ERROR URL');
+      })
+      .finally(() => {});
+  };
 
   /**
    * Stops the loader by setting the loadingData state to false and clearing the text.
@@ -219,6 +291,12 @@ const PostEditNugget = ({route}) => {
         selectedMediaList.map(item => {
           formData.append('nuggets_media', item);
         });
+      } else if (urlMetaData) {
+        const tempMetaData = {
+          ...urlMetaData,
+          image: urlMetaData.open_graph_image,
+        };
+        formData.append('metadata', JSON.stringify(tempMetaData));
       }
     }
     dispatch(addNugget({navigation, formData}));
@@ -289,6 +367,12 @@ const PostEditNugget = ({route}) => {
       tempSelectdeMediaList.map(item => {
         formData.append('nuggets_media', item);
       });
+    } else if (urlMetaData) {
+      const tempMetaData = {
+        ...urlMetaData,
+        image: urlMetaData.open_graph_image,
+      };
+      formData.append('metadata', JSON.stringify(tempMetaData));
     }
     const tempRemovedMediaList = [...nugget.media_list].filter(
       item =>
@@ -611,9 +695,13 @@ const PostEditNugget = ({route}) => {
       maxHeight = maxHeight - mediaListHeight;
     }
 
-    if (isOpenEmojiContainer || isFocusedTextInput) {
+    if (isOpenEmojiContainer) {
       maxHeight = maxHeight - EMOJI_CONTAINER_HEIGHT;
-      maxHeight = maxHeight + mediaListHeight + buttonHeight;
+      maxHeight =
+        maxHeight + mediaListHeight + buttonHeight + metaDataContainerHeight;
+    }
+    if (urlMetaData) {
+      maxHeight = maxHeight - metaDataContainerHeight;
     }
     if (maxHeight >= 0) {
       return maxHeight;
@@ -898,7 +986,11 @@ const PostEditNugget = ({route}) => {
                   setisFocusedTextInput(true);
                   openCloseEmojiPicker(false);
                 }}
-                value={typedText}
+                value={getSlicedText(
+                  typedText,
+                  profile?.nugget_content_length,
+                  false,
+                )}
                 onChangeText={text => {
                   if (
                     text.length > profile?.nugget_content_length &&
@@ -935,21 +1027,79 @@ const PostEditNugget = ({route}) => {
           ) : null}
         </View>
         <View>
-          {!isPollClicked && selectedMediaList.length > 0 && (
-            <View
-              style={styles.selectedNuggetsContainer}
-              onLayout={e => {
-                setmediaListHeight(e.nativeEvent.layout.height);
-              }}>
-              <FlatList
-                data={selectedMediaList}
-                renderItem={renderSelectedNuggetItem}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(_, index) => index.toString()}
-              />
-            </View>
-          )}
+          {!isPollClicked &&
+            (selectedMediaList.length > 0 ? (
+              <View
+                style={styles.selectedNuggetsContainer}
+                onLayout={e => {
+                  setmediaListHeight(e.nativeEvent.layout.height);
+                }}>
+                <FlatList
+                  data={selectedMediaList}
+                  renderItem={renderSelectedNuggetItem}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyExtractor={(_, index) => index.toString()}
+                />
+              </View>
+            ) : (
+              urlMetaData && (
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onLayout={e => {
+                    if (isMount) {
+                      setmetaDataContainerHeight(e.nativeEvent.layout.height);
+                    }
+                  }}
+                  style={styles.metaDataContainer}>
+                  <RoundedIconButton
+                    onPress={() => {
+                      if (isMount) {
+                        seturlMetaData(null);
+                      }
+                    }}
+                    buttonStyle={{
+                      position: 'absolute',
+                      top: -5,
+                      right: -5,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    buttonSize={25}
+                    icon="close"
+                  />
+                  {urlMetaData.title && (
+                    <StyledText
+                      style={{
+                        color: COLORS.white,
+                        fontFamily: FONTS.DMSans.bold,
+                      }}
+                      normalTextModeTextProps={{numberOfLines: 1}}>
+                      {urlMetaData.title}
+                    </StyledText>
+                  )}
+                  {urlMetaData.open_graph_image && (
+                    <Image
+                      source={{uri: urlMetaData.open_graph_image}}
+                      style={{
+                        width: (DIMENSIONS.screen.width - 42) / 2,
+                        height: (DIMENSIONS.screen.width - 42) / 2,
+                        marginVertical: 10,
+                      }}
+                    />
+                  )}
+                  {urlMetaData.description && (
+                    <StyledText
+                      style={{
+                        color: COLORS.white,
+                      }}
+                      normalTextModeTextProps={{numberOfLines: 2}}>
+                      {urlMetaData.description}
+                    </StyledText>
+                  )}
+                </TouchableOpacity>
+              )
+            ))}
 
           <SubmitButton
             buttonText={
@@ -1116,7 +1266,11 @@ const PostEditNugget = ({route}) => {
             selectedShareType.id === 3 ? 'group_name' : 'display_name'
           }
           idFieldName={selectedShareType.id === 3 ? 'group_id' : 'user_id'}
-          list={selectedShareType.id === 3 ? groupsList : connectionsList}
+          list={
+            selectedShareType.id === 3
+              ? [...groupsList].filter(item => item.my_group === 1)
+              : connectionsList
+          }
           onSelectItems={list => {
             if (isMount) {
               setisOpenSelectionModal(false);
@@ -1271,5 +1425,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
     justifyContent: 'center',
     borderRadius: 25,
+  },
+  metaDataContainer: {
+    padding: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
 });

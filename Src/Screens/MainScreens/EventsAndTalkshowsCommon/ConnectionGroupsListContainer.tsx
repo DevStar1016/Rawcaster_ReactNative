@@ -85,7 +85,7 @@ const ConnectionGroupsListContainer = ({
     if (type === 'connection') {
       return connectionsList;
     } else if (type === 'group') {
-      return groupsList;
+      return [...groupsList].filter(item => item.my_group === 1);
     }
     return [];
   };

@@ -208,13 +208,15 @@ const GeneralSettings = () => {
       });
   }
 
-  function updateUsersSettingsAPICall(
+  function updateUsersSettingsAPICall({
     keyText,
     valueText,
     reduxData = undefined,
     otherKeyText,
     isLogout = false,
-  ) {
+    profile_field_name,
+    groupid,
+  }) {
     if (isMount) {
       setloaderText('Settings Updating');
       setisLoading(true);
@@ -222,6 +224,14 @@ const GeneralSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append(otherKeyText ?? keyText, valueText);
+    if (profile_field_name) {
+      formData.append('profile_field_name', profile_field_name);
+    }
+    if (groupid) {
+      formData.append('groupid', JSON.stringify(groupid));
+    }
+
+    console.log(formData, 'FORMDATAAAA');
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -321,13 +331,13 @@ const GeneralSettings = () => {
   ) {
     setsettingsData(preData => {
       if (preData[keyText] !== valueText) {
-        updateUsersSettingsAPICall(
+        updateUsersSettingsAPICall({
           keyText,
           valueText,
           reduxData,
           otherKeyText,
           isLogout,
-        );
+        });
       }
       return {
         ...preData,
@@ -466,7 +476,10 @@ const GeneralSettings = () => {
                     ...tempSettingsData,
                     [fieldName]: changedStatus,
                   };
-                  updateUsersSettingsAPICall(fieldName, changedStatus);
+                  updateUsersSettingsAPICall({
+                    keyText: fieldName,
+                    valueText: changedStatus,
+                  });
                 }
                 return tempSettingsData;
               });
@@ -585,7 +598,7 @@ const GeneralSettings = () => {
           }
           list={
             specificUsersModalData.specificListType === 2
-              ? groupsList
+              ? [...groupsList].filter(item => item.my_group === 1)
               : connectionsList
           }
           onSelectItems={list => {
@@ -600,6 +613,13 @@ const GeneralSettings = () => {
                 [specificUsersModalData.fieldName]:
                   specificUsersModalData.selectedId,
               }));
+              updateUsersSettingsAPICall({
+                keyText: specificUsersModalData.fieldName,
+                valueText: specificUsersModalData.selectedId,
+                groupid: [...list],
+                profile_field_name: specificUsersModalData.fieldName,
+              });
+
               // setshareConnectionsGroupsIdsList(list);
             }
           }}

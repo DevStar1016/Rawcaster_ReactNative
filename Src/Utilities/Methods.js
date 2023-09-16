@@ -675,3 +675,27 @@ export const eventDisplayDuration = time => {
   let hr = parseInt(dur[0]) > 0 ? `${dur[0]} hrs ` : '';
   return `${hr}  ${dur[1]}  mins`;
 };
+
+export const getLinkInfo = val => {
+  // let expression = /([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#]?[\w-]+)*\/?/gm;
+  let expression =
+    /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+  var regex = new RegExp(expression);
+  var t = val;
+  if (t.match(regex)) {
+    let url = t.match(regex);
+    let addHttp = url[url.length - 1].replace(
+      /^(?:(.*:)?\/\/)?(.*)/i,
+      (match, schemma, nonSchemmaUrl) =>
+        schemma ? match : `http://${nonSchemmaUrl}`,
+    );
+    let index = addHttp.indexOf('http');
+    if (index > 0) {
+      addHttp = addHttp.substring(index, addHttp.length);
+    }
+
+    return addHttp;
+  } else {
+    return null;
+  }
+};

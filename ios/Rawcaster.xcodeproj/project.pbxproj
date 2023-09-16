@@ -654,7 +654,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rawcaster/Rawcaster.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = CR8PDZDGNZ;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Rawcaster/Info.plist;
@@ -692,7 +692,7 @@
 				CODE_SIGN_ENTITLEMENTS = Rawcaster/Rawcaster.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = CR8PDZDGNZ;
 				INFOPLIST_FILE = Rawcaster/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rawcaster;

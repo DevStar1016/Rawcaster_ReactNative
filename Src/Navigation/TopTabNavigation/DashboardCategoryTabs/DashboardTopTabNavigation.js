@@ -44,34 +44,6 @@ function DashboardTopTabNavigation() {
   const [preCategoryName, setpreCategoryName] = useState('');
   const [categoryName, setcategoryName] = useState('ForYou');
 
-  /**
-   * Callback function that is called when the viewable items change in a FlatList component. It updates the focusedNuggetUserId state based on the
-   * selected nugget and updates the viewableItem state with the currently viewable item.
-   * @param {Array} viewableItems - An array of viewable items in the list.
-   * @returns None
-   */
-  const onViewRef = useRef(viewableItems => {
-    if (viewableItems?.viewableItems?.length > 0) {
-      const selectedNuggetUserId = viewableItems.viewableItems[0].item.user_id;
-      if (
-        setfocusedNuggetUserId &&
-        token &&
-        profile &&
-        profile.user_id !== selectedNuggetUserId
-      ) {
-        setfocusedNuggetUserId(selectedNuggetUserId);
-      } else {
-        if (setfocusedNuggetUserId) {
-          setfocusedNuggetUserId(null);
-        }
-      }
-      setviewableItem({
-        nugget_id: viewableItems?.viewableItems[0]?.item.nugget_id || 0,
-        viewed: viewableItems?.viewableItems[0]?.item.viewed,
-      });
-    }
-  });
-
   const resetViewabilityItem = () => {
     setviewableItem({
       nugget_id: '',
@@ -84,7 +56,6 @@ function DashboardTopTabNavigation() {
     setheaderContainerHeight,
     setviewableItem,
     viewableItem,
-    onViewRef,
     resetViewabilityItem: () => {
       resetViewabilityItem();
     },

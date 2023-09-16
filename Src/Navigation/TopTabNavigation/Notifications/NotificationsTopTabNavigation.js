@@ -8,6 +8,7 @@ import PollResultsNotifications from '../../../Screens/MainScreens/Notifications
 import {COLORS} from '../../../Utilities/Colors';
 import {FONTS} from '../../../Utilities/Fonts';
 import {useNotications} from '../../../Utilities/Contexts';
+import {DIMENSIONS} from '../../../Utilities/Constants';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -48,11 +49,12 @@ function NotificationsTopTabNavigation() {
         tabBarItemStyle: {
           borderColor: COLORS.transparent,
           borderWidth: 0,
+          width: 160,
         },
         tabBarLabelStyle: {
           textTransform: 'capitalize',
           fontFamily: FONTS.DMSans.bold,
-          fontSize: 15,
+          fontSize: 14,
         },
       }}>
       <Tab.Screen

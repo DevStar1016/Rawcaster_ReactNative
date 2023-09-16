@@ -3,6 +3,7 @@ import {
   Alert,
   FlatList,
   Modal,
+  RefreshControl,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -33,6 +34,7 @@ import {
 } from '../../../Utilities/Methods';
 import {
   followAndUnfollowService,
+  getMyProfileService,
   getOthersProfileService,
   listNuggetsService,
   sendFriendRequestsService,
@@ -58,11 +60,14 @@ import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
 import {
   removeFollowingUser,
+  setConnectionsList,
   setFollowingUsersList,
+  setUnreadNotificationCount,
 } from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
+import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 const PADDING_HORIZONTAL = 10;
 var currentPage = 1;
 var totalPages = 1;
@@ -189,6 +194,63 @@ const Profile = ({route}) => {
     }
   }, [userId, othersProfile]);
 
+  const getMyProfileAPI = () => {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    getMyProfileService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let profile = {...res.data.profile};
+          profile = {
+            ...profile,
+            name: htmlDecodeText(profile?.name),
+            first_name: htmlDecodeText(profile?.first_name),
+            last_name: htmlDecodeText(profile?.last_name),
+            bio_data: htmlDecodeText(profile?.bio_data),
+          };
+
+          dispatch(setMyProfile(profile));
+          dispatch(
+            setUnreadNotificationCount(
+              profile?.unread_notification_count ?? null,
+            ),
+          );
+        } else if (res.data.status === 0) {
+          if (isMount.current) {
+            setemptyText(res.data.msg);
+          }
+        }
+      })
+      .catch(e => {
+        if (isMount.current) {
+          setemptyText(e.message);
+        }
+      })
+      .finally(() => {
+        if (isMount.current) {
+          setisLoading(false);
+          setisRefreshing(false);
+        }
+      });
+  };
+
+  const onRefresh = () => {
+    if (isMount.current) {
+      setisLoading(true);
+      setisRefreshing(true);
+      setisListLoading(true);
+    }
+    currentPage = 1;
+    totalPages = 1;
+    listNuggetsAPICall(1);
+    if (userId) {
+      getOthersProfileAPI();
+    } else {
+      getMyProfileAPI();
+    }
+  };
+
   const getOthersProfileAPI = () => {
     if (profileController) {
       profileController.abort();
@@ -227,6 +289,7 @@ const Profile = ({route}) => {
         }
         if (isMount.current) {
           setisLoading(false);
+          setisRefreshing(false);
         }
       })
       .catch(e => {
@@ -236,6 +299,7 @@ const Profile = ({route}) => {
           } else {
             setemptyText(e.message);
             setisLoading(false);
+            setisRefreshing(false);
           }
         }
       });
@@ -298,7 +362,7 @@ const Profile = ({route}) => {
     );
   }
 
-  const listNuggetsAPICall = (pageNumber = 1, tab = 1) => {
+  const listNuggetsAPICall = (pageNumber = 1, tab = selectedTab) => {
     if (nuggetsController) {
       nuggetsController.abort();
     }
@@ -354,7 +418,7 @@ const Profile = ({route}) => {
           setnuggetsList([]);
           if (!e.message.includes('cancel')) {
             setisLoadMore(false);
-            setisRefreshing(false);
+
             setisListLoading(false);
           }
         }
@@ -377,6 +441,13 @@ const Profile = ({route}) => {
               return {...pre, friend_status: null};
             });
           }
+          dispatch(
+            setConnectionsList(
+              [...connections].filter(
+                item => item.user_ref_id !== othersProfile?.user_ref_id,
+              ),
+            ),
+          );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -782,7 +853,7 @@ const Profile = ({route}) => {
               ? Boolean(parseInt(getProfileData().lock_my_connection))
               : false
           }
-          list={userId ? [] : [...connections]}
+          list={userId ? [] : connections}
           listType="connections"
           title={'Connections'}
           paddingHorizontal={PADDING_HORIZONTAL}
@@ -907,7 +978,8 @@ const Profile = ({route}) => {
               userId &&
               othersProfile &&
               (othersProfile.friend_status === null ||
-                othersProfile.friend_status === '')
+                othersProfile.friend_status === '' ||
+                othersProfile.friend_status === 2)
                 ? true
                 : false
             }
@@ -935,6 +1007,13 @@ const Profile = ({route}) => {
                   // paddingBottom: 20,
                   backgroundColor: COLORS.white,
                 }}
+                refreshControl={
+                  <RefreshControl
+                    tintColor={COLORS.secondary}
+                    refreshing={isRefreshing}
+                    onRefresh={onRefresh}
+                  />
+                }
                 // pagingEnabled
                 // getItemLayout={getItemLayout}
                 renderItem={renderNuggetItem}

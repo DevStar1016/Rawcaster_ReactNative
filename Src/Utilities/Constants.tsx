@@ -238,8 +238,7 @@ export const NUGGET_ACTIONS = [
   {id: 3, buttonName: 'Block User'},
   {id: 4, buttonName: 'Report Abuse'},
   {id: 5, buttonName: 'Share Link'},
-  {id: 6, buttonName: 'See Translation'},
-  {id: 7, buttonName: 'See Original'},
+  {id: 6, buttonName: 'Download'},
 ];
 
 export const SHARE_OPTION = {

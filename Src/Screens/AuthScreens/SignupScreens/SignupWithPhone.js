@@ -189,6 +189,7 @@ const SignupWithPhone = ({route}) => {
             iconColor={COLORS.placeHolderColor}
             placeHolder="Enter your name"
             title="Name"
+            maxLength={50}
             onChangeText={handleChange('name')}
             errorText={errors.name && touched.name ? errors.name : ''}
             value={values.name}

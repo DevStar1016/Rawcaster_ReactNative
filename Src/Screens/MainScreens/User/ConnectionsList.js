@@ -126,6 +126,7 @@ const ConnectionsList = () => {
         if (res[0].data.status === 1) {
           dispatch(setConnectionsList(res[0].data.friends_list));
         }
+
         if (res[1].data.status === 1) {
           dispatch(setPendingFriendRequests(res[1].data.pending_requests));
         }

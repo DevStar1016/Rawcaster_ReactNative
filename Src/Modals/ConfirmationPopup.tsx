@@ -1,4 +1,5 @@
 import {
+  Image,
   StyleSheet,
   TextStyle,
   TouchableOpacity,
@@ -12,6 +13,13 @@ import StyledText from '../Components/StyledText';
 import SubmitButton from '../Components/SubmitButton';
 import {FONTS} from '../Utilities/Fonts';
 import {IconType} from '../Utilities/Icons';
+import {DIMENSIONS} from '../Utilities/Constants';
+
+type MetaDataProp = {
+  image: string;
+  title: string;
+  description: string;
+};
 
 type Props = {
   onClose: () => void;
@@ -20,6 +28,7 @@ type Props = {
   positiveButtonText?: string;
   negativeButtonText?: string;
   content?: string;
+  metaData?: MetaDataProp | null;
   titleText?: string;
   contentTextStyle?: TextStyle;
   subContainerStyle?: ViewStyle;
@@ -51,7 +60,37 @@ const ConfirmationPopup = ({
   titleContainerStyle,
   titleTextStyle,
   bottomLogoContainerStyle,
+  metaData,
 }: Props) => {
+  const MetaDataContainer = () => {
+    if (!metaData) {
+      return null;
+    }
+    return (
+      <View style={styles.metaDataContainer}>
+        {metaData?.image && (
+          <Image source={{uri: metaData?.image}} style={styles.metaDataImage} />
+        )}
+        <View style={{flex: 1, paddingLeft: 10}}>
+          {metaData.title && (
+            <StyledText
+              style={styles.metaDataTitle}
+              normalTextModeTextProps={{numberOfLines: 2}}>
+              {metaData.title}
+            </StyledText>
+          )}
+          {metaData.title && (
+            <StyledText
+              style={styles.metaDataDescription}
+              normalTextModeTextProps={{numberOfLines: 2}}>
+              {metaData.title}
+            </StyledText>
+          )}
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.mainContainer}>
       <View style={[styles.subContainer, {...subContainerStyle}]}>
@@ -82,6 +121,7 @@ const ConfirmationPopup = ({
           )}
         </View>
         <View style={{paddingHorizontal: 15, paddingBottom: 15}}>
+          {MetaDataContainer()}
           <View style={styles.contentContainer}>
             <StyledText
               style={{fontSize: 14, paddingVertical: 5, ...contentTextStyle}}>
@@ -154,5 +194,35 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     paddingBottom: 10,
+  },
+  metaDataContainer: {
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 10,
+    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    marginRight: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
+  },
+  metaDataImage: {
+    height: DIMENSIONS.window.width / 5,
+    width: DIMENSIONS.window.width / 5,
+    borderRadius: 10,
+  },
+  metaDataTitle: {
+    fontFamily: FONTS.DMSans.bold,
+    color: COLORS.black,
+  },
+  metaDataDescription: {
+    color: COLORS.black,
   },
 });

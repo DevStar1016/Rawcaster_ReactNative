@@ -6,6 +6,7 @@ axios.defaults.baseURL = BASE_URL;
 axios.interceptors.request.use(
   async request => {
     request.headers['Content-Type'] = 'multipart/form-data';
+
     return request;
   },
   error => Promise.reject(error),
@@ -364,6 +365,13 @@ export const enableGoLiveEventService = (data: FormData) => {
 
 export const getInfluencerCategoryService = (data: FormData) => {
   return axios.post('getinfluencercategory', data);
+};
+
+export const getUrlMetaDataService = (
+  data: FormData,
+  signal: GenericAbortSignal,
+) => {
+  return axios.post('geturlmetadata', data, {signal});
 };
 
 export const influencerListService = (

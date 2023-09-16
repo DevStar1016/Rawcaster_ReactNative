@@ -6,7 +6,7 @@ import HOCView from '../../../Components/HOCView';
 import {COLORS} from '../../../Utilities/Colors';
 import EncryptedMessageContainer from './EncryptedMessageContainer';
 import {IS_IOS} from '../../../Utilities/Constants';
-import {useProfile} from '../../../Utilities/StoreData';
+import {useGroupsList, useProfile} from '../../../Utilities/StoreData';
 import ChatTextInput from './ChatTextInput';
 import {
   compressMedia,
@@ -21,6 +21,7 @@ var isMount = true;
 const GroupChat = ({route}) => {
   const navigation = useNavigation();
   const {groupData} = route.params ?? {};
+  const groupList = useGroupsList();
   const [headerHeight, setheaderHeight] = useState(20);
   const profile = useProfile();
   const [selectedMediaList, setselectedMediaList] = useState([]);
@@ -162,6 +163,10 @@ const GroupChat = ({route}) => {
       isMount = false;
     };
   }, []);
+
+  const getGroupData = () => {
+    return [...groupList].find(item => item.group_id === groupData?.group_id);
+  };
 
   /**
    * Handles the selection of media from the camera and adds it to the selected media list.
@@ -340,8 +345,8 @@ const GroupChat = ({route}) => {
    * @returns {string} A comma-separated string of display names.
    */
   function getMembersListText() {
-    return groupData?.group_members_list
-      ?.map(item => item.display_name)
+    return getGroupData()
+      ?.group_members_list?.map(item => item.display_name)
       .toString();
   }
 
@@ -378,12 +383,12 @@ const GroupChat = ({route}) => {
       onLayoutHeaderHeight={setheaderHeight}
       backHeaderProps={{
         bgColor: COLORS.transparent,
-        title: getSlicedText(groupData?.group_name, 25),
+        title: getSlicedText(getGroupData()?.group_name, 25),
         isTitleButton: true,
         onPressHeaderTitle: () => {
           navigation.navigate('CreateEditGroup', {
-            groupId: groupData?.group_id,
-            isLocked: parseInt(groupData?.locked) === 1,
+            groupId: getGroupData()?.group_id,
+            isLocked: parseInt(getGroupData()?.locked) === 1,
           });
         },
         videoCallIcon: 'event_white',
@@ -408,7 +413,7 @@ const GroupChat = ({route}) => {
         onPressCopyButton: handleCopyOnClipboard,
         titlePaddingHorizontal: 5,
         profileImageProps: {
-          profileImage: groupData?.group_icon,
+          profileImage: getGroupData()?.group_icon,
           profileSize: 30,
           extraMargin: 0,
           padding: 0,

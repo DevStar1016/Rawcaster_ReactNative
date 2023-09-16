@@ -439,7 +439,9 @@ const Nugget = ({nugget, nuggetIndex}) => {
         };
       });
     }
-    return selectedShareTypeId === 3 ? groupsList : connectionsList;
+    return selectedShareTypeId === 3
+      ? [...groupsList].filter(item => item.my_group === 1)
+      : connectionsList;
   };
 
   const nuggetItemActions = {
