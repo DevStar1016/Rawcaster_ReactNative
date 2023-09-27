@@ -85,7 +85,7 @@ const CustomDateMonthYearPicker = ({
   pickerMode = 'month_date_year',
   placeHolder = {
     first: 'Month',
-    second: 'Day',
+    second: 'Date',
     third: 'Year',
   },
   defaultDurationData = {

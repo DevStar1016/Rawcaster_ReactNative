@@ -217,7 +217,20 @@ export const becomeFan = createAsyncThunk(
     formData.append('type', 1);
     try {
       const res = await followAndUnfollowService(formData);
-    } catch (error) {}
+      if (res.data.status === 1) {
+        if (data?.isEnableToast) {
+          Toast.success(res.data.msg);
+        }
+      } else if (res.data.status === 0) {
+        if (data?.isEnableToast) {
+          Toast.fail(res.data.msg);
+        }
+      }
+    } catch (error) {
+      if (data?.isEnableToast) {
+        Toast.fail(error.message);
+      }
+    }
   },
 );
 

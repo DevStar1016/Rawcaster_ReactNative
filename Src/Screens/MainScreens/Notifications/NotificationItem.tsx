@@ -214,6 +214,7 @@ const NotificationItem = ({
                   ]}>
                   {utcToUserTimezone(
                     item.event_start_time,
+                    // @ts-ignore
                     settings?.time_zone,
                   ).format('DD MMM YYYY')}
                 </StyledText>
@@ -246,9 +247,11 @@ const NotificationItem = ({
                   ]}>
                   {`${utcToUserTimezone(
                     item.event_start_time,
+                    // @ts-ignore
                     settings?.time_zone,
                   ).format('hh:mm A')} ${utctoUserTimezonewithAbbr(
                     item.event_start_time,
+                    // @ts-ignore
                     settings?.time_zone,
                   )}`}
                 </StyledText>

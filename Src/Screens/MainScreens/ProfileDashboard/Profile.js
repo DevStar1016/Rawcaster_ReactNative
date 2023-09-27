@@ -54,7 +54,6 @@ import Nugget from '../HomeScreen/Nugget';
 import SVGIcon from '../../../Components/SVGIcon';
 import {DIMENSIONS} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
-import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
 import {FONTS} from '../../../Utilities/Fonts';
@@ -329,15 +328,6 @@ const Profile = ({route}) => {
               return {...pre, friend_status: 1};
             });
           }
-          if (res.data?.friend_request_ids?.length > 0) {
-            let data = {
-              friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile?.name,
-              profile_img: profile?.profile_image,
-              user_id: profile?.user_id,
-            };
-            friendRequestSocket({user_id: userId, data: data});
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -508,8 +498,8 @@ const Profile = ({route}) => {
   const onUnfollow = () => {
     if (userId) {
       Alert.alert(
-        'Un Follow!',
-        `Are you sure to un follow ${getSlicedText(othersProfile?.name, 20)}?`,
+        'UnFollow!',
+        `Are you sure to unfollow ${getSlicedText(othersProfile?.name, 20)}?`,
         [
           {
             text: 'Cancel',

@@ -34,7 +34,6 @@ import {
   setUnreadNotificationCount,
 } from '../../../Store/Slices/HomeSlice';
 import {useDispatch} from 'react-redux';
-import {getAuthCode} from '../../../Utilities/Methods';
 import {useNotications} from '../../../Utilities/Contexts';
 
 type Props = {
@@ -178,28 +177,6 @@ const NotificationsList = ({
       .finally(() => {
         if (isMount) {
           setisActionLoading(false);
-        }
-      });
-  };
-
-  /**
-   * Makes an API call to retrieve the list of connections.
-   * @returns None
-   */
-  const connectionsListAPICall = () => {
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('auth_code', getAuthCode(token));
-    listAllFriendsService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          dispatch(setConnectionsList(res.data.friends_list));
-        }
-      })
-      .catch(e => {})
-      .finally(() => {
-        if (isMount) {
-          setrefreshing(false);
         }
       });
   };

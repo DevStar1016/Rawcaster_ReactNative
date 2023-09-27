@@ -379,11 +379,23 @@ function NuggetActionsOverlay({
           .then(res => {})
           .catch(e => {});
       } else {
-        if (nugget.media_list && nugget.media_list.length > 0) {
-          if (nugget.metadata) {
-            seturlConfirmationMetaData(JSON.parse(nugget.metadata));
+        if (nugget.metadata) {
+          let metaDataList = JSON.parse(nugget.metadata);
+          const isArrayData = Array.isArray(metaDataList);
+          if (!isArrayData) {
+            metaDataList = [{...metaDataList}];
+          }
+          const singleMetaData = [...metaDataList].find(
+            (item: any) => item.url === value,
+          );
+
+          if (singleMetaData) {
+            seturlConfirmationMetaData(singleMetaData);
           }
         }
+        // if (nugget.media_list && nugget.media_list.length > 0) {
+
+        // }
         seturl(value);
         setopenUrlConfirmation(true);
       }
@@ -418,7 +430,8 @@ function NuggetActionsOverlay({
     if (
       nugget.media_list &&
       nugget.media_list[0] &&
-      nugget.media_list[0]?.media_type?.includes('image')
+      nugget.media_list[0]?.media_type?.includes('image') &&
+      nugget.share_type === 1
     ) {
       const downloadOption = [...NUGGET_ACTIONS].find(item => item.id === 6);
       if (downloadOption) {
@@ -664,21 +677,26 @@ function NuggetActionsOverlay({
    * @returns {number} The total number of likes for the nugget.
    */
   const getTotalLikes = () => {
+    let tempLikesCount = nugget.total_likes;
     if (isNuggetLiked()) {
       const tempLikedNuggets = [...likedNuggets];
       const tempLikedNuggetData = tempLikedNuggets.find(
         item => item.id === nugget.nugget_id,
       );
-      return tempLikedNuggetData?.total_likes;
+      tempLikesCount = tempLikedNuggetData?.total_likes;
+    } else {
+      const tempUnlikedNuggets = [...unLikedNuggetsFromLikedNuggets];
+      const tempUnLikedNuggetData = tempUnlikedNuggets.find(
+        item => item.id === nugget.nugget_id,
+      );
+      if (tempUnLikedNuggetData) {
+        tempLikesCount = tempUnLikedNuggetData.total_likes;
+      }
     }
-    const tempUnlikedNuggets = [...unLikedNuggetsFromLikedNuggets];
-    const tempUnLikedNuggetData = tempUnlikedNuggets.find(
-      item => item.id === nugget.nugget_id,
-    );
-    if (tempUnLikedNuggetData) {
-      return tempUnLikedNuggetData.total_likes;
+    if (tempLikesCount <= 0 && isNuggetLiked()) {
+      tempLikesCount = 1;
     }
-    return nugget.total_likes;
+    return tempLikesCount > 0 ? tempLikesCount : 0;
   };
 
   /**
@@ -812,7 +830,15 @@ function NuggetActionsOverlay({
   }, [pollVotedData, getPollOptions(), nugget]);
 
   const MetaDataContainer = () => {
-    const metaData = JSON.parse(nugget.metadata);
+    let metaData = JSON.parse(nugget.metadata);
+    const isArrayData = Array.isArray(metaData);
+    if (!isArrayData) {
+      metaData = [{...metaData}];
+    }
+    const lastIndex = metaData.length - 1;
+    if (metaData.length === 0 && !metaData[lastIndex]) {
+      return null;
+    }
 
     return (
       <TouchableOpacity
@@ -825,22 +851,25 @@ function NuggetActionsOverlay({
           const url = getLinkInfo(nugget.content);
           onPressUrl(url);
         }}>
-        {metaData?.image && (
-          <Image source={{uri: metaData?.image}} style={styles.metaDataImage} />
+        {metaData[lastIndex]?.open_graph_image && (
+          <Image
+            source={{uri: metaData[lastIndex]?.open_graph_image}}
+            style={styles.metaDataImage}
+          />
         )}
         <View style={{flex: 1, paddingLeft: 10}}>
-          {metaData.title && (
+          {metaData[lastIndex]?.title && (
             <StyledText
               style={styles.metaDataTitle}
               normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData.title}
+              {metaData[lastIndex]?.title}
             </StyledText>
           )}
-          {metaData.title && (
+          {metaData[lastIndex]?.title && (
             <StyledText
               style={styles.metaDataDescription}
               normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData.title}
+              {metaData[lastIndex]?.title}
             </StyledText>
           )}
         </View>
@@ -1054,12 +1083,15 @@ function NuggetActionsOverlay({
             </TouchableOpacity>
           ) : null}
 
-          {nugget.poll_option && nugget.poll_option.length > 0
-            ? PollData()
-            : nugget.metadata &&
-              nugget.media_list &&
-              nugget.media_list.length <= 0 &&
-              MetaDataContainer()}
+          {nugget.poll_option && nugget.poll_option.length > 0 && PollData()}
+          {nugget.metadata &&
+            nugget.media_list &&
+            nugget.media_list.length <= 0 &&
+            MetaDataContainer()}
+          {/* // : nugget.metadata &&
+            //   nugget.media_list &&
+            //   nugget.media_list.length <= 0 &&
+            //   MetaDataContainer()} */}
         </View>
         <View style={[styles.topRightButtonsContainer]}>
           <TouchableOpacity
@@ -1067,8 +1099,6 @@ function NuggetActionsOverlay({
             activeOpacity={0.7}
             onPress={() => {
               if (isLogin() && isVerified()) {
-                console.log(nugget.media_list[0], 'NUGGET');
-
                 setopenMenuOptions(true);
                 if (setpaused) {
                   setpaused(true);
@@ -1130,27 +1160,43 @@ function NuggetActionsOverlay({
             }
           }}>
           <View>
-            <ProfileWithBadge
-              badge={Badges(nugget.user_status_id)}
-              profileImage={nugget.user_image}
-              isEnableGradient={false}
-              profileSize={45}
-              isButton
-              onPressProfile={() => {
-                if (isLogin()) {
-                  const pushAction = StackActions.push('ProfileStack', {
-                    userId:
-                      nugget.user_id === profile?.user_id
-                        ? null
-                        : nugget.user_id,
-                  });
-                  navigation.dispatch(pushAction);
-                }
-              }}
-              badgeSize={18}
-              badgeContainerStyle={{right: 7}}
-              containerStyle={{alignItems: 'flex-start'}}
-            />
+            <View style={styles.profileImageContainer}>
+              <ProfileWithBadge
+                badge={Badges(nugget.user_status_id)}
+                profileImage={nugget.user_image}
+                isEnableGradient={false}
+                profileSize={45}
+                isButton
+                onPressProfile={() => {
+                  if (isLogin()) {
+                    const pushAction = StackActions.push('ProfileStack', {
+                      userId:
+                        nugget.user_id === profile?.user_id
+                          ? null
+                          : nugget.user_id,
+                    });
+                    navigation.dispatch(pushAction);
+                  }
+                }}
+                badgeSize={18}
+                badgeContainerStyle={{right: 7}}
+                containerStyle={{alignItems: 'flex-start'}}
+              />
+              {token &&
+              !isFan() &&
+              profile?.user_id !== nugget?.original_user_id ? (
+                <SubmitButton
+                  buttonText="Become a Fan"
+                  marginTop={0}
+                  paddingVertical={0}
+                  padding={0}
+                  onPress={updateIsFan}
+                  marginRight={10}
+                  paddingHorizontal={2}
+                  buttonTextStyle={{fontSize: 10}}
+                />
+              ) : null}
+            </View>
             <View style={styles.userDetailsContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -1165,17 +1211,20 @@ function NuggetActionsOverlay({
                     navigation.dispatch(pushAction);
                   }
                 }}>
-                <StyledText style={styles.nameText}>
-                  {getSlicedText(
+                <StyledText
+                  style={styles.nameText}
+                  normalTextModeTextProps={{numberOfLines: 1}}>
+                  {nugget.user_name}{' '}
+                  {/* {getSlicedText(
                     htmlDecodeText(nugget.user_name),
                     token ? 15 : 30,
-                  )}
+                  )} */}
                 </StyledText>
               </TouchableOpacity>
               {nugget.type === 2 && (
                 <>
                   <StyledText style={{color: COLORS.white}}>
-                    {' ' + 'shared' + ' '}
+                    {'shared' + ' '}
                   </StyledText>
                   <TouchableOpacity
                     activeOpacity={0.8}
@@ -1200,7 +1249,7 @@ function NuggetActionsOverlay({
                   <StyledText style={{color: COLORS.white}}>Nugget</StyledText>
                 </>
               )}
-              {token &&
+              {/* {token &&
               !isFan() &&
               profile?.user_id !== nugget?.original_user_id ? (
                 <SubmitButton
@@ -1213,7 +1262,7 @@ function NuggetActionsOverlay({
                   paddingHorizontal={2}
                   buttonTextStyle={{fontSize: 10}}
                 />
-              ) : null}
+              ) : null} */}
             </View>
             <View style={[styles.userDetailsContainer, {paddingVertical: 5}]}>
               <UserNuggetDetail value={dateToShortDate(nugget.created_date)} />
@@ -1486,10 +1535,13 @@ function NuggetActionsOverlay({
           }}
           handleShareContent={(content: string) => {
             handleCloseAIChatModal(true);
-            /* @ts-ignore */
-            navigation.navigate('PostEditNugget', {
-              preContent: content,
-            });
+            const timer = setTimeout(() => {
+              /* @ts-ignore */
+              navigation.navigate('PostEditNugget', {
+                preContent: content,
+              });
+              clearTimeout(timer);
+            }, 500);
           }}
         />
       </BottomSheetModal>
@@ -1511,7 +1563,7 @@ const styles = StyleSheet.create({
   nameText: {
     color: COLORS.white,
     fontFamily: FONTS.DMSans.bold,
-    fontSize: 16,
+    fontSize: 14,
   },
   userDetailsContainer: {
     flexDirection: 'row',
@@ -1574,6 +1626,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginRight: 10,
     alignItems: 'center',
+    overflow: 'hidden',
   },
   metaDataImage: {
     height: DIMENSIONS.window.width / 5,
@@ -1586,5 +1639,9 @@ const styles = StyleSheet.create({
   },
   metaDataDescription: {
     color: COLORS.white,
+  },
+  profileImageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

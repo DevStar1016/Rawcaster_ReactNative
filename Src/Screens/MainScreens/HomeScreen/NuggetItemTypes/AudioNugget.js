@@ -116,6 +116,7 @@ function AudioNugget({
       mediaHeight,
       progress,
       duration,
+      insets.mediaHeight,
     ],
   );
 }

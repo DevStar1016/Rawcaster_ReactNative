@@ -8,7 +8,7 @@ import React from 'react';
 import StyledText from './StyledText';
 import {COLORS} from '../Utilities/Colors';
 import {IconType} from '../Utilities/Icons';
-import SVGIcon from './SVGIcon';
+import SVGIcon, {SVGIconProps} from './SVGIcon';
 import {FONTS} from '../Utilities/Fonts';
 
 export type SubmitButtonProps = {
@@ -35,10 +35,12 @@ export type SubmitButtonProps = {
   paddingVertical?: number;
   paddingHorizontal?: number;
   marginHorizontal?: number;
+  marginRight?: number;
   marginBottom?: number;
   textMarginLeftWhenIcon?: number;
   textMarginRightWhenIcon?: number;
   borderRadius?: number;
+  rightIconProps?: SVGIconProps;
 };
 
 const SubmitButton = ({
@@ -67,8 +69,10 @@ const SubmitButton = ({
   textPaddingVertical = 2,
   paddingHorizontal,
   marginHorizontal,
+  marginRight,
   onLayoutHeight,
   borderRadius = 6,
+  rightIconProps,
 }: SubmitButtonProps) => {
   return (
     <TouchableOpacity
@@ -98,6 +102,7 @@ const SubmitButton = ({
           marginHorizontal,
           marginBottom,
           borderRadius,
+          marginRight,
         },
       ]}
       disabled={isLoading || isDisabled}
@@ -130,6 +135,7 @@ const SubmitButton = ({
               icon={rightIcon}
               height={rightIconSize}
               width={rightIconSize}
+              {...rightIconProps}
             />
           ) : null}
         </>

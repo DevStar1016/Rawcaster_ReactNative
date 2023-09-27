@@ -21,7 +21,7 @@ import MenuContainer from '../../../Modals/MenuContainer';
 
 const MENU_LIST = [
   {id: 1, buttonName: 'Remove Friend'},
-  {id: 2, buttonName: 'Un Follow'},
+  {id: 2, buttonName: 'UnFollow'},
 ];
 
 const BANNER_IMAGE_HEIGHT = 140;
@@ -175,11 +175,13 @@ const ProfileTopSection = ({
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}>
-          {isEnableFansList && (
+          {isEnableFansList ? (
             <FansProfilesContainer
               userId={userId}
               profileSize={PROFILE_SIZE / 2 - 5}
             />
+          ) : (
+            <View />
           )}
           {myProfile?.user_id !== profile?.user_id &&
             getOptionsList().length > 0 && (

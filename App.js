@@ -1,4 +1,4 @@
-import {AppState, LogBox} from 'react-native';
+import {AppState, LogBox, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
@@ -15,7 +15,7 @@ import {
   setSettings,
   setToken,
 } from './Src/Store/Slices/AuthSlice';
-import {useToken} from './Src/Utilities/StoreData';
+import {useInsets, useToken} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
 import RootStack from './Src/Stacks/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -42,6 +42,8 @@ import {
 } from './Src/Services/ApiService';
 import {setUnreadNotificationCount} from './Src/Store/Slices/HomeSlice';
 import {deepLinking} from './Src/Utilities/LinkingConfig';
+import {DIMENSIONS} from './Src/Utilities/Constants';
+import {setNuggetsLoading} from './Src/Store/Slices/NuggetsListSlice';
 
 const Stack = createStackNavigator();
 // var tokenFetchingTimer = undefined;
@@ -49,6 +51,7 @@ const App = () => {
   const [isIntroSeen, setisIntroSeen] = useState(false);
   const dispatch = useDispatch();
   const token = useToken();
+  const insets = useInsets();
   const [isFetchingToken, setisFetchingToken] = useState(true);
   const appState = useRef(AppState.currentState);
 
@@ -145,7 +148,6 @@ const App = () => {
             last_name: htmlDecodeText(profile?.last_name),
             bio_data: htmlDecodeText(profile?.bio_data),
           };
-          console.log(profile, 'PROFILE');
 
           dispatch(setMyProfile(profile));
           dispatch(

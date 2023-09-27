@@ -13,15 +13,22 @@ const CustomStatusBar = () => {
   const {top, bottom, left, right} = useSafeAreaInsets();
 
   useEffect(() => {
-    dispatch(
-      setInsets({
-        ...insets,
-        top: top,
-        bottom: bottom,
-        right: right,
-        left: left,
-      }),
-    );
+    let tempInsets = {
+      ...insets,
+      top: top,
+      bottom: bottom,
+      right: right,
+      left: left,
+    };
+    if (!IS_IOS) {
+      tempInsets = {
+        ...tempInsets,
+        mediaHeight:
+          insets.mediaHeight + (top > 0 ? top : StatusBar.currentHeight),
+      };
+    }
+
+    dispatch(setInsets({...tempInsets}));
 
     return () => {};
   }, []);

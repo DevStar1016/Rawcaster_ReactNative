@@ -200,27 +200,29 @@ const ProfileNameBioContainer = ({
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
           <StyledText
-            style={[styles.nameText, {maxWidth: '55%'}]}
-            normalTextModeTextProps={{numberOfLines: 1}}
+            style={[styles.nameText]}
+            // normalTextModeTextProps={{numberOfLines: 1}}
             onPress={() => {}}>
-            {getSlicedText(profile?.name, 50)}
+            {/* {getSlicedText(profile?.name, 50)} */}
+            {profile?.name}
           </StyledText>
 
-          {getSelectedCategoriesList().toString() ? (
+          {/* {getSelectedCategoriesList().toString() ? (
             <View style={styles.dot} />
           ) : (
             false
-          )}
+          )} */}
           {getSelectedCategoriesList().toString() ? (
             <StyledText
-              style={[styles.nameText, {maxWidth: '40%'}]}
-              normalTextModeTextProps={{numberOfLines: 1}}
+              style={[styles.nameText]}
+              // normalTextModeTextProps={{numberOfLines: 1}}
               onPress={() => {
                 if (getSelectedCategoriesList().toString().length > 15) {
                   setisOpenCategoriesListModal(true);
                 }
               }}>
-              {getSlicedText(getSelectedCategoriesList().toString(), 15)}
+              {getSelectedCategoriesList().toString().replace(/,/g, ', ')}
+              {/* {getSlicedText(getSelectedCategoriesList().toString(), 15)} */}
             </StyledText>
           ) : (
             false
@@ -318,13 +320,14 @@ const styles = StyleSheet.create({
   },
   nameAndCategoryContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    // flexDirection: 'row',
+    // alignItems: 'center',
     paddingVertical: 5,
+    // backgroundColor: 'red',
   },
   nameText: {
     fontFamily: FONTS.DMSans.bold,
-    fontSize: 16,
+    fontSize: 14,
   },
   dot: {
     height: 7,

@@ -16,7 +16,7 @@ import {IconType} from '../Utilities/Icons';
 import {DIMENSIONS} from '../Utilities/Constants';
 
 type MetaDataProp = {
-  image: string;
+  open_graph_image: string;
   title: string;
   description: string;
 };
@@ -68,8 +68,11 @@ const ConfirmationPopup = ({
     }
     return (
       <View style={styles.metaDataContainer}>
-        {metaData?.image && (
-          <Image source={{uri: metaData?.image}} style={styles.metaDataImage} />
+        {metaData?.open_graph_image && (
+          <Image
+            source={{uri: metaData?.open_graph_image}}
+            style={styles.metaDataImage}
+          />
         )}
         <View style={{flex: 1, paddingLeft: 10}}>
           {metaData.title && (

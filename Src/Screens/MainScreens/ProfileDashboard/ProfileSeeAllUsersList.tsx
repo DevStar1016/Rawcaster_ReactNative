@@ -12,7 +12,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
-import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import ProfileWithBadge from '../../../Components/ProfileWithBadge';
 import {
   useOtherConnectionsRequestList,
@@ -365,15 +364,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
               userRefId,
             ]),
           );
-          if (res.data?.friend_request_ids?.length > 0) {
-            let data = {
-              friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile?.name,
-              profile_img: profile?.profile_image,
-              user_id: profile?.user_id,
-            };
-            friendRequestSocket({user_id: user_id, data: data});
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -450,7 +440,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
   };
 
   function getRightIcon(item: any) {
-    if (item.user_id !== profile.user_id) {
+    if (item.user_id !== profile?.user_id) {
       if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
         return 'shield_secondary';
       }
@@ -547,8 +537,8 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         } else {
           if (listType === 'influencers') {
             Alert.alert(
-              'Un Follow!',
-              `Are you sure to un follow ${getSlicedText(
+              'UnFollow!',
+              `Are you sure to unfollow ${getSlicedText(
                 item.display_name,
                 20,
               )}?`,

@@ -15,6 +15,7 @@ import SearchInput from '../../../Components/SearchInput';
 import {
   getAuthCode,
   getFilteredDuplicatesList,
+  getIsEnableFriendRequest,
   htmlDecodeText,
 } from '../../../Utilities/Methods';
 import {
@@ -22,10 +23,11 @@ import {
   sendFriendRequestsService,
 } from '../../../Services/ApiService';
 import UserItem from './UserItem';
-import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {setFollowingUsersList} from '../../../Store/Slices/HomeSlice';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
 import {useNavigation} from '@react-navigation/native';
+import DefaultBackground from '../../../Components/DefaultBackground';
+import Toast from '../../../Components/Toast';
 
 var isMount = true;
 var currentPage = 1;
@@ -114,12 +116,15 @@ const AddNewConnection = () => {
                 follow_count: item.follow_count,
               }));
             dispatch(setFollowingUsersList([...tempFollowingUsersList]));
-
+            // getIsEnableFriendRequest(item.friend_request_status)
+            const tempUsersList = [...decodedUsersList].filter(item =>
+              getIsEnableFriendRequest(item.friend_request_status),
+            );
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
-              setusersList(decodedUsersList);
+              setusersList(tempUsersList);
             } else {
-              setusersList(preList => [...preList, ...decodedUsersList]);
+              setusersList(preList => [...preList, ...tempUsersList]);
             }
           } else if (res.data.status === 0) {
             setusersList([]);
@@ -146,6 +151,7 @@ const AddNewConnection = () => {
         user_id: userId,
         follow_count: followCount,
         user_ref_id: userRefId,
+        isEnableToast: true,
       }),
     );
   };
@@ -175,15 +181,6 @@ const AddNewConnection = () => {
             }
             return tempUserList;
           });
-          if (res.data?.friend_request_ids?.length > 0) {
-            let data = {
-              friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile?.name,
-              profile_img: profile?.profile_image,
-              user_id: profile?.user_id,
-            };
-            friendRequestSocket({user_id: user_id, data: data});
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -259,7 +256,7 @@ const AddNewConnection = () => {
       isLoading={isActionLoading}
       loaderProps={{loaderText: actionLoaderText}}
       isEnableSafeArea={false}
-      isEnableDefaultBackground={isListLoading || usersList.length <= 0}
+      isEnableDefaultBackground={false}
       defaultBackgroundProps={{
         bgColor: COLORS.primaryDark,
         isEnableLoading: isListLoading,
@@ -273,6 +270,18 @@ const AddNewConnection = () => {
       isEnableRLogo={usersList.length <= 0}
       paddingHorizontal={0}
       backgroundColor={COLORS.primaryDark}>
+      <DefaultBackground
+        isEnableRLogo={isListLoading || usersList.length === 0}
+        bgColor={COLORS.primaryDark}
+        isEnableLoading={isListLoading}
+        centerText={
+          isListLoading
+            ? 'Fetching Users List'
+            : usersList.length <= 0
+            ? 'No users found'
+            : ''
+        }
+      />
       <SearchInput
         searchButtonColor={COLORS.secondary}
         marginVertical={10}

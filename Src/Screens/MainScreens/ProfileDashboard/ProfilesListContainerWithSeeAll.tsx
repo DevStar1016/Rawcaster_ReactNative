@@ -30,7 +30,6 @@ import {
 import Toast from '../../../Components/Toast';
 import {Modal} from 'react-native';
 import Loader from '../../../Components/Loader';
-import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import {useDispatch} from 'react-redux';
 import {
   setOtherConnectionsRequestList,
@@ -139,7 +138,7 @@ const ProfilesListContainerWithSeeAll = ({
     }
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('auth_code', getAuthCode(token));
+    formData.append('auth_code', getAuthCode(token ?? ''));
     formData.append('allfriends', 1);
     if (userId) {
       formData.append('user_id', userId);
@@ -277,15 +276,6 @@ const ProfilesListContainerWithSeeAll = ({
               userRefId,
             ]),
           );
-          if (res.data?.friend_request_ids?.length > 0) {
-            let data = {
-              friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile?.name,
-              profile_img: profile?.profile_image,
-              user_id: profile?.user_id,
-            };
-            friendRequestSocket({user_id: userId, data: data});
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -434,7 +424,8 @@ const ProfilesListContainerWithSeeAll = ({
                       }}>
                       <ProfileWithBadge
                         extraMargin={0}
-                        isEnableGradient={false}
+                        isEnableGradient={true}
+                        padding={0}
                         profileSize={PROFILE_SIZE}
                         profileImage={item.profile_img}
                         topRightIconAsButton

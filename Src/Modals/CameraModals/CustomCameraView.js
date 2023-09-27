@@ -12,7 +12,6 @@ import {COLORS} from '../../Utilities/Colors';
 import Loader from '../../Components/Loader';
 import SVGIcon from '../../Components/SVGIcon';
 import {useInsets} from '../../Utilities/StoreData';
-import {IS_IOS} from '../../Utilities/Constants';
 import MediaPreview from './MediaPreview';
 import {getUrlWithFilePrefix} from '../../Utilities/Methods';
 import StyledText from '../../Components/StyledText';
@@ -24,7 +23,7 @@ const MAX_VIDEO_SECONDS = 180;
 const CustomCameraView = ({setModal, onSendMedia}) => {
   const [cameraSetting, setcameraSetting] = useState({
     flashMode: 0, // 0 - off , 1 - on , 2 - auto
-    cameraType: IS_IOS ? 1 : 2, // 1 - back , 2 - front
+    cameraType: 1, // 1 - back , 2 - front
   });
   const [isOpenPreview, setisOpenPreview] = useState(false);
   const camera = useRef(null);
@@ -98,7 +97,9 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
           mediaType: 'image',
         });
         setisOpenPreview(true);
-      } catch (e) {}
+      } catch (e) {
+        console.log(e, 'ERROR');
+      }
     }
   };
 

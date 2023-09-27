@@ -5,11 +5,6 @@ type FriendRequestSocketDataProps = {
   user_id: any;
 };
 
-export type FriendRequestSocketProps = {
-  user_id: any;
-  data: FriendRequestSocketDataProps;
-};
-
 export type groupFunctionalitySocketProps = {
   groupId: any;
   userId: any;

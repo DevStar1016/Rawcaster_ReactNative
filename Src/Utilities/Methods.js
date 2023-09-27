@@ -19,10 +19,13 @@ import {clearUtilityReduxData} from '../Store/Slices/UtilitySlice';
 
 /**
  * Generates an authentication code by hashing the given value with a salt key.
- * @param {string} [value=''] - The value to be hashed.
+ * @param {string | undefined | null} [value = '' | null] - The value to be hashed.
  * @returns {string} The hashed authentication code.
  */
 export const getAuthCode = (value = '') => {
+  if (!value) {
+    return '';
+  }
   return sha1(SALT_KEY + value);
 };
 

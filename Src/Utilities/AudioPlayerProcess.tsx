@@ -8,6 +8,8 @@ import {
 } from 'react-native-audio-recorder-player';
 import RNFetchBlob from 'rn-fetch-blob';
 import {isHavePermissionToRecordAudio} from './Permissions';
+import {Camera} from 'react-native-vision-camera';
+import Toast from '../Components/Toast';
 
 type AudioPlayProps = {
   audioPlayer: any;
@@ -38,8 +40,9 @@ export const handleAudioRecord = async ({
   onLimitReached,
   audioUniqueId = '',
 }: AudioRecordProps) => {
+  const newMicrophonePermission = await Camera.requestMicrophonePermission();
   const isGrantedPermission = await isHavePermissionToRecordAudio();
-  if (isGrantedPermission) {
+  if (isGrantedPermission && newMicrophonePermission === 'authorized') {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
       ios: `rawcaster_recorded_audio${audioUniqueId}.m4a`,
@@ -57,6 +60,7 @@ export const handleAudioRecord = async ({
       const meteringEnabled = false;
       setisPaused(false);
       setisRecording(true);
+
       const result = await audioPlayer?.startRecorder(
         path,
         audioSet,
@@ -78,8 +82,11 @@ export const handleAudioRecord = async ({
         return;
       });
     } catch (e) {
+      console.log(e, 'ERRORRRR');
       setisRecording(false);
     }
+  } else {
+    Toast.fail('Permission Denied');
   }
 };
 

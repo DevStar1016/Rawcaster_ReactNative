@@ -17,8 +17,9 @@ const ImageNugget = ({url, mediaHeight}) => {
         // onLoad={event => {
         //   onLoadComplete(event.nativeEvent);
         // }}
+        alt="Rawcaster Image"
         resizeMode="contain"
-        style={{width: windowWidth, height: windowHeight}}
+        style={{width: '100%', height: '100%'}}
       />
     </View>
   );

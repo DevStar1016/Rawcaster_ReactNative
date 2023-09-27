@@ -120,7 +120,11 @@ const DropDownPicker = ({
       ]}>
       {title && (
         <StyledText
-          style={[{paddingVertical: titlePaddingVertical}, titleStyle]}>
+          style={[
+            {paddingVertical: titlePaddingVertical},
+            isDisabled && {opacity: 0.4},
+            titleStyle,
+          ]}>
           {title}
         </StyledText>
       )}
@@ -160,7 +164,7 @@ const DropDownPicker = ({
           </StyledText>
         </View>
         <TouchableOpacity
-          style={styles.iconContainer}
+          style={[isDisabled && {opacity: 0.4}, styles.iconContainer]}
           activeOpacity={0.7}
           disabled={!isDropDownIconAsButton || isLoadingIcon}
           onPress={onPressIcon}>

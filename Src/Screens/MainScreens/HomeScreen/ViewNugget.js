@@ -29,10 +29,8 @@ const ViewNugget = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append('nugget_id', route.params.id);
-    console.log(formData, 'FORMDATAAA');
     getNuggetDetailService(formData)
       .then(res => {
-        console.log(res.data, 'DATATATA NUGGETEEE');
         if (res.data.status === 1) {
           if (isMount) {
             seterrorText('');

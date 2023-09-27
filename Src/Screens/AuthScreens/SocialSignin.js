@@ -60,6 +60,7 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     formData.append('signin_type', signin_type); // 1 - Email, 2 - Phone
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
+    formData.append('signup_social_ref_id', values.uniqueId);
     formData.append('email_id', values.login_id?.trim());
     if (locationDetails && locationDetails?.geoLocation) {
       formData.append('geo_location', locationDetails?.geoLocation);
@@ -71,6 +72,7 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     socialMediaLoginService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          Toast.success(res.data.msg);
           if (parseInt(res.data.first_time) === 1) {
             dispatch(setIsVisibleInfluencers(true));
           }
@@ -85,7 +87,9 @@ const SocialSignin = ({pushId, isLogin = false}) => {
           });
         }
       })
-      .catch(e => {})
+      .catch(e => {
+        Toast.fail(e.message);
+      })
       .finally(() => {
         setisLoading(false);
       });
@@ -125,6 +129,7 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       const values = {
         login_id: userInfo.user.email,
         name: userInfo.user.name,
+        uniqueId: userInfo.user.id,
       };
       handleSocialSignupAPICall(values, SIGNUP_TYPE.google);
     } catch (error) {
@@ -162,15 +167,18 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       let values = {
         login_id: appleAuthRequestResponse.email,
         name: appleAuthRequestResponse.fullName.givenName,
-        id: appleAuthRequestResponse.user,
+        uniqueId: appleAuthRequestResponse.user,
       };
-      // if (!values.login_id) {
-      //   const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
-      //   values = {...values, login_id: tempToken.email, name: ''};
-      // }
+      if (!values.login_id) {
+        const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
+        values = {...values, login_id: tempToken.email ?? '', name: ''};
+      }
+
       handleSocialSignupAPICall(values, SIGNUP_TYPE.apple);
-      const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
-    } catch (err) {}
+      // const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
+    } catch (err) {
+      console.log(err, 'ERRRRRR');
+    }
   };
 
   /**

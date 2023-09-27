@@ -86,7 +86,7 @@ const MainStack = () => {
         const parsed = queryString.parseUrl(url);
         Linking.openURL(`rawcaster://viewnugget/${decode(parsed.query.id)}`)
           .then(res => {
-            console.log(res, 'LINKING RESPONSEE');
+            console.log(res, 'LINKING RESPONSE');
           })
           .catch(e => {
             console.log(e, 'ERROR   CATCH');

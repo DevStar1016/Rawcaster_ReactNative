@@ -14,6 +14,7 @@ import DropDownPicker from '../../../Components/DropDownPicker';
 import {
   getDisplayEventDate,
   getDisplayEventTime,
+  getFileName,
   getSlicedText,
   getUtcToSystemTime,
   htmlDecodeText,
@@ -59,7 +60,10 @@ const CreateEditEvent = ({route}) => {
   const [selectedValues, setselectedValues] = useState({
     eventVisibilityTypeId: settings?.event_type,
     event_layout_id: 1,
-    melody: 1,
+    melody: {
+      id: 1,
+      type: 1,
+    },
     eventDuration: new Date(
       moment(
         '2021-01-05 ' +
@@ -142,6 +146,7 @@ const CreateEditEvent = ({route}) => {
           let tempSelectedData = {...selectedValues};
           if (res[0].data.status === 1) {
             seteventTypesList(res[0].data.event_types);
+
             tempSelectedData = {
               ...tempSelectedData,
               eventVisibilityTypeId:
@@ -151,12 +156,14 @@ const CreateEditEvent = ({route}) => {
           if (res[1].data.status === 1) {
             seteventMelodies([
               ...res[1].data.melody,
-              {id: 2, title: 'Customize'},
+              {id: 0, title: 'Customize', type: 3},
             ]);
             tempSelectedData = {
               ...tempSelectedData,
-              eventVisibilityTypeId:
-                tempSelectedData.melody ?? res[1].data.melody[0].id,
+              melody: {
+                id: res[1].data.melody[0]?.id,
+                type: res[1].data.melody[0]?.type,
+              },
             };
           }
           setselectedValues(tempSelectedData);
@@ -231,7 +238,7 @@ const CreateEditEvent = ({route}) => {
           text: 'To access this feature you need to become a premium member!',
         }),
       );
-    } else if (selectedValues.melody === 2 && !selectedMelodyFile) {
+    } else if (selectedValues.melody.type === 3 && !selectedMelodyFile) {
       Toast.fail('Upload Melody');
       setmelodyFileError('Melody required');
     } else {
@@ -242,7 +249,8 @@ const CreateEditEvent = ({route}) => {
         event_start_time: moment(values.eventTime).utc().format('HH:mm'),
         event_participants: selectedValues.maxParticipants,
         event_duration: getDisplayDuration(),
-        melodyFile: selectedMelodyFile,
+        melodyFile:
+          selectedValues.melody.type === 3 ? selectedMelodyFile : null,
         ...selectedValues,
       };
 
@@ -291,6 +299,9 @@ const CreateEditEvent = ({route}) => {
               ),
             };
           });
+
+          console.log(res.data.event_detail, 'YUYUYUYU');
+
           setliveEventDate(
             getUtcToSystemTime(res.data.event_detail.start_date_time),
             // utcToUserTimezone(
@@ -298,6 +309,12 @@ const CreateEditEvent = ({route}) => {
             //   settings?.time_zone,
             // ),
           );
+          if (res.data.event_detail?.melodies?.path) {
+            setselectedMelodyFile({
+              name: getFileName(res.data.event_detail.melodies.path),
+              uri: res.data.event_detail.melodies.path,
+            });
+          }
 
           tempData = {
             ...tempData,
@@ -313,7 +330,10 @@ const CreateEditEvent = ({route}) => {
             participant_video: parseInt(
               res.data.event_detail.default_guest_video,
             ),
-            melody: res.data.event_detail.event_melody_id,
+            melody: {
+              id: res.data.event_detail.event_melody_id,
+              type: res.data.event_detail.event_melody_type,
+            },
             event_layout_id: res.data.event_detail.event_layout_id,
             eventDuration: new Date(
               moment('2021-01-05 ' + res.data.event_detail.duration),
@@ -518,7 +538,9 @@ const CreateEditEvent = ({route}) => {
    * @returns The melody object that matches the selected melody ID, or undefined if not found.
    */
   function getMelody() {
-    return [...eventMelodies].find(item => item.id === selectedValues.melody);
+    return [...eventMelodies].find(
+      item => item.type === selectedValues.melody.type,
+    );
   }
 
   /**
@@ -726,12 +748,15 @@ const CreateEditEvent = ({route}) => {
             onSelectItem={item => {
               setselectedValues(preData => ({
                 ...preData,
-                melody: item.id,
+                melody: {
+                  id: item.id,
+                  type: item.type,
+                },
               }));
             }}
           />
         </View>
-        {selectedValues.melody === 2 && (
+        {selectedValues.melody.type === 3 && (
           <View style={styles.uploadButtonContainer}>
             <View>
               <SubmitButton

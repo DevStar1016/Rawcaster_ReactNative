@@ -1,27 +1,9 @@
 import {sendSocketMessage} from './Socket';
 import {SocketEvents} from './SocketEvents';
 import {
-  FriendRequestSocketProps,
   GroupChatEnableDisableProps,
   groupFunctionalitySocketProps,
 } from './SocketTypes';
-
-/**
- * Sends a friend request socket message to the specified user.
- * @param {FriendRequestSocketProps} props - The properties for the friend request socket.
- * @returns None
- */
-export const friendRequestSocket = ({
-  user_id,
-  data,
-}: FriendRequestSocketProps) => {
-  const socketMessage = {
-    event: SocketEvents.friendRequest,
-    receiverId: user_id,
-    data: data,
-  };
-  sendSocketMessage(socketMessage, 'message');
-};
 
 /**
  * Sends a socket message related to group functionality.

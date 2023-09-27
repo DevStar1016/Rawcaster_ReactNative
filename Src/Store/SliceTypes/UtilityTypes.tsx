@@ -3,6 +3,7 @@ type InsetsDataProp = {
   top: number;
   left: number;
   right: number;
+  mediaHeight: number;
 };
 
 type GlobalLoaderProp = {

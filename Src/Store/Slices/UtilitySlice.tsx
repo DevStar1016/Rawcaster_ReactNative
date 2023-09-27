@@ -7,6 +7,7 @@ export const initialState: UtilityDataProp = {
     top: 0,
     left: 0,
     right: 0,
+    mediaHeight: 0,
   },
   locationDetails: null,
   isBottomTabBarAbsolute: false,

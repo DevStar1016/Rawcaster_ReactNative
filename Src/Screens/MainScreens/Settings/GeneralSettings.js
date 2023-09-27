@@ -143,6 +143,7 @@ const GeneralSettings = () => {
     lock_my_connection: settings?.lock_my_connection,
     lock_my_influencer: settings?.lock_my_influencer,
     lock_nugget: settings?.lock_nugget,
+    read_out_accent_id: settings?.read_out_accent_id,
   });
 
   const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
@@ -216,6 +217,8 @@ const GeneralSettings = () => {
     isLogout = false,
     profile_field_name,
     groupid,
+    extraKey,
+    extraValue,
   }) {
     if (isMount) {
       setloaderText('Settings Updating');
@@ -224,6 +227,10 @@ const GeneralSettings = () => {
     const formData = new FormData();
     formData.append('token', token);
     formData.append(otherKeyText ?? keyText, valueText);
+    if (extraKey && extraValue) {
+      formData.append(extraKey, extraValue);
+    }
+
     if (profile_field_name) {
       formData.append('profile_field_name', profile_field_name);
     }
@@ -231,14 +238,18 @@ const GeneralSettings = () => {
       formData.append('groupid', JSON.stringify(groupid));
     }
 
-    console.log(formData, 'FORMDATAAAA');
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          dispatch(
-            setSettings({...settings, [keyText]: reduxData ?? valueText}),
-          );
-          if (keyText === 'read_out_language_id') {
+          let tempSettings = {...settings, [keyText]: reduxData ?? valueText};
+          if (extraKey && extraValue) {
+            tempSettings = {...tempSettings, [extraKey]: extraValue};
+          }
+          dispatch(setSettings({...tempSettings}));
+          if (
+            keyText === 'read_out_language_id' ||
+            keyText === 'read_out_accent_id'
+          ) {
             dispatch(setTranslatedNuggets([]));
           }
           if (isLogout) {
@@ -283,6 +294,19 @@ const GeneralSettings = () => {
     );
   }
 
+  function getReadoutAccentList() {
+    const languageData = [...readoutLanguagesList].find(
+      item => item.id === settingsData.read_out_language_id,
+    );
+    return languageData?.accents ?? [];
+  }
+
+  function getSelectedReadoutAccent() {
+    return getReadoutAccentList().find(
+      item => item.id === settingsData.read_out_accent_id,
+    );
+  }
+
   function getSelectedTimeZone() {
     return {name: settingsData.time_zone};
   }
@@ -307,13 +331,11 @@ const GeneralSettings = () => {
           text: 'Yes',
           onPress: () => {
             if (isMount) {
-              handleChangeSettingsData(
-                0,
-                'account_active_inactive',
-                undefined,
-                undefined,
-                true,
-              );
+              handleChangeSettingsData({
+                valueText: 0,
+                keyText: 'account_active_inactive',
+                isLogout: true,
+              });
             }
           },
         },
@@ -322,13 +344,15 @@ const GeneralSettings = () => {
     );
   }
 
-  function handleChangeSettingsData(
+  function handleChangeSettingsData({
     valueText,
     keyText,
     reduxData = undefined,
     otherKeyText,
     isLogout = false,
-  ) {
+    extraKey,
+    extraValue,
+  }) {
     setsettingsData(preData => {
       if (preData[keyText] !== valueText) {
         updateUsersSettingsAPICall({
@@ -337,12 +361,17 @@ const GeneralSettings = () => {
           reduxData,
           otherKeyText,
           isLogout,
+          extraKey,
+          extraValue,
         });
       }
-      return {
-        ...preData,
-        [keyText]: valueText,
-      };
+
+      let updatedSettings = {...preData, [keyText]: valueText};
+      if (extraKey && extraValue) {
+        updatedSettings = {...updatedSettings, [extraKey]: extraValue};
+      }
+
+      return {...updatedSettings};
     });
   }
 
@@ -409,7 +438,10 @@ const GeneralSettings = () => {
             dataList={DEFAULT_PAGES_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              handleChangeSettingsData(selectedItem.id, 'mobile_default_page');
+              handleChangeSettingsData({
+                valueText: selectedItem.id,
+                keyText: 'mobile_default_page',
+              });
             }}
           />
           {CHOICE_CONTAINERS_LIST.map(item => {
@@ -445,7 +477,10 @@ const GeneralSettings = () => {
                         specificListType: selectedId === 3 ? 1 : 2,
                       });
                     } else {
-                      handleChangeSettingsData(selectedId, item.fieldName);
+                      handleChangeSettingsData({
+                        valueText: selectedId,
+                        keyText: item.fieldName,
+                      });
                     }
                   }
                 }}
@@ -486,7 +521,7 @@ const GeneralSettings = () => {
             }}
           />
 
-          {false && (
+          {/* {false && (
             <DropDownPicker
               title="Preference Language"
               value={getSelectedLanguage()}
@@ -499,17 +534,40 @@ const GeneralSettings = () => {
                 handleChangeSettingsData(selectedItem.id, 'language_id');
               }}
             />
-          )}
+          )} */}
           <DropDownPicker
             title="Readout Language"
             value={getSelectedReadOutLanguage()}
             listTitle=""
+            placeHolderText="Select Language"
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={readoutLanguagesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              handleChangeSettingsData(selectedItem.id, 'read_out_language_id');
+              handleChangeSettingsData({
+                valueText: selectedItem.id,
+                keyText: 'read_out_language_id',
+                extraKey: 'read_out_accent_id',
+                extraValue: selectedItem.accents[0]?.id,
+              });
+            }}
+          />
+          <DropDownPicker
+            title="Readout Accent"
+            value={getSelectedReadoutAccent()}
+            listTitle=""
+            placeHolderText="Select Accent"
+            isDisabled={getReadoutAccentList().length <= 0}
+            titleStyle={styles.titleText}
+            borderColor={COLORS.borderColor}
+            dataList={getReadoutAccentList()}
+            fieldName="accent"
+            onSelectItem={selectedItem => {
+              handleChangeSettingsData({
+                valueText: selectedItem.id,
+                keyText: 'read_out_accent_id',
+              });
             }}
           />
           <DropDownPicker
@@ -522,7 +580,10 @@ const GeneralSettings = () => {
             dataList={timeZonesList}
             fieldName="name"
             onSelectItem={selectedItem => {
-              handleChangeSettingsData(selectedItem.name, 'time_zone');
+              handleChangeSettingsData({
+                valueText: selectedItem.name,
+                keyText: 'time_zone',
+              });
             }}
           />
           <DropDownPicker
@@ -534,12 +595,11 @@ const GeneralSettings = () => {
             dataList={DEFAULT_DATE_FORMAT_LIST}
             fieldName="type"
             onSelectItem={selectedItem => {
-              handleChangeSettingsData(
-                selectedItem.type,
-                'default_date_format',
-                undefined,
-                'date_format',
-              );
+              handleChangeSettingsData({
+                valueText: selectedItem.type,
+                keyText: 'default_date_format',
+                otherKeyText: 'date_format',
+              });
             }}
           />
 
@@ -551,7 +611,10 @@ const GeneralSettings = () => {
               if (selectedId === 0) {
                 onPressInActiveAccount();
               } else {
-                handleChangeSettingsData(selectedId, 'account_active_inactive');
+                handleChangeSettingsData({
+                  valueText: selectedId,
+                  keyText: 'account_active_inactive',
+                });
               }
             }}
           />

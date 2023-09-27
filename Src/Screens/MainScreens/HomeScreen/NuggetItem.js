@@ -4,7 +4,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import NuggetActionsOverlay from './NuggetActionsOverlay';
 import VideoNugget from './NuggetItemTypes/VideoNugget';
 import ImageNugget from './NuggetItemTypes/ImageNugget';
-import {useIsAppForeground} from '../../../Utilities/StoreData';
+import {useInsets, useIsAppForeground} from '../../../Utilities/StoreData';
 import AudioNugget from './NuggetItemTypes/AudioNugget';
 import {
   useNuggetItemActions,
@@ -32,6 +32,7 @@ function NuggetItem({
     isReadMuted,
     // isFocused,
   } = useNuggetParentActions();
+  const insets = useInsets();
 
   const isFocused = useIsFocused();
 
@@ -190,6 +191,7 @@ function NuggetItem({
       duration,
       progress,
       isReadMuted,
+      insets.mediaHeight,
     ],
   );
 }

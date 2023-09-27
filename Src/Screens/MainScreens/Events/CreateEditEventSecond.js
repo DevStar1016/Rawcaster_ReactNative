@@ -59,7 +59,7 @@ const CreateEditEventSecond = ({route}) => {
     formData.append('event_participants', submitedData.event_participants);
     formData.append('event_duration', submitedData.event_duration);
     formData.append('event_layout', submitedData.event_layout_id);
-    formData.append('event_melody_id', submitedData.melody);
+    formData.append('event_melody_id', submitedData.melody.id);
     formData.append('event_host_audio', submitedData.host_audio);
     formData.append('event_host_video', submitedData.host_video);
     formData.append('event_guest_audio', submitedData.participant_audio);
@@ -68,7 +68,8 @@ const CreateEditEventSecond = ({route}) => {
     formData.append('join_before_host', submitedData.join_before_host);
     formData.append('sound_notify', submitedData.sound_notify);
     formData.append('user_screenshare', submitedData.user_screenshare);
-    if (submitedData.melodyFile) {
+    console.log(submitedData.melodyFile, 'HGHGHG');
+    if (submitedData.melodyFile && submitedData.melodyFile.type) {
       formData.append('event_melody', submitedData.melodyFile);
     }
     if (bannerImage && bannerImage.type) {

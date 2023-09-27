@@ -22,7 +22,6 @@ import {
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import StyledText from '../../../Components/StyledText';
-import {friendRequestSocket} from '../../../Services/Socket/SocketRequests';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {useNavigation} from '@react-navigation/native';
 import {becomeFan} from '../../../Store/ThunkAPIServices';
@@ -171,15 +170,6 @@ const ProfileSearch = () => {
             }
             return tempProfileList;
           });
-          if (res.data?.friend_request_ids?.length > 0) {
-            let data = {
-              friend_request_id: res.data.friend_request_ids[0],
-              display_name: profile?.name,
-              profile_img: profile?.profile_image,
-              user_id: profile?.user_id,
-            };
-            friendRequestSocket({user_id: user_id, data: data});
-          }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

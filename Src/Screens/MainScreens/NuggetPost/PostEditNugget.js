@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   Keyboard,
   Modal,
@@ -11,9 +12,9 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Video from 'react-native-video';
-
+import lodash from 'lodash';
 import HOCView from '../../../Components/HOCView';
 import {
   useConnectionsList,
@@ -69,6 +70,7 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 }
 
 var isMount = true;
+var metaDataFetchingTimer = undefined;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
 const PostEditNugget = ({route}) => {
   const {nugget, preContent} = route.params ?? {};
@@ -84,6 +86,7 @@ const PostEditNugget = ({route}) => {
   const [topContainerHeight, settopContainerHeight] = useState(0);
   const [mediaListHeight, setmediaListHeight] = useState(0);
   const [buttonHeight, setbuttonHeight] = useState(0);
+  const [isFetchingMetaData, setisFetchingMetaData] = useState(false);
   const [metaDataContainerHeight, setmetaDataContainerHeight] = useState(0);
   const [isFocusedTextInput, setisFocusedTextInput] = useState(false);
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
@@ -102,7 +105,7 @@ const PostEditNugget = ({route}) => {
   );
 
   const [urlMetaData, seturlMetaData] = useState(
-    nugget?.metadata ? JSON.parse(nugget?.metadata) : null,
+    nugget?.metadata ? getMetaDataArrayJSON() : null,
   );
   const [oldUrl, setoldUrl] = useState(null);
 
@@ -122,7 +125,7 @@ const PostEditNugget = ({route}) => {
     text: '',
   });
   const [typedText, settypedText] = useState(
-    preContent ?? (nugget ? nugget.content ?? '' : ''),
+    preContent ? preContent : nugget && nugget.content ? nugget.content : '',
   );
 
   const [question, setquestion] = useState('');
@@ -146,6 +149,9 @@ const PostEditNugget = ({route}) => {
       if (controller.current) {
         controller.current.abort();
       }
+      if (metaDataFetchingTimer) {
+        clearTimeout(metaDataFetchingTimer);
+      }
     };
   }, []);
 
@@ -154,7 +160,6 @@ const PostEditNugget = ({route}) => {
       const url = getLinkInfo(typedText);
       if (url) {
         if (oldUrl !== url) {
-          console.log(url, 'URLLLL');
           if (isMount) {
             setoldUrl(url);
           }
@@ -171,13 +176,6 @@ const PostEditNugget = ({route}) => {
       }
     }
   }, [typedText]);
-
-  useEffect(() => {
-    if (urlMetaData) {
-    }
-    if (selectedMediaList && selectedMediaList.length) {
-    }
-  }, [urlMetaData, selectedMediaList]);
 
   useEffect(() => {
     if (nugget) {
@@ -200,7 +198,49 @@ const PostEditNugget = ({route}) => {
     }
   }, []);
 
+  function getMetaDataArrayJSON() {
+    let metaData = JSON.parse(nugget?.metadata);
+    const isArrayData = Array.isArray(metaData);
+    if (!isArrayData) {
+      metaData = [{...metaData}];
+    }
+    return metaData;
+  }
+
+  function handleMetaDataFetchingTimer() {
+    if (metaDataFetchingTimer) {
+      clearTimeout(metaDataFetchingTimer);
+    }
+    metaDataFetchingTimer = setTimeout(() => {
+      Alert.alert(
+        'Fetching URL Details!',
+        'This is taking time, do you want to wait?',
+        [
+          {
+            text: 'No',
+            onPress: () => {
+              if (controller.current) {
+                controller.current.abort();
+              }
+            },
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: () => {},
+          },
+        ],
+        {cancelable: false},
+      );
+      clearTimeout(metaDataFetchingTimer);
+    }, 6000);
+  }
+
   const getUrlMetaDataAPICall = url => {
+    if (isMount) {
+      setisFetchingMetaData(true);
+    }
+    handleMetaDataFetchingTimer();
     if (controller.current) {
       controller.current.abort();
     }
@@ -210,10 +250,14 @@ const PostEditNugget = ({route}) => {
     formData.append('url', url);
     getUrlMetaDataService(formData, controller.current.signal)
       .then(res => {
-        console.log(res.data.data, 'URL DATAAA');
         if (res.data.status === 1) {
           if (isMount) {
-            seturlMetaData(res.data.data);
+            seturlMetaData(preList => {
+              if (preList) {
+                return [...preList, {...res.data.data[0]}];
+              }
+              return [...res.data.data];
+            });
           }
         } else if (res.data.status === 0) {
           if (isMount) {
@@ -224,7 +268,14 @@ const PostEditNugget = ({route}) => {
       .catch(e => {
         console.log(e, 'ERROR URL');
       })
-      .finally(() => {});
+      .finally(() => {
+        if (isMount) {
+          setisFetchingMetaData(false);
+        }
+        if (metaDataFetchingTimer) {
+          clearTimeout(metaDataFetchingTimer);
+        }
+      });
   };
 
   /**
@@ -291,14 +342,12 @@ const PostEditNugget = ({route}) => {
         selectedMediaList.map(item => {
           formData.append('nuggets_media', item);
         });
-      } else if (urlMetaData) {
-        const tempMetaData = {
-          ...urlMetaData,
-          image: urlMetaData.open_graph_image,
-        };
-        formData.append('metadata', JSON.stringify(tempMetaData));
+      }
+      if (urlMetaData) {
+        formData.append('metadata', JSON.stringify(urlMetaData));
       }
     }
+
     dispatch(addNugget({navigation, formData}));
     // stopLoader();
     // addNuggetsService(formData)
@@ -367,12 +416,9 @@ const PostEditNugget = ({route}) => {
       tempSelectdeMediaList.map(item => {
         formData.append('nuggets_media', item);
       });
-    } else if (urlMetaData) {
-      const tempMetaData = {
-        ...urlMetaData,
-        image: urlMetaData.open_graph_image,
-      };
-      formData.append('metadata', JSON.stringify(tempMetaData));
+    }
+    if (urlMetaData) {
+      formData.append('metadata', JSON.stringify(urlMetaData));
     }
     const tempRemovedMediaList = [...nugget.media_list].filter(
       item =>
@@ -512,7 +558,11 @@ const PostEditNugget = ({route}) => {
             }
           });
       })
-      .catch(e => {});
+      .catch(e => {
+        if (e?.message?.includes('permission')) {
+          Toast.fail('Permission denied');
+        }
+      });
   }
 
   /**
@@ -681,7 +731,9 @@ const PostEditNugget = ({route}) => {
         ? false
         : true;
     }
-    return !typedText.trim() && selectedMediaList.length <= 0;
+    return (
+      isFetchingMetaData || (!typedText.trim() && selectedMediaList.length <= 0)
+    );
   }
 
   /**
@@ -759,6 +811,28 @@ const PostEditNugget = ({route}) => {
     );
   }
 
+  const handlePost = () => {
+    if (!isDisabledPostButton()) {
+      if (
+        (selectedShareType.id === 3 || selectedShareType.id === 4) &&
+        shareConnectionsGroupsIdsList.length <= 0
+      ) {
+        Toast.fail(
+          selectedShareType.id === 3 ? 'Select groups' : 'Select connections',
+        );
+        setisOpenSelectionModal(true);
+        return;
+      }
+      if (nugget) {
+        handleEditNugget();
+      } else {
+        handlePostNuggets();
+      }
+    }
+  };
+
+  const onPost = lodash.debounce(handlePost, 400);
+
   /**
    * Renders a selected nugget item with the given item and index.
    * @param {Object} item - The selected nugget item to render.
@@ -811,7 +885,12 @@ const PostEditNugget = ({route}) => {
         loaderText: loadingData.text,
       }}
       keyboardAwareContentContainerStyle={{flexGrow: 1}}
-      isEnableKeyboardAware={isPollClicked}
+      isEnableKeyboardAware={false}
+      // keyBoardAwareScrollViewProps={{
+      //   nestedScrollEnabled: true,
+      //   keyboardShouldPersistTaps: 'handled',
+      //   keyboardDismissMode: 'on-drag',
+      // }}
       paddingHorizontal={5}
       backHeaderProps={{
         bgColor: COLORS.transparent,
@@ -1043,7 +1122,8 @@ const PostEditNugget = ({route}) => {
                 />
               </View>
             ) : (
-              urlMetaData && (
+              urlMetaData &&
+              urlMetaData.length > 0 && (
                 <TouchableOpacity
                   activeOpacity={1}
                   onLayout={e => {
@@ -1068,66 +1148,66 @@ const PostEditNugget = ({route}) => {
                     buttonSize={25}
                     icon="close"
                   />
-                  {urlMetaData.title && (
-                    <StyledText
-                      style={{
-                        color: COLORS.white,
-                        fontFamily: FONTS.DMSans.bold,
-                      }}
-                      normalTextModeTextProps={{numberOfLines: 1}}>
-                      {urlMetaData.title}
-                    </StyledText>
-                  )}
-                  {urlMetaData.open_graph_image && (
+                  {urlMetaData[urlMetaData.length - 1].open_graph_image && (
                     <Image
-                      source={{uri: urlMetaData.open_graph_image}}
+                      source={{
+                        uri: urlMetaData[urlMetaData.length - 1]
+                          .open_graph_image,
+                      }}
                       style={{
-                        width: (DIMENSIONS.screen.width - 42) / 2,
-                        height: (DIMENSIONS.screen.width - 42) / 2,
+                        width: (DIMENSIONS.screen.width - 42) / 5,
+                        height: (DIMENSIONS.screen.width - 42) / 5,
                         marginVertical: 10,
                       }}
                     />
                   )}
-                  {urlMetaData.description && (
-                    <StyledText
-                      style={{
-                        color: COLORS.white,
-                      }}
-                      normalTextModeTextProps={{numberOfLines: 2}}>
-                      {urlMetaData.description}
-                    </StyledText>
-                  )}
+                  <View style={{flex: 1, paddingLeft: 15}}>
+                    {urlMetaData[urlMetaData.length - 1].title && (
+                      <StyledText
+                        style={{
+                          color: COLORS.white,
+                          fontFamily: FONTS.DMSans.bold,
+                        }}
+                        normalTextModeTextProps={{numberOfLines: 1}}>
+                        {urlMetaData[urlMetaData.length - 1].title}
+                      </StyledText>
+                    )}
+                    {urlMetaData[urlMetaData.length - 1].description && (
+                      <StyledText
+                        style={{
+                          color: COLORS.white,
+                        }}
+                        normalTextModeTextProps={{numberOfLines: 2}}>
+                        {urlMetaData[urlMetaData.length - 1].description}
+                      </StyledText>
+                    )}
+                  </View>
                 </TouchableOpacity>
               )
             ))}
 
           <SubmitButton
             buttonText={
-              isPollClicked ? 'Post Poll' : `${nugget ? 'Edit' : 'Post'} Nugget`
+              isPollClicked
+                ? 'Post Poll'
+                : isFetchingMetaData
+                ? 'Fetching URL Details'
+                : `${nugget ? 'Edit' : 'Post'} Nugget`
             }
             onLayoutHeight={setbuttonHeight}
             isDisabled={isDisabledPostButton()}
             disabledColor={COLORS.dimColor}
-            onPress={() => {
-              if (!isDisabledPostButton()) {
-                if (
-                  (selectedShareType.id === 3 || selectedShareType.id === 4) &&
-                  shareConnectionsGroupsIdsList.length <= 0
-                ) {
-                  Toast.fail(
-                    selectedShareType.id === 3
-                      ? 'Select groups'
-                      : 'Select connections',
-                  );
-                  setisOpenSelectionModal(true);
-                  return;
+            onPress={onPost}
+            rightIcon={isFetchingMetaData && 'close_rounded_white'}
+            rightIconSize={23}
+            rightIconProps={{
+              isButton: true,
+              marginLeft: 5,
+              onPress: () => {
+                if (controller.current) {
+                  controller.current.abort();
                 }
-                if (nugget) {
-                  handleEditNugget();
-                } else {
-                  handlePostNuggets();
-                }
-              }
+              },
             }}
           />
         </View>
@@ -1341,11 +1421,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   textInput: {
+    flex: 1,
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.white,
     fontSize: 17,
     width: '88%',
-    height: '100%',
+    // height: '100%',
   },
   emojiIconContainer: {
     alignItems: 'flex-end',
@@ -1431,5 +1512,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     backgroundColor: 'rgba(255,255,255,0.3)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });

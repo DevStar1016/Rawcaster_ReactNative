@@ -74,7 +74,7 @@ const EditProfile = ({route}) => {
     displayName: yup
       .string()
       .min(2, 'Enter Valid Display name')
-      .max(50, 'Display name is too long')
+      .max(30, 'Display name is too long')
       .required('Required'),
     sex: yup.object().nullable().required('Required'),
     gender: yup.string().max(20, 'Maximum 20 characters allowed'),
@@ -346,6 +346,7 @@ const EditProfile = ({route}) => {
           value={values.firstName}
           onChangeText={handleChange('firstName')}
           titlePaddingVertical={3}
+          maxLength={20}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your first name'}
         />
@@ -355,6 +356,7 @@ const EditProfile = ({route}) => {
           value={values.lastName}
           onChangeText={handleChange('lastName')}
           titlePaddingVertical={3}
+          maxLength={20}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your last name'}
         />
@@ -364,6 +366,7 @@ const EditProfile = ({route}) => {
           value={values.displayName}
           onChangeText={handleChange('displayName')}
           titlePaddingVertical={3}
+          maxLength={30}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your display name'}
         />

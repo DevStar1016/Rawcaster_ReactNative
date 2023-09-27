@@ -170,7 +170,9 @@ const ResetPasswordOTP = ({route}) => {
             placeHolder="Enter your password"
             title="Password"
             onChangeText={handleChange('password')}
-            errorText={errors.password ? errors.password : ''}
+            errorText={
+              touched.password && errors.password ? errors.password : ''
+            }
             value={values.password}
             isSecure
           />
@@ -179,7 +181,11 @@ const ResetPasswordOTP = ({route}) => {
             placeHolder="Enter your password"
             title="Re-Enter your password"
             onChangeText={handleChange('confirm_password')}
-            errorText={errors.confirm_password ? errors.confirm_password : ''}
+            errorText={
+              touched.confirm_password && errors.confirm_password
+                ? errors.confirm_password
+                : ''
+            }
             value={values.confirm_password}
             isSecure
             isEnablePasswordConditionText

@@ -112,6 +112,7 @@ function VideoNugget({
       mediaHeight,
       progress,
       duration,
+      insets.mediaHeight,
     ],
   );
 }

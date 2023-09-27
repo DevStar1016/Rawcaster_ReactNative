@@ -50,6 +50,7 @@ import {
   resetFollowingUsersList,
   setFollowingUsersList,
 } from '../../../Store/Slices/HomeSlice';
+import {DIMENSIONS} from '../../../Utilities/Constants';
 
 var currentPage = 1;
 const DashboardWithCategory = ({route}) => {
@@ -148,10 +149,12 @@ const DashboardWithCategory = ({route}) => {
   useEffect(() => {
     if (getNuggetsList() && getNuggetsList().length > 0 && !isNuggetsLoading) {
       if (token) {
-        setviewableItem({
-          nugget_id: getNuggetsList()[0].nugget_id || 0,
-          viewed: getNuggetsList()[0].viewed,
-        });
+        if (setviewableItem) {
+          setviewableItem({
+            nugget_id: getNuggetsList()[0].nugget_id || 0,
+            viewed: getNuggetsList()[0].viewed,
+          });
+        }
       } else {
         setviewableItemBeforLogin({
           nugget_id: getNuggetsList()[0].nugget_id || 0,
@@ -454,7 +457,7 @@ const DashboardWithCategory = ({route}) => {
       offset: insets.mediaHeight * index,
       index,
     }),
-    [],
+    [insets.mediaHeight],
   );
 
   const renderNuggetItem = useCallback(renderItem, [
@@ -465,6 +468,7 @@ const DashboardWithCategory = ({route}) => {
     viewableItem,
     viewableItemBeforLogin,
     getHeaderHeight(),
+    insets.mediaHeight,
   ]);
 
   const nuggetActions = {
@@ -544,7 +548,7 @@ const DashboardWithCategory = ({route}) => {
             <GradientButton
               icon="app_logo_white"
               rightIcon="right_arrow_white"
-              buttonText="Log in/Sign up to explore Rawcaster"
+              buttonText="Login/Sign up to explore Rawcaster"
               marginHorizontal={15}
               onPress={() => {
                 navigation.navigate('Login');
