@@ -16,6 +16,7 @@ import {
   useInsets,
   useIsNuggetsLoading,
   useNuggetType,
+  useNuggetsErrorMessage,
   useNuggetsList,
   useNuggetsListTotalPages,
   useProfile,
@@ -42,6 +43,7 @@ import {
 import {getListNuggets} from '../../../Store/ThunkAPIServices';
 import {
   resetNuggetsTotalPages,
+  setNuggetsErrorMessage,
   setNuggetsList,
   setNuggetsLoading,
 } from '../../../Store/Slices/NuggetsListSlice';
@@ -75,6 +77,7 @@ const DashboardWithCategory = ({route}) => {
   } = useDashboardTopTabCategories() ?? {};
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
+  const nuggetsErrorMessage = useNuggetsErrorMessage(categoryName ?? 'forYou');
   const nuggetsList = useNuggetsList(categoryName ?? 'forYou');
   const totalPages = useNuggetsListTotalPages(categoryName ?? 'forYou');
   const token = useToken();
@@ -204,6 +207,7 @@ const DashboardWithCategory = ({route}) => {
       dispatch(resetFollowingUsersList([]));
       dispatch(resetNuggetsTotalPages(categoryName));
       dispatch(setNuggetsLoading({categoryName, status: true}));
+      dispatch(setNuggetsErrorMessage({categoryName, message: ''}));
       dispatch(
         setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])),
       );
@@ -427,6 +431,7 @@ const DashboardWithCategory = ({route}) => {
     dispatch(resetFollowingUsersList([]));
     dispatch(resetNuggetsTotalPages(categoryName));
     dispatch(setNuggetsLoading({categoryName, status: true}));
+    dispatch(setNuggetsErrorMessage({categoryName, message: ''}));
     dispatch(setNuggetsList(getNuggetsReduxStoreDataFormate(categoryName, [])));
     if (token) {
       if (resetViewabilityItem) {
@@ -527,7 +532,8 @@ const DashboardWithCategory = ({route}) => {
           centerText={
             getNuggetsList() && getNuggetsList().length > 0
               ? 'Loading...'
-              : 'No data found'
+              : nuggetsErrorMessage ?? `No Result found`
+            // : `You have not followed any influencer to display their nuggets`
           }
           isEnableLoading={getNuggetsList() && getNuggetsList().length > 0}
         />

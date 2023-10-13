@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
 import StyledText from '../../../../Components/StyledText';
 import {COLORS} from '../../../../Utilities/Colors';
@@ -15,154 +15,64 @@ import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import LoadingDots from '../../../../Components/LoadingDots';
 import MediaProgressSlider from '../../../../Components/MediaProgressSlider';
 import AppLogoBgWhite from '../../../../Assets/Png/app_logo_bg_white.png';
+import Toast from '../../../../Components/Toast';
 
-var isMount = true;
 const AIChatItem = ({
   item,
   audioPlayerRef,
-  playingChatId,
-  setplayingChatId,
-  readMessageLoadingIdsList,
-  setreadMessageLoading,
-  audioList,
-  setaudioUrl,
+  readoutChatData,
+  handlePlayLocalAudio,
+  handleReadoutChat,
+  handlePlayAudio,
+  handleTranslate,
+  handleSeeOriginal,
+  translationData,
+  handleStopAudio,
   onShareContent,
   progress,
-  setprogress,
-  setisDisableAudioProcess,
+  isMount,
   isEnableShare = true,
 }) => {
   const token = useToken();
   const profile = useProfile();
-  useEffect(() => {
-    isMount = true;
-    return () => {
-      isMount = false;
-      handleStopAudio();
-    };
-  }, []);
+  const [isLoadingTranslate, setisLoadingTranslate] = useState(false);
+  const [translatedText, settranslatedText] = useState('');
 
   /**
    * Handles the response from the AI service for reading text to audio.
    * @param {string} msg - The message to be converted to audio.
-   * @param {string} id - The ID of the message.
    * @returns None
    */
-  function handleReadAIResponse(msg, id) {
-    if (isMount) {
-      setreadMessageLoading(id, true);
-    }
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('message', msg);
-    textToAudioService(formData)
-      .then(res => {
-        if (res.data.status === 1) {
-          if (isMount) {
-            setaudioUrl(id, res.data.url);
-            handlePlayAudio(res.data.url, id);
-          }
-        } else if (res.data.status === 0) {
-          if (isMount) {
-            setreadMessageLoading(id, false);
-          }
-        }
-      })
-      .catch(e => {
-        if (isMount) {
-          setreadMessageLoading(id, false);
-        }
-      });
-  }
+  // const handleReadAIResponse = msg => {
+  //   if (isMount) {
+  //     setisLoadingTranslate(true);
+  //   }
+  //   const formData = new FormData();
+  //   formData.append('token', token);
+  //   formData.append('message', msg);
+  //   formData.append('translation_type', 2);
 
-  /**
-   * Handles playing an audio file.
-   * @param {string} url - The URL of the audio file to play.
-   * @param {string} id - The ID of the audio file.
-   * @returns None
-   */
-  const handlePlayAudio = async (url, id) => {
-    handleStopAudio();
-
-    try {
-      if (isMount && !isLoadingRead(id)) {
-        setreadMessageLoading(id, true);
-      }
-      await audioPlayerRef.current?.startPlayer(url);
-
-      audioPlayerRef.current?.addPlayBackListener(e => {
-        if (Math.floor(e.currentPosition / 1000) >= 0) {
-          setprogress(Math.floor(e.currentPosition / 1000));
-        }
-
-        if (Math.floor(e.currentPosition) === 0) {
-          if (isMount) {
-            setisDisableAudioProcess(true);
-
-            setreadMessageLoading(id, false);
-            setplayingChatId(id);
-          }
-        } else if (e.currentPosition >= e.duration) {
-          if (isMount) {
-            setisDisableAudioProcess(false);
-          }
-          handleStopAudio();
-        }
-        return;
-      });
-    } catch (e) {
-      if (isMount) {
-        setreadMessageLoading(id, false);
-        setplayingChatId(null);
-      }
-    }
-  };
-
-  /**
-   * Handles stopping the audio playback.
-   * Stops the audio player, removes the playback listener, and resets the progress.
-   * If an error occurs during the process, it is caught and ignored.
-   * Finally, it sets the playing chat ID to null and enables audio processing.
-   * @returns None
-   */
-  const handleStopAudio = () => {
-    try {
-      audioPlayerRef.current?.stopPlayer();
-      audioPlayerRef.current?.removePlayBackListener();
-      if (isMount) {
-        setprogress(0);
-      }
-    } catch (e) {
-    } finally {
-      if (isMount) {
-        setplayingChatId(null);
-        setisDisableAudioProcess(false);
-      }
-    }
-  };
-
-  /**
-   * Checks if the given ID is included in the list of loading IDs for read messages.
-   * @param {any} id - The ID to check.
-   * @returns {boolean} - True if the ID is included in the list, false otherwise.
-   */
-  const isLoadingRead = id => {
-    return readMessageLoadingIdsList?.includes(id);
-  };
-
-  /**
-   * Retrieves the URL of an audio file based on its ID.
-   * @param {string} id - The ID of the audio file.
-   * @returns {string | null} The URL of the audio file, or null if the ID is not found.
-   */
-  const getAudioUrl = id => {
-    const tempAudioList = [...audioList];
-    const tempAudio = tempAudioList.find(item => item.id === id);
-    if (tempAudio) {
-      return tempAudio.url;
-    }
-    return null;
-  };
+  //   textToAudioService(formData)
+  //     .then(res => {
+  //       if (res.data.status === 1) {
+  //         if (isMount) {
+  //           setisLoadingTranslate(false);
+  //           settranslatedText(res.data.translation);
+  //         }
+  //       } else if (res.data.status === 0) {
+  //         Toast.fail(res.data.msg);
+  //         if (isMount) {
+  //           setisLoadingTranslate(false);
+  //         }
+  //       }
+  //     })
+  //     .catch(e => {
+  //       Toast.fail(e.message);
+  //       if (isMount) {
+  //         setisLoadingTranslate(false);
+  //       }
+  //     });
+  // };
 
   return (
     <View>
@@ -206,21 +116,32 @@ const AIChatItem = ({
                   isVisibleStop
                   isEnableDurationFloor={false}
                   onPlayPause={() => {
-                    if (item.id !== playingChatId) {
-                      handlePlayAudio(item.audioUrl, item.id);
-                    } else {
+                    if (
+                      readoutChatData?.id === item.id &&
+                      readoutChatData?.isPlaying
+                    ) {
                       handleStopAudio();
+                    } else {
+                      handlePlayLocalAudio(item.audioUrl, item.id);
                     }
                   }}
                   seekUpdate={value => {
-                    if (item.id === playingChatId) {
-                      try {
-                        audioPlayerRef?.current?.seekToPlayer(value * 1000);
-                      } catch (e) {}
-                    }
+                    try {
+                      audioPlayerRef?.current?.seekToPlayer(value * 1000);
+                    } catch (e) {}
                   }}
-                  progress={item.id === playingChatId ? progress : 0}
-                  isPaused={item.id !== playingChatId}
+                  progress={
+                    readoutChatData?.id === item.id &&
+                    readoutChatData?.isPlaying
+                      ? progress
+                      : 0
+                  }
+                  isPaused={
+                    !(
+                      readoutChatData?.id === item.id &&
+                      readoutChatData?.isPlaying
+                    )
+                  }
                   duration={item.duration ?? 0}
                 />
               </View>
@@ -250,7 +171,9 @@ const AIChatItem = ({
               style={{
                 color: COLORS.white,
               }}>
-              {item.msgQuery || item.msg}
+              {translationData.id === item.id && translationData.text
+                ? translationData.text
+                : item.msgQuery || item.msg}
             </StyledText>
           )}
           <StyledText
@@ -276,20 +199,29 @@ const AIChatItem = ({
         <View style={styles.itemActionButtonsContainer}>
           <TouchableOpacity
             activeOpacity={0.7}
-            disabled={isLoadingRead(item.id)}
+            disabled={
+              readoutChatData?.id === item.id && readoutChatData?.isLoading
+            }
             style={styles.button}
             onPress={() => {
-              if (getAudioUrl(item.id)) {
-                if (item.id === playingChatId) {
-                  handleStopAudio();
-                } else {
-                  handlePlayAudio(getAudioUrl(item.id), item.id);
-                }
+              if (
+                readoutChatData?.id === item.id &&
+                readoutChatData?.isPlaying
+              ) {
+                handleStopAudio();
               } else {
-                handleReadAIResponse(item.msgQuery || item.msg, item.id);
+                if (
+                  readoutChatData?.id === item.id &&
+                  !readoutChatData?.isLoading &&
+                  readoutChatData?.url
+                ) {
+                  handlePlayAudio(readoutChatData?.url);
+                } else {
+                  handleReadoutChat(item.msgQuery || item.msg, item.id);
+                }
               }
             }}>
-            {isLoadingRead(item.id) ? (
+            {readoutChatData?.id === item.id && readoutChatData?.isLoading ? (
               <View style={{flexDirection: 'row'}}>
                 <LoadingDots size={6} bounceHeight={5} dots={3} />
                 <StyledText
@@ -301,7 +233,8 @@ const AIChatItem = ({
               <>
                 <SVGIcon
                   icon={
-                    item.id === playingChatId
+                    readoutChatData?.id === item.id &&
+                    readoutChatData?.isPlaying
                       ? 'mic_fill_secondary'
                       : 'mic_fill_white'
                   }
@@ -314,12 +247,15 @@ const AIChatItem = ({
                     styles.buttonText,
                     {
                       color:
-                        item.id === playingChatId
+                        readoutChatData?.id === item.id &&
+                        readoutChatData?.isPlaying
                           ? COLORS.secondary
                           : COLORS.white,
                     },
                   ]}>
-                  {item.id === playingChatId ? 'Stop' : 'Read Out'}
+                  {readoutChatData?.id === item.id && readoutChatData?.isPlaying
+                    ? 'Stop'
+                    : 'Read Out'}
                 </StyledText>
               </>
             )}
@@ -331,7 +267,7 @@ const AIChatItem = ({
                 height: '100%',
                 backgroundColor: COLORS.white,
                 opacity: 0.3,
-                marginHorizontal: 20,
+                marginHorizontal: 10,
               }}
             />
           )}
@@ -344,6 +280,46 @@ const AIChatItem = ({
               }}>
               <SVGIcon icon={'share'} width={18} height={18} marginRight={5} />
               <StyledText style={styles.buttonText}>Share</StyledText>
+            </TouchableOpacity>
+          )}
+
+          <View
+            style={{
+              width: 1,
+              height: '100%',
+              backgroundColor: COLORS.white,
+              opacity: 0.3,
+              marginHorizontal: 10,
+            }}
+          />
+          {translationData.id === item.id && translationData.isLoading ? (
+            <LoadingDots size={6} bounceHeight={4} dots={3} borderRadius={3} />
+          ) : (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.button}
+              onPress={() => {
+                if (translationData.id === item.id && translationData.text) {
+                  handleSeeOriginal();
+                } else {
+                  handleTranslate(item.msgQuery || item.msg, item.id);
+                }
+              }}>
+              <SVGIcon
+                icon={
+                  translationData.id === item.id && translationData.text
+                    ? 'translation_secondary'
+                    : 'translation_white'
+                }
+                width={18}
+                height={18}
+                marginRight={5}
+              />
+              <StyledText style={styles.buttonText}>
+                {translationData.id === item.id && translationData.text
+                  ? 'Original'
+                  : 'Translate'}
+              </StyledText>
             </TouchableOpacity>
           )}
         </View>

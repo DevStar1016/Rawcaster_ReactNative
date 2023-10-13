@@ -12,13 +12,23 @@ import SVGIcon from '../../../../Components/SVGIcon';
 import {COLORS} from '../../../../Utilities/Colors';
 import {FONTS} from '../../../../Utilities/Fonts';
 import {useProfile, useToken} from '../../../../Utilities/StoreData';
-import {likeAndUnlikeNuggetCommentService} from '../../../../Services/ApiService';
+import {
+  likeAndUnlikeNuggetCommentService,
+  nuggetContentAudioService,
+} from '../../../../Services/ApiService';
 import MenuPopup from '../../../../Components/MenuPopup';
+import LoadingDots from '../../../../Components/LoadingDots';
+import Toast from '../../../../Components/Toast';
 
+var controller = undefined;
 const CommentItem = ({
   item,
   replyData,
   onPressReply,
+  readoutCommentData,
+  handleReadoutComment,
+  handlePlayAudio,
+  handleStopAudio,
   isEnableReply = true,
   onPressEdit,
   onDeleteComment,
@@ -27,6 +37,8 @@ const CommentItem = ({
     liked: item.liked,
     like_count: item.like_count,
   });
+  const [translatedText, settranslatedText] = useState(null);
+  const [isLoadingTranslation, setisLoadingTranslation] = useState(false);
   const token = useToken();
 
   const profile = useProfile();
@@ -59,6 +71,30 @@ const CommentItem = ({
     lodash.debounce(handleLikeComment, 300),
     [],
   );
+
+  const handleTranslateComment = () => {
+    setisLoadingTranslation(true);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', item.comment_id);
+    formData.append('nugget_type', 1);
+    formData.append('translation_type', 2);
+    nuggetContentAudioService(formData)
+      .then(res => {
+        console.log(res.data, 'DATATATAA');
+        if (res.data.status === 1) {
+          settranslatedText(res.data.translation);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisLoadingTranslation(false);
+      });
+  };
 
   const ActionButton = ({marginLeft, name = '', icon, onPress, isSelected}) => {
     return (
@@ -105,8 +141,8 @@ const CommentItem = ({
         </View>
         <View style={[styles.rowContainer, {paddingBottom: 0}]}>
           <View style={{flex: 1}}>
-            <StyledText style={styles.text}>
-              {htmlDecodeText(item.comment)}
+            <StyledText style={[styles.text]}>
+              {htmlDecodeText(translatedText ? translatedText : item.comment)}
             </StyledText>
           </View>
           {!item.isLoading && profile?.user_id === item.user_id && (
@@ -132,49 +168,125 @@ const CommentItem = ({
             <StyledText style={{color: COLORS.dimColor}}>Posting...</StyledText>
           ) : (
             <>
-              <ActionButton
-                icon={likedData.liked ? 'heart_pink' : 'heart_white'}
-                name={`Agree ${
-                  parseInt(likedData.like_count) > 0
-                    ? '(' + likedData.like_count + ')'
-                    : ''
-                }`}
-                isSelected={likedData.liked}
-                onPress={() => {
-                  // setcommentItem(pre => {
-                  //   let isLiked = !pre.liked;
-                  //   let likedCount = parseInt(pre.like_count);
-                  //   likedCount = isLiked ? likedCount + 1 : likedCount - 1;
-                  //   return {...pre, liked: isLiked, like_count: likedCount};
-                  // });
-                  setlikedData(pre => {
-                    let isLiked = !pre.liked;
-                    let likedCount = parseInt(pre.like_count);
-                    likedCount = isLiked ? likedCount + 1 : likedCount - 1;
-                    debounceOnLike(isLiked);
-                    return {liked: isLiked, like_count: likedCount};
-                  });
-                }}
-              />
-              {isEnableReply && (
+              <View style={{flexDirection: 'row'}}>
                 <ActionButton
-                  icon={
-                    replyData && replyData.comment_id === item.comment_id
-                      ? 'comment_pink'
-                      : 'comment'
-                  }
-                  isSelected={
-                    replyData && replyData.comment_id === item.comment_id
-                  }
-                  marginLeft={10}
-                  name={`Reply ${
-                    item.reply && item.reply.length > 0
-                      ? '(' + item.reply.length + ')'
+                  icon={likedData.liked ? 'heart_pink' : 'heart_white'}
+                  name={`Agree ${
+                    parseInt(likedData.like_count) > 0
+                      ? '(' + likedData.like_count + ')'
                       : ''
                   }`}
-                  onPress={onPressReply}
+                  isSelected={likedData.liked}
+                  onPress={() => {
+                    // setcommentItem(pre => {
+                    //   let isLiked = !pre.liked;
+                    //   let likedCount = parseInt(pre.like_count);
+                    //   likedCount = isLiked ? likedCount + 1 : likedCount - 1;
+                    //   return {...pre, liked: isLiked, like_count: likedCount};
+                    // });
+                    setlikedData(pre => {
+                      let isLiked = !pre.liked;
+                      let likedCount = parseInt(pre.like_count);
+                      likedCount = isLiked ? likedCount + 1 : likedCount - 1;
+                      debounceOnLike(isLiked);
+                      return {liked: isLiked, like_count: likedCount};
+                    });
+                  }}
                 />
-              )}
+
+                {isEnableReply && (
+                  <ActionButton
+                    icon={
+                      replyData && replyData.comment_id === item.comment_id
+                        ? 'comment_pink'
+                        : 'comment'
+                    }
+                    isSelected={
+                      replyData && replyData.comment_id === item.comment_id
+                    }
+                    marginLeft={10}
+                    name={`Reply ${
+                      item.reply && item.reply.length > 0
+                        ? '(' + item.reply.length + ')'
+                        : ''
+                    }`}
+                    onPress={onPressReply}
+                  />
+                )}
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                {readoutCommentData?.id === item.comment_id &&
+                readoutCommentData?.isLoading ? (
+                  <LoadingDots
+                    size={6}
+                    bounceHeight={4}
+                    dots={3}
+                    borderRadius={3}
+                  />
+                ) : (
+                  <SVGIcon
+                    height={17.5}
+                    icon={
+                      readoutCommentData?.id === item.comment_id &&
+                      readoutCommentData?.isPlaying
+                        ? 'mic_off_fill_secondary'
+                        : 'mic_fill_white'
+                    }
+                    isButton
+                    onPress={() => {
+                      if (
+                        readoutCommentData?.id === item.comment_id &&
+                        readoutCommentData?.isPlaying
+                      ) {
+                        handleStopAudio();
+                      } else {
+                        if (
+                          readoutCommentData?.id === item.comment_id &&
+                          !readoutCommentData?.isLoading &&
+                          readoutCommentData?.url
+                        ) {
+                          handlePlayAudio(readoutCommentData?.url);
+                        } else {
+                          handleReadoutComment(item.comment_id);
+                        }
+                      }
+                    }}
+                  />
+                )}
+                <View
+                  style={{
+                    width: 2,
+                    height: 16,
+                    marginHorizontal: 5,
+                    backgroundColor: COLORS.white,
+                  }}
+                />
+                {isLoadingTranslation ? (
+                  <LoadingDots
+                    size={6}
+                    bounceHeight={4}
+                    dots={3}
+                    borderRadius={3}
+                  />
+                ) : (
+                  <SVGIcon
+                    height={17.5}
+                    icon={
+                      translatedText
+                        ? 'translation_secondary'
+                        : 'translation_white'
+                    }
+                    isButton
+                    onPress={() => {
+                      if (translatedText) {
+                        settranslatedText(null);
+                      } else {
+                        handleTranslateComment();
+                      }
+                    }}
+                  />
+                )}
+              </View>
             </>
           )}
         </View>
@@ -216,5 +328,6 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     paddingVertical: 7,
+    justifyContent: 'space-between',
   },
 });

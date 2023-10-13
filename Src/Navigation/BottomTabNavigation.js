@@ -7,6 +7,7 @@ import {
   useIsOpenLoginAlert,
   useIsOpenVerifyPopup,
   useProfile,
+  useSettings,
   useToken,
 } from '../Utilities/StoreData';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
@@ -29,6 +30,7 @@ import {useDashboardProfile} from '../Utilities/Contexts';
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
   const navigation = useNavigation();
+  const settings = useSettings();
   const dispatch = useDispatch();
   const token = useToken();
   const profile = useProfile();
@@ -78,10 +80,28 @@ export default function BottomTabNavigation() {
     }
   };
 
+  const getInitialRouteName = () => {
+    // return 'HomeStack';
+    if (token && settings) {
+      switch (
+        settings.mobile_default_page // 1-nuggets ( Home ), 2-events,  3-chats
+      ) {
+        case 2:
+          return 'EventsStack';
+        case 3:
+          return 'UsersStack';
+        default:
+          return 'HomeStack';
+      }
+    } else {
+      return 'HomeStack';
+    }
+  };
+
   return (
     <>
       <Tab.Navigator
-        initialRouteName="HomeStack"
+        initialRouteName={getInitialRouteName()}
         backBehavior="initialRoute"
         tabBar={props => <CustomBottomTabBar {...props} />}
         screenListeners={{
@@ -104,8 +124,6 @@ export default function BottomTabNavigation() {
                 setswipeEnabled(false);
               }
             }
-
-            dispatch(setIsBottomTabBarAbsolute(true));
           },
         }}
         screenOptions={({route}) => ({

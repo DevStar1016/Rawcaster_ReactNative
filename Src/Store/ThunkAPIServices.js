@@ -5,6 +5,7 @@ import {
   blockUnblockUserService,
   deleteNuggetService,
   followAndUnfollowService,
+  getInfluencerCategoryService,
   likeAndUnlikeNuggetService,
   listAllFriendGroupsService,
   listAllFriendsService,
@@ -20,7 +21,11 @@ import {
   setLikedSavedNuggets,
 } from './Slices/NuggetActionsSlice';
 import Toast from '../Components/Toast';
-import {getFilteredDuplicatesList, getUniqueId} from '../Utilities/Methods';
+import {
+  getAuthCode,
+  getFilteredDuplicatesList,
+  getUniqueId,
+} from '../Utilities/Methods';
 import {
   addFollowingUser,
   blockUsers,
@@ -29,9 +34,11 @@ import {
   setFollowingUsersList,
   setGroupListLoading,
   setGroupsList,
+  setInfluencerCategoryList,
   unBlockUser,
 } from './Slices/HomeSlice';
 import {setGlobalLoaderData} from './Slices/UtilitySlice';
+import {initiateAllNuggetsLoadingTotalPages} from './Slices/NuggetsListSlice';
 
 /**
  * Asynchronously retrieves a list of nuggets based on the provided data.
@@ -54,43 +61,48 @@ export const getListNuggets = createAsyncThunk(
     }
     try {
       const res = await listNuggetsService(formData, data?.signal);
-      const tempLikedNuggets = [...res.data.nuggets_list]
-        .filter(item => item.liked)
-        .map(item => ({
-          id: item.nugget_id,
-          total_likes: item.total_likes,
-        }));
-      const tempSavedNuggetsIds = [...res.data.nuggets_list]
-        .filter(item => item.saved)
-        .map(item => item.nugget_id);
-      dispatch(
-        setLikedSavedNuggets({
-          likedNuggets: [...tempLikedNuggets],
-          savedNuggetsIds: [...tempSavedNuggetsIds],
-        }),
-      );
+      if (res.data.status === 1) {
+        const tempLikedNuggets = [...res.data.nuggets_list]
+          .filter(item => item.liked)
+          .map(item => ({
+            id: item.nugget_id,
+            total_likes: item.total_likes,
+          }));
+        const tempSavedNuggetsIds = [...res.data.nuggets_list]
+          .filter(item => item.saved)
+          .map(item => item.nugget_id);
+        dispatch(
+          setLikedSavedNuggets({
+            likedNuggets: [...tempLikedNuggets],
+            savedNuggetsIds: [...tempSavedNuggetsIds],
+          }),
+        );
 
-      const tempFollowingUsersList = getFilteredDuplicatesList(
-        [...res.data.nuggets_list],
-        'user_id',
-      )
-        .filter(item => item.following)
-        .map(item => ({
-          user_id: item.user_id,
-          follow_count: item.follow_count,
-        }));
-      dispatch(setFollowingUsersList([...tempFollowingUsersList]));
-
+        const tempFollowingUsersList = getFilteredDuplicatesList(
+          [...res.data.nuggets_list],
+          'user_id',
+        )
+          .filter(item => item.following)
+          .map(item => ({
+            user_id: item.user_id,
+            follow_count: item.follow_count,
+          }));
+        dispatch(setFollowingUsersList([...tempFollowingUsersList]));
+      }
       return {
         data: res.data,
         pageNumber: data?.pageNumber,
         categoryName: data?.categoryName,
       };
+      console.log(res.data, 'DATATATTAAA');
     } catch (error) {
       if (!error.message.includes('canceled')) {
-        return rejectWithValue({categoryName: data?.categoryName});
+        return rejectWithValue({
+          categoryName: data?.categoryName,
+          msg: error.message,
+        });
       }
-      return rejectWithValue({categoryName: null});
+      return rejectWithValue({categoryName: null, msg: ''});
     }
   },
 );
@@ -218,6 +230,7 @@ export const becomeFan = createAsyncThunk(
     try {
       const res = await followAndUnfollowService(formData);
       if (res.data.status === 1) {
+        dispatch(getInfluencersCategoriesList());
         if (data?.isEnableToast) {
           Toast.success(res.data.msg);
         }
@@ -260,6 +273,7 @@ export const blockUnblockUser = createAsyncThunk(
       if (res.data.status === 1) {
         Toast.success(res.data.msg);
         if (data.action === 1) {
+          dispatch(getInfluencersCategoriesList());
           dispatch(blockUsers([data.user_id]));
 
           let tempConnectionsList = [...getState().home.connectionsList];
@@ -310,6 +324,7 @@ export const blockMultipleUsers = createAsyncThunk(
       const res = await blockMultipleUserService(formData);
       if (res.data.status === 1) {
         Toast.success(res.data.msg);
+        dispatch(getInfluencersCategoriesList());
         dispatch(blockUsers([...data.user_id]));
         let tempConnectionsList = [...getState().home.connectionsList];
         tempConnectionsList = [...tempConnectionsList].filter(
@@ -414,5 +429,20 @@ export const getAllFriendsList = createAsyncThunk(
     } finally {
       dispatch(setConnectionsListLoading(false));
     }
+  },
+);
+
+export const getInfluencersCategoriesList = createAsyncThunk(
+  'getInfluencersCategoriesList',
+  async (data, {rejectWithValue, getState, dispatch}) => {
+    const formData = new FormData();
+    formData.append('token', getState().auth.token);
+    formData.append('auth_code', getAuthCode(getState().auth.token));
+    try {
+      const res = await getInfluencerCategoryService(formData);
+      if (res.data.status === 1) {
+        dispatch(setInfluencerCategoryList(res.data.influencer_category));
+      }
+    } catch (error) {}
   },
 );

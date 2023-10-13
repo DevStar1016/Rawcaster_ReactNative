@@ -1,5 +1,6 @@
 import {
   Alert,
+  BackHandler,
   Image,
   Keyboard,
   Modal,
@@ -59,11 +60,11 @@ import {useDispatch} from 'react-redux';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
 import MediaPreview from '../../../Modals/CameraModals/MediaPreview';
 import {addEditedNugget} from '../../../Store/Slices/NuggetActionsSlice';
-import EmojiContainer from 'react-native-emoji-container';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {addNugget} from '../../../Store/ThunkAPIServices';
 import StyledText from '../../../Components/StyledText';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
+import {EmojiKeyboard} from 'rn-emoji-keyboard';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -71,7 +72,7 @@ if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
 
 var isMount = true;
 var metaDataFetchingTimer = undefined;
-const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2 - 60;
+const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2;
 const PostEditNugget = ({route}) => {
   const {nugget, preContent} = route.params ?? {};
   const dispatch = useDispatch();
@@ -140,6 +141,26 @@ const PostEditNugget = ({route}) => {
       value: '',
     },
   ]);
+
+  useEffect(() => {
+    const backAction = () => {
+      if (isOpenEmojiContainer) {
+        if (isMount) {
+          setisOpenEmojiContainer(false);
+        }
+      } else {
+        navigation.goBack();
+      }
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [isOpenEmojiContainer]);
 
   useEffect(() => {
     Keyboard.dismiss();
@@ -1224,22 +1245,27 @@ const PostEditNugget = ({route}) => {
             borderTopStartRadius: 10,
             borderTopEndRadius: 10,
           }}>
-          <EmojiContainer
-            emojisContainerWidth={DIMENSIONS.window.width - 10}
-            titleTextStyle={{
-              fontFamily: FONTS.DMSans.medium,
-              fontSize: 14,
-              color: COLORS.black,
-            }}
-            onPressEmoji={emojiItem => {
+          <EmojiKeyboard
+            onEmojiSelected={res => {
               if (isMount) {
                 settypedText(pre => {
                   if (pre.length < 500) {
-                    return pre + emojiItem.emoji;
+                    return pre + res.emoji;
                   }
                   return pre;
                 });
               }
+            }}
+            // enableSearchBar
+            // disabledCategories={['people_body', 'flags']}
+            categoryPosition="bottom"
+            enableCategoryChangeGesture={false}
+            defaultHeight={'100%'}
+            emojiSize={25}
+            styles={{
+              header: {fontFamily: FONTS.DMSans.medium},
+              // container
+              // container: {width: },
             }}
           />
         </View>

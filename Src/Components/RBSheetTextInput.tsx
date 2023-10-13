@@ -40,6 +40,7 @@ type Props = {
   onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
   placeholderText?: string;
+  onPermissionRejection?: () => void;
   onPressSend?: (text: string) => void;
   inpuFieldRef?: (e: any) => void;
   isInsideTextChange?: boolean;
@@ -83,6 +84,7 @@ const RBSheetTextInput = ({
   isInsideTextChange = true,
   onChangeText,
   text = '',
+  onPermissionRejection,
   isSearchBar = false,
   onSendAudio,
   containerAlignItems = 'center',
@@ -335,6 +337,7 @@ const RBSheetTextInput = ({
                         setrecordingAudioUniqueId(uniqueId);
                         handleAudioRecord({
                           audioPlayer,
+                          onPermissionRejection,
                           setisRecording,
                           setrecordedAudio,
                           setrecordingSeconds,

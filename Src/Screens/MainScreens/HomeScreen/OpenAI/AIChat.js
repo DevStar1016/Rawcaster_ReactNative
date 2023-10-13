@@ -26,34 +26,43 @@ import LoadingDots from '../../../../Components/LoadingDots';
 
 var isMount = true;
 var timer = undefined;
-const AIChat = ({onPressBack, handleShareContent}) => {
-  const audioPlayer = useRef(new AudioRecorderPlayer());
+var readoutController = undefined;
+var translateController = undefined;
+const AIChat = ({onPressBack, handleShareContent, onPermissionRejection}) => {
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const token = useToken();
   const profile = useProfile();
   const [chatList, setchatList] = useState([]);
-  const [playingChatId, setplayingChatId] = useState(null);
-  const [readMessageLoadingIdsList, setreadMessageLoadingIdsList] = useState(
-    [],
-  );
-  const [isDisableAudioProcess, setisDisableAudioProcess] = useState(false);
+
+  const [translationData, settranslationData] = useState({
+    id: null,
+    text: '',
+    isLoading: false,
+  });
+  const [readoutChatData, setreadoutChatData] = useState({
+    id: null,
+    isLoading: false,
+    url: null,
+    isPlaying: false,
+  });
   const [progress, setprogress] = useState(0);
   const [isLoadingChat, setisLoadingChat] = useState(false);
   const [audioList, setaudioList] = useState([]); //{id:1,url:''}
-  const listRef = useRef(null);
+
   useEffect(() => {
     isMount = true;
     // aiChatAPICall();
     return () => {
       isMount = false;
+      handleStopAudio();
+      if (readoutController) {
+        readoutController.abort();
+      }
       if (timer) {
         clearTimeout(timer);
       }
     };
   }, []);
-
-  useEffect(() => {
-    scrollToEnd();
-  }, [chatList]);
 
   useEffect(() => {
     const backAction = () => {
@@ -68,13 +77,61 @@ const AIChat = ({onPressBack, handleShareContent}) => {
   }, []);
 
   /**
-   * Scrolls to the end of the chat list.
-   * If the chat list is not empty, it scrolls to the top of the list.
+   * Stops the audio playback and removes the playback listener.
+   * If an error occurs during the process, it is caught and ignored.
+   * Finally, sets the 'isReadMuted' state to false.
    * @returns None
    */
-  const scrollToEnd = () => {
-    if (chatList.length > 0) {
-      listRef.current.scrollToOffset({animated: false, offset: 0});
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+      if (isMount) {
+        setprogress(0);
+      }
+    } catch (e) {
+    } finally {
+      if (isMount) {
+        setreadoutChatData(pre => ({
+          ...pre,
+          isPlaying: false,
+        }));
+      }
+    }
+  };
+
+  /**
+   * Handles playing audio from the given URL.
+   * @param {string} url - The URL of the audio file to play.
+   * @returns None
+   */
+  const handlePlayAudio = async url => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition / 1000) >= 0) {
+          setprogress(Math.floor(e.currentPosition / 1000));
+        }
+        if (Math.floor(e.currentPosition) === 0) {
+          if (isMount) {
+            setreadoutChatData(pre => ({
+              ...pre,
+              isPlaying: true,
+            }));
+          }
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      if (isMount) {
+        setreadoutChatData(pre => ({
+          ...pre,
+          isPlaying: false,
+        }));
+      }
     }
   };
 
@@ -86,9 +143,6 @@ const AIChat = ({onPressBack, handleShareContent}) => {
    * @returns None
    */
   function aiChatAPICall(text = '', audioFile, existingUniqueId) {
-    if (isMount) {
-      setisLoadingChat(true);
-    }
     const formData = new FormData();
     formData.append('token', token);
     if (text && text.trim()) {
@@ -100,9 +154,10 @@ const AIChat = ({onPressBack, handleShareContent}) => {
 
     aiChatService(formData)
       .then(res => {
-        if (res.data.status === 1) {
+        if (res.data.status === 1 || res.data.status === 0) {
+          const uniqueId = getUniqueId();
           const responseChatData = {
-            id: getUniqueId(),
+            id: uniqueId,
             msg: res.data.msg,
             isAI: true,
             dateTime: moment().format('hh:mm A'),
@@ -111,7 +166,7 @@ const AIChat = ({onPressBack, handleShareContent}) => {
           if (audioFile && existingUniqueId) {
             setchatList(preList => {
               let tempChatList = [...preList];
-              const tempIndex = tempChatList.findIndex(
+              const tempIndex = [...tempChatList].findIndex(
                 item => item.id === existingUniqueId,
               );
               if (tempIndex !== -1) {
@@ -121,17 +176,18 @@ const AIChat = ({onPressBack, handleShareContent}) => {
                   isAudioLoading: false,
                 };
               }
-              return [...tempChatList];
+              return [{...responseChatData}, ...tempChatList];
             });
-            timer = setTimeout(() => {
-              if (isMount) {
-                setchatList(preList => {
-                  return [{...responseChatData}, ...preList];
-                });
-                setisLoadingChat(false);
-              }
-              clearTimeout(timer);
-            }, 1000);
+            // timer = setTimeout(() => {
+            //   if (isMount) {
+            //     setchatList(preList => {
+            //       return [{...responseChatData}, ...preList];
+            //     });
+            //     setisLoadingChat(false);
+            //   }
+            //   clearTimeout(timer);
+            // }, 1000);
+            setisLoadingChat(false);
           } else {
             if (isMount) {
               setchatList(preList => {
@@ -147,14 +203,11 @@ const AIChat = ({onPressBack, handleShareContent}) => {
               setisLoadingChat(false);
             }
           }
-        } else if (res.data.status === 0) {
-          if (isMount) {
-            setisLoadingChat(false);
-          }
         }
       })
       .catch(e => {
         if (isMount) {
+          console.log(e, 'ERROR AI');
           setisLoadingChat(false);
         }
       });
@@ -164,6 +217,117 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     //   }
     // });
   }
+
+  const handleReadoutChat = (msg, chatId) => {
+    handleStopAudio();
+    if (isMount) {
+      setreadoutChatData(pre => ({
+        ...pre,
+        id: chatId,
+        isLoading: true,
+      }));
+    }
+    if (readoutController) {
+      readoutController.abort();
+    }
+    readoutController = new AbortController();
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('message', msg);
+    formData.append('translation_type', 1);
+
+    textToAudioService(formData, readoutController.signal)
+      .then(res => {
+        if (isMount) {
+          if (res.data.status === 1) {
+            setreadoutChatData(pre => ({
+              ...pre,
+              isLoading: false,
+              url: res.data.file_path,
+            }));
+            handlePlayAudio(res.data.file_path);
+          } else if (res.data.status === 0) {
+            Toast.fail(res.data.msg);
+            setreadoutChatData(pre => ({
+              ...pre,
+              id: null,
+              isLoading: false,
+              url: null,
+              isPlaying: false,
+            }));
+          }
+        }
+      })
+      .catch(e => {
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+          if (isMount) {
+            setreadoutChatData(pre => ({
+              ...pre,
+              id: null,
+              isLoading: false,
+              url: null,
+              isPlaying: false,
+            }));
+          }
+        }
+      });
+  };
+
+  const handleTranslate = (msg, chatId) => {
+    if (isMount) {
+      settranslationData(pre => ({
+        ...pre,
+        text: '',
+        id: chatId,
+        isLoading: true,
+      }));
+    }
+    if (translateController) {
+      translateController.abort();
+    }
+    translateController = new AbortController();
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('message', msg);
+    formData.append('translation_type', 2);
+    textToAudioService(formData, translateController.signal)
+      .then(res => {
+        if (res.data.status === 1) {
+          if (isMount) {
+            settranslationData(pre => ({
+              ...pre,
+              text: res.data.translation,
+              isLoading: false,
+            }));
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+          handleSeeOriginal();
+        }
+      })
+      .catch(e => {
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+          handleSeeOriginal();
+        }
+      });
+  };
+
+  const handlePlayLocalAudio = (url, chatId) => {
+    if (readoutController) {
+      readoutController.abort();
+    }
+    if (isMount) {
+      setreadoutChatData(pre => ({
+        ...pre,
+        id: chatId,
+        isLoading: false,
+        url: url,
+      }));
+    }
+    handlePlayAudio(url);
+  };
 
   /**
    * Handles sending a message in the chat.
@@ -189,7 +353,13 @@ const AIChat = ({onPressBack, handleShareContent}) => {
         ...preList,
       ];
     });
-    aiChatAPICall(text, audioFile, uniqueId);
+    if (isMount) {
+      setisLoadingChat(true);
+    }
+    timer = setTimeout(() => {
+      aiChatAPICall(text, audioFile, uniqueId);
+      clearTimeout(timer);
+    }, 1000);
   }
 
   /**
@@ -206,41 +376,14 @@ const AIChat = ({onPressBack, handleShareContent}) => {
     );
   };
 
-  /**
-   * Adds a new audio URL to the audio list.
-   * @param {string} id - The ID of the audio.
-   * @param {string} url - The URL of the audio.
-   * @returns None
-   */
-  const onGetAudioUrl = (id, url) => {
-    setaudioList(preList => {
-      let tempAudiosList = [...preList];
-      const index = tempAudiosList.findIndex(item => item.id === id);
-      if (index === -1) {
-        tempAudiosList.push({id, url});
-      }
-      return tempAudiosList;
-    });
-  };
-
-  /**
-   * Updates the list of loading message IDs based on the provided ID and status.
-   * @param {any} id - The ID of the message.
-   * @param {boolean} status - The status of the message (true if loading, false if not loading).
-   * @returns None
-   */
-  const onLoadingReadMessage = (id, status) => {
-    setreadMessageLoadingIdsList(preList => {
-      let tempList = [...preList];
-      if (status) {
-        if (!tempList.includes(id)) {
-          tempList.push(id);
-        }
-      } else {
-        tempList = tempList.filter(itemId => itemId !== id);
-      }
-      return tempList;
-    });
+  const handleSeeOriginal = () => {
+    if (isMount) {
+      settranslationData({
+        id: null,
+        text: '',
+        isLoading: false,
+      });
+    }
   };
 
   function renderItem({item, index}) {
@@ -248,17 +391,17 @@ const AIChat = ({onPressBack, handleShareContent}) => {
       <AIChatItem
         isEnableShare={index !== chatList.length - 1}
         item={item}
+        isMount={isMount}
+        readoutChatData={readoutChatData}
         progress={progress}
-        setprogress={setprogress}
-        audioPlayerRef={audioPlayer}
-        setisDisableAudioProcess={setisDisableAudioProcess}
-        playingChatId={playingChatId}
-        setplayingChatId={setplayingChatId}
-        readMessageLoadingIdsList={readMessageLoadingIdsList}
-        audioList={audioList}
+        handleSeeOriginal={handleSeeOriginal}
+        handleTranslate={handleTranslate}
+        translationData={translationData}
+        handleReadoutChat={handleReadoutChat}
+        handlePlayAudio={handlePlayAudio}
+        handlePlayLocalAudio={handlePlayLocalAudio}
+        handleStopAudio={handleStopAudio}
         onShareContent={handleShareContent}
-        setaudioUrl={onGetAudioUrl}
-        setreadMessageLoading={onLoadingReadMessage}
       />
     );
   }
@@ -289,7 +432,6 @@ const AIChat = ({onPressBack, handleShareContent}) => {
         // }}
       >
         <BottomSheetFlatList
-          ref={listRef}
           data={chatList}
           keyboardShouldPersistTaps="handled"
           style={{flexGrow: 0}}
@@ -339,8 +481,9 @@ const AIChat = ({onPressBack, handleShareContent}) => {
             textAlignVertical: 'top',
             numberOfLines: 6,
           }}
+          onPermissionRejection={onPermissionRejection}
           containerHeight={110}
-          isDisableAudioProcess={isDisableAudioProcess}
+          isDisableAudioProcess={readoutChatData && readoutChatData.isPlaying}
           isVisibleVoiceRecord={true}
           isDisableSend={isLoadingChat}
           onSendAudio={(audioFile, duration) => {

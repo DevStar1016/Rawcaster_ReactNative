@@ -56,10 +56,10 @@ const ProfileSearch = () => {
   }, []);
 
   useEffect(() => {
-    if (searchText !== null) {
-      setisListLoading(true);
-      profileSearchAPICall(1);
-    }
+    // if (searchText !== null) {
+    setisListLoading(true);
+    profileSearchAPICall(1);
+    // }
   }, [searchText]);
 
   /**

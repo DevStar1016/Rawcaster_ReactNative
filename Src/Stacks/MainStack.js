@@ -2,11 +2,11 @@ import {Linking, Modal} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Loader from '../Components/Loader';
-import queryString from 'query-string';
 import {
   useGlobalLoaderData,
   useIsVisibleInfluencers,
   usePremiumAlert,
+  useSettings,
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
@@ -46,14 +46,15 @@ import {
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
-import {decode} from 'base-64';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
+import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
   const [isLoading, setisLoading] = useState(true);
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
+  const settings = useSettings();
   const dispatch = useDispatch();
   const globalLoaderData = useGlobalLoaderData();
   const navigation = useNavigation();
@@ -65,10 +66,10 @@ const MainStack = () => {
 
   useEffect(() => {
     const subscription = Linking.addEventListener('url', event =>
-      handleOpenUrl(event.url),
+      OpenLinkingUrl(event.url),
     );
     Linking?.getInitialURL()
-      .then(handleOpenUrl)
+      .then(OpenLinkingUrl)
       .catch(e => {
         console.log(e, 'ERROR LINK');
       });
@@ -79,22 +80,6 @@ const MainStack = () => {
       }
     };
   }, []);
-
-  const handleOpenUrl = url => {
-    if (url && !url.includes('rawcaster://')) {
-      if (url?.includes('share')) {
-        const parsed = queryString.parseUrl(url);
-        Linking.openURL(`rawcaster://viewnugget/${decode(parsed.query.id)}`)
-          .then(res => {
-            console.log(res, 'LINKING RESPONSE');
-          })
-          .catch(e => {
-            console.log(e, 'ERROR   CATCH');
-          });
-        // Linking.openURL()
-      }
-    }
-  };
 
   function getCommonFormData() {
     const formData = new FormData();
@@ -138,9 +123,12 @@ const MainStack = () => {
         if (res[1].data.status === 1) {
           dispatch(setInfluencerCategoryList(res[1].data.influencer_category));
           dispatch(
-            initiateAllNuggetsLoadingTotalPages(
-              res[1].data.influencer_category,
-            ),
+            initiateAllNuggetsLoadingTotalPages({
+              categoriesList: [...res[1].data.influencer_category],
+              isForYouLoading: token
+                ? settings.mobile_default_page === 1
+                : true,
+            }),
           );
         }
         return res;

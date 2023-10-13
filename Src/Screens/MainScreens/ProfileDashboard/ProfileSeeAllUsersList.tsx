@@ -122,6 +122,9 @@ const ProfileSeeAllUsersList = ({route}: any) => {
       case 'nugget_agreed_users':
         nuggetAndCommentLikedUserListAPICall(pageNumber);
         return;
+      case 'unclaimed_influencers':
+        unclaimedInfluencersListAPICall(pageNumber, dataToFilter);
+        return;
       default:
         if (isMount.current) {
           setisLoading(false);
@@ -267,7 +270,6 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             if (pageNumber === 1) {
               totalPages.current = parseInt(res.data.total_pages);
               dispatch(setUnclaimedAccountsList(res.data.unclaim_accounts));
-              setusersList(res.data.unclaim_accounts);
             } else {
               if (unclaimedAccountsList) {
                 dispatch(
@@ -277,23 +279,11 @@ const ProfileSeeAllUsersList = ({route}: any) => {
                   ]),
                 );
               }
-              setusersList(preList => [
-                ...preList,
-                ...res.data.unclaim_accounts,
-              ]);
             }
           }
-        } else if (res.data.status === 0) {
-          if (isMount.current) {
-            setusersList([]);
-          }
         }
       })
-      .catch(e => {
-        if (isMount.current) {
-          setusersList([]);
-        }
-      })
+      .catch(e => {})
       .finally(() => {
         setLoaders(false);
       });
@@ -441,8 +431,15 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
   function getRightIcon(item: any) {
     if (item.user_id !== profile?.user_id) {
-      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
-        return 'shield_secondary';
+      if (
+        listType === 'unclaimed_influencers' &&
+        (item.unclaimed_status === 1 || item.unclaimed_status === 2)
+      ) {
+        if (item.unclaimed_status === 1) {
+          return 'shield_secondary';
+        } else {
+          return 'pending_time';
+        }
       }
       if (
         listType === 'nugget_agreed_users' &&
@@ -514,11 +511,13 @@ const ProfileSeeAllUsersList = ({route}: any) => {
 
   function getRightIconAction(item: any) {
     if (item.user_id !== profile?.user_id) {
-      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
-        //@ts-ignore
-        navigation.navigate('ClaimAccount', {
-          influencerId: item.user_id,
-        });
+      if (listType === 'unclaimed_influencers') {
+        if (item.unclaimed_status === 1) {
+          //@ts-ignore
+          navigation.navigate('ClaimAccount', {
+            influencerId: item.user_id,
+          });
+        }
       }
       if (
         listType === 'nugget_agreed_users' &&
@@ -672,7 +671,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
         title={title}
         isEnableSafeArea
         isEnableRightIcon={
-          listType !== 'unclaimed_influencers' &&
+          // listType !== 'unclaimed_influencers' &&
           listType !== 'nugget_agreed_users'
         }
         rightIcon="filter_line_white"

@@ -13,6 +13,10 @@ export const initialState: NuggetsListDataProp = {
     influencing: true,
     forYou: true,
   },
+  nuggetsErrorMessage: {
+    influencing: '',
+    forYou: '',
+  },
   nuggetsList: {
     influencing: [],
     forYou: [],
@@ -25,11 +29,11 @@ const NuggetsListSlice = createSlice({
   reducers: {
     initiateAllNuggetsLoadingTotalPages: (state, action) => {
       if (action.payload) {
-        action.payload.map((item: InfluencerCategoryProp) => {
+        action.payload.categoriesList.map((item: InfluencerCategoryProp) => {
           state.nuggetsLoading[item.name?.split(' ').join('')] = true;
           state.totalPages[item.name?.split(' ').join('')] = 1;
         });
-        state.nuggetsLoading.forYou = true;
+        state.nuggetsLoading.forYou = action.payload.isForYouLoading;
         state.nuggetsLoading.influencing = true;
         state.totalPages.forYou = 1;
         state.totalPages.influencing = 1;
@@ -45,6 +49,12 @@ const NuggetsListSlice = createSlice({
       if (action.payload) {
         state.nuggetsLoading[action.payload.categoryName] =
           action.payload.status;
+      }
+    },
+    setNuggetsErrorMessage: (state, action) => {
+      if (action.payload) {
+        state.nuggetsErrorMessage[action.payload.categoryName] =
+          action.payload.message;
       }
     },
     resetNuggetsTotalPages: (state, action) => {
@@ -90,6 +100,8 @@ const NuggetsListSlice = createSlice({
               ...decodedNuggetList,
             ];
           }
+        } else if (data.status === 0) {
+          state.nuggetsErrorMessage[categoryName] = data.msg;
         }
         state.nuggetsLoading[categoryName] = false;
       })
@@ -97,7 +109,8 @@ const NuggetsListSlice = createSlice({
         // @ts-ignore
         if (action.payload && action.payload.categoryName) {
           // @ts-ignore
-          const {categoryName} = action.payload;
+          const {categoryName, msg} = action.payload;
+          state.nuggetsErrorMessage[categoryName] = msg;
           state.nuggetsLoading[categoryName] = false;
         }
       });
@@ -109,5 +122,6 @@ export const {
   setNuggetsLoading,
   resetNuggetsTotalPages,
   clearNuggetsListReduxData,
+  setNuggetsErrorMessage,
 } = NuggetsListSlice.actions;
 export default NuggetsListSlice.reducer;

@@ -123,6 +123,14 @@ export const useIsNuggetsLoading = (categoryName = 'forYou') => {
   }
 };
 
+export const useNuggetsErrorMessage = (categoryName = 'forYou') => {
+  if (categoryName) {
+    return useAppSelector(
+      state => state.nugget_list_data.nuggetsErrorMessage[categoryName],
+    );
+  }
+};
+
 export const useNuggetsList = (categoryName = 'forYou') => {
   return categoryName
     ? useAppSelector(

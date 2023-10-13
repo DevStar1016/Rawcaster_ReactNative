@@ -284,7 +284,9 @@ export const getLocationAddress = () => {
           },
         );
       })
-      .catch(e => {});
+      .catch(e => {
+        reject(e);
+      });
   });
 
   return promise;

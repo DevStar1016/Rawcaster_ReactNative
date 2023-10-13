@@ -27,20 +27,21 @@ import {useDispatch} from 'react-redux';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 import Loader from '../../../Components/Loader';
 import ItemSelectionMiniList from '../../../Components/ItemSelectionMiniList';
+import SVGIcon from '../../../Components/SVGIcon';
 
 const ProfileNameBioContainer = ({
   userId,
   profile,
   paddingHorizontal,
   onLayout,
-  isEnableClaimAccount = false,
+  claimAccountStatus = 0,
   onPressBecomeFan,
   onPressClaimAccount,
 }) => {
   const dispatch = useDispatch();
   const token = useToken();
   const settings = useSettings();
-  const influencerCategoryList = useInfluencerCategoryList();
+  const influencerCategoryList = useInfluencerCategoryList() ?? [];
   const [isUpdating, setisUpdating] = useState(false);
   const [isOpenBioCategoryEditor, setisOpenBioCategoryEditor] = useState(false);
   const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
@@ -199,13 +200,20 @@ const ProfileNameBioContainer = ({
       style={[styles.mainContainer, {paddingHorizontal}]}>
       <View style={styles.nameRowContainer}>
         <View style={styles.nameAndCategoryContainer}>
-          <StyledText
-            style={[styles.nameText]}
-            // normalTextModeTextProps={{numberOfLines: 1}}
-            onPress={() => {}}>
-            {/* {getSlicedText(profile?.name, 50)} */}
-            {profile?.name}
-          </StyledText>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <StyledText
+              style={[styles.nameText]}
+              // normalTextModeTextProps={{numberOfLines: 1}}
+              onPress={() => {
+                console.log(profile);
+              }}>
+              {/* {getSlicedText(profile?.name, 50)} */}
+              {profile?.name}
+              {profile?.account_verify_type === 2 && (
+                <SVGIcon icon="diamond_verified" height={15} width={15} />
+              )}
+            </StyledText>
+          </View>
 
           {/* {getSelectedCategoriesList().toString() ? (
             <View style={styles.dot} />
@@ -253,10 +261,13 @@ const ProfileNameBioContainer = ({
           onPress={onPressBecomeFan}
         />
       )}
-      {isEnableClaimAccount && (
+      {(claimAccountStatus === 1 || claimAccountStatus === 2) && (
         <GradientButton
-          buttonText={'Claim Account'}
-          rightIcon="right_arrow_white"
+          buttonText={
+            claimAccountStatus === 1 ? 'Claim Account' : 'Claim Status Pending'
+          }
+          disabled={claimAccountStatus !== 1}
+          rightIcon={claimAccountStatus === 1 ? 'right_arrow_white' : null}
           marginTop={15}
           onPress={onPressClaimAccount}
         />

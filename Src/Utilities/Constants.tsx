@@ -242,6 +242,7 @@ export const NUGGET_ACTIONS = [
 ];
 
 export const SHARE_OPTION = {
+  copy_link: 'copy_link',
   contacts: 'contacts',
   facebook: 'facebook',
   instagram: 'instagram',

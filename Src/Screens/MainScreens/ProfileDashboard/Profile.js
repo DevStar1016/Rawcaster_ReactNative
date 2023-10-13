@@ -64,7 +64,10 @@ import {
   setUnreadNotificationCount,
 } from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import {becomeFan} from '../../../Store/ThunkAPIServices';
+import {
+  becomeFan,
+  getInfluencersCategoriesList,
+} from '../../../Store/ThunkAPIServices';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 const PADDING_HORIZONTAL = 10;
@@ -431,6 +434,7 @@ const Profile = ({route}) => {
               return {...pre, friend_status: null};
             });
           }
+
           dispatch(
             setConnectionsList(
               [...connections].filter(
@@ -469,6 +473,7 @@ const Profile = ({route}) => {
               user_id: othersProfile.user_id,
             }),
           );
+          dispatch(getInfluencersCategoriesList());
           // dispatch(
           //   setFollowingUsersList(
           //     [...followingUsersList].filter(
@@ -583,17 +588,21 @@ const Profile = ({route}) => {
     return [...tempNuggetsList];
   };
 
-  function getIsEnableClaimAccount() {
+  function getClaimAccountStatus() {
+    // if (userId && othersProfile) {
+    //   return othersProfile.unclaimed_status;
+    // }
+    // return 0;
     if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
       let tempUnclaimedList = [...unclaimedAccountsList];
       const tempUnclaimedUser = tempUnclaimedList.find(
         item => item.user_id === getProfileData().user_id,
       );
       if (tempUnclaimedUser) {
-        return tempUnclaimedUser.unclaimed_status === 0;
+        return tempUnclaimedUser.unclaimed_status;
       }
     }
-    return false;
+    return 0;
   }
 
   function getIsDisplayVerifyAccount() {
@@ -746,7 +755,7 @@ const Profile = ({route}) => {
           userId={userId}
           profile={getProfileData()}
           paddingHorizontal={PADDING_HORIZONTAL}
-          isEnableClaimAccount={getIsEnableClaimAccount()}
+          claimAccountStatus={getClaimAccountStatus()}
           onPressBecomeFan={() => {
             handleBecomeFan(
               othersProfile.user_id,
@@ -789,9 +798,9 @@ const Profile = ({route}) => {
             <Divider />
             <ProfilesListContainerWithSeeAll
               listType="unclaimed_influencers"
-              list={unclaimedAccountsList ?? []}
-              isExternalListOnly
-              title={'Unclaimed Influencers Account'}
+              // list={unclaimedAccountsList ?? []}
+              // isExternalListOnly
+              title={'Unclaimed Influencers'}
               paddingHorizontal={PADDING_HORIZONTAL}
               ProfileItemProps={{
                 topRightIconContainerStyle: {
@@ -928,7 +937,7 @@ const Profile = ({route}) => {
       userId,
       focusedNuggetUserId,
       getProfileData(),
-      getIsEnableClaimAccount(),
+      getClaimAccountStatus(),
       unclaimedAccountsList,
       connections,
       isFocused,

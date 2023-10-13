@@ -536,7 +536,7 @@ const GeneralSettings = () => {
             />
           )} */}
           <DropDownPicker
-            title="Readout Language"
+            title="Translation Language"
             value={getSelectedReadOutLanguage()}
             listTitle=""
             placeHolderText="Select Language"

@@ -34,6 +34,7 @@ import Loader from '../../Components/Loader';
 import Toast from '../../Components/Toast';
 import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
 import CheckBox from '../../Components/CheckBox';
+import {getInfluencersCategoriesList} from '../../Store/ThunkAPIServices';
 
 var totalPages = 1;
 var currentPage = 1;
@@ -272,6 +273,7 @@ const InfluencersList = () => {
           } else {
             Toast.success(res.data.msg);
           }
+          dispatch(getInfluencersCategoriesList());
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

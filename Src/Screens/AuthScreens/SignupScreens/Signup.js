@@ -14,7 +14,9 @@ import SocialSignin from '../SocialSignin';
 
 const Signup = ({route}) => {
   const navigation = useNavigation();
-  const {pushId} = route.params;
+  const {pushId, refId} = route.params;
+
+  console.log(route.params, 'PARAMSSS');
 
   useEffect(() => {
     AvoidSoftInput.setAdjustResize();
@@ -53,7 +55,10 @@ const Signup = ({route}) => {
             buttonText="Sign up with phone number or email"
             buttonTextStyle={{fontSize: 17}}
             onPress={() => {
-              navigation.navigate('SignupWithPhone', {pushId: pushId});
+              navigation.navigate('SignupWithPhone', {
+                pushId: pushId,
+                refId: refId,
+              });
             }}
           />
           <View style={styles.dividerContainer}>
@@ -65,7 +70,7 @@ const Signup = ({route}) => {
             </View>
             <Divider />
           </View>
-          <SocialSignin pushId={pushId} />
+          <SocialSignin pushId={pushId} refId={refId} />
           <View style={styles.signUpContainer}>
             <StyledText style={styles.signUpText}>
               Already Registered?

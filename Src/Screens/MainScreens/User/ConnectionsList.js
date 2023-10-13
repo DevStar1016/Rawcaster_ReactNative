@@ -279,7 +279,39 @@ const ConnectionsList = () => {
 
   return (
     <View style={styles.mainContainer}>
-      {getList().length > 0 ? (
+      {isLoadingConnectionsList || getList().length <= 0 ? (
+        <View style={styles.emptyListContainer}>
+          {isLoadingConnectionsList ? (
+            <>
+              <ActivityIndicator size={'large'} color={COLORS.white} />
+              <StyledText style={{color: COLORS.white}}>
+                Fetching Connections
+              </StyledText>
+            </>
+          ) : (
+            <StyledText style={styles.emptyListText}>
+              No connections found
+            </StyledText>
+          )}
+        </View>
+      ) : (
+        <FlatList
+          data={getList()}
+          renderItem={renderItem}
+          contentContainerStyle={{paddingBottom: 20}}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={keyExtractor}
+          onScroll={onScrollEvent}
+          refreshControl={
+            <RefreshControl
+              tintColor={COLORS.secondary}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        />
+      )}
+      {/* {getList().length > 0 ? (
         <FlatList
           data={getList()}
           renderItem={renderItem}
@@ -303,7 +335,7 @@ const ConnectionsList = () => {
             <StyledText style={styles.emptyListText}>No data found</StyledText>
           )}
         </View>
-      )}
+      )} */}
       {isShowAddButton && (
         <RoundedPlusButton
           style={styles.addButton}

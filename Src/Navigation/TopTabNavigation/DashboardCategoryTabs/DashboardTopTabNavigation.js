@@ -25,7 +25,7 @@ const Tab = createMaterialTopTabNavigator();
 function DashboardTopTabNavigation() {
   const insets = useInsets();
   const profile = useProfile();
-  const categoryList = useInfluencerCategoryList();
+  const categoryList = useInfluencerCategoryList() ?? [];
   const token = useToken();
   const {setswipeEnabled, setfocusedNuggetUserId} = useDashboardProfile() ?? {};
   const [

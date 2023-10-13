@@ -415,7 +415,10 @@ export const nuggetContentAudioService = (
   return axios.post('nuggetcontentaudio', data, {signal});
 };
 
-export const textToAudioService = (data: FormData) => {
+export const textToAudioService = (
+  data: FormData,
+  signal: GenericAbortSignal,
+) => {
   return axios.post('texttoaudio', data);
 };
 

@@ -5,7 +5,9 @@ import {COLORS} from '../../Utilities/Colors';
 import {useInfluencerCategoryList} from '../../Utilities/StoreData';
 
 const InfluencerCategoriesList = ({selectedCategoryId, onSelectCategory}) => {
-  const categoryList = useInfluencerCategoryList();
+  const categoryList = useInfluencerCategoryList() ?? [];
+
+  console.log(categoryList, 'LIST');
 
   const renderCategoryItem = ({item}) => {
     return (

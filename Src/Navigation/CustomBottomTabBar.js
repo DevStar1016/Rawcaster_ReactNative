@@ -29,7 +29,6 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const tabType = useTabType();
   const unreadNotificationCount = useUnreadNotificationCount();
   const isAllNuggetsLoading = useIsNuggetsLoading();
-
   useEffect(() => {
     let keyboardEventListeners;
     if (!IS_IOS) {

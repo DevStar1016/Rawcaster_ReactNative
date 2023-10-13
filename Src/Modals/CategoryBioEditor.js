@@ -17,7 +17,7 @@ const CategoryBioEditor = ({
   onSubmit,
   preSelectedCategoriesIds = [],
 }) => {
-  const influencerCategoryList = useInfluencerCategoryList();
+  const influencerCategoryList = useInfluencerCategoryList() ?? [];
   const [selectedCategoryIdsList, setselectedCategoryIdsList] = useState([
     ...preSelectedCategoriesIds,
   ]);

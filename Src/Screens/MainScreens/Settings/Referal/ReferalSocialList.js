@@ -50,12 +50,19 @@ import {
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
 } from '../../../../Services/APIKeysIds';
 import {useNavigation} from '@react-navigation/native';
+import Clipboard from '@react-native-community/clipboard';
+import {REFERRAL_LINK} from '../../../../Services/ServiceConstants';
 
 var isMount = true;
 var currentPage = 1;
 var totalPages = 1;
 
 const REFERAL_OPTIONS_LIST = [
+  {
+    id: SHARE_OPTION.copy_link,
+    icon: 'clipboard_copy_rounded',
+    name: 'Copy Link',
+  },
   {
     id: SHARE_OPTION.contacts,
     icon: 'contact_rounded_fill_orange',
@@ -186,6 +193,10 @@ const ReferalSocialList = () => {
 
   const onPressReferalOption = pressedShareType => {
     switch (pressedShareType) {
+      case SHARE_OPTION.copy_link:
+        Clipboard.setString(profile.referral_link);
+        Toast.success('Link Copied');
+        break;
       case SHARE_OPTION.contacts:
         if (contactsListType === 2 || contactsListType === 0) {
           if (isMount) {

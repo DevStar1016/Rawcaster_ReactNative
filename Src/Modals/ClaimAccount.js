@@ -130,7 +130,7 @@ const ClaimAccount = ({route}) => {
             if (tempIndex !== -1) {
               tempUnclaimedList[tempIndex] = {
                 ...tempUnclaimedList[tempIndex],
-                unclaimed_status: 1,
+                unclaimed_status: 2,
               };
             }
             dispatch(setUnclaimedAccountsList(tempUnclaimedList));

@@ -20,6 +20,7 @@ type ButtonProps = {
   marginHorizontal?: number;
   containerPadding?: number;
   buttonTextStyle?: TextStyle;
+  disabled?: boolean;
 };
 
 const GradientButton = ({
@@ -32,6 +33,7 @@ const GradientButton = ({
   marginBottom,
   marginHorizontal,
   marginTop,
+  disabled = false,
   rightIcon,
   buttonTextStyle = {},
   containerPadding = 10,
@@ -47,7 +49,8 @@ const GradientButton = ({
       ]}>
       <TouchableOpacity
         style={[styles.button, {padding: containerPadding}]}
-        activeOpacity={0.7}
+        disabled={disabled}
+        activeOpacity={disabled ? 1 : 0.7}
         onPress={onPress}>
         {leftIcon ? (
           <SVGIcon icon={leftIcon} height={leftIconSize} width={leftIconSize} />

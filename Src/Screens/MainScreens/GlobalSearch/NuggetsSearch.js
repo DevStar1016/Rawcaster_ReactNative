@@ -80,10 +80,10 @@ const NuggetsSearch = () => {
   }, []);
 
   useEffect(() => {
-    if (searchText !== null) {
-      setisListLoading(true);
-      nuggetsSearchAPICall(1);
-    }
+    // if (searchText !== null) {
+    setisListLoading(true);
+    nuggetsSearchAPICall(1);
+    // }
   }, [searchText]);
   useEffect(() => {
     if (!isFocused) {
@@ -118,6 +118,7 @@ const NuggetsSearch = () => {
                 translated_content: '',
               };
             });
+            console.log(JSON.stringify(decodedNuggetList[0]), 'LIST');
 
             const tempFollowingUsersList = getFilteredDuplicatesList(
               [...res.data.nuggets_list],

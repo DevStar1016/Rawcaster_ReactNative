@@ -960,7 +960,11 @@ function NuggetActionsOverlay({
               pollDataHeight,
           }}>
           {nugget.content ? (
-            <TouchableOpacity activeOpacity={1}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={{
+                marginRight: isEnableADDButton ? 0 : 20,
+              }}>
               <ScrollView
                 contentContainerStyle={{
                   flexGrow: 1,
@@ -1004,7 +1008,8 @@ function NuggetActionsOverlay({
                   ) : (
                     <SVGIcon
                       // height={15.5}
-                      height={17.5}
+                      // height={17.5}
+                      height={20}
                       icon={
                         !isReadLoading
                           ? !isReadMuted
@@ -1043,7 +1048,7 @@ function NuggetActionsOverlay({
                   <View
                     style={{
                       width: 2,
-                      height: 16,
+                      height: 20,
                       marginHorizontal: 5,
                       backgroundColor: COLORS.white,
                     }}
@@ -1058,7 +1063,8 @@ function NuggetActionsOverlay({
                   ) : (
                     <SVGIcon
                       // height={15.5}
-                      height={17.5}
+                      // height={17.5}
+                      height={20}
                       icon={
                         !isTranslateLoading
                           ? isTranslated
@@ -1200,6 +1206,10 @@ function NuggetActionsOverlay({
             <View style={styles.userDetailsContainer}>
               <TouchableOpacity
                 activeOpacity={0.8}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
                 onPress={() => {
                   if (isLogin()) {
                     const pushAction = StackActions.push('ProfileStack', {
@@ -1220,6 +1230,9 @@ function NuggetActionsOverlay({
                     token ? 15 : 30,
                   )} */}
                 </StyledText>
+                {nugget.account_verify_type === 1 && (
+                  <SVGIcon icon="diamond_verified" height={15} width={15} />
+                )}
               </TouchableOpacity>
               {nugget.type === 2 && (
                 <>
@@ -1532,6 +1545,11 @@ function NuggetActionsOverlay({
         <AIChat
           onPressBack={() => {
             handleCloseAIChatModal();
+          }}
+          onPermissionRejection={() => {
+            if (setpaused) {
+              setpaused(true);
+            }
           }}
           handleShareContent={(content: string) => {
             handleCloseAIChatModal(true);

@@ -47,6 +47,9 @@ import ClipboardCopySecondaryIcon from '../Assets/Svg/clipboard_copy_secondary.s
 import ClipboardCopyPrimaryDarkIcon from '../Assets/Svg/clipboard_copy_primary_dark.svg';
 import FullScreenWhiteIcon from '../Assets/Svg/full_screen_white.svg';
 import MiniScreenWhiteIcon from '../Assets/Svg/mini_screen_white.svg';
+import ClipboardCopyRoundedIcon from '../Assets/Svg/clipboard_copy_rounded.svg';
+import DimondVerifiedIcon from '../Assets/Svg/diamond_verified.svg';
+import PendingTimeIcon from '../Assets/Svg/pending_time.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -370,7 +373,10 @@ export type IconType =
   | 'clipboard_copy_secondary'
   | 'clipboard_copy_primary_dark'
   | 'full_screen_white'
-  | 'mini_screen_white';
+  | 'mini_screen_white'
+  | 'clipboard_copy_rounded'
+  | 'pending_time'
+  | 'diamond_verified';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -556,4 +562,7 @@ export const ICONS = {
   clipboard_copy_primary_dark: ClipboardCopyPrimaryDarkIcon,
   full_screen_white: FullScreenWhiteIcon,
   mini_screen_white: MiniScreenWhiteIcon,
+  clipboard_copy_rounded: ClipboardCopyRoundedIcon,
+  diamond_verified: DimondVerifiedIcon,
+  pending_time: PendingTimeIcon,
 };

@@ -10,7 +10,7 @@ export const initialState: UtilityDataProp = {
     mediaHeight: 0,
   },
   locationDetails: null,
-  isBottomTabBarAbsolute: false,
+  isBottomTabBarAbsolute: true,
   nugget_type: 1, // 1 - video, 2 - audio
   bottomHomeButtonType: 1, //1 - video or other_nuggets, 2 - rawcaster Logo
   isVisibleInfluencers: false,

@@ -10,7 +10,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import TextBox from '../../../../Components/TextBox';
 import {inviteToRawcasterService} from '../../../../Services/ApiService';
 import {getAuthCode} from '../../../../Utilities/Methods';
-import {useToken} from '../../../../Utilities/StoreData';
+import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import Toast from '../../../../Components/Toast';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import GroupUsersImage from '../../../../Assets/Png/group_users_referal.png';
@@ -24,6 +24,7 @@ const ReferalDashboardHeader = ({
   const navigation = useNavigation();
   const inviteUserInputRef = useRef(null);
   const token = useToken();
+  const profile = useProfile();
   const [inviteUserText, setinviteUserText] = useState('');
   const [invitedUsersList, setinvitedUsersList] = useState([]);
   const [isLoading, setisLoading] = useState(false);
@@ -274,16 +275,27 @@ const ReferalDashboardHeader = ({
             </StyledText>
           </TouchableOpacity>
         </LinearGradient>
-        <View style={styles.countsContainer}>
-          <CountContainer
-            count={referalCount}
-            text="Total number of Valid Referrals Credit"
-          />
-          <CountContainer
-            count={referalNeededCount}
-            text="Referrals Needed for Upgrade to Premium"
-          />
-        </View>
+        {profile.user_status_id === 1 && (
+          <View
+            style={[
+              styles.countsContainer,
+              {
+                justifyContent:
+                  referalNeededCount > 0 ? 'space-between' : 'center',
+              },
+            ]}>
+            <CountContainer
+              count={referalCount}
+              text="Total number of Valid Referrals Credit"
+            />
+            {referalNeededCount > 0 && (
+              <CountContainer
+                count={referalNeededCount}
+                text="Referrals Needed for Upgrade to Premium"
+              />
+            )}
+          </View>
+        )}
       </View>
       {listLength > 0 && (
         <View style={styles.listTitleContainer}>
@@ -392,6 +404,7 @@ const styles = StyleSheet.create({
   listTitleContainer: {
     paddingBottom: 15,
     paddingHorizontal: 15,
+    marginTop: 10,
   },
   listTitle: {
     fontFamily: FONTS.DMSans.bold,

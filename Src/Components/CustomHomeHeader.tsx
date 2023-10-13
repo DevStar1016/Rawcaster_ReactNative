@@ -16,6 +16,7 @@ import StyledText from './StyledText';
 import ProfileWithBadge from './ProfileWithBadge';
 import {FONTS} from '../Utilities/Fonts';
 import LiveGif from '../Assets/Gif/live.gif';
+import Badges from '../Utilities/Badges';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -244,6 +245,11 @@ const CustomHomeHeader = ({
             profileSize={28}
             extraMargin={0}
             padding={0}
+            // @ts-ignore
+            badge={token && Badges(profile?.user_status_id)}
+            badgeSize={15}
+            badgeContainerStyle={{right: -5, bottom: -2}}
+            // badgeContainerStyle={{left: -5, bottom: -2}}
             containerStyle={{marginLeft: 5, marginRight: 0}}
             isButton
             onPressProfile={() => {

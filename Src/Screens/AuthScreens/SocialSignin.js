@@ -33,7 +33,7 @@ import {
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 
-const SocialSignin = ({pushId, isLogin = false}) => {
+const SocialSignin = ({pushId, isLogin = false, refId}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const locationDetails = useLocationDetails();
@@ -44,7 +44,9 @@ const SocialSignin = ({pushId, isLogin = false}) => {
       .then(res => {
         dispatch(setLocationDetails(res));
       })
-      .catch(e => {});
+      .catch(e => {
+        console.log(e, 'ERROR LOCATION');
+      });
   }, []);
 
   /**
@@ -67,8 +69,12 @@ const SocialSignin = ({pushId, isLogin = false}) => {
     }
     formData.append('device_id', DEVICE_ID);
     formData.append('push_id', pushId);
+    if (refId) {
+      formData.append('ref_id', refId);
+    }
     // formData.append("voip_token", IS_IOS ? "" : null);
     formData.append('app_type', IS_IOS ? 2 : 1);
+    console.log(formData, 'SIGNUP FORMDATA');
     socialMediaLoginService(formData)
       .then(res => {
         if (res.data.status === 1) {

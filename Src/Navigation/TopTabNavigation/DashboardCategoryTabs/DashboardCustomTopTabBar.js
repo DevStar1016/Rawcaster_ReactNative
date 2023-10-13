@@ -178,9 +178,9 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
           profileSize={28}
           extraMargin={0}
           padding={0}
-          // badge={Badges(profile?.user_status_id)}
-          // badgeSize={15}
-          // badgeContainerStyle={{right: -5, bottom: -2}}
+          badge={Badges(profile?.user_status_id)}
+          badgeSize={15}
+          badgeContainerStyle={{right: -5, bottom: -2}}
           containerStyle={{marginLeft: 5, marginRight: 0}}
           isButton
           onPressProfile={() => {

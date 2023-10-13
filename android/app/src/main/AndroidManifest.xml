@@ -103,6 +103,10 @@
                   android:pathPrefix="/index.php" />
               <data android:scheme="https"
                   android:host="*.rawcaster.com"
+                  android:pathPrefix="/signup" />
+              />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com" />
                   />
               <!-- DeepLinking with Dynamic Pre Start url End -->
 
@@ -122,6 +126,10 @@
               <data android:scheme="https"
                   android:host="rawcaster.com"
                   android:pathPrefix="/share" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/signup"
+                  />
               <data android:scheme="https"
                   android:host="rawcaster.com"
                   />

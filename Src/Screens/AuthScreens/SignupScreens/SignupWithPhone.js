@@ -16,10 +16,17 @@ import {
 } from '../../../Services/ServiceConstants';
 import SloganLogo from '../../../Assets/Svg/slogan_logo.svg';
 import Toast from '../../../Components/Toast';
-import {getAuthCode, storeToken} from '../../../Utilities/Methods';
+import {
+  getAuthCode,
+  getLocationAddress,
+  storeToken,
+} from '../../../Utilities/Methods';
 import {FONTS} from '../../../Utilities/Fonts';
 import {useLocationDetails} from '../../../Utilities/StoreData';
-import {setIsVisibleInfluencers} from '../../../Store/Slices/UtilitySlice';
+import {
+  setIsVisibleInfluencers,
+  setLocationDetails,
+} from '../../../Store/Slices/UtilitySlice';
 import WebUrlLoaderModal from '../../../Modals/WebUrlLoaderModal';
 import Loader from '../../../Components/Loader';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
@@ -34,7 +41,7 @@ const SignupWithPhone = ({route}) => {
   const navigation = useNavigation();
   const locationDetails = useLocationDetails();
   const dispatch = useDispatch();
-  const {loginId, signUpType, pushId /* 1 - Email, 2 - Phone*/} =
+  const {loginId, signUpType, refId, pushId /* 1 - Email, 2 - Phone*/} =
     route.params ?? {};
 
   const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
@@ -76,8 +83,22 @@ const SignupWithPhone = ({route}) => {
       validationSchema: validationSchema,
       onSubmit: values => {
         setisLoading(true);
+        if (isEnablePhoneNumber) {
+          getLocationAddress()
+            .then(res => {
+              dispatch(setLocationDetails(res));
 
-        handleSignupWithPhone(values);
+              handleSignupWithPhone(values, res);
+            })
+            .catch(e => {
+              setisLoading(false);
+              Toast.fail(
+                'Please enable location permissions in settings to sign-up with phone number',
+              );
+            });
+        } else {
+          handleSignupWithPhone(values);
+        }
       },
     });
 
@@ -98,7 +119,7 @@ const SignupWithPhone = ({route}) => {
    * @param {object} values - The form values submitted for signup.
    * @returns None
    */
-  const handleSignupWithPhone = values => {
+  const handleSignupWithPhone = (values, tempLocationDetails) => {
     const formData = new FormData();
     formData.append('auth_code', getAuthCode(values.login_id));
     formData.append('signup_type', isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
@@ -110,15 +131,25 @@ const SignupWithPhone = ({route}) => {
     formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
-    if (locationDetails && locationDetails?.geoLocation) {
-      formData.append('geo_location', locationDetails?.geoLocation);
+    if (
+      (locationDetails && locationDetails?.geoLocation) ||
+      (tempLocationDetails && tempLocationDetails?.geoLocation)
+    ) {
+      formData.append(
+        'geo_location',
+        locationDetails?.geoLocation ?? tempLocationDetails?.geoLocation,
+      );
     }
     formData.append('ref_id', '');
     formData.append('device_id', DEVICE_ID);
     formData.append('push_id', pushId);
+    if (refId) {
+      formData.append('ref_id', refId);
+    }
+
     // formData.append("voip_token", IS_IOS ? "" : null);
     formData.append('app_type', IS_IOS ? 2 : 1);
-
+    console.log(formData, 'SIGNUP FORMDATA');
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {

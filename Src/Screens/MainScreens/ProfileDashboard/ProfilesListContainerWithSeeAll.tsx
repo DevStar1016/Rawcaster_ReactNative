@@ -73,7 +73,8 @@ const ProfilesListContainerWithSeeAll = ({
   const dispatch = useDispatch();
   const token = useToken();
   const profile = useProfile();
-  const unclaimedAccountsList = useUnclaimedAccountsList();
+  const unclaimedAccountsList: any = useUnclaimedAccountsList();
+
   const otherInfluencersRequestList = useOtherInfluencersRequestList();
   const otherConnectionsRequestList = useOtherConnectionsRequestList();
   const [isLoading, setisLoading] = useState(
@@ -106,10 +107,9 @@ const ProfilesListContainerWithSeeAll = ({
             fansListAPICall();
             return;
           case 'unclaimed_influencers':
-            if (!unclaimedAccountsList) {
-              unclaimedAccountsListAPICall();
-              return;
-            }
+            unclaimedAccountsListAPICall();
+            return;
+
           default:
             if (isMount) {
               setisLoading(false);
@@ -294,6 +294,9 @@ const ProfilesListContainerWithSeeAll = ({
     if (isExternalListOnly) {
       return list;
     }
+    if (listType === 'unclaimed_influencers') {
+      return unclaimedAccountsList ? [...unclaimedAccountsList] : [];
+    }
     return usersList;
   }
 
@@ -308,14 +311,24 @@ const ProfilesListContainerWithSeeAll = ({
     if (isLock) {
       return title;
     }
+    if (listType === 'unclaimed_influencers') {
+      return `${title} (${unclaimedAccountsList?.length ?? 0})`;
+    }
     return `${title} (${usersTotalCount})`;
     // return `${title} (${getList().length})`;
   }
 
   function getTopRightIcon(item: any) {
     if (item.user_id !== profile?.user_id) {
-      if (listType === 'unclaimed_influencers' && item.unclaimed_status === 0) {
-        return 'shield_secondary';
+      if (
+        listType === 'unclaimed_influencers' &&
+        (item.unclaimed_status === 1 || item.unclaimed_status === 2)
+      ) {
+        if (item.unclaimed_status === 1) {
+          return 'shield_secondary';
+        } else {
+          return 'pending_time';
+        }
       }
       if (userId) {
         if (
@@ -431,10 +444,12 @@ const ProfilesListContainerWithSeeAll = ({
                         topRightIconAsButton
                         onPressTopRightIcon={() => {
                           if (listType === 'unclaimed_influencers') {
-                            /* @ts-ignore */
-                            navigation.navigate('ClaimAccount', {
-                              influencerId: item.user_id,
-                            });
+                            if (item.unclaimed_status === 1) {
+                              /* @ts-ignore */
+                              navigation.navigate('ClaimAccount', {
+                                influencerId: item.user_id,
+                              });
+                            }
                           } else if (userId) {
                             if (listType === 'influencers' && !item.follow) {
                               handleBecomeFan(item.user_ref_id);

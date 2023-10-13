@@ -11,31 +11,26 @@ import React, {useEffect, useRef, useState} from 'react';
 import {COLORS} from '../../../../Utilities/Colors';
 import StyledText from '../../../../Components/StyledText';
 import {FONTS} from '../../../../Utilities/Fonts';
-import {
-  BottomSheetFlatList,
-  BottomSheetScrollView,
-  BottomSheetTextInput,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
-import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
+import {BottomSheetFlatList, BottomSheetView} from '@gorhom/bottom-sheet';
 import {useProfile, useToken} from '../../../../Utilities/StoreData';
 import SVGIcon from '../../../../Components/SVGIcon';
-import EmojiSelector, {Categories} from 'react-native-emoji-selector';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {
   addNuggetCommentService,
   deleteNuggetCommentService,
   editNuggetCommentService,
   nuggetCommentListService,
+  nuggetContentAudioService,
 } from '../../../../Services/ApiService';
 import {getSlicedText} from '../../../../Utilities/Methods';
 import CommentReplyFullItem from './CommentReplyFullItem';
 import Toast from '../../../../Components/Toast';
 import {EmojiKeyboard} from 'rn-emoji-keyboard';
 import RBSheetTextInput from '../../../../Components/RBSheetTextInput';
-import EmojiContainer from 'react-native-emoji-container';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 var isMount = true;
+var readoutController = undefined;
 const CommentsList = ({
   onPressBack,
   id,
@@ -45,6 +40,7 @@ const CommentsList = ({
 }) => {
   const [isOpenEmojiContainer, setisOpenEmojiContainer] = useState(false);
   const inpuFieldRef = useRef(null);
+  const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const [replyData, setreplyData] = useState(null);
   const [editData, seteditData] = useState(null);
   const [isLoading, setisLoading] = useState(true);
@@ -52,12 +48,22 @@ const CommentsList = ({
   const token = useToken();
   const [typedText, settypedText] = useState('');
   const profile = useProfile();
+  const [readoutCommentData, setreadoutCommentData] = useState({
+    id: null,
+    isLoading: false,
+    url: null,
+    isPlaying: false,
+  });
 
   useEffect(() => {
     isMount = true;
 
     return () => {
       isMount = false;
+      handleStopAudio();
+      if (readoutController) {
+        readoutController.abort();
+      }
     };
   }, []);
 
@@ -101,6 +107,59 @@ const CommentsList = ({
   }, []);
 
   /**
+   * Stops the audio playback and removes the playback listener.
+   * If an error occurs during the process, it is caught and ignored.
+   * Finally, sets the 'isReadMuted' state to false.
+   * @returns None
+   */
+  const handleStopAudio = () => {
+    try {
+      audioPlayerRef.current?.stopPlayer();
+      audioPlayerRef.current?.removePlayBackListener();
+    } catch (e) {
+    } finally {
+      if (isMount) {
+        setreadoutCommentData(pre => ({
+          ...pre,
+          isPlaying: false,
+        }));
+      }
+    }
+  };
+
+  /**
+   * Handles playing audio from the given URL.
+   * @param {string} url - The URL of the audio file to play.
+   * @returns None
+   */
+  const handlePlayAudio = async url => {
+    handleStopAudio();
+    try {
+      await audioPlayerRef.current?.startPlayer(url);
+      audioPlayerRef.current?.addPlayBackListener(e => {
+        if (Math.floor(e.currentPosition) === 0) {
+          if (isMount) {
+            setreadoutCommentData(pre => ({
+              ...pre,
+              isPlaying: true,
+            }));
+          }
+        } else if (e.currentPosition >= e.duration) {
+          handleStopAudio();
+        }
+        return;
+      });
+    } catch (e) {
+      if (isMount) {
+        setreadoutCommentData(pre => ({
+          ...pre,
+          isPlaying: false,
+        }));
+      }
+    }
+  };
+
+  /**
    * Makes an API call to retrieve the comments list for a specific nugget.
    * @returns None
    */
@@ -121,6 +180,63 @@ const CommentsList = ({
       .finally(() => {
         if (isMount) {
           setisLoading(false);
+        }
+      });
+  };
+
+  const handleReadoutComment = commentId => {
+    handleStopAudio();
+    if (isMount) {
+      setreadoutCommentData(pre => ({
+        ...pre,
+        id: commentId,
+        isLoading: true,
+      }));
+    }
+    if (readoutController) {
+      readoutController.abort();
+    }
+    readoutController = new AbortController();
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('nugget_id', commentId);
+    formData.append('nugget_type', 1);
+    formData.append('translation_type', 1);
+    nuggetContentAudioService(formData, readoutController.signal)
+      .then(res => {
+        console.log(res.data, 'DATATATAA');
+        if (isMount) {
+          if (res.data.status === 1) {
+            setreadoutCommentData(pre => ({
+              ...pre,
+              isLoading: false,
+              url: res.data.file_path,
+            }));
+            handlePlayAudio(res.data.file_path);
+          } else if (res.data.status === 0) {
+            Toast.fail(res.data.msg);
+            setreadoutCommentData(pre => ({
+              ...pre,
+              id: null,
+              isLoading: false,
+              url: null,
+              isPlaying: false,
+            }));
+          }
+        }
+      })
+      .catch(e => {
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+          if (isMount) {
+            setreadoutCommentData(pre => ({
+              ...pre,
+              id: null,
+              isLoading: false,
+              url: null,
+              isPlaying: false,
+            }));
+          }
         }
       });
   };
@@ -267,7 +383,32 @@ const CommentsList = ({
     formData.append('comment_id', commentId);
     formData.append('comment', comment);
     editNuggetCommentService(formData)
-      .then(res => {})
+      .then(res => {
+        if (res.data.status === 1) {
+          if (isMount) {
+            setreadoutCommentData(preData => {
+              let tempData = {...preData};
+              if (commentId === tempData.id) {
+                tempData = {
+                  id: null,
+                  isLoading: false,
+                  isPlaying: false,
+                  url: null,
+                };
+              }
+              return {
+                ...tempData,
+              };
+            });
+          }
+        }
+        if (res.data.status === 0) {
+          if (isMount) {
+            setcommentsList(preCommentsList);
+          }
+          Toast.fail(res.data.msg);
+        }
+      })
       .catch(e => {
         if (isMount) {
           setcommentsList(preCommentsList);
@@ -418,10 +559,14 @@ const CommentsList = ({
                 return (
                   <CommentReplyFullItem
                     item={item}
+                    handlePlayAudio={handlePlayAudio}
+                    handleStopAudio={handleStopAudio}
                     replyData={replyData}
                     onDeleteComment={(deleteItem, isReply) => {
                       onDeleteComment(item, deleteItem, isReply);
                     }}
+                    handleReadoutComment={handleReadoutComment}
+                    readoutCommentData={readoutCommentData}
                     onPressEdit={(editItem, isReply) => {
                       if (isMount) {
                         setreplyData(null);
@@ -527,7 +672,7 @@ const CommentsList = ({
           <TouchableOpacity
             activeOpacity={1}
             style={{
-              height: DIMENSIONS.window.height / 2 - 60,
+              height: DIMENSIONS.window.height / 2,
               backgroundColor: COLORS.white,
               // position: 'absolute',
               // bottom: 0,
@@ -537,24 +682,7 @@ const CommentsList = ({
               borderTopEndRadius: 10,
             }}>
             <BottomSheetView style={{flex: 1}}>
-              <EmojiContainer
-                titleTextStyle={{
-                  fontFamily: FONTS.DMSans.medium,
-                  fontSize: 14,
-                  color: COLORS.black,
-                }}
-                onPressEmoji={emojiItem => {
-                  if (isMount) {
-                    settypedText(pre => {
-                      if (pre.length < 500) {
-                        return pre + emojiItem.emoji;
-                      }
-                      return pre;
-                    });
-                  }
-                }}
-              />
-              {/* <EmojiKeyboard
+              <EmojiKeyboard
                 onEmojiSelected={res => {
                   if (isMount) {
                     settypedText(pre => {
@@ -565,16 +693,18 @@ const CommentsList = ({
                     });
                   }
                 }}
-                disabledCategories={['people_body', 'flags']}
+                // enableSearchBar
+                // disabledCategories={['people_body', 'flags']}
                 categoryPosition="bottom"
                 enableCategoryChangeGesture={false}
-                defaultHeight={DIMENSIONS.window.height / 2 + 10}
+                defaultHeight={'100%'}
+                emojiSize={25}
                 styles={{
                   header: {fontFamily: FONTS.DMSans.medium},
                   // container
                   // container: {width: },
                 }}
-              /> */}
+              />
               {/* <EmojiSelector
               showSearchBar={false}
               showSectionTitles={false}

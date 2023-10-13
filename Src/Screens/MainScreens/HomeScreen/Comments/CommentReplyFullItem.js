@@ -6,7 +6,11 @@ import {COLORS} from '../../../../Utilities/Colors';
 const CommentReplyFullItem = ({
   item,
   replyData,
+  readoutCommentData,
+  handleReadoutComment,
   onPressReply,
+  handlePlayAudio,
+  handleStopAudio,
   onDeleteComment,
   onPressEdit,
 }) => {
@@ -14,6 +18,10 @@ const CommentReplyFullItem = ({
     <View>
       <CommentItem
         item={item}
+        handlePlayAudio={handlePlayAudio}
+        handleStopAudio={handleStopAudio}
+        handleReadoutComment={handleReadoutComment}
+        readoutCommentData={readoutCommentData}
         replyData={replyData}
         onPressReply={() => {
           onPressReply(item);
@@ -32,6 +40,10 @@ const CommentReplyFullItem = ({
             <CommentItem
               key={replyItem.comment_id?.toString()}
               item={replyItem}
+              handlePlayAudio={handlePlayAudio}
+              handleStopAudio={handleStopAudio}
+              handleReadoutComment={handleReadoutComment}
+              readoutCommentData={readoutCommentData}
               isEnableReply={false}
               replyData={replyData}
               onPressReply={() => {
