@@ -50,6 +50,7 @@ import MiniScreenWhiteIcon from '../Assets/Svg/mini_screen_white.svg';
 import ClipboardCopyRoundedIcon from '../Assets/Svg/clipboard_copy_rounded.svg';
 import DimondVerifiedIcon from '../Assets/Svg/diamond_verified.svg';
 import PendingTimeIcon from '../Assets/Svg/pending_time.svg';
+import MembershipGreyIcon from '../Assets/Svg/membership_grey.svg';
 
 import TwitterIcon from '../Assets/Svg/twitter.svg';
 import AppleIcon from '../Assets/Svg/apple.svg';
@@ -376,7 +377,8 @@ export type IconType =
   | 'mini_screen_white'
   | 'clipboard_copy_rounded'
   | 'pending_time'
-  | 'diamond_verified';
+  | 'diamond_verified'
+  | 'membership_grey';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -565,4 +567,5 @@ export const ICONS = {
   clipboard_copy_rounded: ClipboardCopyRoundedIcon,
   diamond_verified: DimondVerifiedIcon,
   pending_time: PendingTimeIcon,
+  membership_grey: MembershipGreyIcon,
 };

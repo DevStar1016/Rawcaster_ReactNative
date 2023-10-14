@@ -61,6 +61,14 @@ const NotificationsSettings = () => {
     verificationField: '',
   });
 
+  const [optinConfirmationData, setoptinConfirmationData] = useState({
+    status: false,
+    text: '',
+    updatedOptinValue: settings?.opt_in,
+    id: null,
+    fieldName: '',
+  });
+
   useEffect(() => {
     isMount = true;
 
@@ -69,17 +77,37 @@ const NotificationsSettings = () => {
     };
   }, []);
 
-  function updateUsersSettingsAPICall(keyText, changedValue, oldValue) {
+  function updateUsersSettingsAPICall(
+    keyText,
+    changedValue,
+    oldValue,
+    extraFieldName,
+    extraValue,
+  ) {
     if (isMount) {
       setisLoading(true);
     }
     const formData = new FormData();
     formData.append('token', token);
     formData.append(keyText, changedValue);
+    if (extraFieldName) {
+      formData.append(extraFieldName, extraValue);
+    }
     updateUserSettingsService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          dispatch(setSettings({...settings, [keyText]: changedValue}));
+          let updatedSettings = {...settings, [keyText]: changedValue};
+          if (extraFieldName) {
+            updatedSettings = {
+              ...updatedSettings,
+              [extraFieldName]: extraValue,
+            };
+          }
+          dispatch(
+            setSettings({
+              ...updatedSettings,
+            }),
+          );
 
           Toast.success(res.data.msg);
         } else if (res.data.status === 0) {
@@ -176,14 +204,7 @@ const NotificationsSettings = () => {
       return true;
     }
     setconfirmationBoxData({isOpen: true, verificationField: 'email'});
-    // if (profile?.email_id) {
-    //   setconfirmationBoxData({isOpen: true, verificationField: 'email'});
-    // } else {
-    //   setverificationInputModalData({
-    //     isOpen: true,
-    //     verificationField: 'email',
-    //   });
-    // }
+
     return false;
   }
 
@@ -192,14 +213,7 @@ const NotificationsSettings = () => {
       return true;
     }
     setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
-    // if (profile?.mobile) {
-    //   setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
-    // } else {
-    //   setverificationInputModalData({
-    //     isOpen: true,
-    //     verificationField: 'sms',
-    //   });
-    // }
+
     return false;
   }
 
@@ -214,14 +228,21 @@ const NotificationsSettings = () => {
     });
   }
 
-  function updateSwitchStatus(id, fieldName) {
+  function updateSwitchStatus(id, fieldName, extraFieldName, extraValue) {
     setswitchStatus(preData => {
       const changedStatus = getChangedStatus(preData[fieldName], id);
-      updateUsersSettingsAPICall(fieldName, changedStatus, preData[fieldName]);
-      return {
-        ...preData,
-        [fieldName]: changedStatus,
-      };
+      let tempPreData = {...preData, [fieldName]: changedStatus};
+      if (extraFieldName) {
+        tempPreData = {...tempPreData, [extraFieldName]: extraValue};
+      }
+      updateUsersSettingsAPICall(
+        fieldName,
+        changedStatus,
+        preData[fieldName],
+        extraFieldName,
+        extraValue,
+      );
+      return {...tempPreData};
     });
   }
 
@@ -231,7 +252,28 @@ const NotificationsSettings = () => {
         isEmailVerified() && updateSwitchStatus(id, fieldName);
         return;
       case 2:
-        isMobileVerified() && updateSwitchStatus(id, fieldName);
+        if (isMobileVerified()) {
+          const changedStatus = getChangedStatus(switchStatus[fieldName], id);
+          if (
+            changedStatus?.split('')[1] &&
+            parseInt(changedStatus?.split('')[1]) === 1
+          ) {
+            if (settings.opt_in === 0) {
+              setoptinConfirmationData({
+                status: true,
+                text: 'By enabling SMS, you agree to receive text messages from Rawcaster.com. Message and data rates may apply. If you wish to STOP receiving SMS messages from Rawcaster.com, please disable this option.',
+                updatedOptinValue: 1,
+                id,
+                fieldName,
+              });
+            } else {
+              updateSwitchStatus(id, fieldName);
+            }
+          } else {
+            updateSwitchStatus(id, fieldName);
+          }
+        }
+        // isMobileVerified() && updateSwitchStatus(id, fieldName);
         return;
       case 3:
         updateSwitchStatus(id, fieldName);
@@ -354,6 +396,47 @@ const NotificationsSettings = () => {
           }}
         />
       </Modal>
+
+      <Modal
+        onRequestClose={() => {}}
+        transparent
+        visible={optinConfirmationData.status}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          positiveButtonText={'Confirm'}
+          onPressPositiveButton={() => {
+            updateSwitchStatus(
+              optinConfirmationData.id,
+              optinConfirmationData.fieldName,
+              'opt_in',
+              optinConfirmationData.updatedOptinValue,
+            );
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+                updatedOptinValue: null,
+                fieldName: '',
+                id: null,
+              });
+            }
+          }}
+          negativeButtonText={'Cancel'}
+          onPressNegativeButton={() => {
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+                updatedOptinValue: null,
+                fieldName: '',
+                id: null,
+              });
+            }
+          }}
+          content={optinConfirmationData.text}
+        />
+      </Modal>
+
       <Modal visible={isLoading} transparent>
         <Loader
           bgColor={COLORS.transparentDimColor}

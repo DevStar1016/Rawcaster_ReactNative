@@ -133,6 +133,17 @@ export const ACCOUNT_ACTIVE_STATUS_LIST = [
   },
 ];
 
+export const OPT_IN_STATUS_LIST = [
+  {
+    id: 1,
+    name: 'Enable',
+  },
+  {
+    id: 0,
+    name: 'Disable',
+  },
+];
+
 export const SIGNUP_TYPE = {
   email_phone: 1,
   apple: 2,

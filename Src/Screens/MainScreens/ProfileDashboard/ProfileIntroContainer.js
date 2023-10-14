@@ -91,6 +91,15 @@ const ProfileIntroContainer = ({
       ) : (
         false
       )}
+      {profile?.user_status ? (
+        <RowContainer
+          text={`Rawcaster membership is ${profile?.user_status}`}
+          icon={'membership_grey'}
+          iconSize={28}
+        />
+      ) : (
+        false
+      )}
     </View>
   );
 };

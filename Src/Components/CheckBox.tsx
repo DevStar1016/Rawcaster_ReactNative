@@ -44,7 +44,7 @@ const CheckBox = ({
         {isSelected && <SVGIcon icon="tick" height={13} width={13} />}
       </View>
       {isVisibleText && (
-        <View style={{flex: 1, paddingLeft: 10}}>
+        <View style={{paddingLeft: 10}}>
           <StyledText style={textStyle}>{text}</StyledText>
         </View>
       )}

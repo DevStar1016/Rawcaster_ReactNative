@@ -8,7 +8,12 @@ import TextBox from '../../../Components/TextBox';
 import {COLORS} from '../../../Utilities/Colors';
 import StyledText from '../../../Components/StyledText';
 import CustomDateMonthYearPicker from '../../../Components/CustomDateMonthYearPicker';
-import {GENDER_LIST, IS_IOS} from '../../../Utilities/Constants';
+import {
+  EMAIL_REGEX,
+  GENDER_LIST,
+  IS_IOS,
+  PHONE_REGEX,
+} from '../../../Utilities/Constants';
 import {signupService} from '../../../Services/ApiService';
 import {
   DEVICE_ID,
@@ -35,6 +40,8 @@ import ReplaceStatusBar from '../../../Components/ReplaceStatusBar';
 import SubmitButton from '../../../Components/SubmitButton';
 import PoliciesFooter from '../../../Components/PoliciesFooter';
 import DropDownPicker from '../../../Components/DropDownPicker';
+import CheckBox from '../../../Components/CheckBox';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 
 let isMount = true;
 const SignupWithPhone = ({route}) => {
@@ -44,9 +51,14 @@ const SignupWithPhone = ({route}) => {
   const {loginId, signUpType, refId, pushId /* 1 - Email, 2 - Phone*/} =
     route.params ?? {};
 
-  const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
-    signUpType === 2 ? true : false,
-  );
+  // const [isEnablePhoneNumber, setisEnablePhoneNumber] = useState(
+  //   signUpType === 2 ? true : false,
+  // );
+  const [optinConfirmationData, setoptinConfirmationData] = useState({
+    status: false,
+    text: '',
+    isContinue: false,
+  });
   const [isLoading, setisLoading] = useState(false);
 
   const [isOpenTermsAndConditionsModal, setisOpenTermsAndConditionsModal] =
@@ -63,44 +75,71 @@ const SignupWithPhone = ({route}) => {
       //   'Password contain uppercase letter (A-Z), lowercase letter (a-z), symbol (!@#$%) and a number (0-9)',
       // )
       .required('Password is required'),
-    login_id: isEnablePhoneNumber
-      ? Yup.string().required('Phone number is required')
-      : Yup.string().email('Enter valid email').required('Email is required'),
+    isEnablePhoneNumber: Yup.boolean(),
+    login_id: Yup.string().test('login_id', 'required', (value, ctx) => {
+      const {isEnablePhoneNumber} = ctx.parent;
+      if (!value) {
+        return ctx.createError({
+          message: `${
+            isEnablePhoneNumber ? 'Phone number' : 'Email'
+          } is required`,
+        });
+      }
+      const isValid = isEnablePhoneNumber
+        ? PHONE_REGEX.test(value)
+        : EMAIL_REGEX.test(value);
+      if (!isValid) {
+        return ctx.createError({
+          message: `Enter valid ${
+            isEnablePhoneNumber ? 'phone number' : 'email'
+          }`,
+        });
+      }
+      return true;
+    }),
+    //  isEnablePhoneNumber
+    //   ? Yup.string().required('Phone number is required')
+    //   : Yup.string().email('Enter valid email').required('Email is required'),
     dob: Yup.string().required('Date of birth is required'),
     sex: Yup.object().nullable().required('Sex is required'),
     gender: Yup.string().max(20, 'Maximum 20 characters allowed'),
   });
 
-  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
-    useFormik({
-      initialValues: {
-        name: '',
-        login_id: loginId ?? '',
-        password: '',
-        dob: '',
-        sex: null,
-      },
-      validationSchema: validationSchema,
-      onSubmit: values => {
-        setisLoading(true);
-        if (isEnablePhoneNumber) {
-          getLocationAddress()
-            .then(res => {
-              dispatch(setLocationDetails(res));
-
-              handleSignupWithPhone(values, res);
-            })
-            .catch(e => {
-              setisLoading(false);
-              Toast.fail(
-                'Please enable location permissions in settings to sign-up with phone number',
-              );
-            });
-        } else {
-          handleSignupWithPhone(values);
+  const {
+    handleSubmit,
+    handleChange,
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setValues,
+  } = useFormik({
+    initialValues: {
+      name: '',
+      isEnablePhoneNumber: signUpType === 2 ? true : false,
+      login_id: loginId ?? '',
+      password: '',
+      dob: '',
+      sex: null,
+    },
+    validationSchema: validationSchema,
+    onSubmit: values => {
+      if (values.isEnablePhoneNumber) {
+        if (isMount) {
+          setoptinConfirmationData({
+            isContinue: true,
+            status: true,
+            text: 'By Providing your phone number, you agree to receive text messages from Rawcaster.com with your One-Time-Password, during signup or password reset. Message and data rates may apply. If you wish to STOP receiving SMS messages from Rawcaster.com, please uncheck this box and register with email',
+          });
         }
-      },
-    });
+      } else {
+        if (isMount) {
+          setisLoading(true);
+        }
+        handleSignupWithPhone(values);
+      }
+    },
+  });
 
   useEffect(() => {
     AvoidSoftInput.setAdjustResize();
@@ -114,6 +153,24 @@ const SignupWithPhone = ({route}) => {
     };
   }, []);
 
+  const handleContinueOptinConfirmation = () => {
+    if (isMount) {
+      setisLoading(true);
+    }
+    getLocationAddress()
+      .then(res => {
+        console.log(res, 'RESSSSS');
+        dispatch(setLocationDetails(res));
+
+        handleSignupWithPhone(values, res);
+      })
+      .catch(e => {
+        Toast.fail(
+          'Please enable location permissions in settings to sign-up with phone number',
+        );
+      });
+  };
+
   /**
    * Handles the signup process with phone number.
    * @param {object} values - The form values submitted for signup.
@@ -122,23 +179,36 @@ const SignupWithPhone = ({route}) => {
   const handleSignupWithPhone = (values, tempLocationDetails) => {
     const formData = new FormData();
     formData.append('auth_code', getAuthCode(values.login_id));
-    formData.append('signup_type', isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
+    formData.append('signup_type', values.isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
     formData.append('first_name', values.name);
     formData.append('display_name', values.name);
     formData.append('dob', values.dob);
     formData.append('gender', values.sex?.id);
-    formData.append('other_gender', values.gender);
+    if (values.gender) {
+      formData.append('other_gender', values.gender);
+    }
     formData.append('email_id', values.login_id?.trim());
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
-    if (
-      (locationDetails && locationDetails?.geoLocation) ||
-      (tempLocationDetails && tempLocationDetails?.geoLocation)
-    ) {
-      formData.append(
-        'geo_location',
-        locationDetails?.geoLocation ?? tempLocationDetails?.geoLocation,
-      );
+    if (locationDetails || tempLocationDetails) {
+      if (locationDetails?.geoLocation || tempLocationDetails?.geoLocation) {
+        formData.append(
+          'geo_location',
+          locationDetails?.geoLocation ?? tempLocationDetails?.geoLocation,
+        );
+      }
+      if (locationDetails?.latitude || tempLocationDetails?.latitude) {
+        formData.append(
+          'latitude',
+          locationDetails?.latitude ?? tempLocationDetails?.latitude,
+        );
+      }
+      if (locationDetails?.longitude || tempLocationDetails?.longitude) {
+        formData.append(
+          'longitude',
+          locationDetails?.longitude ?? tempLocationDetails?.longitude,
+        );
+      }
     }
     formData.append('ref_id', '');
     formData.append('device_id', DEVICE_ID);
@@ -225,7 +295,7 @@ const SignupWithPhone = ({route}) => {
             errorText={errors.name && touched.name ? errors.name : ''}
             value={values.name}
           />
-          {isEnablePhoneNumber ? (
+          {values.isEnablePhoneNumber ? (
             <TextBox
               iconColor={COLORS.placeHolderColor}
               placeHolder="Enter your phone number"
@@ -252,15 +322,41 @@ const SignupWithPhone = ({route}) => {
             />
           )}
 
-          <View style={{alignItems: 'flex-end'}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: values.isEnablePhoneNumber
+                ? 'space-between'
+                : 'flex-end',
+            }}>
+            {values.isEnablePhoneNumber && (
+              <CheckBox
+                text="Opt-in"
+                isSelected={true}
+                onPress={() => {
+                  setoptinConfirmationData({
+                    status: true,
+                    text: 'No SMS messages will be sent to your phone. You will need to register with your email address to receive your One-Time-Password.',
+                  });
+                }}
+              />
+            )}
+
             <StyledText
               style={styles.emailFieldToggleButtonText}
               onPress={() => {
                 if (isMount) {
-                  setisEnablePhoneNumber(pre => !pre);
+                  setValues(preValues => ({
+                    ...preValues,
+                    login_id: '',
+                    isEnablePhoneNumber: !preValues.isEnablePhoneNumber,
+                  }));
+                  // setisEnablePhoneNumber(pre => !pre);
                 }
               }}>
-              {`Use ${isEnablePhoneNumber ? 'Email' : 'Phone Number'} instead`}
+              {`Use ${
+                values.isEnablePhoneNumber ? 'email' : 'phone number'
+              } instead`}
             </StyledText>
           </View>
           <TextBox
@@ -357,6 +453,44 @@ const SignupWithPhone = ({route}) => {
       </Modal>
       <Modal onRequestClose={() => {}} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
+      </Modal>
+
+      <Modal
+        onRequestClose={() => {}}
+        transparent
+        visible={optinConfirmationData.status}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          positiveButtonText={
+            optinConfirmationData.isContinue ? 'Continue' : 'Cancel'
+          }
+          onPressPositiveButton={() => {
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+              });
+              if (optinConfirmationData.isContinue) {
+                handleContinueOptinConfirmation();
+              }
+            }
+          }}
+          negativeButtonText={'Register with email'}
+          onPressNegativeButton={() => {
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+              });
+              setValues(preValues => ({
+                ...preValues,
+                isEnablePhoneNumber: false,
+                login_id: '',
+              }));
+            }
+          }}
+          content={optinConfirmationData.text}
+        />
       </Modal>
     </View>
   );

@@ -16,6 +16,7 @@ import {
   DEFAULT_DATE_FORMAT_LIST,
   DEFAULT_PAGES_LIST,
   DISPLAY_CHOICES_LIST,
+  OPT_IN_STATUS_LIST,
   VISIBLE_CHOICES_LIST,
 } from '../../../Utilities/Constants';
 import {COLORS} from '../../../Utilities/Colors';
@@ -23,16 +24,24 @@ import RadioButton from '../../../Components/RadioButton';
 import {
   getLanguageListService,
   getTimeZoneService,
+  updateMyProfileService,
   updateUserSettingsService,
 } from '../../../Services/ApiService';
 import Loader from '../../../Components/Loader';
 import MultiItemsSelectList from '../../../Modals/MultiItemsSelectList';
-import {setSettings} from '../../../Store/Slices/AuthSlice';
+import {setMyProfile, setSettings} from '../../../Store/Slices/AuthSlice';
 import Toast from '../../../Components/Toast';
 import {useDispatch} from 'react-redux';
-import {removeToken} from '../../../Utilities/Methods';
+import {
+  getAuthCode,
+  htmlDecodeText,
+  removeToken,
+} from '../../../Utilities/Methods';
 import SwtchesContainer from '../../../Components/SwtchesContainer';
 import {setTranslatedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
+import {useNavigation} from '@react-navigation/native';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
+import InputPopup from '../../../Modals/InputPopup';
 
 var isMount = true;
 const CHOICE_CONTAINERS_LIST = [
@@ -104,6 +113,7 @@ const PRIVACY_SWITCHES_LIST = [
 ];
 
 const GeneralSettings = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
   const settings = useSettings();
@@ -121,6 +131,22 @@ const GeneralSettings = () => {
   const [loaderText, setloaderText] = useState(
     'Fetching Languages and Timezones',
   );
+
+  const [confirmationBoxData, setconfirmationBoxData] = useState({
+    isOpen: false,
+    verificationField: '',
+  });
+  const [verificationInputModalData, setverificationInputModalData] = useState({
+    isOpen: false,
+    verificationField: '',
+  });
+
+  const [optinConfirmationData, setoptinConfirmationData] = useState({
+    status: false,
+    text: '',
+    updatedOptinValue: settings?.opt_in,
+  });
+
   const [isLoading, setisLoading] = useState(true);
   const [languagesList, setlanguagesList] = useState([]);
   const [readoutLanguagesList, setreadoutLanguagesList] = useState([]);
@@ -144,6 +170,7 @@ const GeneralSettings = () => {
     lock_my_influencer: settings?.lock_my_influencer,
     lock_nugget: settings?.lock_nugget,
     read_out_accent_id: settings?.read_out_accent_id,
+    opt_in: settings?.opt_in,
   });
 
   const [selectedChoiceUserGroupListData, setselectedChoiceUserGroupListData] =
@@ -208,6 +235,52 @@ const GeneralSettings = () => {
         }
       });
   }
+
+  const handleUpdateProfile = (value = '', fieldType = '') => {
+    if (isMount) {
+      setisLoading(true);
+    }
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token + profile?.name.trim()));
+    formData.append('name', profile?.name.trim());
+    formData.append('first_name', profile?.first_name.trim());
+    if (fieldType.includes('sms')) {
+      formData.append('mobile_no', value.trim());
+    } else if (fieldType.includes('email')) {
+      formData.append('email_id', value.trim());
+    }
+
+    updateMyProfileService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let tempProfile = {...res.data.profile};
+          tempProfile = {
+            ...tempProfile,
+            name: htmlDecodeText(tempProfile.name),
+            first_name: htmlDecodeText(tempProfile.first_name),
+            last_name: htmlDecodeText(tempProfile.last_name),
+            bio_data: htmlDecodeText(tempProfile.bio_data),
+          };
+          dispatch(setMyProfile(tempProfile));
+          navigation.navigate('EmailPhoneVerification', {
+            otpType: fieldType,
+            isGoBack: true,
+          });
+          Toast.success(res.data.msg);
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        if (isMount) {
+          setisLoading(false);
+        }
+      });
+  };
 
   function updateUsersSettingsAPICall({
     keyText,
@@ -276,6 +349,24 @@ const GeneralSettings = () => {
       });
   }
 
+  function closeConfirmationBox() {
+    setconfirmationBoxData({isOpen: false, verificationField: ''});
+  }
+
+  function closeVerificationInputModal() {
+    setverificationInputModalData({
+      isOpen: false,
+      verificationField: '',
+    });
+  }
+
+  function getConfirmationBoxFieldText() {
+    if (confirmationBoxData.verificationField === 'sms') {
+      return 'phone number';
+    }
+    return confirmationBoxData.verificationField;
+  }
+
   function getDefaultPage() {
     return [...DEFAULT_PAGES_LIST].find(
       item => item.id === settingsData.mobile_default_page,
@@ -315,6 +406,24 @@ const GeneralSettings = () => {
     return [...DEFAULT_DATE_FORMAT_LIST].find(
       item => item.type === settingsData.default_date_format,
     );
+  }
+
+  function isEmailVerified() {
+    if (parseInt(profile?.is_email_id_verified) === 1) {
+      return true;
+    }
+    setconfirmationBoxData({isOpen: true, verificationField: 'email'});
+
+    return false;
+  }
+
+  function isMobileVerified() {
+    if (parseInt(profile?.is_mobile_no_verified) === 1) {
+      return true;
+    }
+    setconfirmationBoxData({isOpen: true, verificationField: 'sms'});
+
+    return false;
   }
 
   function onPressInActiveAccount() {
@@ -444,6 +553,32 @@ const GeneralSettings = () => {
               });
             }}
           />
+          <ChoiceContainer
+            title="SMS Opt-in"
+            selectedId={settingsData.opt_in}
+            choiceList={[...OPT_IN_STATUS_LIST]}
+            onSelectRadioOption={selectedId => {
+              if (settingsData.opt_in !== selectedId) {
+                if (
+                  (selectedId === 0 && isEmailVerified()) ||
+                  (selectedId === 1 && isMobileVerified())
+                ) {
+                  if (isMount) {
+                    setoptinConfirmationData({
+                      status: true,
+                      updatedOptinValue: selectedId,
+                      text:
+                        selectedId === 1
+                          ? 'By Providing your phone number, you agree to receive text messages from Rawcaster.com with your One-Time-Password, during signup or password reset. Message and data rates may apply. If you wish to STOP receiving SMS messages from Rawcaster.com, please uncheck this box.'
+                          : `starting now no SMS messages will be sent to your phone. All the OTP will be sent to your registered email ID ${
+                              profile?.email_id ?? ''
+                            }`,
+                    });
+                  }
+                }
+              }
+            }}
+          />
           {CHOICE_CONTAINERS_LIST.map(item => {
             const list =
               item.listType === 2
@@ -487,7 +622,6 @@ const GeneralSettings = () => {
               />
             );
           })}
-
           <SwtchesContainer
             title="Profile Privacy"
             description="Choose if you want to lock your Nuggets, Fans, Connections and Influencers list from other users"
@@ -520,7 +654,6 @@ const GeneralSettings = () => {
               });
             }}
           />
-
           {/* {false && (
             <DropDownPicker
               title="Preference Language"
@@ -602,7 +735,6 @@ const GeneralSettings = () => {
               });
             }}
           />
-
           <ChoiceContainer
             title="Rawcaster Account"
             selectedId={settingsData.account_active_inactive}
@@ -693,6 +825,110 @@ const GeneralSettings = () => {
           }
         />
       </Modal>
+
+      <Modal visible={confirmationBoxData.isOpen} transparent>
+        <ConfirmationPopup
+          onClose={() => {
+            closeConfirmationBox();
+          }}
+          onPressPositiveButton={() => {
+            const otpType = confirmationBoxData.verificationField;
+            closeConfirmationBox();
+            if (
+              (otpType === 'email' && profile?.email_id) ||
+              (otpType === 'sms' && profile?.mobile)
+            ) {
+              navigation.navigate('EmailPhoneVerification', {
+                otpType: otpType,
+                isGoBack: true,
+              });
+            } else {
+              setverificationInputModalData({
+                isOpen: true,
+                verificationField: otpType,
+              });
+            }
+          }}
+          onPressNegativeButton={() => {
+            closeConfirmationBox();
+          }}
+          positiveButtonText="Yes"
+          negativeButtonText="No"
+          content={`You need to complete your ${getConfirmationBoxFieldText()} verification before you can do this. Do you want to verify your ${getConfirmationBoxFieldText()} now?`}
+        />
+      </Modal>
+
+      <Modal
+        visible={verificationInputModalData.isOpen}
+        transparent
+        onRequestClose={() => {
+          closeVerificationInputModal();
+        }}>
+        <InputPopup
+          closePopup={() => {
+            closeVerificationInputModal();
+          }}
+          title={`Enter your ${
+            verificationInputModalData.verificationField === 'sms'
+              ? 'Phone Number'
+              : 'Email'
+          } to verify`}
+          submitButtonProps={{
+            buttonText: 'Update and Verify',
+          }}
+          textInputProps={{
+            placeHolder:
+              verificationInputModalData.verificationField === 'sms'
+                ? 'Phone Number'
+                : 'Email',
+            keyboardType:
+              verificationInputModalData.verificationField === 'sms'
+                ? 'number-pad'
+                : 'email-address',
+          }}
+          onSubmit={value => {
+            const otpType = verificationInputModalData.verificationField;
+            closeVerificationInputModal();
+
+            handleUpdateProfile(value, otpType);
+          }}
+        />
+      </Modal>
+
+      <Modal
+        onRequestClose={() => {}}
+        transparent
+        visible={optinConfirmationData.status}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          positiveButtonText={'Confirm'}
+          onPressPositiveButton={() => {
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+                updatedOptinValue: null,
+              });
+            }
+            handleChangeSettingsData({
+              valueText: optinConfirmationData.updatedOptinValue,
+              keyText: 'opt_in',
+            });
+          }}
+          negativeButtonText={'Cancel'}
+          onPressNegativeButton={() => {
+            if (isMount) {
+              setoptinConfirmationData({
+                status: false,
+                text: '',
+                updatedOptinValue: null,
+              });
+            }
+          }}
+          content={optinConfirmationData.text}
+        />
+      </Modal>
+
       <Modal visible={isLoading} transparent>
         <Loader bgColor={COLORS.transparentDimColor} loaderText={loaderText} />
       </Modal>
