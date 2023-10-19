@@ -120,7 +120,8 @@ const ChatItem = ({
           isSelected && {backgroundColor: COLORS.primaryDark},
         ]}>
         {item?.user_id === 1 &&
-          (isGroup && !isPreChatSame ? (
+          isGroup &&
+          (!isPreChatSame ? (
             <ProfileWithBadge
               profileImage={item?.profile_img}
               profileSize={22}

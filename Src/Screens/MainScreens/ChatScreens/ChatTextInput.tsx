@@ -409,6 +409,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.black,
     backgroundColor: COLORS.white,
+    minHeight: 45,
   },
   sendButtonContainer: {
     borderRadius: 45 / 2,

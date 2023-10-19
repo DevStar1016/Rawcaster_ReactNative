@@ -352,7 +352,7 @@ const UserChat = ({route}) => {
         }}
         isDisableOtherClickables={selectedMsgIds.length > 0}
         onSelectMsg={handleSelectMessage}
-        isGroup
+        isGroup={false}
       />
     );
   };
