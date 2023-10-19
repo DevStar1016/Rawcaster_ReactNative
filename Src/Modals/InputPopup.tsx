@@ -16,6 +16,8 @@ type Props = {
   textInputProps?: Omit<TextBoxProps, 'value' | 'onChangeText'>;
   submitButtonProps?: Omit<SubmitButtonProps, 'onPress'>;
   onSubmit: (value: string) => void;
+  regexValue?: RegExp;
+  regexErrorText?: string;
 };
 
 const InputPopup = ({
@@ -23,9 +25,11 @@ const InputPopup = ({
   title = '',
   textInputProps,
   requiredErrorText = 'Required',
+  regexErrorText = '',
   isRequired = true,
   submitButtonProps,
   onSubmit,
+  regexValue,
 }: Props) => {
   const [value, setvalue] = useState('');
   const [errorText, seterrorText] = useState('');
@@ -33,10 +37,11 @@ const InputPopup = ({
     <View style={styles.mainContainer}>
       <KeyboardAwareScrollView
         keyboardShouldPersistTaps={'handled'}
-        style={{flexGrow: 0}}
+        // style={{flexGrow: 0}}
         contentContainerStyle={{
           justifyContent: 'center',
           paddingVertical: 20,
+          flex: 1,
         }}
         showsVerticalScrollIndicator={false}>
         <SafeAreaView style={styles.subContainer}>
@@ -69,6 +74,10 @@ const InputPopup = ({
             onPress={() => {
               if (!value.trim() && isRequired) {
                 seterrorText(requiredErrorText);
+                return;
+              }
+              if (regexValue && !regexValue.test(value)) {
+                seterrorText(regexErrorText);
                 return;
               }
               onSubmit(value);

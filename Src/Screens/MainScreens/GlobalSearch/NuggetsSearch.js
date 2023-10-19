@@ -102,7 +102,9 @@ const NuggetsSearch = () => {
   const nuggetsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('search_key', searchText);
+    if (searchText) {
+      formData.append('search_key', searchText);
+    }
     formData.append('page_number', pageNumber);
 
     listNuggetsService(formData)

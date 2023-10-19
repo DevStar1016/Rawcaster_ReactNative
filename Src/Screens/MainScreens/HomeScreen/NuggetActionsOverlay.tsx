@@ -1546,7 +1546,7 @@ function NuggetActionsOverlay({
           onPressBack={() => {
             handleCloseAIChatModal();
           }}
-          onPermissionRejection={() => {
+          onPermissionResult={() => {
             if (setpaused) {
               setpaused(true);
             }

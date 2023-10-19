@@ -165,6 +165,9 @@ const SignupWithPhone = ({route}) => {
         handleSignupWithPhone(values, res);
       })
       .catch(e => {
+        if (isMount) {
+          setisLoading(false);
+        }
         Toast.fail(
           'Please enable location permissions in settings to sign-up with phone number',
         );

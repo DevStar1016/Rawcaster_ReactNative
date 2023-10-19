@@ -271,6 +271,7 @@ const Profile = ({route}) => {
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
           };
+
           if (isMount.current) {
             setothersProfile({...tempProfile});
           }
@@ -589,10 +590,6 @@ const Profile = ({route}) => {
   };
 
   function getClaimAccountStatus() {
-    // if (userId && othersProfile) {
-    //   return othersProfile.unclaimed_status;
-    // }
-    // return 0;
     if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
       let tempUnclaimedList = [...unclaimedAccountsList];
       const tempUnclaimedUser = tempUnclaimedList.find(
@@ -602,6 +599,10 @@ const Profile = ({route}) => {
         return tempUnclaimedUser.unclaimed_status;
       }
     }
+    if (userId && othersProfile) {
+      return othersProfile.unclaimed_status;
+    }
+
     return 0;
   }
 
@@ -936,9 +937,11 @@ const Profile = ({route}) => {
     [
       userId,
       focusedNuggetUserId,
-      getProfileData(),
-      getClaimAccountStatus(),
+      // getProfileData(),
+      // getClaimAccountStatus(),
       unclaimedAccountsList,
+      othersProfile,
+      profile,
       connections,
       isFocused,
       selectedTab,

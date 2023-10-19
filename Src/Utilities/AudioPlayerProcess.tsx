@@ -28,7 +28,7 @@ type AudioRecordProps = {
   onLimitReached?: () => void;
   audioUniqueId?: string | number;
   maxRecordingTimeInSeconds?: number;
-  onPermissionRejection?: () => void;
+  onPermissionResult?: () => void;
 };
 
 export const handleAudioRecord = async ({
@@ -39,7 +39,7 @@ export const handleAudioRecord = async ({
   setrecordingSeconds = () => {},
   maxRecordingTimeInSeconds = 150,
   onLimitReached,
-  onPermissionRejection,
+  onPermissionResult,
   audioUniqueId = '',
 }: AudioRecordProps) => {
   const newMicrophonePermission = await Camera.requestMicrophonePermission();
@@ -62,7 +62,9 @@ export const handleAudioRecord = async ({
       const meteringEnabled = false;
       setisPaused(false);
       setisRecording(true);
-
+      if (onPermissionResult) {
+        onPermissionResult();
+      }
       const result = await audioPlayer?.startRecorder(
         path,
         audioSet,
@@ -88,8 +90,8 @@ export const handleAudioRecord = async ({
       setisRecording(false);
     }
   } else {
-    if (onPermissionRejection) {
-      onPermissionRejection();
+    if (onPermissionResult) {
+      onPermissionResult();
     }
     Toast.fail('Permission Denied');
   }

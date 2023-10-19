@@ -28,7 +28,7 @@ var isMount = true;
 var timer = undefined;
 var readoutController = undefined;
 var translateController = undefined;
-const AIChat = ({onPressBack, handleShareContent, onPermissionRejection}) => {
+const AIChat = ({onPressBack, handleShareContent, onPermissionResult}) => {
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const token = useToken();
   const profile = useProfile();
@@ -481,7 +481,7 @@ const AIChat = ({onPressBack, handleShareContent, onPermissionRejection}) => {
             textAlignVertical: 'top',
             numberOfLines: 6,
           }}
-          onPermissionRejection={onPermissionRejection}
+          onPermissionResult={onPermissionResult}
           containerHeight={110}
           isDisableAudioProcess={readoutChatData && readoutChatData.isPlaying}
           isVisibleVoiceRecord={true}

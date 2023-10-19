@@ -16,6 +16,7 @@ import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
 import InputPopup from '../../../Modals/InputPopup';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
+import {EMAIL_REGEX, PHONE_REGEX} from '../../../Utilities/Constants';
 
 const SWITCHES_LIST = [
   {
@@ -59,6 +60,8 @@ const NotificationsSettings = () => {
   const [verificationInputModalData, setverificationInputModalData] = useState({
     isOpen: false,
     verificationField: '',
+    regexValue: null,
+    regexErrorText: '',
   });
 
   const [optinConfirmationData, setoptinConfirmationData] = useState({
@@ -225,6 +228,8 @@ const NotificationsSettings = () => {
     setverificationInputModalData({
       isOpen: false,
       verificationField: '',
+      regexValue: null,
+      regexErrorText: '',
     });
   }
 
@@ -348,6 +353,18 @@ const NotificationsSettings = () => {
               setverificationInputModalData({
                 isOpen: true,
                 verificationField: otpType,
+                regexValue:
+                  otpType === 'email'
+                    ? EMAIL_REGEX
+                    : otpType === 'sms'
+                    ? PHONE_REGEX
+                    : null,
+                regexErrorText:
+                  otpType === 'email'
+                    ? 'Enter valid email'
+                    : otpType === 'sms'
+                    ? 'Eneter valid phone number'
+                    : '',
               });
             }
           }}
@@ -370,6 +387,8 @@ const NotificationsSettings = () => {
           closePopup={() => {
             closeVerificationInputModal();
           }}
+          regexErrorText={verificationInputModalData.regexErrorText}
+          regexValue={verificationInputModalData.regexValue}
           title={`Enter your ${
             verificationInputModalData.verificationField === 'sms'
               ? 'Phone Number'
@@ -383,10 +402,10 @@ const NotificationsSettings = () => {
               verificationInputModalData.verificationField === 'sms'
                 ? 'Phone Number'
                 : 'Email',
-            keyboardType:
-              verificationInputModalData.verificationField === 'sms'
-                ? 'number-pad'
-                : 'email-address',
+            // keyboardType:
+            //   verificationInputModalData.verificationField === 'sms'
+            //     ? 'number-pad'
+            //     : 'email-address',
           }}
           onSubmit={value => {
             const otpType = verificationInputModalData.verificationField;
