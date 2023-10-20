@@ -88,8 +88,8 @@ function VideoNugget({
           useTextureView={true}
           paused={paused}
           muted={isMuted}
-          // repeat={isRepeatVideo}
-          repeat={false}
+          repeat={isRepeatVideo}
+          // repeat={false}
           onBuffer={() => {}}
           onLoadStart={val => {
             setisLoadingVideo(true);

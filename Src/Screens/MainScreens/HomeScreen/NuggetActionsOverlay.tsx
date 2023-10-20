@@ -162,6 +162,7 @@ function NuggetActionsOverlay({
     updateLike,
     updateSave,
     updateIsFan,
+    setisRepeatVideo,
     handleNuggetContentTranslate,
   } = useNuggetItemActions();
 
@@ -1549,6 +1550,7 @@ function NuggetActionsOverlay({
           onPermissionResult={() => {
             if (setpaused) {
               setpaused(true);
+              setisRepeatVideo(true);
             }
           }}
           handleShareContent={(content: string) => {
