@@ -86,6 +86,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
   const [loaderText, setloaderText] = useState('');
   const [totalComments, settotalComments] = useState(nugget.total_comments);
   const [isRepeatVideo, setisRepeatVideo] = useState(false);
+  const [isVideoBackground, setisVideoBackground] = useState(false);
   const [viewableItem, setviewableItem] = useState('');
   const [isOpenReportModal, setisOpenReportModal] = useState(false);
   const viewConfigRef = useRef({
@@ -457,6 +458,8 @@ const Nugget = ({nugget, nuggetIndex}) => {
     setisRepeatVideo: setisRepeatVideo,
     viewableItem: viewableItem,
     handleNuggetContentTranslate: handleNuggetContentTranslate,
+    setisVideoBackground: setisVideoBackground,
+    isVideoBackground: isVideoBackground,
     onFinishPlaying: index => {
       // if (index < nugget?.media_list?.length - 1) {
       //   flatlistRef.current.scrollToIndex({

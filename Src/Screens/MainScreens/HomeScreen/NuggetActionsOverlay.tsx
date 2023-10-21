@@ -164,6 +164,7 @@ function NuggetActionsOverlay({
     updateIsFan,
     setisRepeatVideo,
     handleNuggetContentTranslate,
+    setisVideoBackground,
   } = useNuggetItemActions();
 
   const navigation = useNavigation();
@@ -220,29 +221,29 @@ function NuggetActionsOverlay({
   }, [isFrom, searchFocused, dashboardFocused, profileFocused]);
 
   const handlePresentCommentsModal = useCallback(() => {
-    if (setpaused) {
-      setpaused(true);
+    if (setisVideoBackground) {
+      setisVideoBackground(true);
     }
     commentsBottomSheetModalRef.current?.present();
   }, []);
   const handleCloseCommentsModal = useCallback(() => {
-    if (setpaused) {
-      setpaused(false);
+    if (setisVideoBackground) {
+      setisVideoBackground(false);
     }
     commentsBottomSheetModalRef.current?.close();
   }, []);
 
   const handlePresentAIChatModal = useCallback(() => {
-    if (setpaused) {
-      setpaused(true);
+    if (setisVideoBackground) {
+      setisVideoBackground(true);
     }
     aiChatBottomSheetModalRef.current?.present();
   }, []);
   const handleCloseAIChatModal = useCallback((val = false) => {
-    aiChatBottomSheetModalRef.current?.close();
-    if (setpaused && !val) {
-      setpaused(false);
+    if (setisVideoBackground) {
+      setisVideoBackground(false);
     }
+    aiChatBottomSheetModalRef.current?.close();
   }, []);
 
   const handleSheetChanges = useCallback((index: number) => {}, []);
@@ -462,8 +463,8 @@ function NuggetActionsOverlay({
         // dismissed
       }
     } catch (error) {
-      if (setpaused) {
-        setpaused(false);
+      if (setisVideoBackground) {
+        setisVideoBackground(false);
       }
     }
   };
@@ -586,8 +587,8 @@ function NuggetActionsOverlay({
         onReportAbouseNugget();
         break;
       case 5:
-        if (setpaused) {
-          setpaused(true);
+        if (setisVideoBackground) {
+          setisVideoBackground(true);
         }
         shareLinkTimer.current = setTimeout(() => {
           onShareLink();
@@ -630,8 +631,8 @@ function NuggetActionsOverlay({
     if (profile && profile.acc_verify_status === 1) {
       return true;
     }
-    if (setpaused) {
-      setpaused(true);
+    if (setisVideoBackground) {
+      setisVideoBackground(true);
     }
     dispatch(setIsOpenVerifyPopup(true));
     return false;
@@ -645,8 +646,8 @@ function NuggetActionsOverlay({
     if (token) {
       return true;
     }
-    if (setpaused) {
-      setpaused(true);
+    if (setisVideoBackground) {
+      setisVideoBackground(true);
     }
     dispatch(setIsOpenLoginAlert(true));
     return false;
@@ -1107,8 +1108,8 @@ function NuggetActionsOverlay({
             onPress={() => {
               if (isLogin() && isVerified()) {
                 setopenMenuOptions(true);
-                if (setpaused) {
-                  setpaused(true);
+                if (setisVideoBackground) {
+                  setisVideoBackground(true);
                 }
               }
             }}>
@@ -1446,15 +1447,15 @@ function NuggetActionsOverlay({
         transparent
         onRequestClose={() => {
           setopenMenuOptions(false);
-          if (setpaused) {
-            setpaused(false);
+          if (setisVideoBackground) {
+            setisVideoBackground(false);
           }
         }}>
         <MenuContainer
           setModal={status => {
             setopenMenuOptions(status);
-            if (setpaused) {
-              setpaused(status);
+            if (setisVideoBackground) {
+              setisVideoBackground(status);
             }
           }}
           buttonsOptions={getMenuOptions()}
@@ -1467,8 +1468,8 @@ function NuggetActionsOverlay({
         handleStyle={{display: 'none'}}
         onDismiss={() => {
           setisEnableContentPanningGesture(true);
-          if (setpaused) {
-            setpaused(false);
+          if (setisVideoBackground) {
+            setisVideoBackground(false);
           }
         }}
         topInset={insets.top ? insets.top : StatusBar.currentHeight}
@@ -1548,10 +1549,10 @@ function NuggetActionsOverlay({
             handleCloseAIChatModal();
           }}
           onPermissionResult={() => {
-            if (setpaused) {
-              setpaused(true);
-              setisRepeatVideo(true);
-            }
+            // if (setpaused) {
+            //   setpaused(true);
+            //   setisRepeatVideo(true);
+            // }
           }}
           handleShareContent={(content: string) => {
             handleCloseAIChatModal(true);
