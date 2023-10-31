@@ -16,7 +16,7 @@ const QRCodeScanner = () => {
 
   const checkAndSetPermission = async () => {
     const status = await Camera.requestCameraPermission();
-    setHasPermission(status === 'authorized');
+    setHasPermission(status === 'granted');
   };
 
   return (

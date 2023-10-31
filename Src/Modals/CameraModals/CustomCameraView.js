@@ -7,7 +7,11 @@ import {
   View,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
-import {Camera, useCameraDevices} from 'react-native-vision-camera';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraDevices,
+} from 'react-native-vision-camera';
 import {COLORS} from '../../Utilities/Colors';
 import Loader from '../../Components/Loader';
 import SVGIcon from '../../Components/SVGIcon';
@@ -25,6 +29,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     flashMode: 0, // 0 - off , 1 - on , 2 - auto
     cameraType: 1, // 1 - back , 2 - front
   });
+  const [isCameraInit, setisCameraInit] = useState(false);
   const [isOpenPreview, setisOpenPreview] = useState(false);
   const camera = useRef(null);
   const device = useCameraDevices();
@@ -43,11 +48,11 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
   const getCameraType = () => {
     switch (cameraSetting.cameraType) {
       case 1:
-        return device.back;
+        return useCameraDevice('back');
       case 2:
-        return device.front;
+        return useCameraDevice('front');
       default:
-        return device.back;
+        return useCameraDevice('back');
     }
   };
 
@@ -225,19 +230,28 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
     );
   };
 
-  return getCameraType() ? (
+  return device !== null ? (
     <View style={styles.mainContainer}>
       <Camera
         ref={camera}
-        style={StyleSheet.absoluteFill}
-        device={getCameraType()}
+        style={[StyleSheet.absoluteFill]}
+        device={
+          cameraSetting.cameraType === 2
+            ? useCameraDevice('front')
+            : useCameraDevice('back')
+        }
         isActive={true}
         audio={true}
         photo={true}
         video={true}
+        children={isCameraInit ? null : <Loader bgColor={COLORS.primaryDark} />}
+        onInitialized={() => {
+          setisCameraInit(true);
+          console.log('Initiated');
+          // Camera is initialized, you can start using it.
+        }}
         enableZoomGesture={true}
       />
-
       <View
         style={[
           styles.actionsOverlay,

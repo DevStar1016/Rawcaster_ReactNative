@@ -92,6 +92,7 @@ function VideoNugget({
           // repeat={false}
           onBuffer={() => {}}
           onLoadStart={val => {
+            console.log();
             setisLoadingVideo(true);
           }}
           onLoad={onLoadComplete}

@@ -334,7 +334,7 @@ const SignupWithPhone = ({route}) => {
             }}>
             {values.isEnablePhoneNumber && (
               <CheckBox
-                text="Opt-in"
+                text="Opt-in for SMS messages"
                 isSelected={true}
                 onPress={() => {
                   setoptinConfirmationData({

@@ -149,8 +149,8 @@ const ChatTextInput = ({
       const newMicrophonePermission =
         await Camera.requestMicrophonePermission();
       if (
-        newCameraPermission === 'authorized' &&
-        newMicrophonePermission === 'authorized'
+        newCameraPermission === 'granted' &&
+        newMicrophonePermission === 'granted'
       ) {
         setisOpenCamera(true);
       } else {

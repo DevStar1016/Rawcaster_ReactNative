@@ -3,17 +3,17 @@ import {
   BackHandler,
   Image,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Pressable,
   SafeAreaView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   UIManager,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Video from 'react-native-video';
 import lodash from 'lodash';
 import HOCView from '../../../Components/HOCView';
@@ -69,11 +69,14 @@ import {EmojiKeyboard} from 'rn-emoji-keyboard';
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+const WINDOW_WIDTH = DIMENSIONS.window.width;
+const WINDOW_HEIGHT = DIMENSIONS.window.height;
 
 var isMount = true;
 var metaDataFetchingTimer = undefined;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2;
 const PostEditNugget = ({route}) => {
+  const [isKeyBoardEnabledStatus, setisKeyBoardEnabledStatus] = useState(false);
   const {nugget, preContent} = route.params ?? {};
   const dispatch = useDispatch();
   const connectionsList = useConnectionsList();
@@ -89,7 +92,6 @@ const PostEditNugget = ({route}) => {
   const [buttonHeight, setbuttonHeight] = useState(0);
   const [isFetchingMetaData, setisFetchingMetaData] = useState(false);
   const [metaDataContainerHeight, setmetaDataContainerHeight] = useState(0);
-  const [isFocusedTextInput, setisFocusedTextInput] = useState(false);
   const [isOpenSelectionModal, setisOpenSelectionModal] = useState(false);
   const [isOpenSharTypeList, setisOpenSharTypeList] = useState(false);
   const [isOpenCamera, setisOpenCamera] = useState(false);
@@ -342,7 +344,13 @@ const PostEditNugget = ({route}) => {
     if (typedText.trim() || (isPollClicked && question.trim())) {
       formData.append(
         'content',
-        isPollClicked ? question.trim() : typedText.trim(),
+        isPollClicked
+          ? question.trim()
+          : getSlicedText(
+              typedText,
+              profile?.nugget_content_length,
+              false,
+            ).trim(),
       );
     }
     if (isPollClicked) {
@@ -523,6 +531,7 @@ const PostEditNugget = ({route}) => {
         const mediaList = nugget
           ? [{...selectedMediaList}]
           : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
+
         if (isMount) {
           setloadingData({
             status: true,
@@ -613,9 +622,10 @@ const PostEditNugget = ({route}) => {
       const newCameraPermission = await Camera.requestCameraPermission();
       const newMicrophonePermission =
         await Camera.requestMicrophonePermission();
+
       if (
-        newCameraPermission === 'authorized' &&
-        newMicrophonePermission === 'authorized'
+        newCameraPermission === 'granted' &&
+        newMicrophonePermission === 'granted'
       ) {
         if (isMount) {
           stopLoader();
@@ -649,7 +659,7 @@ const PostEditNugget = ({route}) => {
    */
   async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
-    if (newMicrophonePermission === 'authorized') {
+    if (newMicrophonePermission === 'granted') {
       if (isMount) {
         setisOpenAudioRecorder(true);
       }
@@ -665,6 +675,10 @@ const PostEditNugget = ({route}) => {
    */
   async function onSelectMediaFromCamera(mediaItem) {
     let mediaType = mediaItem.type.includes('image') ? 1 : 2;
+    setloadingData({
+      status: true,
+      text: 'Media being compressed',
+    });
     let mediaPath = await compressMedia(mediaType, mediaItem.uri);
     if (nugget) {
       setselectedMediaList([
@@ -684,6 +698,10 @@ const PostEditNugget = ({route}) => {
         },
       ]);
     }
+    setloadingData({
+      status: false,
+      text: '',
+    });
   }
 
   /**
@@ -796,7 +814,11 @@ const PostEditNugget = ({route}) => {
           paused={true}
           muted={false}
           source={{uri: item.uri}}
-          style={{height: '100%', width: '100%', borderRadius: 10}}
+          style={{
+            height: '100%',
+            width: '100%',
+            borderRadius: 10,
+          }}
           onLoad={() => {
             if (videoPlayerRef.current) {
               videoPlayerRef.current.seek(0);
@@ -854,6 +876,26 @@ const PostEditNugget = ({route}) => {
 
   const onPost = lodash.debounce(handlePost, 400);
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setisKeyBoardEnabledStatus(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setisKeyBoardEnabledStatus(false);
+      },
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, [isKeyBoardEnabledStatus]);
+
   /**
    * Renders a selected nugget item with the given item and index.
    * @param {Object} item - The selected nugget item to render.
@@ -905,7 +947,10 @@ const PostEditNugget = ({route}) => {
       loaderProps={{
         loaderText: loadingData.text,
       }}
-      keyboardAwareContentContainerStyle={{flexGrow: 1}}
+      keyboardAwareContentContainerStyle={{
+        flexGrow: 1,
+        height: WINDOW_HEIGHT / 2,
+      }}
       isEnableKeyboardAware={false}
       // keyBoardAwareScrollViewProps={{
       //   nestedScrollEnabled: true,
@@ -933,7 +978,6 @@ const PostEditNugget = ({route}) => {
         onPress={() => {
           Keyboard.dismiss();
           openCloseEmojiPicker(false);
-          setisFocusedTextInput(false);
         }}>
         <View>
           <View
@@ -982,8 +1026,11 @@ const PostEditNugget = ({route}) => {
                       text: 'Opening Camera',
                     });
                   }
-
-                  handleOpenCamera();
+                  try {
+                    handleOpenCamera();
+                  } catch (error) {
+                    console.log(error);
+                  }
                 }}
               />
               <SVGIcon
@@ -1079,11 +1126,17 @@ const PostEditNugget = ({route}) => {
               ]}>
               <TextInput
                 placeholder={`What’s on your mind, ${profile?.name}!`}
-                style={styles.textInput}
+                style={[
+                  styles.textInput,
+                  {
+                    height: isKeyBoardEnabledStatus
+                      ? WINDOW_HEIGHT / 2.5
+                      : 'auto',
+                  },
+                ]}
                 multiline
                 maxLength={profile?.nugget_content_length}
                 onFocus={() => {
-                  setisFocusedTextInput(true);
                   openCloseEmojiPicker(false);
                 }}
                 value={getSlicedText(
@@ -1118,7 +1171,7 @@ const PostEditNugget = ({route}) => {
                   isButton
                   onPress={() => {
                     Keyboard.dismiss();
-                    setisFocusedTextInput(false);
+
                     openCloseEmojiPicker(true);
                   }}
                 />
@@ -1447,7 +1500,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   textInput: {
-    flex: 1,
+    // flex: 1,
     fontFamily: FONTS.DMSans.regular,
     color: COLORS.white,
     fontSize: 17,

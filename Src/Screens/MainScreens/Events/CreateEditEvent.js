@@ -577,7 +577,6 @@ const CreateEditEvent = ({route}) => {
       <ReplaceStatusBar />
       <HeaderWithBack
         title={`${eventId ? 'Edit' : 'Create'} virtual meeting event`}
-        //  title={eventId ? 'Edit Event' : 'Create Event'}
       />
       <KeyboardAwareScrollView
         extraScrollHeight={10}

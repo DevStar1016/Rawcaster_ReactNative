@@ -186,8 +186,8 @@ const MyFansChat = () => {
       const newMicrophonePermission =
         await Camera.requestMicrophonePermission();
       if (
-        newCameraPermission === 'authorized' &&
-        newMicrophonePermission === 'authorized'
+        newCameraPermission === 'granted' &&
+        newMicrophonePermission === 'granted'
       ) {
         if (isMount) {
           setisLoading(false);
@@ -224,7 +224,7 @@ const MyFansChat = () => {
    */
   async function handleOpenAudioRecorder() {
     const newMicrophonePermission = await Camera.requestMicrophonePermission();
-    if (newMicrophonePermission === 'authorized') {
+    if (newMicrophonePermission === 'granted') {
       if (isMount) {
         setisOpenAudioRecorder(true);
       }

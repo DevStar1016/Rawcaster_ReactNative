@@ -52,6 +52,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import Clipboard from '@react-native-community/clipboard';
 import {REFERRAL_LINK} from '../../../../Services/ServiceConstants';
+import SearchInput from '../../../../Components/SearchInput';
 
 var isMount = true;
 var currentPage = 1;
@@ -115,6 +116,7 @@ const APPSTORE_WHATSAPP_LINK =
 const PLAYSTORE_WHATSAPP_LINK =
   'https://play.google.com/store/apps/details?id=com.whatsapp&hl=en&gl=US&pli=1';
 const ReferalSocialList = () => {
+  const [searchKey, setsearchKey] = useState(null);
   const profile = useProfile();
   const token = useToken();
   const navigation = useNavigation();
@@ -163,6 +165,7 @@ const ReferalSocialList = () => {
   }) {
     if (socialMedia) {
       Share.shareSingle({
+        attributionURL: profile?.referral_link ?? '',
         title: 'Rawcaster Invite',
         url: profile?.referral_link ?? '',
         message: referalMessage ?? REFERAL_MESSAGE,
@@ -224,7 +227,7 @@ const ReferalSocialList = () => {
       case SHARE_OPTION.whatsapp:
         handleSocialShare({
           socialUrl: `whatsapp://send?text=${encodeURIComponent(
-            REFERAL_MESSAGE,
+            REFERAL_MESSAGE + '\n' + profile?.referral_link,
           )}`,
           isWhatsApp: true,
         });
@@ -437,7 +440,10 @@ const ReferalSocialList = () => {
         return 0;
       },
     );
-    const sections = [...sortedContactsList].reduce((resultSections, item) => {
+    const validArray = [...sortedContactsList].filter(
+      ele => !searchKey || ele.name.includes(searchKey),
+    );
+    const sections = [...validArray].reduce((resultSections, item) => {
       if (isAlphabet(item.name[0])) {
         const tempNumberItemIndex = [...resultSections].findIndex(subItem =>
           subItem.title.toUpperCase().includes(item.name[0].toUpperCase()),
@@ -577,7 +583,7 @@ const ReferalSocialList = () => {
       defaultBackgroundProps={{
         isEnableLoading: isListLoading,
         centerText:
-          contactList.length > 0 || isListLoading
+          getContactsListSections().length > 0 || isListLoading
             ? ''
             : `We didn't find any results!`,
       }}
@@ -608,6 +614,15 @@ const ReferalSocialList = () => {
         />
       </View>
       <Divider />
+      {(searchKey || getContactsListSections().length !== 0) && (
+        <SearchInput
+          searchWhenClickedButton={false}
+          searchButtonColor={COLORS.secondary}
+          onSearch={value => {
+            setsearchKey(value);
+          }}
+        />
+      )}
 
       <SectionList
         sections={getContactsListSections()}

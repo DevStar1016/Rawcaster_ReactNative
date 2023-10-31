@@ -44,7 +44,7 @@ export const handleAudioRecord = async ({
 }: AudioRecordProps) => {
   const newMicrophonePermission = await Camera.requestMicrophonePermission();
   const isGrantedPermission = await isHavePermissionToRecordAudio();
-  if (isGrantedPermission && newMicrophonePermission === 'authorized') {
+  if (isGrantedPermission && newMicrophonePermission === 'granted') {
     const dirs = RNFetchBlob.fs.dirs;
     const path = Platform.select({
       ios: `rawcaster_recorded_audio${audioUniqueId}.m4a`,

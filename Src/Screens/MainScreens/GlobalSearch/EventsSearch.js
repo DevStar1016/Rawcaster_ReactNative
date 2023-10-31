@@ -70,6 +70,7 @@ const EventsSearch = () => {
     formData.append('page_number', pageNumber);
     globalSearchEventsService(formData)
       .then(res => {
+        console.log(res.data, '=====>Event Response');
         if (isMount) {
           if (res.data.status === 1) {
             if (pageNumber === 1) {

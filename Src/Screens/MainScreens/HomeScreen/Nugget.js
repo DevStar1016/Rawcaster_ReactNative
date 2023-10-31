@@ -54,6 +54,8 @@ import {
   saveAndUnsaveNugget,
 } from '../../../Store/ThunkAPIServices';
 import {setTranslatedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
+import InViewPort from '../../../Components/InviewPort';
+import VisibilitySensor from '../../../Components/InviewPort';
 
 const Nugget = ({nugget, nuggetIndex}) => {
   const {
@@ -495,6 +497,10 @@ const Nugget = ({nugget, nuggetIndex}) => {
 
   return (
     <NuggetItemActionsContext.Provider value={nuggetItemActions}>
+      {/* <VisibilitySensor
+        onChange={isVisible => {
+          console.log(isVisible, 'isVisible');
+        }}> */}
       <View style={styles.mainContainer}>
         {nugget?.media_list?.length > 0 ? (
           <FlatList
@@ -651,6 +657,8 @@ const Nugget = ({nugget, nuggetIndex}) => {
           />
         </Modal>
       </View>
+      {/* </VisibilitySensor> */}
+      {/* </InViewPort> */}
     </NuggetItemActionsContext.Provider>
   );
 };

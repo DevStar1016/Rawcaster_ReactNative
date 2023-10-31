@@ -88,7 +88,8 @@ const EventSettings = () => {
     if (
       settingsData.default_melody &&
       settingsData.default_melody.path &&
-      settingsData.default_melody.type === 2
+      (settingsData.default_melody.type === 2 ||
+        settingsData.default_melody.type === 3)
     ) {
       createMelodyVideoThumbnail();
     }
@@ -99,6 +100,15 @@ const EventSettings = () => {
       settingsData.default_melody &&
       settingsData.default_melody.type === 2 &&
       settingsData.default_melody.thumbnail &&
+      isVideoLoaded
+    ) {
+      console.log('setisVideoLoading');
+      if (isMount) {
+        setisVideoLoading(false);
+      }
+    } else if (
+      settingsData.default_melody &&
+      settingsData.default_melody.type === 3 &&
       isVideoLoaded
     ) {
       if (isMount) {
@@ -208,19 +218,28 @@ const EventSettings = () => {
   }
 
   async function createMelodyVideoThumbnail() {
-    createThumbnail({
-      url: settingsData.default_melody.path,
-      timeStamp: 10000,
-    })
-      .then(res => {
-        if (isMount) {
-          setsettingsData(preData => {
-            let tempMelody = {...preData.default_melody, thumbnail: res.path};
-            return {...preData, default_melody: tempMelody};
-          });
-        }
+    if (settingsData.default_melody.type === 2) {
+      createThumbnail({
+        url: settingsData.default_melody.path,
+        timeStamp: 10000,
       })
-      .catch(e => {});
+        .then(res => {
+          if (isMount) {
+            setsettingsData(preData => {
+              let tempMelody = {...preData.default_melody, thumbnail: res.path};
+              return {...preData, default_melody: tempMelody};
+            });
+          }
+        })
+        .catch(e => {});
+    } else if (settingsData.default_melody.type === 3) {
+      if (isMount) {
+        setsettingsData(preData => {
+          let tempMelody = {...preData.default_melody, thumbnail: ''};
+          return {...preData, default_melody: tempMelody};
+        });
+      }
+    }
   }
 
   function getEnabledSwitchesIds(list) {
@@ -326,11 +345,8 @@ const EventSettings = () => {
             ignoreSilentSwitch={'ignore'}
             // style={VideoDimensions}
             style={{
-              width:
-                settingsData.default_melody.type === 2
-                  ? DIMENSIONS.window.width - 32
-                  : 0,
-              height: settingsData.default_melody.type === 2 ? 178 : 0,
+              width: DIMENSIONS.window.width - 32,
+              height: 178,
             }}
             resizeMode="contain"
             onError={() => {}}
@@ -358,22 +374,27 @@ const EventSettings = () => {
               videoAudioPlayer.current.seek(0);
             }}
           />
-
-          {/* {settingsData.default_melody.thumbnail && paused ? (
-            <Image
-              source={{uri: settingsData.default_melody.thumbnail}}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-              resizeMode="contain"
-            />
+          {settingsData.default_melody.type === 2 ? (
+            <>
+              {settingsData.default_melody.thumbnail && paused ? (
+                <Image
+                  source={{uri: settingsData.default_melody.thumbnail}}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }}
+                  resizeMode="contain"
+                />
+              ) : (
+                false
+              )}
+            </>
           ) : (
-            false
-          )} */}
+            <>{null}</>
+          )}
 
           <View
             style={{

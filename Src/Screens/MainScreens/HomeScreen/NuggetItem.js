@@ -1,6 +1,5 @@
 import {View} from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-
 import NuggetActionsOverlay from './NuggetActionsOverlay';
 import VideoNugget from './NuggetItemTypes/VideoNugget';
 import ImageNugget from './NuggetItemTypes/ImageNugget';
@@ -57,6 +56,7 @@ function NuggetItem({
     // if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
     //   return true;
     // }
+
     return (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&
@@ -127,6 +127,7 @@ function NuggetItem({
         <VideoNugget
           videoPlayer={videoPlayer}
           paused={paused}
+          isLoadingVideo={isLoadingVideo}
           setisLoadingVideo={setisLoadingVideo}
           duration={duration}
           setduration={setduration}
@@ -141,7 +142,7 @@ function NuggetItem({
         <AudioNugget
           audioPlayer={videoPlayer}
           setisLoadingVideo={setisLoadingVideo}
-          paused={paused}
+          paused={paused || shouldPauseVideo}
           duration={duration}
           setduration={setduration}
           progress={progress}

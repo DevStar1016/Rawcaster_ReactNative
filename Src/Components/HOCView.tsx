@@ -26,6 +26,7 @@ interface Props {
   isEnableScroll?: boolean;
   backgroundColor?: string;
   isEnableHeader?: boolean;
+  isKeyboardAwareScroll?: boolean;
   paddingBottom?: number;
   paddingHorizontal?: number;
   headerType?: 'header_with_back' | 'home_header';
@@ -48,6 +49,7 @@ interface Props {
 const HOCView = ({
   children,
   isEnableKeyboardAware = false,
+  isKeyboardAwareScroll = true,
   isEnableScroll = false,
   backgroundColor = COLORS.white,
   isEnableHeader = true,
@@ -154,7 +156,7 @@ const HOCView = ({
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps={'handled'}
               // contentContainerStyle={{flex: 1}}
-              scrollEnabled={true}
+              scrollEnabled={isKeyboardAwareScroll}
               {...keyBoardAwareScrollViewProps}>
               {children}
             </KeyboardAwareScrollView>
@@ -195,6 +197,7 @@ const HOCView = ({
                 if (onLayoutHeaderHeight) {
                   onLayoutHeaderHeight(
                     event.nativeEvent.layout.height +
+                      //@ts-ignore
                       (IS_IOS
                         ? insets.top
                           ? insets.top

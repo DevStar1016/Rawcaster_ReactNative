@@ -382,6 +382,10 @@ export const getUrlWithFilePrefix = (fileUrl = '') => {
   return `file://${url}`;
 };
 
+export function isFileURL(url) {
+  return url.startsWith('file:///');
+}
+
 /**
  * Compresses media files based on their type.
  * @param {number} mediaType - The type of media file (1 for image, 2 for video).
@@ -390,7 +394,9 @@ export const getUrlWithFilePrefix = (fileUrl = '') => {
  */
 export const compressMedia = async (mediaType, mediaPath) => {
   // mediaType --- 1 - image , 2 - Video
+
   mediaPath = getUrlWithFilePrefix(mediaPath);
+
   let result = mediaPath;
   if (mediaType === 1) {
     let fileExtension = getFileName(mediaPath).split('.').pop();
@@ -408,7 +414,8 @@ export const compressMedia = async (mediaType, mediaPath) => {
       progress => {},
     );
   }
-  return result;
+
+  return isFileURL(result) ? result : result.replace('file://', 'file:///');
 };
 
 /**

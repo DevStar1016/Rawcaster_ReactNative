@@ -93,6 +93,7 @@ const DashboardWithCategory = ({route}) => {
   const [refreshing, setrefreshing] = useState(false);
   const [isReadMuted, setisReadMuted] = useState(false);
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
+
   const viewConfigRef = useRef({
     waitForInteraction: false,
     minimumViewTime: 500,
@@ -139,7 +140,6 @@ const DashboardWithCategory = ({route}) => {
 
   useEffect(() => {
     dispatch(setIsBottomTabBarAbsolute(true));
-
     return () => {
       currentPage = 1;
       dispatch(resetNuggetsTotalPages(categoryName));
@@ -159,10 +159,12 @@ const DashboardWithCategory = ({route}) => {
           });
         }
       } else {
-        setviewableItemBeforLogin({
-          nugget_id: getNuggetsList()[0].nugget_id || 0,
-          viewed: getNuggetsList()[0].viewed,
-        });
+        if (!viewableItemBeforLogin.nugget_id) {
+          setviewableItemBeforLogin({
+            nugget_id: getNuggetsList()[0].nugget_id || 0,
+            viewed: getNuggetsList()[0].viewed,
+          });
+        }
       }
     } else {
       if (token) {
@@ -475,12 +477,14 @@ const DashboardWithCategory = ({route}) => {
     getHeaderHeight(),
     insets.mediaHeight,
   ]);
+  console.log(viewableItemBeforLogin);
 
   const nuggetActions = {
     headerContainerHeight: getHeaderHeight(),
     isMuted: isMuted,
     isFrom: 'dashboard',
     dashboardFocused: isFocused,
+    isPaused: false,
     isFocused,
     setisMuted: setisMuted,
     categoryName: categoryName ?? 'forYou',
@@ -524,6 +528,14 @@ const DashboardWithCategory = ({route}) => {
       </View>
     ) : null;
   }
+
+  useEffect(() => {
+    if (flatlistRef.current) {
+      flatlistRef.current.onViewableItemsChanged(info => {
+        console.log(info, 'flatlistRef');
+      });
+    }
+  }, [flatlistRef]);
 
   return (
     <NuggetParentActionsContext.Provider value={nuggetActions}>
@@ -570,6 +582,11 @@ const DashboardWithCategory = ({route}) => {
           isNuggetsLoading ? (
             <Loader
               loaderText="Fetching Nuggets"
+              // loaderText={
+              //   nuggetType === 1
+              //     ? 'Fetching Video Nuggets'
+              //     : 'Fetching Text Nuggets'
+              // }
               isEnableDefaultLoaderBackground={true}
             />
           ) : (
@@ -595,7 +612,13 @@ const DashboardWithCategory = ({route}) => {
               itemHeight={insets.mediaHeight}
               footerHeight={50}
               initialScrollIndex={0}
-              onViewableItemsChanged={onViewRef?.current}
+              onViewableItemsChanged={viewableItems => {
+                setviewableItemBeforLogin({
+                  nugget_id: '',
+                  viewed: false,
+                });
+                return onViewRef?.current(viewableItems);
+              }}
               renderFooter={renderFooter}
             />
           )

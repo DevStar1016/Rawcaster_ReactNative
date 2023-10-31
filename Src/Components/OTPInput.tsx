@@ -3,6 +3,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
 import {secondsToMinutesAndSeconds} from '../Utilities/Methods';
+import {IS_IOS} from '../Utilities/Constants';
+import AutoFetchOtp from './AutoFetchOtp';
 
 type Props = {
   onCodeChanged: (code: string) => void;
@@ -10,9 +12,11 @@ type Props = {
   paddingBottom?: number;
   paddingVertical?: number;
   seconds?: number;
+  numberOfDigits?: number;
   errorText?: string;
   onResendOtp?: () => void;
 };
+
 let interval: any;
 const OTPInput = ({
   onCodeChanged,
@@ -20,18 +24,21 @@ const OTPInput = ({
   paddingBottom,
   paddingVertical = 10,
   seconds = 0,
+  numberOfDigits = 6,
   onResendOtp,
   errorText,
 }: Props) => {
+  const [otpValue, setotp] = useState(['', '', '', '', '', '']);
+
   const [errorString, seterrorString] = useState('');
   const [timer, settimer] = useState(seconds);
-  const [otp, setotp] = useState(['', '', '', '', '', '']);
+
   const inputs = useRef<any[]>([]);
   const [forcusedIndex, setforcusedIndex] = useState(0);
 
   useEffect(() => {
-    onCodeChanged(otp?.join(''));
-  }, [otp]);
+    onCodeChanged(otpValue?.join(''));
+  }, [otpValue]);
 
   useEffect(() => {
     settimer(seconds);
@@ -63,6 +70,8 @@ const OTPInput = ({
   };
 
   const handleOtpChange = (value: string, index: number) => {
+    console.log(value, 'value');
+
     seterrorString('');
     let isInvalid = false;
     value.split('').map(val => {
@@ -82,7 +91,7 @@ const OTPInput = ({
 
     if (value.length >= 6) {
       clearOtp();
-      let newOtp = [...otp];
+      let newOtp = [...otpValue];
       if (value.length === 6) {
         value.split('').map((val, ind) => (newOtp[ind] = val));
       } else {
@@ -98,7 +107,7 @@ const OTPInput = ({
       seterrorString('OTP must have 6 digits');
       return;
     } else {
-      const newOtp = [...otp];
+      const newOtp = [...otpValue];
       newOtp[index] = value.charAt(0);
       setotp(newOtp);
       // Move focus to the next box if the current one has a value
@@ -124,9 +133,18 @@ const OTPInput = ({
         styles.mainContainer,
         {paddingTop, paddingBottom, paddingVertical},
       ]}>
+      {!IS_IOS && (
+        <AutoFetchOtp
+          numberOfDigits={numberOfDigits}
+          onResult={value => {
+            setotp(value);
+            console.log(value);
+          }}
+        />
+      )}
       <StyledText style={styles.titleText}>Enter OTP</StyledText>
       <View style={styles.inputContainer}>
-        {otp.map((digit, index) => (
+        {otpValue.map((digit, index) => (
           <TextInput
             key={index}
             style={[
@@ -143,6 +161,7 @@ const OTPInput = ({
             onFocus={() => {
               setforcusedIndex(index);
             }}
+            // maxLength={1}
             selectTextOnFocus={true}
             textContentType="oneTimeCode"
             ref={input => {
