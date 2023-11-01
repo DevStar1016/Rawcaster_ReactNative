@@ -59,6 +59,10 @@ const MainStack = () => {
   const globalLoaderData = useGlobalLoaderData();
   const navigation = useNavigation();
   const premiumALert = usePremiumAlert();
+  const [isComplimentoryAlert, setisComplimentoryAlert] = useState({
+    status: false,
+    text: '',
+  });
 
   useEffect(() => {
     initialAPICall();
@@ -140,6 +144,13 @@ const MainStack = () => {
         dispatch(getAllFriendsList());
       });
   }
+
+  const HandleUpgradeComplimentory = () => {
+    setisComplimentoryAlert({
+      status: true,
+      text: 'you have been granted a complementary upgrade for xx days',
+    });
+  };
 
   return isLoading ? (
     <Loader
@@ -233,9 +244,30 @@ const MainStack = () => {
                   text: '',
                 }),
               );
-              navigation.navigate('PlansAndPrice');
+              HandleUpgradeComplimentory();
             }}
             content={premiumALert.text}
+          />
+        </Modal>
+      )}
+      {isComplimentoryAlert?.status && (
+        <Modal
+          onRequestClose={() => {}}
+          // style={{zIndex: 10000}}
+          transparent
+          visible={isComplimentoryAlert.status}>
+          <ConfirmationPopup
+            isEnableClose={false}
+            isEnableNegativeButton={false}
+            positiveButtonText={'Ok'}
+            onPressPositiveButton={() => {
+              setisComplimentoryAlert({
+                status: false,
+                text: '',
+              });
+              // navigation.navigate('PlansAndPrice');
+            }}
+            content={isComplimentoryAlert.text}
           />
         </Modal>
       )}

@@ -33,6 +33,7 @@ import {FONTS} from '../Utilities/Fonts';
 import {useDispatch} from 'react-redux';
 import {setUnclaimedAccountsList} from '../Store/Slices/HomeSlice';
 import {setMyProfile} from '../Store/Slices/AuthSlice';
+import {StartIdenfyVerification} from '../Hooks/IdenfyHooks';
 
 var isMount = true;
 
@@ -154,6 +155,26 @@ const ClaimAccount = ({route}) => {
       });
   }
 
+  const handleChangeIdenfyVerification = token => {
+    setisLoading(true);
+    console.log(token, 'token');
+    StartIdenfyVerification(token)
+      .then(response => {
+        console.log(response);
+        // dispatch(setMyProfile({...profile, account_verify_type: 1}));
+        // setmessageBoxData({
+        //   isOpen: true,
+        //   message: res.data.msg,
+        // });
+      })
+      .catch(error => {
+        console.log(error, 'error');
+      })
+      .finally(() => {
+        console.log('setisLoading');
+        setisLoading(false);
+      });
+  };
   /**
    * Handles the verification of a user account by sending the necessary form data to the server.
    * @returns None
@@ -169,13 +190,12 @@ const ClaimAccount = ({route}) => {
     formData.append('location', values.location);
     verifyAccountService(formData)
       .then(res => {
+        console.log(res.data);
         if (res.data.status === 1) {
-          dispatch(setMyProfile({...profile, account_verify_type: 1}));
-
-          setmessageBoxData({
-            isOpen: true,
-            message: res.data.msg,
-          });
+          // handleChangeIdenfyVerification(res.data.verification_token);
+          handleChangeIdenfyVerification(
+            'LRhxZiG0RsGw57v19NDFbWNbMz31rEXgjtaulGm8',
+          );
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }

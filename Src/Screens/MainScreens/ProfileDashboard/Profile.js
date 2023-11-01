@@ -70,6 +70,7 @@ import {
 } from '../../../Store/ThunkAPIServices';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 const PADDING_HORIZONTAL = 10;
 var currentPage = 1;
 var totalPages = 1;
@@ -81,6 +82,10 @@ const Profile = ({route}) => {
   const dispatch = useDispatch();
   const profile = useProfile();
   const isFocused = useIsFocused();
+  const [isunclaimeduserAlert, setisunclaimeduserAlert] = useState({
+    status: false,
+    text: '',
+  });
   const uploadingNuggets = useUploadingNuggets();
   const deletedNuggetsIds = useDeletedNuggetsIds();
   const editedNuggetsList = useEditedNuggetsList();
@@ -271,6 +276,18 @@ const Profile = ({route}) => {
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
           };
+          // if (res.data.profile.unclaimed_status === 1) {
+          //   setisunclaimeduserAlert({
+          //     status: true,
+          //     text: 'This is Unclaimed Account',
+          //   });
+          //   setTimeout(() => {
+          //     setisunclaimeduserAlert({
+          //       status: false,
+          //       text: '',
+          //     });
+          //   }, 5000);
+          // }
 
           if (isMount.current) {
             setothersProfile({...tempProfile});
@@ -1055,6 +1072,27 @@ const Profile = ({route}) => {
               <Loader bgColor={COLORS.transparentDimColor} />
             </Modal>
           </>
+        )}
+
+        {isunclaimeduserAlert?.status && (
+          <Modal
+            onRequestClose={() => {}}
+            // style={{zIndex: 10000}}
+            transparent
+            visible={isunclaimeduserAlert.status}>
+            <ConfirmationPopup
+              isEnableClose={false}
+              isEnableNegativeButton={false}
+              positiveButtonText={'Ok'}
+              onPressPositiveButton={() => {
+                setisunclaimeduserAlert({
+                  status: false,
+                  text: '',
+                });
+              }}
+              content={isunclaimeduserAlert.text}
+            />
+          </Modal>
         )}
 
         {!isFocused && <DefaultBackground />}
