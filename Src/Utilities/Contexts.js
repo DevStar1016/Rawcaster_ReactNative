@@ -22,3 +22,7 @@ export const useDashboardTopTabCategories = () =>
 
 export const DashboardProfileContext = createContext();
 export const useDashboardProfile = () => useContext(DashboardProfileContext);
+
+export const ReadMoreTextNuggetContext = createContext();
+export const useReadMoreTextNuggetContext = () =>
+  useContext(ReadMoreTextNuggetContext);

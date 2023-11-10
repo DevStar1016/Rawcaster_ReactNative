@@ -239,6 +239,7 @@ const SignupWithPhone = ({route}) => {
               otp_ref_id: res.data.otp_ref_id,
               remaining_seconds: res.data.remaining_seconds,
               alt_token_id: res.data.alt_token_id,
+              group_id: res.data.group_id,
             });
           }
           Toast.success(res.data.msg);

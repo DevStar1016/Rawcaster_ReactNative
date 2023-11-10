@@ -40,6 +40,7 @@ const EventSettings = () => {
   const settings = useSettings();
   const token = useToken();
   const videoAudioPlayer = useRef(null);
+  const [isBuffering, setisBuffering] = useState(false);
   const [isUpdating, setisUpdating] = useState(false);
   const [settingsData, setsettingsData] = useState({
     waiting_room: parseInt(settings?.waiting_room),
@@ -64,6 +65,8 @@ const EventSettings = () => {
     participant_video: parseInt(settings?.participant_video),
     event_type: parseInt(settings?.event_type),
   });
+  // const [isBuffering, setisBuffering] = useState(false);
+  const isBufferingRef = useRef();
   const [isVideoLoaded, setisVideoLoaded] = useState(false);
   const [isVideoLoading, setisVideoLoading] = useState(true);
   const [paused, setpaused] = useState(true);
@@ -102,7 +105,6 @@ const EventSettings = () => {
       settingsData.default_melody.thumbnail &&
       isVideoLoaded
     ) {
-      console.log('setisVideoLoading');
       if (isMount) {
         setisVideoLoading(false);
       }
@@ -322,7 +324,7 @@ const EventSettings = () => {
     );
   }
 
-  function getMelodyFile() {
+  function GetMelodyFile() {
     if (settingsData.default_melody.type === 1) {
       return (
         <Image
@@ -337,6 +339,23 @@ const EventSettings = () => {
     ) {
       return (
         <View style={{flex: 1}}>
+          {!paused && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}>
+              <Loader
+                bgColor={COLORS.white}
+                indicatorColor={COLORS.primaryDark}
+                loaderText={'Loading...'}
+              />
+            </View>
+          )}
+
           <Video
             ref={videoAudioPlayer}
             source={{
@@ -346,7 +365,7 @@ const EventSettings = () => {
             // style={VideoDimensions}
             style={{
               width: DIMENSIONS.window.width - 32,
-              height: 178,
+              height: 188,
             }}
             resizeMode="contain"
             onError={() => {}}
@@ -368,12 +387,13 @@ const EventSettings = () => {
             }}
             // onProgress={PlayBackStatusUpdate}
             onEnd={() => {
+              videoAudioPlayer.current.seek(0);
               if (isMount) {
                 setpaused(true);
               }
-              videoAudioPlayer.current.seek(0);
             }}
           />
+
           {settingsData.default_melody.type === 2 ? (
             <>
               {settingsData.default_melody.thumbnail && paused ? (
@@ -594,7 +614,7 @@ const EventSettings = () => {
             {settingsData.default_melody &&
               settingsData.default_melody.path && (
                 <View style={[styles.imageSelectorContainer, {marginTop: 10}]}>
-                  {getMelodyFile()}
+                  <GetMelodyFile />
                 </View>
               )}
           </View>

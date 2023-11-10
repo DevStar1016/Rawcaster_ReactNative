@@ -5,6 +5,8 @@ export interface ProfileDataProp {
   is_mobile_no_verified?: number | null | string;
   acc_verify_status?: number | null | string;
   is_profile_updated?: number | null | string;
+  complementary_days?: number;
+  complementary_status?: number;
   name?: string | null;
   email_id?: string | null;
   mobile?: string | null;
@@ -42,6 +44,7 @@ export interface ProfileDataProp {
   ai_content_length?: number | null | string;
   referral_link?: string | null;
   language?: string | null;
+  profile_url?: string | null;
   two_type_verification?: number | null | string;
   unread_notification_count?: number | null | string;
 }

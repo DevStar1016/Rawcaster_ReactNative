@@ -28,6 +28,8 @@ const ViewNugget = () => {
   const navigation = useNavigation();
   const insets = useInsets();
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
+
+  const isReadMore = route.params?.isReadMore;
   const [headerHeight, setheaderHeight] = useState(0);
   const canGoBack = navigation.getState()?.routes.length;
   const isFocused = useIsFocused();
@@ -141,6 +143,7 @@ const ViewNugget = () => {
   const nuggetActions = {
     headerContainerHeight: headerHeight,
     isMuted: isMuted,
+    isReadMore: isReadMore ?? false,
     isFrom: 'dashboard',
     dashboardFocused: isFocused,
     isFocused,

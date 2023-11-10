@@ -265,6 +265,41 @@ export const SHARE_OPTION = {
   invite_fans: 'invite_fans',
 };
 
+export const IDENFY_STATUS = {
+  APPROVED: 'APPROVED',
+  FAILED: 'FAILED',
+  UNVERIFIED: 'UNVERIFIED',
+  WAITING: 'WAITING',
+  INACTIVE: 'INACTIVE',
+};
+
+export const RAWCASTER_DEFAULT_MESSAGE = {
+  DEFAULT_UNCLAIM_MESSAGE:
+    'Rawcaster generated profile \nPage to be claimed by the owner',
+  CLAIM_VERIFY_MESSAGE:
+    'Your profile should be a verified profile to claim an influencer profile',
+  CLAIM_NOT_VERIFIED_MESSAGE:
+    'Your profile verification status is pending, you can claim an influencer profile only when verification status is success',
+  UNFOLLOW_MESSAGE:
+    'Are you sure you want to stop being a fan of this Influencer?',
+  VERIFY_UPGRADE_MESSAGE:
+    ' Verified account feature is only for Diamond members and Influencers',
+  UPGRADE_MESSAGE:
+    'To access this feature you need to become a premium member!',
+};
+
+export const IDENFY_STATUS_MESSAGE = {
+  APPROVED: "You're good to go! Your verification has been approved.",
+  FAILED: 'Your verification has not been approved.',
+  UNVERIFIED:
+    'You have not completed the verification process. Please complete it to get your profile verified.',
+  WAITING:
+    "Your verification is currently pending. We'll notify you once it's completed.",
+  INACTIVE:
+    'Your verification is currently inactive. Please follow the instructions provided to reactivate it.',
+  OTHERS: 'something went wrong!',
+};
+
 export const EVENT_TYPE = {
   event: 1,
   talkshow: 2,

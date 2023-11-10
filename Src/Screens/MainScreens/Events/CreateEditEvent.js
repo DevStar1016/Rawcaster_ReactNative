@@ -31,13 +31,18 @@ import SwtchesContainer from '../../../Components/SwtchesContainer';
 import SubmitButton from '../../../Components/SubmitButton';
 import {useNavigation} from '@react-navigation/native';
 import Loader from '../../../Components/Loader';
-import {EVENT_LAYOUT_LIST, IS_IOS} from '../../../Utilities/Constants';
+import {
+  EVENT_LAYOUT_LIST,
+  IS_IOS,
+  RAWCASTER_DEFAULT_MESSAGE,
+} from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {FONTS} from '../../../Utilities/Fonts';
 import StyledText from '../../../Components/StyledText';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {useDispatch} from 'react-redux';
+import CustomHourMinutePicker from '../../../Components/CustomHourMinutePicker';
 
 var isMount = true;
 const CreateEditEvent = ({route}) => {
@@ -65,12 +70,7 @@ const CreateEditEvent = ({route}) => {
       type: 1,
     },
     eventDuration: new Date(
-      moment(
-        '2021-01-05 ' +
-          `${settings?.max_event_duration <= 9 ? '0' : ''}${parseInt(
-            settings?.max_event_duration,
-          )}:00:00`,
-      ),
+      moment('2021-01-05 ' + `${settings?.max_event_duration}:00`),
     ),
     durationError: '',
     maxParticipants: parseInt(settings?.max_event_participants_count),
@@ -224,7 +224,7 @@ const CreateEditEvent = ({route}) => {
       dispatch(
         setPremiumAlert({
           status: true,
-          text: 'To access this feature you need to become a premium member!',
+          text: RAWCASTER_DEFAULT_MESSAGE.UPGRADE_MESSAGE,
         }),
       );
     } else if (
@@ -235,7 +235,7 @@ const CreateEditEvent = ({route}) => {
       dispatch(
         setPremiumAlert({
           status: true,
-          text: 'To access this feature you need to become a premium member!',
+          text: RAWCASTER_DEFAULT_MESSAGE.UPGRADE_MESSAGE,
         }),
       );
     } else if (selectedValues.melody.type === 3 && !selectedMelodyFile) {
@@ -371,8 +371,9 @@ const CreateEditEvent = ({route}) => {
    */
   const onSelectDuration = date => {
     let actualDurationallowed = settings?.max_event_duration;
+
     let selectedDuration = moment(date).format('HH:mm');
-    let durationSelected = selectedDuration.replace(/[':]+/g, '.');
+
     if (
       moment('2022-02-16T00:14:00').format('HH:mm') >=
       moment(date).format('HH:mm')
@@ -384,7 +385,7 @@ const CreateEditEvent = ({route}) => {
       }));
       return;
     }
-    if (parseFloat(durationSelected) > settings?.max_event_duration) {
+    if (selectedDuration > settings?.max_event_duration) {
       if (profile.user_status_id !== 4) {
         dispatch(
           setPremiumAlert({
@@ -401,9 +402,7 @@ const CreateEditEvent = ({route}) => {
       }));
       return;
     }
-    let allowedDuration = moment(actualDurationallowed + ':00', 'HH:mm')
-      .format('HH:mm')
-      .toString();
+    let allowedDuration = moment(actualDurationallowed, 'HH:mm').toString();
     allowedDuration = parseFloat(allowedDuration.replace(':', '.'));
     selectedDuration = parseFloat(selectedDuration.replace(':', '.'));
     if (selectedDuration > allowedDuration && profile?.user_status_id === 1) {
@@ -700,25 +699,27 @@ const CreateEditEvent = ({route}) => {
             inputContainerMarginVertical={5}
             titlePaddingVertical={5}
           />
-          <DropDownPicker
+          <CustomHourMinutePicker
             title="Duration"
-            isDateTime
+            minInterval={15}
+            maxHours={
+              settings?.max_event_duration
+                ? parseInt(
+                    moment(settings?.max_event_duration, 'HH:mm').get('hours'),
+                  )
+                : 10
+            }
             mainContainerMarginVertical={0}
-            mainContainerWidth={'48%'}
-            errorText={selectedValues.durationError}
             inputContainerMarginVertical={5}
             titlePaddingVertical={5}
+            mainContainerWidth={'48%'}
             value={getDisplayDuration()}
-            dateValue={selectedValues.eventDuration}
-            datePickerProps={{
-              mode: 'time',
-              is24Hour: true,
-              locale: settings?.time_zone,
-              minimumDate: new Date().setHours('00:00:00:00'),
-            }}
             dropDownIcon="clock_black"
-            placeHolderText={'Select Duration'}
-            onSelectItem={onSelectDuration}
+            placeHolderText="Select Duration"
+            onSelectItem={val => {
+              const convertedDate = moment(val, 'HH:mm').toDate();
+              onSelectDuration(convertedDate);
+            }}
           />
         </View>
 
@@ -811,7 +812,7 @@ const CreateEditEvent = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature you need to become a premium member!',
+                  text: RAWCASTER_DEFAULT_MESSAGE.UPGRADE_MESSAGE,
                 }),
               );
               return;
@@ -836,7 +837,7 @@ const CreateEditEvent = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature you need to become a premium member!',
+                  text: RAWCASTER_DEFAULT_MESSAGE.UPGRADE_MESSAGE,
                 }),
               );
               return;

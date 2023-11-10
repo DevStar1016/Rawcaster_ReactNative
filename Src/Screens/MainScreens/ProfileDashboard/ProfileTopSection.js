@@ -22,6 +22,7 @@ import MenuContainer from '../../../Modals/MenuContainer';
 const MENU_LIST = [
   {id: 1, buttonName: 'Remove Friend'},
   {id: 2, buttonName: 'UnFollow'},
+  {id: 3, buttonName: 'Copy Link'},
 ];
 
 const BANNER_IMAGE_HEIGHT = 140;
@@ -112,8 +113,11 @@ const ProfileTopSection = ({
     if (!isEnableRemoveFriend) {
       tempMenuList = tempMenuList.filter(item => item.id !== 1);
     }
-    if (!isFan()) {
+    if (!isFan() || myProfile?.user_id === profile?.user_id) {
       tempMenuList = tempMenuList.filter(item => item.id !== 2);
+    }
+    if (myProfile?.user_id !== profile?.user_id) {
+      tempMenuList = tempMenuList.filter(item => item.id !== 3);
     }
     return [...tempMenuList];
   };
@@ -183,23 +187,23 @@ const ProfileTopSection = ({
           ) : (
             <View />
           )}
-          {myProfile?.user_id !== profile?.user_id &&
-            getOptionsList().length > 0 && (
-              <View
-                style={{
-                  padding: 10,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                <SVGIcon
-                  icon="menu_horizontal"
-                  isButton
-                  onPress={() => {
-                    setisOpenMenuList(true);
-                  }}
-                />
-              </View>
-            )}
+
+          {getOptionsList().length > 0 && (
+            <View
+              style={{
+                padding: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <SVGIcon
+                icon="menu_horizontal"
+                isButton
+                onPress={() => {
+                  setisOpenMenuList(true);
+                }}
+              />
+            </View>
+          )}
         </View>
       </View>
 
@@ -226,6 +230,11 @@ const ProfileTopSection = ({
               onRemoveFriend();
             } else if (selectedId === 2) {
               onUnfollow();
+            } else if (selectedId === 3) {
+              if (myProfile.profile_url) {
+                Clipboard.setString(myProfile.profile_url);
+                Toast.success('Profile Link Copied');
+              }
             }
           }}
           // buttonsOptions={getMenuOptions()}

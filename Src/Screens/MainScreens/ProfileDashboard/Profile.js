@@ -52,7 +52,10 @@ import {
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import Nugget from '../HomeScreen/Nugget';
 import SVGIcon from '../../../Components/SVGIcon';
-import {DIMENSIONS} from '../../../Utilities/Constants';
+import {
+  DIMENSIONS,
+  RAWCASTER_DEFAULT_MESSAGE,
+} from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
 import {useDispatch} from 'react-redux';
 import StyledText from '../../../Components/StyledText';
@@ -276,18 +279,18 @@ const Profile = ({route}) => {
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
           };
-          // if (res.data.profile.unclaimed_status === 1) {
-          //   setisunclaimeduserAlert({
-          //     status: true,
-          //     text: 'This is Unclaimed Account',
-          //   });
-          //   setTimeout(() => {
-          //     setisunclaimeduserAlert({
-          //       status: false,
-          //       text: '',
-          //     });
-          //   }, 5000);
-          // }
+          if (res.data.profile.unclaimed_status === 1) {
+            setisunclaimeduserAlert({
+              status: true,
+              text: RAWCASTER_DEFAULT_MESSAGE.DEFAULT_UNCLAIM_MESSAGE,
+            });
+            setTimeout(() => {
+              setisunclaimeduserAlert({
+                status: false,
+                text: '',
+              });
+            }, 5000);
+          }
 
           if (isMount.current) {
             setothersProfile({...tempProfile});
@@ -522,7 +525,8 @@ const Profile = ({route}) => {
     if (userId) {
       Alert.alert(
         'UnFollow!',
-        `Are you sure to unfollow ${getSlicedText(othersProfile?.name, 20)}?`,
+        RAWCASTER_DEFAULT_MESSAGE.UNFOLLOW_MESSAGE,
+        // `Are you sure to unfollow ${getSlicedText(othersProfile?.name, 20)}?`,
         [
           {
             text: 'Cancel',
@@ -804,7 +808,7 @@ const Profile = ({route}) => {
               dispatch(
                 setPremiumAlert({
                   status: true,
-                  text: 'To access this feature you need to become a diamond member!',
+                  text: RAWCASTER_DEFAULT_MESSAGE.VERIFY_UPGRADE_MESSAGE,
                 }),
               );
             }

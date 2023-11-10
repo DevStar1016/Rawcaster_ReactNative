@@ -22,7 +22,7 @@ var isMount: boolean = true;
 var timer: any = undefined;
 const Events = () => {
   const navigation = useNavigation();
-  const profile = useProfile();
+  const profile: any = useProfile();
   const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [isOpenHostingScreen, setisOpenHostingScreen] = useState(false);

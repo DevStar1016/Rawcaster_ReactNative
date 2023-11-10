@@ -83,6 +83,8 @@ import SavePinkIcon from '../Assets/Svg/save_pink.svg';
 import SaveWhiteIcon from '../Assets/Svg/save_white.svg';
 import SaveYellowIcon from '../Assets/Svg/save_yellow.svg';
 import ShareIcon from '../Assets/Svg/share.svg';
+import ShareBlackIcon from '../Assets/Svg/share_black.svg';
+import ShareGreyIcon from '../Assets/Svg/share_grey.svg';
 import PlayWhiteIcon from '../Assets/Svg/play_white.svg';
 import AppTextLogo from '../Assets/Svg/app_text_logo_colored.svg';
 import PhoneIcon from '../Assets/Svg/phone.svg';
@@ -182,7 +184,7 @@ import FilterLineBlackIcon from '../Assets/Svg/filter_line_black.svg';
 import VerifiedSignIcon from '../Assets/Svg/verified_sign.svg';
 import CloseBlackIcon from '../Assets/Svg/close_black.svg';
 import ClaimUserIcon from '../Assets/Svg/claim_user.svg';
-
+import TwitterXlogo from '../Assets/Svg/twitter_x_logo.svg';
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
 import DiamondIcon from '../Assets/Svg/Badges/MemberShip/diamond.svg';
@@ -190,6 +192,7 @@ import NanoIcon from '../Assets/Svg/Badges/Influencer/nano.svg';
 import MicroIcon from '../Assets/Svg/Badges/Influencer/micro.svg';
 import MacroIcon from '../Assets/Svg/Badges/Influencer/macro.svg';
 import MegaIcon from '../Assets/Svg/Badges/Influencer/mega.svg';
+import LinkIcon from '../Assets/Svg/link_icon.svg';
 
 export type IconType =
   | 'visibility_on'
@@ -378,7 +381,11 @@ export type IconType =
   | 'clipboard_copy_rounded'
   | 'pending_time'
   | 'diamond_verified'
-  | 'membership_grey';
+  | 'membership_grey'
+  | 'twitter_x_square_fill'
+  | 'copy_link'
+  | 'share_black'
+  | 'share_grey';
 
 export const ICONS = {
   visibility_on: VisibilityOnIcon,
@@ -390,6 +397,7 @@ export const ICONS = {
   whatsapp: WhatsappIcon,
   telegram: TelegramIcon,
   twitter_rounded_fill: TwitterRoundedFillIcon,
+  twitter_x_square_fill: TwitterXlogo,
   facebook_fill: FaceBookFillIcon,
   instagram_rounded_fill: InstagramRoundedFillIcon,
   contact_rounded_fill_orange: ContactRoundedFillOrangeIcon,
@@ -434,6 +442,8 @@ export const ICONS = {
   save_white: SaveWhiteIcon,
   save_yellow: SaveYellowIcon,
   share: ShareIcon,
+  share_black: ShareBlackIcon,
+  share_grey: ShareGreyIcon,
   play_white: PlayWhiteIcon,
   app_text_logo_colored: AppTextLogo,
   phone: PhoneIcon,
@@ -568,4 +578,5 @@ export const ICONS = {
   diamond_verified: DimondVerifiedIcon,
   pending_time: PendingTimeIcon,
   membership_grey: MembershipGreyIcon,
+  copy_link: LinkIcon,
 };

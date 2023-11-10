@@ -35,6 +35,7 @@ import {
   IS_IOS,
   NUGGET_ACTIONS,
   NUGGET_SHARE_TYPE,
+  RAWCASTER_DEFAULT_MESSAGE,
 } from '../../../Utilities/Constants';
 import SVGIcon from '../../../Components/SVGIcon';
 import {IconType} from '../../../Utilities/Icons';
@@ -63,6 +64,7 @@ import MenuContainer from '../../../Modals/MenuContainer';
 import {
   useNuggetItemActions,
   useNuggetParentActions,
+  useReadMoreTextNuggetContext,
 } from '../../../Utilities/Contexts';
 import PollDataDisplay from '../../../Components/PollDataDisplay';
 import MediaProgressSlider from '../../../Components/MediaProgressSlider';
@@ -93,6 +95,7 @@ type Props = {
   progress?: number;
   nuggetContentController?: any;
   numberOfLines?: number;
+  onReadMore?: (val: any) => void;
 };
 type ActionContainerProps = {
   icon: IconType;
@@ -136,6 +139,7 @@ function NuggetActionsOverlay({
   progress = 0,
   nuggetContentController,
   numberOfLines = 3,
+  onReadMore,
 }: Props) {
   const {
     headerContainerHeight,
@@ -145,13 +149,10 @@ function NuggetActionsOverlay({
     isFromGlobalSearch,
     isEnableHeaderContainerHeightforTopButtons,
     isEnableTopInsetsPadding,
-    isFrom,
-    searchFocused,
-    dashboardFocused,
-    profileFocused,
-    handlePlayAudio,
+
     handleStopAudio,
     isReadMuted,
+    isReadMore,
   } = useNuggetParentActions();
 
   const {
@@ -166,6 +167,18 @@ function NuggetActionsOverlay({
     handleNuggetContentTranslate,
     setisVideoBackground,
   } = useNuggetItemActions();
+  const {
+    isTranslated,
+    setisTranslated,
+    url,
+    seturl,
+    onPressUrl,
+    isTranslateLoading,
+    nuggetContentAudioAPICall,
+    getTranslatedContent,
+    isReadLoading,
+    setisReadLoading,
+  } = useReadMoreTextNuggetContext();
 
   const navigation = useNavigation();
   const token = useToken();
@@ -180,7 +193,7 @@ function NuggetActionsOverlay({
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(true);
   const [openUrlConfirmation, setopenUrlConfirmation] = useState(false);
-  const [url, seturl] = useState('');
+
   const [urlConfirmationMetaData, seturlConfirmationMetaData] = useState(null);
   const [pollVotedData, setpollVotedData] = useState<PollVotedDataProp>({
     isVoted: nugget.voted ? parseInt(nugget.voted) === 1 : false,
@@ -197,9 +210,7 @@ function NuggetActionsOverlay({
   const [mainContentContainerWidth, setmainContentContainerWidth] = useState(0);
   const [mediaSliderHeight, setmediaSliderHeight] = useState(0);
   const [openMenuOptions, setopenMenuOptions] = useState(false);
-  const [isReadLoading, setisReadLoading] = useState(false);
-  const [isTranslateLoading, setisTranslateLoading] = useState(false);
-  const [isTranslated, setisTranslated] = useState(false);
+
   const commentsBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const aiChatBottomSheetModalRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ['90%'], []);
@@ -211,14 +222,6 @@ function NuggetActionsOverlay({
       }
     };
   }, []);
-
-  const getIsFocused = useMemo(() => {
-    return (
-      (isFrom === 'search' && searchFocused) ||
-      (isFrom === 'dashboard' && dashboardFocused) ||
-      (isFrom === 'profile' && profileFocused)
-    );
-  }, [isFrom, searchFocused, dashboardFocused, profileFocused]);
 
   const handlePresentCommentsModal = useCallback(() => {
     if (setisVideoBackground) {
@@ -285,58 +288,6 @@ function NuggetActionsOverlay({
   };
 
   /**
-   * Makes an API call to retrieve audio content for a nugget.
-   * @param {number} [type=1] - The type of audio content to retrieve. Default is 1.
-   * @returns None
-   */
-  const nuggetContentAudioAPICall = (type = 1) => {
-    if (
-      nuggetContentController &&
-      nuggetContentController.current &&
-      type === 1
-    ) {
-      nuggetContentController.current.abort();
-    }
-    nuggetContentController.current = new AbortController();
-    const formData = new FormData();
-    formData.append('token', token);
-    formData.append('nugget_id', nugget.nugget_id);
-    formData.append('translation_type', type);
-    nuggetContentAudioService(formData, nuggetContentController.current.signal)
-      .then(res => {
-        if (res.data?.status === 1) {
-          if (type === 1) {
-            if (getIsFocused) {
-              if (handlePlayAudio) {
-                handlePlayAudio(res.data.file_path);
-              }
-            }
-          } else {
-            handleNuggetContentTranslate(res.data.translation);
-            setisTranslated(true);
-          }
-        } else if (res.data?.status === 0) {
-          Toast.fail(res.data.msg);
-          if (type === 2) {
-            setisTranslated(false);
-          }
-        }
-      })
-      .catch(e => {
-        if (!e.message.includes('cancel')) {
-          Toast.fail(e.message);
-        }
-      })
-      .finally(() => {
-        if (type === 1) {
-          setisReadLoading(false);
-        } else {
-          setisTranslateLoading(false);
-        }
-      });
-  };
-
-  /**
    * Calculates the total number of votes for a poll.
    * @returns {number} The total number of votes.
    */
@@ -374,35 +325,6 @@ function NuggetActionsOverlay({
    * @param {any} value - The URL value to handle onPress event for.
    * @returns None
    */
-  const onPressUrl = (value: any) => {
-    if (value) {
-      if (value.includes('rawcaster')) {
-        Linking.openURL(value)
-          .then(res => {})
-          .catch(e => {});
-      } else {
-        if (nugget.metadata) {
-          let metaDataList = JSON.parse(nugget.metadata);
-          const isArrayData = Array.isArray(metaDataList);
-          if (!isArrayData) {
-            metaDataList = [{...metaDataList}];
-          }
-          const singleMetaData = [...metaDataList].find(
-            (item: any) => item.url === value,
-          );
-
-          if (singleMetaData) {
-            seturlConfirmationMetaData(singleMetaData);
-          }
-        }
-        // if (nugget.media_list && nugget.media_list.length > 0) {
-
-        // }
-        seturl(value);
-        setopenUrlConfirmation(true);
-      }
-    }
-  };
 
   /**
    * Retrieves the menu options based on the current state of the nugget.
@@ -614,14 +536,6 @@ function NuggetActionsOverlay({
    * and makes an API call to retrieve the translated content.
    * @returns None
    */
-  const getTranslatedContent = () => {
-    if (nugget.translated_content) {
-      setisTranslated(true);
-    } else {
-      setisTranslateLoading(true);
-      nuggetContentAudioAPICall(2);
-    }
-  };
 
   /**
    * Checks if the user is verified.
@@ -969,9 +883,11 @@ function NuggetActionsOverlay({
               }}>
               <ScrollView
                 contentContainerStyle={{
+                  flex: 1,
                   flexGrow: 1,
                   zIndex: 1000,
                 }}
+                scrollEnabled
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
                 bounces={false}>
@@ -979,7 +895,19 @@ function NuggetActionsOverlay({
                 <StyledText
                   textMode="read_more_hyper_link"
                   numberOfLines={numberOfLines}
+                  isReadmoreEnable={true}
                   onPressUrl={onPressUrl}
+                  onReadMore={val => {
+                    if (onReadMore) {
+                      onReadMore({
+                        status: val,
+                        text:
+                          isTranslated && nugget.translated_content?.trim()
+                            ? nugget.translated_content.trim()
+                            : nugget.content.trim(),
+                      });
+                    }
+                  }}
                   style={{
                     color: COLORS.white,
                     // fontSize: 15.5,
@@ -1145,7 +1073,7 @@ function NuggetActionsOverlay({
                   dispatch(
                     setPremiumAlert({
                       status: true,
-                      text: 'To access this feature you need to become a premium member!',
+                      text: RAWCASTER_DEFAULT_MESSAGE.UPGRADE_MESSAGE,
                     }),
                   );
                 }

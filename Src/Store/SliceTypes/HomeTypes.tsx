@@ -119,6 +119,7 @@ type GroupDataProp = {
   result_list: number;
   group_member_ids: number[];
   my_group: number;
+  referral_link?: string;
   group_members_list: GroupMemberDataProp[];
 };
 

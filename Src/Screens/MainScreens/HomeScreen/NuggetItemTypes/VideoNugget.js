@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import Video from 'react-native-video';
 import {COLORS} from '../../../../Utilities/Colors';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
@@ -20,12 +20,20 @@ function VideoNugget({
   duration,
   setisLoadingVideo,
   setduration,
+  onUnmounted,
 }) {
-  const {isMuted, mediaHeight} = useNuggetParentActions();
+  const {isMuted, mediaHeight, activecategoryName, categoryName} =
+    useNuggetParentActions();
   const {isRepeatVideo, onFinishPlaying} = useNuggetItemActions();
   const insets = useInsets();
   const windowHeight = mediaHeight ?? insets.mediaHeight;
   const windowWidth = DIMENSIONS.window.width;
+
+  useEffect(() => {
+    return () => {
+      onUnmounted();
+    };
+  }, []);
 
   /**
    * Handles the error that occurs when loading a video.
@@ -92,7 +100,6 @@ function VideoNugget({
           // repeat={false}
           onBuffer={() => {}}
           onLoadStart={val => {
-            console.log();
             setisLoadingVideo(true);
           }}
           onLoad={onLoadComplete}

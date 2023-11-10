@@ -16,6 +16,10 @@ export const initialState: UtilityDataProp = {
   isVisibleInfluencers: false,
   isAppForeground: true,
   isOpenLoginAlert: false,
+  isGroupJoinAlert: {
+    status: false,
+    text: '',
+  },
   premiumAlert: {
     status: false,
     text: '',
@@ -54,6 +58,9 @@ const UtilitySlice = createSlice({
     },
     setIsOpenLoginAlert: (state, action) => {
       state.isOpenLoginAlert = action.payload;
+    },
+    setIsGroupJoinAlert: (state, action) => {
+      state.isGroupJoinAlert = action.payload;
     },
     setPremiumAlert: (state, action) => {
       state.premiumAlert = action.payload;
@@ -100,5 +107,6 @@ export const {
   setIsOpenVerifyPopup,
   setGlobalLoaderData,
   clearUtilityReduxData,
+  setIsGroupJoinAlert,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

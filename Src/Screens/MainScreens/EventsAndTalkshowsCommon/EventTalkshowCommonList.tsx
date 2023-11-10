@@ -240,10 +240,12 @@ const EventTalkshowCommonScreen = ({
     ) : null;
   };
 
+  const ScreenType = screenType === 'talkshow' ? 'Talkshow' : 'Events';
+
   return (
     <View style={{flex: 1}}>
       <CustomHomeHeader
-        title={screenType === 'talkshow' ? 'Talkshow' : 'Events'}
+        title={ScreenType}
         bgColor={COLORS.transparent}
         isEnableSafeArea
         isEnableSearch={true}
@@ -255,11 +257,9 @@ const EventTalkshowCommonScreen = ({
         isEnableLoading={isListLoading}
         centerText={
           isListLoading
-            ? `Fetching ${
-                screenType === 'talkshow' ? 'Talkshow' : 'Events'
-              } List`
+            ? `Fetching ${ScreenType} List`
             : getEventsList().length <= 0
-            ? 'No data found'
+            ? `No new or future ${ScreenType.toLowerCase()} found`
             : ''
         }
       />

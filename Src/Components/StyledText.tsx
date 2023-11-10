@@ -1,4 +1,11 @@
-import {StyleProp, StyleSheet, Text, TextStyle, View} from 'react-native';
+import {
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
@@ -16,14 +23,18 @@ export interface StyledTextProps {
   normalTextModeTextProps?: NormalTextModeProps;
   onPressUrl?: (value: string) => void;
   onPress?: () => void;
+  onReadMore?: (value: boolean) => void;
+  isReadmoreEnable?: boolean;
 }
 
 function StyledText({
   children,
   textMode = 'normal',
   numberOfLines = 0,
+  isReadmoreEnable = false,
   onPress,
   onPressUrl,
+  onReadMore,
   readMoreButtonTextStyle = {},
   style,
   normalTextModeTextProps,
@@ -83,13 +94,20 @@ function StyledText({
           </Text>
         )}
 
-        {lengthMore ? (
+        {lengthMore && isReadmoreEnable ? (
           <Text
             style={[
               styles.text,
               {color: COLORS.secondary, ...readMoreButtonTextStyle},
             ]}
-            onPress={() => setisEnableFullText(pre => !pre)}>
+            onPress={() => {
+              setisEnableFullText(pre => {
+                if (onReadMore) {
+                  onReadMore(!pre);
+                }
+                return isReadmoreEnable ? pre : !pre;
+              });
+            }}>
             {isEnableFullText ? 'Read less' : 'Read more'}
           </Text>
         ) : null}
@@ -102,7 +120,7 @@ function StyledText({
       <Hyperlink
         linkDefault={false}
         linkStyle={{color: '#2980b9'}}
-        onPress={onPressUrl}>
+        onPress={onPressUrl ? onPressUrl : () => {}}>
         {isEnableReadMore ? renderReadMoreText() : renderText()}
       </Hyperlink>
     );

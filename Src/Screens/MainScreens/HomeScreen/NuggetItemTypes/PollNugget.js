@@ -10,6 +10,7 @@ import {
 } from '../../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
 import moment from 'moment';
+import ReadMoreTextNugget from './ReadMoreTextNugget';
 
 const PollNugget = ({
   onDeleteNugget,
@@ -64,7 +65,7 @@ const PollNugget = ({
         {height: windowHeight, width: windowWidth},
       ]}>
       <DefaultBackground />
-      <NuggetActionsOverlay
+      <ReadMoreTextNugget
         onPressShareType={onPressShareType}
         onPressShare={onPressShare}
         onEditNugget={onEditNugget}

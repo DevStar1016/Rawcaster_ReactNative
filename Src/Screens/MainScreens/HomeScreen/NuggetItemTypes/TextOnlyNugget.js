@@ -1,15 +1,17 @@
-import {StyleSheet, View} from 'react-native';
-import React, {useEffect, useMemo, useRef} from 'react';
+import {StatusBar, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import NuggetActionsOverlay from '../NuggetActionsOverlay';
 import {DIMENSIONS} from '../../../../Utilities/Constants';
 import {COLORS} from '../../../../Utilities/Colors';
 import DefaultBackground from '../../../../Components/DefaultBackground';
 import {useInsets, useIsAppForeground} from '../../../../Utilities/StoreData';
 import {
+  TextNuggetContext,
   useNuggetItemActions,
   useNuggetParentActions,
 } from '../../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
+import ReadMoreTextNugget from './ReadMoreTextNugget';
 
 const TextOnlyNugget = ({
   onPressShare,
@@ -27,6 +29,7 @@ const TextOnlyNugget = ({
     nuggetContentController,
     isFocused,
   } = useNuggetParentActions();
+
   const {nugget, viewableItem, parentNuggetIndex} = useNuggetItemActions();
   const insets = useInsets();
   const isAppForeground = useIsAppForeground();
@@ -65,7 +68,7 @@ const TextOnlyNugget = ({
       ]}>
       <DefaultBackground bgColor={COLORS.primaryDark} />
 
-      <NuggetActionsOverlay
+      <ReadMoreTextNugget
         onEditNugget={onEditNugget}
         onDeleteNugget={onDeleteNugget}
         onPressShare={onPressShare}

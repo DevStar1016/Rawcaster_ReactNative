@@ -103,6 +103,10 @@ export const useIsOpenLoginAlert = () => {
   return useAppSelector(state => state.utility.isOpenLoginAlert);
 };
 
+export const useIsGroupJoinAlert = () => {
+  return useAppSelector(state => state.utility.isGroupJoinAlert);
+};
+
 export const usePremiumAlert = () => {
   return useAppSelector(state => state.utility.premiumAlert);
 };

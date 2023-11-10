@@ -105,6 +105,7 @@ const NuggetsSearch = () => {
     formData.append('token', token);
     if (searchText) {
       formData.append('search_key', searchText);
+      formData.append('global_search', 1);
     }
     formData.append('page_number', pageNumber);
 

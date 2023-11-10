@@ -41,6 +41,7 @@ import {useDispatch} from 'react-redux';
 import SVGIcon from '../../../Components/SVGIcon';
 import Loader from '../../../Components/Loader';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import {RAWCASTER_DEFAULT_MESSAGE} from '../../../Utilities/Constants';
 
 type Props = {
   initialList: [];
@@ -537,10 +538,11 @@ const ProfileSeeAllUsersList = ({route}: any) => {
           if (listType === 'influencers') {
             Alert.alert(
               'UnFollow!',
-              `Are you sure to unfollow ${getSlicedText(
-                item.display_name,
-                20,
-              )}?`,
+              RAWCASTER_DEFAULT_MESSAGE.UNFOLLOW_MESSAGE,
+              // `Are you sure to unfollow ${getSlicedText(
+              //   item.display_name,
+              //   20,
+              // )}?`,
               [
                 {
                   text: 'Cancel',

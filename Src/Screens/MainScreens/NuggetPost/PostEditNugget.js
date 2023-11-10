@@ -23,7 +23,7 @@ import {
   useProfile,
   useToken,
 } from '../../../Utilities/StoreData';
-import {useNavigation} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../../Utilities/Colors';
 import {FONTS} from '../../../Utilities/Fonts';
 import SubmitButton from '../../../Components/SubmitButton';
@@ -78,6 +78,7 @@ const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2;
 const PostEditNugget = ({route}) => {
   const [isKeyBoardEnabledStatus, setisKeyBoardEnabledStatus] = useState(false);
   const {nugget, preContent} = route.params ?? {};
+  const focus = useIsFocused();
   const dispatch = useDispatch();
   const connectionsList = useConnectionsList();
   const groupsList = useGroupsList();
@@ -127,9 +128,43 @@ const PostEditNugget = ({route}) => {
     status: false,
     text: '',
   });
-  const [typedText, settypedText] = useState(
-    preContent ? preContent : nugget && nugget.content ? nugget.content : '',
-  );
+  const [typedText, settypedText] = useState('');
+
+  useEffect(() => {
+    if (!typedText && focus) {
+      if (preContent) {
+        settypedText(
+          getSlicedText(preContent, profile?.nugget_content_length, false),
+        );
+        if (
+          preContent.length > profile?.nugget_content_length &&
+          profile?.user_status_id !== 4
+        ) {
+          dispatch(
+            setPremiumAlert({
+              status: true,
+              text: 'You have reached your character limit, to increase the limit upgrade your membership',
+            }),
+          );
+        }
+      } else if (nugget && nugget.content) {
+        settypedText(
+          getSlicedText(nugget.content, profile?.nugget_content_length, false),
+        );
+        if (
+          nugget.length > profile?.nugget_content_length &&
+          profile?.user_status_id !== 4
+        ) {
+          dispatch(
+            setPremiumAlert({
+              status: true,
+              text: 'You have reached your character limit, to increase the limit upgrade your membership',
+            }),
+          );
+        }
+      }
+    }
+  }, [preContent, nugget]);
 
   const [question, setquestion] = useState('');
   const [pollLength, setpollLength] = useState(null);
@@ -143,6 +178,7 @@ const PostEditNugget = ({route}) => {
       value: '',
     },
   ]);
+  console.log(preContent);
 
   useEffect(() => {
     const backAction = () => {
@@ -1135,7 +1171,7 @@ const PostEditNugget = ({route}) => {
                   },
                 ]}
                 multiline
-                maxLength={profile?.nugget_content_length}
+                // maxLength={profile?.nugget_content_length}
                 onFocus={() => {
                   openCloseEmojiPicker(false);
                 }}
@@ -1149,6 +1185,14 @@ const PostEditNugget = ({route}) => {
                     text.length > profile?.nugget_content_length &&
                     profile?.user_status_id !== 4
                   ) {
+                    settypedText(
+                      getSlicedText(
+                        typedText,
+                        profile?.nugget_content_length,
+                        false,
+                      ),
+                    );
+                    console.log('test123');
                     Keyboard.dismiss();
                     dispatch(
                       setPremiumAlert({

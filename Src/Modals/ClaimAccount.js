@@ -9,7 +9,12 @@ import TextBox from '../Components/TextBox';
 import CustomDateMonthYearPicker from '../Components/CustomDateMonthYearPicker';
 import DropDownPicker from '../Components/DropDownPicker';
 import {getLocationAddress} from '../Utilities/Methods';
-import {PHONE_REGEX} from '../Utilities/Constants';
+import {
+  IDENFY_STATUS,
+  IDENFY_STATUS_MESSAGE,
+  PHONE_REGEX,
+  RAWCASTER_DEFAULT_MESSAGE,
+} from '../Utilities/Constants';
 import {
   useProfile,
   useToken,
@@ -68,6 +73,12 @@ const ClaimAccount = ({route}) => {
   const [isLoading, setisLoading] = useState(false);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
     useState(false);
+  const [AccountVerifyConfirmationData, setAccountVerifyConfirmationData] =
+    useState({
+      isOpen: false,
+      text: '',
+      isPositive: false,
+    });
   const [messageBoxData, setmessageBoxData] = useState({
     isOpen: false,
     message: '',
@@ -88,13 +99,31 @@ const ClaimAccount = ({route}) => {
         if (isMount) {
           setisLoading(true);
         }
-        if (isVerifyAccount) {
-          handleVerifyAccount();
-        } else {
-          handleClaimAccount();
-        }
+        HandleSubmitforVeification();
       },
     });
+
+  const HandleSubmitforVeification = () => {
+    if (isVerifyAccount) {
+      handleVerifyAccount();
+    } else {
+      if (profile.account_verify_type === 2) {
+        handleClaimAccount();
+      } else if (profile.account_verify_type === 1) {
+        setAccountVerifyConfirmationData({
+          isOpen: true,
+          text: RAWCASTER_DEFAULT_MESSAGE.CLAIM_NOT_VERIFIED_MESSAGE,
+          isPositive: false,
+        });
+      } else {
+        setAccountVerifyConfirmationData({
+          isOpen: true,
+          text: RAWCASTER_DEFAULT_MESSAGE.CLAIM_VERIFY_MESSAGE,
+          isPositive: true,
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     isMount = true;
@@ -155,23 +184,61 @@ const ClaimAccount = ({route}) => {
       });
   }
 
+  const HandleDisplayMessage = message => {
+    setmessageBoxData({
+      isOpen: true,
+      message: message,
+    });
+  };
+
+  const HandleManualVerify = response => {
+    switch (response.manualIdentificationStatus) {
+      case IDENFY_STATUS.APPROVED:
+        dispatch(setMyProfile({...profile, acc_verify_status: 1}));
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.APPROVED);
+
+        break;
+      case IDENFY_STATUS.FAILED:
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED);
+        break;
+      case IDENFY_STATUS.WAITING:
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.WAITING);
+        break;
+      case IDENFY_STATUS.INACTIVE:
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.INACTIVE);
+        break;
+      default:
+        Toast.fail(IDENFY_STATUS_MESSAGE.OTHERS);
+        break;
+    }
+  };
+
+  const HandleAutomatedVerify = response => {
+    switch (response.autoIdentificationStatus) {
+      case IDENFY_STATUS.APPROVED:
+        HandleManualVerify(response);
+        break;
+      case IDENFY_STATUS.FAILED:
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED);
+        break;
+      case IDENFY_STATUS.UNVERIFIED:
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.UNVERIFIED);
+        break;
+      default:
+        Toast.fail(IDENFY_STATUS_MESSAGE.OTHERS);
+        break;
+    }
+  };
+
   const handleChangeIdenfyVerification = token => {
     setisLoading(true);
-    console.log(token, 'token');
     StartIdenfyVerification(token)
       .then(response => {
-        console.log(response);
-        // dispatch(setMyProfile({...profile, account_verify_type: 1}));
-        // setmessageBoxData({
-        //   isOpen: true,
-        //   message: res.data.msg,
-        // });
+        navigation.goBack();
+        HandleAutomatedVerify(response);
       })
-      .catch(error => {
-        console.log(error, 'error');
-      })
+      .catch(error => {})
       .finally(() => {
-        console.log('setisLoading');
         setisLoading(false);
       });
   };
@@ -190,12 +257,8 @@ const ClaimAccount = ({route}) => {
     formData.append('location', values.location);
     verifyAccountService(formData)
       .then(res => {
-        console.log(res.data);
         if (res.data.status === 1) {
-          // handleChangeIdenfyVerification(res.data.verification_token);
-          handleChangeIdenfyVerification(
-            'LRhxZiG0RsGw57v19NDFbWNbMz31rEXgjtaulGm8',
-          );
+          handleChangeIdenfyVerification(res.data.verification_token);
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -365,6 +428,45 @@ const ClaimAccount = ({route}) => {
               setFieldValue('location', location);
             }
           }}
+        />
+      </Modal>
+
+      <Modal
+        onRequestClose={() => {
+          closeMessageBox();
+        }}
+        transparent
+        visible={AccountVerifyConfirmationData.isOpen}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          positiveButtonText={
+            AccountVerifyConfirmationData.isPositive
+              ? 'Verify Account'
+              : 'Back to Profile'
+          }
+          onPressPositiveButton={() => {
+            if (isMount) {
+              if (AccountVerifyConfirmationData.isPositive) {
+                setAccountVerifyConfirmationData({
+                  isOpen: false,
+                  text: '',
+                  isPositive: false,
+                });
+                navigation.navigate('ClaimAccount', {
+                  isVerifyAccount: true,
+                });
+              } else {
+                closeMessageBox();
+                setAccountVerifyConfirmationData({
+                  isOpen: false,
+                  text: '',
+                  isPositive: false,
+                });
+              }
+            }
+          }}
+          isEnableNegativeButton={false}
+          content={AccountVerifyConfirmationData.text}
         />
       </Modal>
 

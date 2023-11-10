@@ -20,7 +20,10 @@ import {FONTS} from '../../Utilities/Fonts';
 import StyledText from '../../Components/StyledText';
 import PoliciesFooter from '../../Components/PoliciesFooter';
 import SubmitButton from '../../Components/SubmitButton';
-import {setIsVisibleInfluencers} from '../../Store/Slices/UtilitySlice';
+import {
+  setIsGroupJoinAlert,
+  setIsVisibleInfluencers,
+} from '../../Store/Slices/UtilitySlice';
 
 const otpVerificationSchema = Yup.object({
   otp: Yup.string()
@@ -42,6 +45,7 @@ const EmailPhoneVerification = ({route}) => {
     otp_ref_id,
     alt_token_id,
     remaining_seconds,
+    group_id,
   } = route.params ?? {};
   const [otpRefId, setotpRefId] = useState(otp_ref_id);
   const [timer, settimer] = useState(
@@ -133,9 +137,22 @@ const EmailPhoneVerification = ({route}) => {
     if (alt_token_id) {
       formData.append('alt_token_id', alt_token_id);
     }
+    if (group_id) {
+      formData.append('group_id', group_id);
+    }
+
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data);
+          if (res.data.group_name) {
+            dispatch(
+              setIsGroupJoinAlert({
+                status: true,
+                text: `You have been added to the group ${res.data.group_name}`,
+              }),
+            );
+          }
           if (isFromLoginSignup) {
             if (parseInt(res.data.first_time) === 1) {
               dispatch(setIsVisibleInfluencers(true));

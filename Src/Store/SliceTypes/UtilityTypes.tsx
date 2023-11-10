@@ -18,6 +18,7 @@ type PremiumAlertProp = {
 
 export type UtilityDataProp = {
   insets: InsetsDataProp;
+  isGroupJoinAlert: PremiumAlertProp;
   locationDetails: any;
   isBottomTabBarAbsolute: boolean;
   nugget_type: number; // 1 - video, 2 - audio

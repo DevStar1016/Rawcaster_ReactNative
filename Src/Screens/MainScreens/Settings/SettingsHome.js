@@ -55,6 +55,10 @@ const SettingsHome = () => {
       id: 7,
       name: 'Logout',
     },
+    // {
+    //   id: 8,
+    //   name: 'Development',
+    // },
   ];
 
   useEffect(() => {
@@ -108,6 +112,7 @@ const SettingsHome = () => {
       case 6:
         navigation.navigate('ReferalSocialList');
         return;
+
       case 7:
         Alert.alert(
           'Logout!',
@@ -127,7 +132,9 @@ const SettingsHome = () => {
           ],
           {cancelable: false},
         );
-
+        return;
+      case 8:
+        navigation.navigate('Development');
         return;
     }
   }

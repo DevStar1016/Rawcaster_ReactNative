@@ -154,6 +154,7 @@ const AIChat = ({onPressBack, handleShareContent, onPermissionResult}) => {
 
     aiChatService(formData)
       .then(res => {
+        console.log(res.data);
         if (res.data.status === 1 || res.data.status === 0) {
           const uniqueId = getUniqueId();
           const responseChatData = {

@@ -53,6 +53,7 @@ import {useNavigation} from '@react-navigation/native';
 import Clipboard from '@react-native-community/clipboard';
 import {REFERRAL_LINK} from '../../../../Services/ServiceConstants';
 import SearchInput from '../../../../Components/SearchInput';
+import banner from '../../../../Assets/Png/group_users_referal.png';
 
 var isMount = true;
 var currentPage = 1;
@@ -91,8 +92,8 @@ const REFERAL_OPTIONS_LIST = [
   },
   {
     id: SHARE_OPTION.twitter,
-    icon: 'twitter_rounded_fill',
-    name: 'Twitter',
+    icon: 'twitter_x_square_fill',
+    name: 'x',
   },
   {
     id: SHARE_OPTION.linked_in,
@@ -115,6 +116,13 @@ const APPSTORE_WHATSAPP_LINK =
   'https://apps.apple.com/us/app/whatsapp-messenger/id310633997';
 const PLAYSTORE_WHATSAPP_LINK =
   'https://play.google.com/store/apps/details?id=com.whatsapp&hl=en&gl=US&pli=1';
+
+const APPSTORE_INSTAGRAM_LINK =
+  'https://apps.apple.com/in/app/instagram/id389801252';
+
+const PLAYSTORE_INSTAGRAM_LINK =
+  'https://play.google.com/store/apps/details?id=com.instagram.android';
+
 const ReferalSocialList = () => {
   const [searchKey, setsearchKey] = useState(null);
   const profile = useProfile();
@@ -162,19 +170,32 @@ const ReferalSocialList = () => {
     referalMessage = null,
     socialUrl,
     isWhatsApp = false,
+    onError,
   }) {
     if (socialMedia) {
-      Share.shareSingle({
-        attributionURL: profile?.referral_link ?? '',
-        title: 'Rawcaster Invite',
-        url: profile?.referral_link ?? '',
-        message: referalMessage ?? REFERAL_MESSAGE,
-        social: socialMedia,
-        type: 'text/*',
-        subject: 'Rawcaster - Invite from ' + profile?.name,
-      })
-        .then(res => {})
-        .catch(err => {});
+      try {
+        Share.shareSingle({
+          attributionURL: profile?.referral_link ?? '',
+          title: 'Rawcaster Invite',
+          url: profile?.referral_link ?? '',
+          message: referalMessage ?? REFERAL_MESSAGE,
+
+          social: socialMedia,
+          type: 'text/*',
+          subject: 'Rawcaster - Invite from ' + profile?.name,
+        })
+          .then(res => {
+            console.log(res);
+          })
+          .catch(err => {
+            if (onError) {
+              onError();
+            }
+            console.log(err);
+          });
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       Linking.openURL(socialUrl)
         .then(() => {})
@@ -213,7 +234,30 @@ const ReferalSocialList = () => {
         handleSocialShare({socialMedia: Share.Social.FACEBOOK});
         break;
       case SHARE_OPTION.instagram:
-        handleSocialShare({socialMedia: Share.Social.INSTAGRAM});
+        if (IS_IOS) {
+          const url = `instagram://sharesheet?text=${REFERAL_MESSAGE}&url=${profile?.referral_link}`;
+          Linking.canOpenURL(url).then(response => {
+            if (response) {
+              handleSocialShare({
+                socialUrl: url,
+              });
+            } else {
+              Linking.openURL(APPSTORE_INSTAGRAM_LINK)
+                .then(() => {})
+                .catch(e => {});
+            }
+          });
+        } else {
+          const handleError = () => {
+            Linking.openURL(PLAYSTORE_INSTAGRAM_LINK)
+              .then(() => {})
+              .catch(e => {});
+          };
+          handleSocialShare({
+            socialMedia: Share.Social.INSTAGRAM,
+            onError: handleError,
+          });
+        }
         return;
       case SHARE_OPTION.telegram:
         if (IS_IOS) {

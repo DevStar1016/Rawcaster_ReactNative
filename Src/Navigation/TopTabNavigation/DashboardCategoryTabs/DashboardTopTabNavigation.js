@@ -23,26 +23,20 @@ import DashboardCustomTopTabBar from './DashboardCustomTopTabBar';
 const Tab = createMaterialTopTabNavigator();
 
 function DashboardTopTabNavigation() {
-  const insets = useInsets();
-  const profile = useProfile();
+  const viewableRef = useRef();
+  // const insets = useInsets();
+  // const profile = useProfile();
   const categoryList = useInfluencerCategoryList() ?? [];
-  const token = useToken();
+  // const token = useToken();
   const {setswipeEnabled, setfocusedNuggetUserId} = useDashboardProfile() ?? {};
-  const [
-    headerRightButtonsContainerWidth,
-    setheaderRightButtonsContainerWidth,
-  ] = useState(0);
-  const [headerLeftButtonContainerWidth, setheaderLeftButtonContainerWidth] =
-    useState(0);
+
   const [headerContainerHeight, setheaderContainerHeight] = useState(0);
-  const [tabNuggetsList, settabNuggetsList] = useState([]);
   const [viewableItem, setviewableItem] = useState({
     nugget_id: '',
     viewed: false,
   });
-
-  const [preCategoryName, setpreCategoryName] = useState('');
-  const [categoryName, setcategoryName] = useState('ForYou');
+  const [isViewableItemSet, setisViewableItemSet] = useState(false);
+  const categoryNameRef = useRef('forYou');
 
   const resetViewabilityItem = () => {
     setviewableItem({
@@ -52,10 +46,14 @@ function DashboardTopTabNavigation() {
   };
 
   const categoriesListData = {
+    ActivecategoryName: categoryNameRef.current,
     headerContainerHeight,
     setheaderContainerHeight,
     setviewableItem,
     viewableItem,
+    viewableRef,
+    isViewableItemSet,
+    setisViewableItemSet,
     resetViewabilityItem: () => {
       resetViewabilityItem();
     },
@@ -96,10 +94,13 @@ function DashboardTopTabNavigation() {
         backBehavior="initialRoute"
         screenListeners={{
           focus: e => {
-            setcategoryName(preName => {
-              setpreCategoryName(preName);
-              return e.target.split('-')[0];
-            });
+            setisViewableItemSet(false);
+
+            categoryNameRef.current = e.target.split('-')[0];
+            // setcategoryName(preName => {
+            //   setpreCategoryName(preName);
+            //   return e.target.split('-')[0];
+            // });
 
             // resetViewabilityItem();
             if (setswipeEnabled) {
@@ -162,6 +163,7 @@ function DashboardTopTabNavigation() {
                 categoryType: item.id,
                 categoryName: item.name?.split(' ').join(''),
                 filterType: 0,
+                activecategoryName: categoryNameRef.current,
               }}
             />
           );
@@ -173,7 +175,11 @@ function DashboardTopTabNavigation() {
           options={{
             title: 'Influencing',
           }}
-          initialParams={{filterType: 1, categoryName: 'influencing'}}
+          initialParams={{
+            filterType: 1,
+            categoryName: 'influencing',
+            activecategoryName: categoryNameRef.current,
+          }}
         />
 
         <Tab.Screen
@@ -182,7 +188,11 @@ function DashboardTopTabNavigation() {
           options={{
             title: 'For You',
           }}
-          initialParams={{filterType: 0, categoryName: 'forYou'}}
+          initialParams={{
+            filterType: 0,
+            categoryName: 'forYou',
+            activecategoryName: categoryNameRef.current,
+          }}
         />
       </Tab.Navigator>
     </DashboardCategoryTopTabContext.Provider>

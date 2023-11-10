@@ -435,3 +435,9 @@ export const endMeeting = (data: FormData) => {
 export const exitMeeting = (data: FormData) => {
   return axios.post('exit_meeting', data);
 };
+
+// Complementory
+
+export const complementaryMembershipService = (data: FormData) => {
+  return axios.post('complementary_membership', data);
+};

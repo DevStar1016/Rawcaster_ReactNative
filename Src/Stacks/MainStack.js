@@ -6,12 +6,14 @@ import {
   useGlobalLoaderData,
   useIsVisibleInfluencers,
   usePremiumAlert,
+  useProfile,
   useSettings,
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
 import {getAuthCode} from '../Utilities/Methods';
 import {
+  complementaryMembershipService,
   getInfluencerCategoryService,
   listAllFriendRequestsService,
 } from '../Services/ApiService';
@@ -48,9 +50,11 @@ import {
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
+import {setMyProfile} from '../Store/Slices/AuthSlice';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
+  const profile = useProfile();
   const [isLoading, setisLoading] = useState(true);
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
@@ -58,6 +62,7 @@ const MainStack = () => {
   const dispatch = useDispatch();
   const globalLoaderData = useGlobalLoaderData();
   const navigation = useNavigation();
+  const userSettings = useSettings();
   const premiumALert = usePremiumAlert();
   const [isComplimentoryAlert, setisComplimentoryAlert] = useState({
     status: false,
@@ -146,10 +151,29 @@ const MainStack = () => {
   }
 
   const HandleUpgradeComplimentory = () => {
-    setisComplimentoryAlert({
-      status: true,
-      text: 'you have been granted a complementary upgrade for xx days',
-    });
+    const formData = new FormData();
+    formData.append('token', token);
+    complementaryMembershipService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          dispatch(
+            setMyProfile({
+              ...profile,
+              user_status: res.data.user_status ?? profile.user_status,
+              user_status_id: res.data.user_status_id ?? profile.user_status_id,
+            }),
+          );
+          setisComplimentoryAlert({
+            status: true,
+            text: res.data.msg,
+          });
+        } else {
+          navigation.navigate('PlansAndPrice');
+        }
+      })
+      .catch(e => {
+        console.log(e);
+      });
   };
 
   return isLoading ? (
@@ -238,13 +262,17 @@ const MainStack = () => {
             positiveButtonText={'Upgrade'}
             negativeButtonText={'Later'}
             onPressPositiveButton={() => {
+              if (userSettings.complementary_status === 1) {
+                HandleUpgradeComplimentory();
+              } else {
+                navigation.navigate('PlansAndPrice');
+              }
               dispatch(
                 setPremiumAlert({
                   status: false,
                   text: '',
                 }),
               );
-              HandleUpgradeComplimentory();
             }}
             content={premiumALert.text}
           />
@@ -265,7 +293,6 @@ const MainStack = () => {
                 status: false,
                 text: '',
               });
-              // navigation.navigate('PlansAndPrice');
             }}
             content={isComplimentoryAlert.text}
           />

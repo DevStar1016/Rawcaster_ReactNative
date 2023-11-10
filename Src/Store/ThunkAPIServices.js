@@ -94,7 +94,6 @@ export const getListNuggets = createAsyncThunk(
         pageNumber: data?.pageNumber,
         categoryName: data?.categoryName,
       };
-      console.log(res.data, 'DATATATTAAA');
     } catch (error) {
       if (!error.message.includes('canceled')) {
         return rejectWithValue({

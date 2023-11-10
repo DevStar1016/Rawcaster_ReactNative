@@ -3,6 +3,7 @@ import {
   FlatList,
   LayoutAnimation,
   Modal,
+  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
@@ -44,6 +45,8 @@ import {
 import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstants';
 import UserItem from './UserItem';
 import BlurOverlay from '../../../Components/BlurOverlay';
+import Clipboard from '@react-native-community/clipboard';
+import {getAllFriendsGroupsList} from '../../../Store/ThunkAPIServices';
 
 var isMount = true;
 var isOnSameGroup = true;
@@ -52,11 +55,13 @@ const GROUP_OPERATIONS = {
   deleteGroup: 2,
   reportGroup: 3,
   exitGroup: 4,
+  copylink: 5,
 };
 const CreateEditGroup = ({route}) => {
   const {groupId, isLocked} = route.params ?? {};
   const groupsList = useGroupsList();
   const profile = useProfile();
+  const [refreshing, setrefreshing] = useState(false);
   const groupDetails = [...groupsList].find(item => item.group_id === groupId);
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -529,6 +534,10 @@ const CreateEditGroup = ({route}) => {
       case GROUP_OPERATIONS.exitGroup:
         onExitGroup();
         break;
+      case GROUP_OPERATIONS.copylink:
+        Clipboard.setString(groupDetails?.referral_link ?? '');
+        Toast.success('Group Link Copied');
+        break;
     }
   }
 
@@ -560,12 +569,19 @@ const CreateEditGroup = ({route}) => {
     let groupMenuList = [];
 
     if (isGroupOwner()) {
+      if (isOtherGroup()) {
+        groupMenuList.push({
+          id: GROUP_OPERATIONS.copylink,
+          buttonName: `Share Link`,
+        });
+      }
       groupMenuList.push({
         id: GROUP_OPERATIONS.enableDisableMemberChat,
         buttonName: `${
           isEnabledMemberChat() ? 'Disable' : 'Enable'
         } Member Chat`,
       });
+
       if (isOtherGroup()) {
         groupMenuList.push({
           id: GROUP_OPERATIONS.deleteGroup,
@@ -823,6 +839,21 @@ const CreateEditGroup = ({route}) => {
             ItemSeparatorComponent={() => {
               return <View style={{height: 15}} />;
             }}
+            refreshing={refreshing}
+            refreshControl={
+              <RefreshControl
+                tintColor={COLORS.secondary}
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setrefreshing(true);
+                  dispatch(getAllFriendsGroupsList())
+                    .then(() => {})
+                    .finally(() => {
+                      setrefreshing(false);
+                    });
+                }}
+              />
+            }
             keyboardShouldPersistTaps={'handled'}
             contentContainerStyle={{paddingBottom: 20, paddingTop: 10}}
             keyExtractor={keyExtractor}

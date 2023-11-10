@@ -58,7 +58,9 @@ var currentPage = 1;
 const DashboardWithCategory = ({route}) => {
   let controller = undefined;
   const navigation = useNavigation();
-  const {filterType, categoryType, categoryName} = route.params ?? {};
+  const {filterType, categoryType, categoryName, activecategoryName} =
+    route.params ?? {};
+
   const {setfocusedNuggetUserId} = useDashboardProfile() ?? {};
   const profile = useProfile();
   const dispatch = useDispatch();
@@ -74,7 +76,11 @@ const DashboardWithCategory = ({route}) => {
     viewableItem,
     setviewableItem,
     resetViewabilityItem,
+    ActivecategoryName,
+    isViewableItemSet,
+    setisViewableItemSet,
   } = useDashboardTopTabCategories() ?? {};
+
   const [headerHeight, setheaderHeight] = useState(0);
   const isNuggetsLoading = useIsNuggetsLoading(categoryName ?? 'forYou');
   const nuggetsErrorMessage = useNuggetsErrorMessage(categoryName ?? 'forYou');
@@ -87,6 +93,7 @@ const DashboardWithCategory = ({route}) => {
     nugget_id: '',
     viewed: false,
   });
+  const [isTempviewItem, setisTempviewItem] = useState();
 
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isMuted, setisMuted] = useState(true);
@@ -122,6 +129,11 @@ const DashboardWithCategory = ({route}) => {
           setfocusedNuggetUserId(null);
         }
       }
+      if (setisViewableItemSet) {
+        setisViewableItemSet(viewableItems?.viewableItems[0].item.nugget_id);
+      }
+      setisTempviewItem(viewableItems?.viewableItems[0].item.nugget_id);
+
       if (token) {
         if (setviewableItem) {
           setviewableItem({
@@ -142,6 +154,7 @@ const DashboardWithCategory = ({route}) => {
     dispatch(setIsBottomTabBarAbsolute(true));
     return () => {
       currentPage = 1;
+
       dispatch(resetNuggetsTotalPages(categoryName));
       if (controller) {
         controller.abort();
@@ -150,30 +163,46 @@ const DashboardWithCategory = ({route}) => {
   }, []);
 
   useEffect(() => {
-    if (getNuggetsList() && getNuggetsList().length > 0 && !isNuggetsLoading) {
-      if (token) {
-        if (setviewableItem) {
-          setviewableItem({
-            nugget_id: getNuggetsList()[0].nugget_id || 0,
-            viewed: getNuggetsList()[0].viewed,
-          });
+    if (!isViewableItemSet && isFocused) {
+      if (
+        getNuggetsList() &&
+        getNuggetsList().length > 0 &&
+        !isNuggetsLoading
+      ) {
+        if (setisViewableItemSet) {
+          setisViewableItemSet(
+            isTempviewItem ? isTempviewItem : getNuggetsList()[0].nugget_id,
+          );
+        }
+
+        if (!isTempviewItem) {
+          setisTempviewItem(getNuggetsList()[0].nugget_id);
+        }
+
+        if (token) {
+          if (setviewableItem) {
+            setviewableItem({
+              nugget_id: getNuggetsList()[0].nugget_id || 0,
+              viewed: getNuggetsList()[0].viewed,
+            });
+          }
+        } else {
+          if (!viewableItemBeforLogin.nugget_id) {
+            setviewableItemBeforLogin({
+              nugget_id: getNuggetsList()[0].nugget_id || 0,
+              viewed: getNuggetsList()[0].viewed,
+            });
+          }
         }
       } else {
-        if (!viewableItemBeforLogin.nugget_id) {
-          setviewableItemBeforLogin({
-            nugget_id: getNuggetsList()[0].nugget_id || 0,
-            viewed: getNuggetsList()[0].viewed,
-          });
-        }
-      }
-    } else {
-      if (token) {
-        if (resetViewabilityItem) {
-          resetViewabilityItem();
+        if (token) {
+          if (resetViewabilityItem) {
+            resetViewabilityItem();
+          }
         }
       }
     }
-  }, [nuggetsList, isNuggetsLoading]);
+  }, [nuggetsList, isNuggetsLoading, isViewableItemSet]);
 
   useEffect(() => {
     if (token && viewableItem?.nugget_id && !viewableItem?.viewed) {
@@ -239,6 +268,15 @@ const DashboardWithCategory = ({route}) => {
       }
     }
   }, [nuggetsList, isFocused]);
+
+  useEffect(() => {
+    if (isNuggetsLoading) {
+      if (setisViewableItemSet) {
+        setisViewableItemSet(null);
+      }
+      setisTempviewItem(null);
+    }
+  }, [isFocused, isNuggetsLoading]);
 
   function getHeaderHeight() {
     return headerContainerHeight ?? headerHeight;
@@ -441,6 +479,7 @@ const DashboardWithCategory = ({route}) => {
       }
     }
     listNuggetsAPICall(1);
+    setisTempviewItem(null);
   }
 
   /**
@@ -477,17 +516,19 @@ const DashboardWithCategory = ({route}) => {
     getHeaderHeight(),
     insets.mediaHeight,
   ]);
-  console.log(viewableItemBeforLogin);
 
   const nuggetActions = {
     headerContainerHeight: getHeaderHeight(),
+    isViewableItemSet: token ? isViewableItemSet : isTempviewItem,
     isMuted: isMuted,
     isFrom: 'dashboard',
     dashboardFocused: isFocused,
     isPaused: false,
     isFocused,
+    ActivecategoryName: ActivecategoryName,
     setisMuted: setisMuted,
     categoryName: categoryName ?? 'forYou',
+    activecategoryName: ActivecategoryName,
     isAutoPlay: true,
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
@@ -528,14 +569,6 @@ const DashboardWithCategory = ({route}) => {
       </View>
     ) : null;
   }
-
-  useEffect(() => {
-    if (flatlistRef.current) {
-      flatlistRef.current.onViewableItemsChanged(info => {
-        console.log(info, 'flatlistRef');
-      });
-    }
-  }, [flatlistRef]);
 
   return (
     <NuggetParentActionsContext.Provider value={nuggetActions}>
@@ -612,13 +645,7 @@ const DashboardWithCategory = ({route}) => {
               itemHeight={insets.mediaHeight}
               footerHeight={50}
               initialScrollIndex={0}
-              onViewableItemsChanged={viewableItems => {
-                setviewableItemBeforLogin({
-                  nugget_id: '',
-                  viewed: false,
-                });
-                return onViewRef?.current(viewableItems);
-              }}
+              onViewableItemsChanged={onViewRef?.current}
               renderFooter={renderFooter}
             />
           )

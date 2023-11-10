@@ -10,6 +10,8 @@ import {
   useNuggetParentActions,
 } from '../../../Utilities/Contexts';
 import {useIsFocused} from '@react-navigation/native';
+import {IS_IOS} from '../../../Utilities/Constants';
+import ReadMoreTextNugget from './NuggetItemTypes/ReadMoreTextNugget';
 
 function NuggetItem({
   index,
@@ -24,6 +26,7 @@ function NuggetItem({
   const {
     isMuted,
     viewableNuggetItem,
+    isViewableItemSet,
     mediaHeight,
     isAutoPlay,
     nuggetContentController,
@@ -56,11 +59,11 @@ function NuggetItem({
     // if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
     //   return true;
     // }
-
+    console.log(isViewableItemSet, 'isViewableItemSet', nugget.nugget_id);
     return (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&
-      nugget.nugget_id === viewableNuggetItem &&
+      nugget.nugget_id === isViewableItemSet &&
       isFocused &&
       isAutoPlay &&
       !isVideoBackground
@@ -74,6 +77,7 @@ function NuggetItem({
     isAutoPlay,
     isReadMuted,
     isVideoBackground,
+    isViewableItemSet,
   ]);
 
   const shouldPauseReadAudio = useMemo(() => {
@@ -135,6 +139,9 @@ function NuggetItem({
           setprogress={setprogress}
           url={mediaItem.path}
           index={index}
+          onUnmounted={() => {
+            setpaused(true);
+          }}
         />
       );
     } else if (mediaItem.media_type.includes('audio')) {
@@ -142,7 +149,7 @@ function NuggetItem({
         <AudioNugget
           audioPlayer={videoPlayer}
           setisLoadingVideo={setisLoadingVideo}
-          paused={paused || shouldPauseVideo}
+          paused={paused || !shouldPauseVideo}
           duration={duration}
           setduration={setduration}
           progress={progress}
@@ -162,7 +169,7 @@ function NuggetItem({
       <View style={{flex: 1}}>
         {getNuggetItem()}
 
-        <NuggetActionsOverlay
+        <ReadMoreTextNugget
           nugget={nugget}
           nuggetType={mediaItem.media_type}
           isLoadingVideo={isLoadingVideo}
