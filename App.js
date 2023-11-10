@@ -1,4 +1,4 @@
-import {AppState, LogBox, View} from 'react-native';
+import {AppState, LogBox, Modal, View} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import SplashScreen from 'react-native-splash-screen';
@@ -15,7 +15,11 @@ import {
   setSettings,
   setToken,
 } from './Src/Store/Slices/AuthSlice';
-import {useInsets, useToken} from './Src/Utilities/StoreData';
+import {
+  useInsets,
+  useIsGroupJoinAlert,
+  useToken,
+} from './Src/Utilities/StoreData';
 import MainStack from './Src/Stacks/MainStack';
 import RootStack from './Src/Stacks/RootStack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -30,7 +34,11 @@ import Toast from './Src/Components/Toast';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import {createStackNavigator} from '@react-navigation/stack';
-import {setInsets, setIsAppForeground} from './Src/Store/Slices/UtilitySlice';
+import {
+  setInsets,
+  setIsAppForeground,
+  setIsGroupJoinAlert,
+} from './Src/Store/Slices/UtilitySlice';
 import {
   GOOGLE_PLACES_API_KEY,
   GOOGLE_SIGNIN_IOS_CLIENT_ID,
@@ -42,6 +50,7 @@ import {
 } from './Src/Services/ApiService';
 import {setUnreadNotificationCount} from './Src/Store/Slices/HomeSlice';
 import LinkingConfig from './Src/Utilities/LinkingConfig';
+import ConfirmationPopup from './Src/Modals/ConfirmationPopup';
 
 const Stack = createStackNavigator();
 // var tokenFetchingTimer = undefined;
@@ -52,6 +61,7 @@ const App = () => {
   const insets = useInsets();
   const [isFetchingToken, setisFetchingToken] = useState(true);
   const appState = useRef(AppState.currentState);
+  const isGroupJoinAlert = useIsGroupJoinAlert();
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
@@ -220,6 +230,34 @@ const App = () => {
       ) : (
         <LoginIntro onSkipIntro={onSkipIntro} />
       )}
+
+      <Modal
+        onRequestClose={() => {}}
+        transparent
+        visible={isGroupJoinAlert.status}>
+        <ConfirmationPopup
+          isEnableClose={false}
+          onPressNegativeButton={() => {
+            dispatch(
+              setIsGroupJoinAlert({
+                status: false,
+                text: '',
+              }),
+            );
+          }}
+          positiveButtonText={'Continue'}
+          isEnableNegativeButton={false}
+          onPressPositiveButton={() => {
+            dispatch(
+              setIsGroupJoinAlert({
+                status: false,
+                text: '',
+              }),
+            );
+          }}
+          content={isGroupJoinAlert.text}
+        />
+      </Modal>
     </SafeAreaProvider>
   );
 };
