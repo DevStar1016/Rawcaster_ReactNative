@@ -162,7 +162,7 @@ const ChangePassword = () => {
             borderRadius={15}
             textPaddingVertical={0}
             bgColor={COLORS.primary}
-            borderColor={COLORS.primary}
+            borderColor={COLORS.transparent}
             onPress={handleSubmit}
             buttonTextStyle={{fontSize: 14}}
           />

@@ -53,7 +53,7 @@ const SearchProfileItem = ({
               <SubmitButton
                 buttonText="Become a fan"
                 marginBottom={0}
-                borderColor={COLORS.primaryLight}
+                borderColor={COLORS.transparent}
                 bgColor={COLORS.primaryLight}
                 marginTop={0}
                 onPress={onBecomeFan}
