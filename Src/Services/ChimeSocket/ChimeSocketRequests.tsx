@@ -12,6 +12,9 @@ import {
   MeetingRoomSendMessageData,
   RaiseHandMessageData,
   RenameUserMessageData,
+  
+  SendEmojiData,
+  
   SingleUserSendMessageData,
   UserDataProp,
   UserLeftMessageData,
@@ -55,6 +58,8 @@ export const sendMessageToMeetingRoom = (
 export const sendMessageToSingleUser = (
   messageData: SingleUserSendMessageData,
 ) => {
+  console.log('to single called')
+ // messageData.userId = parseInt(messageData.send_to?.userId);
   sendChimeSocketMessage(
     messageData,
     ChimeSocketEvents.sendMessageToSingleUser,
@@ -88,6 +93,14 @@ export const joinRequest = (messageData: JoinRequestMessageData) => {
 };
 
 /**
+ * Meeting Join Request Socket
+ * @param messageData Request Meeting Data
+ */
+export const joinEventRoom = (messageData: JoinRequestMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.joinEventRoom);
+};
+
+/**
  *
  * @param messageData RasiseHand Message Data
  */
@@ -111,12 +124,25 @@ export const userLeft = (messageData: UserLeftMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.userLeft);
 };
 
+
+export const meetingEndAlert = (messageData: UserLeftMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.meetingEndAlert);
+};
+
 /**
  *
  * @param messageData EnableDisableMessageData Props
  */
 export const enableAudio = (messageData: EnableDisableMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.enableAudio);
+};
+
+/**
+ *
+ * @param messageData EnableDisableMessageData Props
+ */
+export const sendEmojee = (messageData: SendEmojiData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.sendEmojee);
 };
 
 /**
@@ -141,6 +167,14 @@ export const enableShareScreen = (messageData: EnableDisableMessageData) => {
  */
 export const kickUser = (messageData: KickUserMessageData) => {
   sendChimeSocketMessage(messageData, ChimeSocketEvents.kickUser);
+};
+export const makeHost = (messageData: KickUserMessageData) => {
+  console.log('userData there',messageData);
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.makeHost);
+};
+export const removeHost = (messageData: KickUserMessageData) => {
+  console.log('userData there',messageData);
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.removeHost);
 };
 
 /**

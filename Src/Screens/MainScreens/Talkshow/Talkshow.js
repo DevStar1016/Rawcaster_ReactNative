@@ -1,22 +1,23 @@
-import {Modal, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { Modal, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import EventTalkshowCommonScreen from '../EventsAndTalkshowsCommon/EventTalkshowCommonList';
-import {useNavigation} from '@react-navigation/native';
-import {chimeSocketListen} from '../../../Services/ChimeSocket/ChimeSocket';
-import {ChimeSocketEvents} from '../../../Services/ChimeSocket/ChimeSocketEvents';
+import { useNavigation } from '@react-navigation/native';
+import { chimeSocketListen } from '../../../Services/ChimeSocket/ChimeSocket';
+import { ChimeSocketEvents } from '../../../Services/ChimeSocket/ChimeSocketEvents';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
-import {useProfile} from '../../../Utilities/StoreData';
+import { useProfile } from '../../../Utilities/StoreData';
 import {
   createMeetingRoom,
   joinMeetingRoom,
   joinRequest,
 } from '../../../Services/ChimeSocket/ChimeSocketRequests';
-import {COLORS} from '../../../Utilities/Colors';
-import {EVENT_TYPE} from '../../../Utilities/Constants';
+import { COLORS } from '../../../Utilities/Colors';
+import { EVENT_TYPE } from '../../../Utilities/Constants';
+import axios from 'axios';
 
 var isMount = true;
-const Talkshow = () => {
+const Talkshow = ({ route }) => {
   const navigation = useNavigation();
   const profile = useProfile();
   const [eventDetails, seteventDetails] = useState(null);
@@ -30,25 +31,78 @@ const Talkshow = () => {
     };
   }, []);
 
+
+  ///////////// Referece ids of events from shared url handle here
+  /////////////////////////////
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route?.params?.ref_id) {
+        console.log('ref_id_received_in_talkshow', route.params.ref_id);
+        postData(route.params.ref_id);
+        const updatedParams = { ...route.params };
+        delete updatedParams.ref_id;
+        navigation.setParams(updatedParams);
+      }
+    });
+
+    return unsubscribe;
+
+  }, [navigation]);
+
+  const postData = async (ref_id) => {
+    try {
+      const apiUrl = 'https://devapi.rawcaster.com/rawcaster/externaluserjoin';
+      const dataToSend = {
+        reference_id: ref_id,
+        email_id: profile?.email_id,
+        name: profile?.name
+      };
+      const response = await axios.post(apiUrl, dataToSend);
+      console.log('response:', response.data);
+      if (response.data.status === 1) {
+        if (isMount) {
+          seteventDetails(response.data.event);
+          setisLoading(true);
+        }
+        onStartHosting(response.data.event);
+
+      }
+    } catch (error) {
+      // Handle any errors
+      console.error('share url join Error:', error);
+    }
+  };
+
+
+  /////////////////////////////
+  ////////////////////////////////
+
   // Meeting Room - Host Accept or Reject Join Request Response Received here - Socket
   useEffect(() => {
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestAnswer,
       joinedData => {
-        const meetingJoinedResult = joinedData?.result;
+        const meetingJoinedResult = joinedData?.joinInfo?.result;
+        //const meetingJoinedResult = joinedData;
+
+        console.log('join_answer side= ' + profile.user_id, joinedData);
         if (isMount) {
           setisLoading(false);
         }
         if (meetingJoinedResult) {
-          navigation.navigate('EventHostScreen', {
+          navigation.navigate('TalkShowHostScreen', {
             meetingData: meetingJoinedResult.meeting,
             attendeeData: meetingJoinedResult.Attendee,
+            usersList: joinedData.AttendeeList,
+            // attendeeData: joinedData.AttendeeList,
+            meetingSetting: joinedData.meetingSetting,
             eventDetails: eventDetails,
             eventType: EVENT_TYPE.talkshow,
           });
         } else {
-          if (joinedData.allow === false) {
-            Toast.fail(joinedData.msg);
+          if (joinedData.allow === false || joinedData.statusCode === 'host_not_available') {
+            Toast.fail(joinedData.msg ? joinedData.msg : joinedData.message);
           }
         }
       },
@@ -57,7 +111,7 @@ const Talkshow = () => {
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
     };
-  }, [eventDetails]);
+  }, [eventDetails, isMount]);
 
   /**
    * Checks if the current user is the owner of the event.
@@ -78,19 +132,25 @@ const Talkshow = () => {
    */
   const onStartHosting = eventItem => {
     if (getIsOwner(eventItem)) {
+      //  console.log('talkshow_started', eventItem);
       createMeetingRoom({
-        meetingId: eventItem.chime_meeting_id,
+        // meetingId: eventItem.chime_meeting_id,
+        refId: eventItem.reference_id,
       });
+
     } else {
       joinMeetingRoom({
-        meetingId: eventItem.chime_meeting_id,
+        refId: eventItem.reference_id,
       });
     }
+    //  console.log('profileee', profile);
     joinRequest({
-      meetingId: eventItem.chime_meeting_id,
-      userId: profile.user_id,
-      user_img: profile.profile_image,
-      user_name: profile.name,
+      // meetingId: eventItem.chime_meeting_id,
+      refId: eventItem.reference_id,
+      userId: profile?.user_id,
+      image: profile?.profile_image,
+      name: profile?.name,
+      userRefId: profile?.user_ref_id
     });
   };
 
@@ -106,7 +166,7 @@ const Talkshow = () => {
           onStartHosting(eventItem);
         }}
       />
-      <Modal onRequestClose={() => {}} transparent visible={isLoading}>
+      <Modal onRequestClose={() => { }} transparent visible={isLoading}>
         <Loader bgColor={COLORS.transparentDimColor} />
       </Modal>
     </>

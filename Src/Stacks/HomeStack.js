@@ -1,14 +1,14 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import {
   setIsBottomTabBarAbsolute,
   setTabNuggetType,
 } from '../Store/Slices/UtilitySlice';
-import {useDispatch} from 'react-redux';
+import { useDispatch } from 'react-redux';
 import StackAnimation from '../Utilities/StackAnimation';
 import DashboardTopTabNavigation from '../Navigation/TopTabNavigation/DashboardCategoryTabs/DashboardTopTabNavigation';
-import {useToken} from '../Utilities/StoreData';
+import { useToken } from '../Utilities/StoreData';
 import DashboardWithCategory from '../Screens/MainScreens/HomeScreen/DashboardWithCategory';
 
 const Stack = createStackNavigator();
@@ -19,7 +19,7 @@ const HomeStack = () => {
 
   return (
     <Stack.Navigator
-      screenOptions={{headerShown: false, ...StackAnimation}}
+      screenOptions={{ headerShown: false, ...StackAnimation }}
       screenListeners={{
         focus: e => {
           if (
@@ -53,7 +53,7 @@ const HomeStack = () => {
         <Stack.Screen
           name="DashboardWithCategory"
           component={DashboardWithCategory}
-          initialParams={{filterType: 0, categoryName: 'forYou'}}
+          initialParams={{ filterType: 0, categoryName: 'forYou' }}
         />
       )}
     </Stack.Navigator>

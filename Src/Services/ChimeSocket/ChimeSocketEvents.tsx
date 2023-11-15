@@ -15,11 +15,15 @@ export const ChimeSocketEvents: ChimeEventsProps = {
   joinRequest: 'joinRequest',
   joinRequestFromUser: 'joinRequestFromUser',
   joinRequestAnswer: 'joinRequestAnswer',
+  joinEventRoom:'joinEventRoom',
   raiseHand: 'raiseHand',
   inCallEvents: 'inCallEvents',
   newUserJoined: 'newUserJoined',
   userLeft: 'userLeft',
   userLefted: 'userLefted',
+  meetingEndAlert:'meetingEndAlert',
+  meetingEndAlertAnswer:'meetingEndAlertAnswer',
+  endMeetingAlertAnswer:'endMeetingAlertAnswer',
   enableAudio: 'enableAudio',
   enableAudioAnswer: 'enableAudioAnswer',
   enableVideo: 'enableVideo',
@@ -32,6 +36,13 @@ export const ChimeSocketEvents: ChimeEventsProps = {
   renameUserAnswer: 'renameUserAnswer',
   endMeeting: 'endMeeting',
   endMeetingAnswer: 'endMeetingAnswer',
+  makeHost: 'makeHost',
+  makeHostAnswer: 'makeHostAnswer',
+  removeHost: 'removeHost',
+  removeHostAnswer: 'removeHostAnswer',
+  sendEmojee:'postReaction',
+  emojeeAnswer:'postReactionAnswer'
+
 };
 
 export const JOIN_REQUEST_STATUS_CODE: JoinRequestStatusCodeProp = {

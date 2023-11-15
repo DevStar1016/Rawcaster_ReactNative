@@ -1,6 +1,6 @@
-import {Linking, Modal} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { Linking, Modal } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import Loader from '../Components/Loader';
 import {
   useGlobalLoaderData,
@@ -11,13 +11,13 @@ import {
   useToken,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import {getAuthCode} from '../Utilities/Methods';
+import { getAuthCode } from '../Utilities/Methods';
 import {
   complementaryMembershipService,
   getInfluencerCategoryService,
   listAllFriendRequestsService,
 } from '../Services/ApiService';
-import {useDispatch} from 'react-redux';
+import { useDispatch } from 'react-redux';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
@@ -32,30 +32,35 @@ import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
-import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
+import { initiateAllNuggetsLoadingTotalPages } from '../Store/Slices/NuggetsListSlice';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
-import {COLORS} from '../Utilities/Colors';
+import { COLORS } from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
 import ChimeSocketConnectionListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketConnectionListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
-import {setPremiumAlert} from '../Store/Slices/UtilitySlice';
-import {useNavigation} from '@react-navigation/native';
+import { setPremiumAlert } from '../Store/Slices/UtilitySlice';
+import { getFocusedRouteNameFromRoute, useNavigation, useRoute } from '@react-navigation/native';
 import {
   getAllFriendsGroupsList,
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
+import { decode } from 'base-64';
+import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
-import {setMyProfile} from '../Store/Slices/AuthSlice';
+import { setMyProfile } from '../Store/Slices/AuthSlice';
+import { setMeetInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
   const profile = useProfile();
   const [isLoading, setisLoading] = useState(true);
+  const route = useRoute();
+  // Get Nested Route Name
   const isVisibleInfluencers = useIsVisibleInfluencers();
   const token = useToken();
   const settings = useSettings();
@@ -74,11 +79,41 @@ const MainStack = () => {
   }, []);
 
   useEffect(() => {
-    const subscription = Linking.addEventListener('url', event =>
-      OpenLinkingUrl(event.url),
+
+    const subscription = Linking.addEventListener('url', event => {
+
+      if (event.url?.includes('https://dev.rawcaster.com/join/event') || event.url?.includes('https://dev.rawcaster.com/join/talkshow')) {
+        setTimeout(() => {
+          console.log('from here 123')
+          handleOpenUrl(event.url)
+        }, 3000);
+      }
+      else {
+        ////////// Change from indian team
+        //////////////////////
+        OpenLinkingUrl(event.url)
+        ///////
+        //////////
+      }
+
+    }
     );
     Linking?.getInitialURL()
-      .then(OpenLinkingUrl)
+      .then((url) => {
+        if (url?.includes('https://dev.rawcaster.com/join/event') || url?.includes('https://dev.rawcaster.com/join/talkshow')) {
+          setTimeout(() => {
+            console.log('from here')
+            handleOpenUrl(url);
+          }, 3000);
+        } else {
+          ////////// Change from indian team
+          //////////////////////
+          OpenLinkingUrl(url);
+          ////////////
+        }
+
+      })
+
       .catch(e => {
         console.log(e, 'ERROR LINK');
       });
@@ -142,13 +177,78 @@ const MainStack = () => {
         }
         return res;
       })
-      .catch(e => {})
+      .catch(e => { })
       .finally(() => {
         setisLoading(false);
         dispatch(getAllFriendsGroupsList());
         dispatch(getAllFriendsList());
       });
   }
+
+  const handleOpenUrl = url => {
+    console.log('url_received', url);
+    if (url && !url.includes('rawcaster://')) {
+      if (url?.includes('share')) {
+        const parsed = queryString.parseUrl(url);
+        Linking.openURL(`rawcaster://viewnugget/${decode(parsed.query.id)}`)
+          .then(res => {
+            console.log(res, 'LINKING RESPONSEE');
+          })
+          .catch(e => {
+            console.log(e, 'ERROR   CATCH');
+          });
+        // Linking.openURL()
+      } else {
+        if (url?.includes('https://dev.rawcaster.com/join/event')) {
+          console.log('incluededddddd');
+          const ref_id = url.replace('https://dev.rawcaster.com/join/event/', '').trim();
+          console.log('ref_id', ref_id);
+          console.log('route', route);
+          const routeName = getFocusedRouteNameFromRoute(route);
+          console.log('route_name', routeName);
+          if (routeName == "DashboardProfileTopTabNavigation" || routeName == undefined) {
+            console.log('im_in', routeName);
+            dispatch(setMeetInviteRefId(ref_id));
+          } else {
+            console.log('im_out', routeName);
+            setTimeout(() => {
+              dispatch(setMeetInviteRefId(ref_id));
+            }, 4000);
+          }
+          navigation.navigate('DashboardProfileTopTabNavigation', {
+            screen: 'BottomTabNavigationAfterLogin',
+            params: {
+              screen: 'EventsStack',
+              params: {
+                screen: 'Events',
+                params: {
+                  ref_id: ref_id
+                },
+              },
+            },
+          });
+        } else {
+          if (url?.includes('https://dev.rawcaster.com/join/talkshow')) {
+            const ref_id = url.replace('https://dev.rawcaster.com/join/talkshow/', '').trim();
+            console.log('ref_id', ref_id);
+            navigation.navigate('DashboardProfileTopTabNavigation', {
+              screen: 'BottomTabNavigationAfterLogin',
+              params: {
+                screen: 'TalkshowStack',
+                params: {
+                  screen: 'Talkshow',
+                  params: {
+                    ref_id: ref_id
+                  },
+                },
+              },
+            });
+          }
+        }
+      }
+    }
+  };
+
 
   const HandleUpgradeComplimentory = () => {
     const formData = new FormData();
@@ -220,7 +320,13 @@ const MainStack = () => {
                 gestureEnabled: false,
               }}
             />
-
+            <Stack.Screen
+              name="TalkShowHostScreen"
+              component={TalkShowHostScreen}
+              options={{
+                gestureEnabled: false,
+              }}
+            />
             <Stack.Screen name="CreateEditGroup" component={CreateEditGroup} />
             <Stack.Screen name="AddUserToGroup" component={AddUserToGroup} />
             <Stack.Screen
@@ -245,7 +351,7 @@ const MainStack = () => {
       )}
       {premiumALert?.status && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={premiumALert.status}>
@@ -280,7 +386,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>

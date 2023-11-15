@@ -21,7 +21,8 @@ export type MEETING_MENU_IDS =
   | 'enable_disable_audio'
   | 'enable_disable_video'
   | 'raise_hand'
-  | 'remove_user';
+  | 'remove_user'
+  |'make_co_host';
 
 type OptionsProp = {
   id: MEETING_MENU_IDS;
@@ -39,6 +40,7 @@ type Props = {
   isAllowedScreenShare?: boolean;
   selfUserId: number;
   hostUserId: number;
+  isCoHost:boolean
   userData?: UserDataProp | UserVideoItemDetailsProp;
   visibleMenuIds: MEETING_MENU_IDS[];
   isEnableReactionsWithCondition?: boolean;
@@ -48,6 +50,7 @@ type MenuListProps = {
   hostUserId: number;
   selfUserId: number;
   eventType?: number;
+  isCoHost?:boolean;
   isAllowedScreenShare?: boolean;
   userData?: UserDataProp | UserVideoItemDetailsProp;
   visibleMenuIds: MEETING_MENU_IDS[];
@@ -57,6 +60,7 @@ export const GetMeetingOptionsMenuList = ({
   hostUserId,
   selfUserId,
   userData,
+  isCoHost,
   isAllowedScreenShare,
   eventType,
   visibleMenuIds,
@@ -66,14 +70,29 @@ export const GetMeetingOptionsMenuList = ({
       id: 'rename',
       buttonText: 'Rename',
       icon: 'edit_name_white',
-      isShow: hostUserId === selfUserId,
+      isShow: (hostUserId === selfUserId || isCoHost || userData?.userId == selfUserId),
+     // isShow: true,
+    //  isShow: userData?.isCoHost? true:userData?.isHost?true: false
+
     },
+    {
+      id: 'make_co_host',
+      buttonText:
+        userData && userData.isCoHost
+          ? 'Remove Co Host'
+          : 'Make Co Host',
+      icon: 'chat_white',
+     // isShow: userData ? userData.userId !== selfUserId : false,
+      isShow: (hostUserId == selfUserId && userData?.userId !== selfUserId)? true:false,
+
+    },
+    
     {
       id: 'in_call_message',
       buttonText:
-        userData && userData.userId !== selfUserId
+        userData && userData.userId !== selfUserId 
           ? 'Chat'
-          : 'In-call messages',
+          : 'Chat',
       icon: 'chat_white',
       isShow: true,
     },
@@ -82,7 +101,7 @@ export const GetMeetingOptionsMenuList = ({
       buttonText: userData?.audio ? 'Mute' : 'Un Mute',
       icon: userData?.audio ? 'mic_white' : 'mic_off_white',
       isShow: userData
-        ? hostUserId === selfUserId
+        ?( hostUserId === selfUserId || isCoHost)
           ? true
           : userData.userId === selfUserId
         : false,
@@ -99,7 +118,7 @@ export const GetMeetingOptionsMenuList = ({
           ? 'video_call_white'
           : 'video_disabled_white',
       isShow: userData
-        ? hostUserId === selfUserId
+        ? ( hostUserId === selfUserId || isCoHost)
           ? true
           : userData.userId === selfUserId
         : false,
@@ -120,11 +139,12 @@ export const GetMeetingOptionsMenuList = ({
     },
     {
       id: 'screenshare_permission',
-      buttonText: `${isAllowedScreenShare ? 'Stop' : 'Allow'} Screen Share`,
+      buttonText: `${isAllowedScreenShare ? 'Discard' : 'Allow'} Screen-Share In Meeting`,
       icon: isAllowedScreenShare
         ? 'screen_share_disable_pink'
         : 'screen_share_enable',
-      isShow: eventType === EVENT_TYPE.event && selfUserId === hostUserId,
+        
+      isShow: (eventType === EVENT_TYPE.event )&& (selfUserId === hostUserId || isCoHost ),
       highLightedTextColor: isAllowedScreenShare ? COLORS.secondary : undefined,
     },
     {
@@ -132,7 +152,7 @@ export const GetMeetingOptionsMenuList = ({
       buttonText: 'Remove User',
       icon: 'remove_user_white',
       isShow:
-        userData && userData.userId !== selfUserId && hostUserId === selfUserId,
+       ( userData && userData.userId !== selfUserId && hostUserId === selfUserId)||(userData && userData.userId !== selfUserId && isCoHost),
     },
     {
       id: 'exit_meeting',
@@ -144,12 +164,13 @@ export const GetMeetingOptionsMenuList = ({
       id: 'end_meeting',
       buttonText: `End Meeting`,
       icon: 'exit_white',
-      isShow: hostUserId === selfUserId,
+      isShow: (hostUserId === selfUserId || isCoHost),
     },
   ];
   menuList = [...menuList].filter(
     item => visibleMenuIds.includes(item.id) && item.isShow,
   );
+  //console.log('returning_here',menuList);
   return [...menuList];
 };
 
@@ -161,6 +182,7 @@ const MeetingMoreOptions = ({
   selfUserId,
   hostUserId,
   userData,
+  isCoHost,
   visibleMenuIds = [],
   onClose,
   isEnableReactionsWithCondition = true,
@@ -171,6 +193,7 @@ const MeetingMoreOptions = ({
       selfUserId,
       userData,
       eventType,
+      isCoHost,
       isAllowedScreenShare,
       visibleMenuIds,
     });
@@ -182,6 +205,7 @@ const MeetingMoreOptions = ({
         styles.mainContainer,
         eventType === EVENT_TYPE.event &&
           isEnableReactionsWithCondition && {paddingHorizontal: 0},
+          
       ]}>
       {eventType !== EVENT_TYPE.event && isEnableReactionsWithCondition && (
         <Reactions onPressEmoji={onPressEmoji} />
@@ -236,6 +260,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     paddingHorizontal: 10,
+   
   },
   subContainer: {
     flex: 1,

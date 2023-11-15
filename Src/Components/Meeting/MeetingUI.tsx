@@ -3,6 +3,7 @@ import {
   Animated,
   BackHandler,
   Easing,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -11,6 +12,8 @@ import ToastMessage from 'react-native-toast-message';
 import React, {useEffect, useRef, useState} from 'react';
 import MeetingActionsContainer from './MeetingActionsContainer';
 import {MeetingError, Meeting} from '../../Native/Bridges/ChimeMeetingBridge';
+import NetInfo from "@react-native-community/netinfo";
+
 import MeetingVideoView, {
   AttendeeDetailProp,
   UserVideoItemDetailsProp,
@@ -29,11 +32,15 @@ import {
   enableVideo,
   kickUser,
   raiseHand,
+  makeHost,
+  removeHost,
   rejectToJoinMeeting,
   renameUser,
   sendMessageToMeetingRoom,
   sendMessageToSingleUser,
   userLeft,
+  meetingEndAlert,
+  sendEmojee,
 } from '../../Services/ChimeSocket/ChimeSocketRequests';
 import {useProfile} from '../../Utilities/StoreData';
 import Toast from '../Toast';
@@ -46,10 +53,15 @@ import MeetingMoreOptions, {
 import InCallMessages, {MessageData} from './InCallMessages';
 import {
   JoinRequestMessageData,
+  SendEmojiData,
   UserDataProp,
 } from '../../Services/ChimeSocket/ChimeSocketPropTypes';
 import ParticipantsList from './ParticipantsList';
 import RenameUser from './RenameUser';
+import { MeetingJoinedDataProp } from '../../Modals/StartJoinEventWaitingRoom';
+import { string } from 'yup';
+import { useDispatch } from 'react-redux';
+import { setMeetRemainingTime } from '../../Store/Slices/MeetingRemainingTimeSlice';
 
 export type MeetingSettingProp = {
   id: number;
@@ -67,7 +79,9 @@ export type MeetingSettingProp = {
   start_date_time: string;
   cover_img: string;
   created_at: string;
-  created_by: number;
+  hostRefId:string;
+ // created_by: number;
+  created_by: string;
   last_updated_at: null | string;
   total_cost: null;
   paid_amount: null;
@@ -102,7 +116,9 @@ interface StatusCodeProp {
 interface RenameUserDataProp extends StatusCodeProp {
   updatedUser: UserDataProp;
 }
-
+interface MakeRemoveHostDataProp extends StatusCodeProp {
+  updatedUser: UserDataProp;
+}
 interface EnableDisableDataProp extends StatusCodeProp {
   status: boolean;
   updatedUser?: UserDataProp;
@@ -177,13 +193,18 @@ const MeetingUI = ({
   membersList = [],
 }: Props) => {
   const profile = useProfile();
+  const dispatch = useDispatch();
   const [meetingSetting, setmeetingSetting] = useState({...eventSettings});
+  const [isCoHost,setCoHost]= useState(false);
+  const [isNetConnected,setNetConnected]= useState(true);
+ // console.log('meeting_setting_now',{...eventSettings});
   const [isEnableContentPanningGesture, setisEnableContentPanningGesture] =
     useState(false);
   const [messagesList, setmessagesList] = useState<MessageData[]>([]);
   const [data, setdata] = useState<DataProps>({
     attendees: [],
     selfVideoEnabled: false,
+    
   });
   const [fullScreenUserData, setfullScreenUserData] = useState<
     UserVideoItemDetailsProp | undefined
@@ -240,10 +261,28 @@ const MeetingUI = ({
     };
   }, []);
 
+
+  ////////// Net info listener
+  useEffect(() => {
+    const unsubscribeNetListener = NetInfo.addEventListener((state) => {
+      console.log(state);
+      if(state.isConnected){
+        setNetConnected(true);
+      }else{
+        setNetConnected(false);
+      }
+    });
+    return () => {
+      unsubscribeNetListener();
+    };
+  }, []);
+
   // Initial Video, Audio Enable/Disable
   useEffect(() => {
     isMount = true;
-    if (getHostUserId() === profile?.user_id) {
+    if (getHostUserId() === profile?.user_ref_id) {
+      console.log('i_am_the_host',profile?.user_ref_id);
+
       if (meetingSetting?.default_host_audio === 1) {
         Meeting.setMute(false);
       } else {
@@ -263,6 +302,7 @@ const MeetingUI = ({
       } else {
         Meeting.setMute(true);
       }
+      
       initialVideoEnableTimer = setTimeout(() => {
         if (meetingSetting?.default_guest_video === 1) {
           Meeting.setCameraOn(true);
@@ -270,6 +310,17 @@ const MeetingUI = ({
           Meeting.setCameraOn(false);
         }
       }, 200);
+    }
+    if(usersList){
+      console.log('i_am_in_user_list',usersList);
+      let userSelf = usersList.find((item)=>item.userId == getSelfUserId());
+      console.log('user_self_found',userSelf);
+
+      if(userSelf?.isCoHost){
+        setCoHost(true);
+      }else{
+        setCoHost(false);
+      }
     }
     // getAttendeesList();
     return () => {
@@ -283,6 +334,7 @@ const MeetingUI = ({
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestFromUser,
       (requestData: JoinRequestMessageData) => {
+        console.log('joininngggg',requestData);
         handleAddRequestedUser(requestData);
       },
     );
@@ -291,11 +343,42 @@ const MeetingUI = ({
     };
   }, []);
 
+   // Meeting joining Request  Received here - Socket
+   useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.joinRequestFromUser,
+      (requestData: JoinRequestMessageData) => {
+        console.log('joininngggg',requestData);
+        handleAddRequestedUser(requestData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.joinRequestFromUser);
+    };
+  }, []);
+
+  // Emoji shared by users Received here - Socket
+  useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.emojeeAnswer,
+      (messageData: SendEmojiData) => {
+        console.log('emoji_recieve side= '+profile?.user_id,messageData);
+        handleEmoji(messageData.emoji)
+       // handleAddRequestedUser(requestData);
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.emojeeAnswer);
+    };
+  }, [isMount,data.attendees]);
+
   // New User Joined Received Here - Socket
   useEffect(() => {
+    console.log('this_one_registered');
     chimeSocketListen.on(
       ChimeSocketEvents.newUserJoined,
       (participantData: UserDataProp) => {
+        console.log('new_user_joined',participantData);
         handleAddJoinedUser(participantData);
       },
     );
@@ -304,24 +387,27 @@ const MeetingUI = ({
     };
   }, []);
 
+ 
+
   // Raise Hand Received Here - Socket
   useEffect(() => {
     chimeSocketListen.on(
       ChimeSocketEvents.raiseHand,
       (raiseHandUserData: RaiseHandUserDataProp) => {
-        handleRaiseHand(raiseHandUserData.UserData);
+        handleRaiseHand(raiseHandUserData.UserData,false);
       },
     );
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.raiseHand);
     };
-  }, [data.attendees]);
+  }, [data,isMount]);
 
   // Meeting Room Message Received Here - Socket
   useEffect(() => {
     chimeSocketListen.on(
       ChimeSocketEvents.meetingRoomMsg,
       (messageData: MessageData) => {
+        console.log('room_message',JSON.stringify(messageData));
         triggerToast(messageData.name, undefined, messageData.message);
         handleAddMessage(messageData);
       },
@@ -336,6 +422,7 @@ const MeetingUI = ({
     chimeSocketListen.on(
       ChimeSocketEvents.enableAudioAnswer,
       (messageData: EnableDisableDataProp) => {
+        console.log('enable_audio_answer_calledm '+profile?.user_id,messageData);
         if (messageData.statusCode === 1) {
           let userData: UserDataProp | undefined = undefined;
           if (messageData.updatedUser) {
@@ -367,11 +454,22 @@ const MeetingUI = ({
                 });
               }
               if (messageData.status) {
-                if (getIsSelfMuted()) {
-                  triggerToast('Host requests that you unmute your microphone');
-                }
+              //  if (getIsSelfMuted()) {
+                  triggerToast('Host requests you to unmute your microphone');
+              //  }
+                if ((getHostUserId() === getSelfUserId())||isCoHost) {
+                  setmeetingSetting(preData => ({
+                    ...preData,
+                    default_guest_audio:1,
+                  }));}
               } else {
                 Meeting.setMute(true);
+                
+                if ((getHostUserId() === getSelfUserId())||isCoHost) {
+                  setmeetingSetting(preData => ({
+                    ...preData,
+                    default_guest_audio:0,
+                  }));}
               }
             }
           }
@@ -381,13 +479,14 @@ const MeetingUI = ({
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.enableAudioAnswer);
     };
-  }, [data.attendees, usersList]);
+  }, [isMount,data]);
 
   // Enable / Disable Video Received Here - Socket
   useEffect(() => {
     chimeSocketListen.on(
       ChimeSocketEvents.enableVideoAnswer,
       (messageData: EnableDisableDataProp) => {
+        console.log('gloabl_video',messageData);
         if (messageData.statusCode === 1) {
           let userData: UserDataProp | undefined = undefined;
           if (messageData.updatedUser) {
@@ -419,9 +518,19 @@ const MeetingUI = ({
               });
             }
             if (messageData.status) {
-              triggerToast('Host requests that you enable your camera');
+              triggerToast('Host requests you to enable your camera');
+              if ((getHostUserId() === getSelfUserId()) || isCoHost) {
+                setmeetingSetting(preData => ({
+                  ...preData,
+                  default_guest_video: 1,
+                }));}
             } else {
               Meeting.setCameraOn(false);
+              if ((getHostUserId() === getSelfUserId()) || isCoHost) {
+                setmeetingSetting(preData => ({
+                  ...preData,
+                  default_guest_video: 0,
+                }));}
             }
           }
         }
@@ -432,13 +541,15 @@ const MeetingUI = ({
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.enableVideoAnswer);
     };
-  }, []);
+  }, [data.attendees, usersList]);
 
   // Enable / Disable Screen Share Received Here - Socket
   useEffect(() => {
+    if(isMount){
     chimeSocketListen.on(
       ChimeSocketEvents.enableShareScreenAnswer,
       (messageData: EnableDisableDataProp) => {
+        console.log('on_enable_screen_share',messageData);
         if (messageData.statusCode === 1) {
           if (isMount) {
             setmeetingSetting(preSetting => ({
@@ -454,11 +565,11 @@ const MeetingUI = ({
           }
         }
       },
-    );
+    );}
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.enableShareScreenAnswer);
     };
-  }, []);
+  }, [isMount]);
 
   // Rename User Received Here - Socket
   useEffect(() => {
@@ -488,12 +599,13 @@ const MeetingUI = ({
           const userData = {...kickedUserData.kickedUser};
           if (getSelfUserId() === userData.userId) {
             const attendeeData = [...data.attendees].find(
-              item => item.userId === userData.userId,
+              item => item.userRefId === userData.userRefId,
             );
             if (attendeeData) {
               handleExitMeeting(true);
             }
           } else {
+           
             handleRemoveUser(userData.userId);
           }
         }
@@ -502,9 +614,67 @@ const MeetingUI = ({
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.kickUserAnswer);
     };
-  }, []);
+  }, [data]);
 
-  const getHostUserId = () => meetingSetting?.created_by;
+ // Listen  Make Co Host Received Here - Socket
+ useEffect(() => {
+  chimeSocketListen.on(
+    ChimeSocketEvents.makeHostAnswer,
+    (coHostUserData: MakeRemoveHostDataProp) => {
+      console.log('makingHost',coHostUserData);
+
+      handleMakeeHost(coHostUserData.updatedUser.userId);
+    },
+  );
+  return () => {
+    chimeSocketListen.off(ChimeSocketEvents.makeHostAnswer);
+  };
+}, [data]);
+// Listen  EndMeetingALert  Received Here - Socket
+useEffect(() => {
+  chimeSocketListen.on(
+    ChimeSocketEvents.meetingEndAlertAnswer,
+    (userData: MakeRemoveHostDataProp) => {
+      console.log('user_ending_info',userData);
+      handleEndMeetingAlert();
+    },
+  );
+  return () => {
+    chimeSocketListen.off(ChimeSocketEvents.meetingEndAlertAnswer);
+  };
+}, []);
+ // Listen  Alerts Before Meeting End  Received Here - Socket
+ useEffect(() => {
+  chimeSocketListen.on(
+    ChimeSocketEvents.endMeetingAlertAnswer,
+    (meetingData: any) => {
+      console.log('meeting_end_info',meetingData);
+      dispatch(setMeetRemainingTime(meetingData?.time))
+
+    },
+  );
+  return () => {
+    chimeSocketListen.off(ChimeSocketEvents.endMeetingAlertAnswer);
+  };
+}, []);
+ // Listen  Make Co Host Received Here - Socket
+ useEffect(() => {
+  chimeSocketListen.on(
+    ChimeSocketEvents.removeHostAnswer,
+    (coHostUserData: MakeRemoveHostDataProp) => {
+      console.log('removingHost',coHostUserData);
+      handleRemoveHost(coHostUserData.updatedUser.userId);
+    },
+  );
+  return () => {
+    chimeSocketListen.off(ChimeSocketEvents.removeHostAnswer);
+  };
+}, []);
+
+ // const getHostUserId = () => profile?.user_id;
+  const getHostUserId = () => ([...usersList].find((item:UserDataProp)=>item.isHost))?.userId;
+
+  const getIfCoHost = () => [...usersList].find((item:UserDataProp)=>((item.userId == profile?.user_id ) && item.isCoHost))
   const getSelfUserId = () => profile?.user_id ?? 0;
 
   /**
@@ -554,6 +724,8 @@ const MeetingUI = ({
               name: requestData.name,
               image: requestData.image,
               isRequested: true,
+              userRefId:requestData.userRefId
+
             },
             ...tempUsersList,
           ];
@@ -563,6 +735,8 @@ const MeetingUI = ({
             name: requestData.name,
             image: requestData.image,
             isRequested: true,
+            userRefId:requestData.userRefId
+
           };
         }
         return [...tempUsersList];
@@ -571,12 +745,17 @@ const MeetingUI = ({
   };
 
   const handleAddJoinedUser = (userData: UserDataProp) => {
+    console.log('handleAddCalled',userData);
+    console.log('userListList',usersList);
+
     if (
       [...usersList].findIndex(
         (item: UserDataProp) => item.userId === userData.userId,
       ) === -1
     ) {
       triggerToast(`${userData.name} joined.`);
+      console.log('found',userData.name);
+
     }
 
     setusersList(preList => {
@@ -594,12 +773,15 @@ const MeetingUI = ({
   };
 
   const handleRaiseHand = (
+    
     raiseHandData: RaisHandUserData | RaiseHandRequestData,
     isSelf: boolean = false,
   ) => {
     if (isMount) {
+      console.log('raiseHand_recieved '+profile?.user_id,raiseHandData);
       if (
-        [...data.attendees].findIndex(
+       // [...data.attendees].findIndex(
+          [...usersList].findIndex(
           item => item.userId === raiseHandData.userId,
         ) !== -1 &&
         raiseHandData.handRaised &&
@@ -637,6 +819,8 @@ const MeetingUI = ({
 
   const handleRenameUser = (userId: number, updatedName: string) => {
     if (isMount) {
+      console.log('share called')
+     // startScreenSharing();
       setusersList(preList => {
         let tempUsersList = [...preList];
         let ind = tempUsersList.findIndex(item => item.userId === userId);
@@ -647,6 +831,14 @@ const MeetingUI = ({
       });
     }
   };
+
+  async function startScreenSharing() {
+    try {
+      Meeting.startScreenShare();
+    } catch (error) {
+      console.error('Error starting screen sharing: ', error);
+    }
+  }
 
   const handleRemoveUser = (userId: number) => {
     if (isMount) {
@@ -663,6 +855,38 @@ const MeetingUI = ({
       });
     }
   };
+  const handleMakeeHost = (userId: number) => {
+    if (isMount) {
+      if(userId === getSelfUserId()){
+        setCoHost(true);
+      }
+      
+      setusersList(preList => {
+        let tempUsersList = [...preList];
+        let ind = tempUsersList.findIndex(item => item.userId === userId);
+        if (ind !== -1) {
+          tempUsersList[ind] = {...tempUsersList[ind], isCoHost:true};
+        }
+        return [...tempUsersList];
+      });
+    }
+  };
+  const handleRemoveHost = (userId: number) => {
+    if (isMount) {
+      if(userId === getSelfUserId()){
+        setCoHost(false);
+      }
+      
+      setusersList(preList => {
+        let tempUsersList = [...preList];
+        let ind = tempUsersList.findIndex(item => item.userId === userId);
+        if (ind !== -1) {
+          tempUsersList[ind] = {...tempUsersList[ind], isCoHost:false};
+        }
+        return [...tempUsersList];
+      });
+    }
+  };
 
   /**
    * Handles the event when a user leaves the meeting.
@@ -673,7 +897,7 @@ const MeetingUI = ({
    */
   const handleUserLefted = (
     attendeeId: string,
-    userId: number,
+    userId: string,
     isContentShare: boolean = false,
   ) => {
     if (isMount) {
@@ -688,8 +912,8 @@ const MeetingUI = ({
       if (!isContentShare) {
         let tempUserData: UserDataProp | undefined;
         setusersList(preList => {
-          tempUserData = [...preList].find(item => item.userId === userId);
-          return [...preList].filter(item => item.userId !== userId);
+          tempUserData = [...preList].find(item => item.userRefId === userId);
+          return [...preList].filter(item => item.userRefId !== userId);
         });
         if (tempUserData) {
           triggerToast(`${tempUserData.name} has left the meeting`);
@@ -706,7 +930,8 @@ const MeetingUI = ({
    * @param {number} userId - The ID of the user associated with the new attendee.
    * @returns None
    */
-  const onJoinAttendee = (attendeeId: string, userId: number) => {
+  const onJoinAttendee = (attendeeId: string, userRefId: string) => {
+    console.log('before mount',isMount);
     if (isMount) {
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
@@ -716,11 +941,16 @@ const MeetingUI = ({
           ) === -1
         ) {
           if (attendeeId === selfAttendeeId) {
-            tempAttendeesList = [{attendeeId, userId}, ...tempAttendeesList];
+            console.log("i_am_in_self")
+          //  tempAttendeesList = [{attendeeId, userId}, ...tempAttendeesList];
+            tempAttendeesList = [{attendeeId,userRefId }, ...tempAttendeesList];
+            console.log(tempAttendeesList);
+
           } else {
-            tempAttendeesList = [...tempAttendeesList, {attendeeId, userId}];
+            tempAttendeesList = [...tempAttendeesList, {attendeeId, userRefId}];
           }
         }
+        
         return {
           ...pre,
           attendees: [...tempAttendeesList],
@@ -729,16 +959,42 @@ const MeetingUI = ({
     }
   };
 
+
+/**
+   * Handles the event when an attendee leaves the meeting.
+   * 
+   * 
+   * **/
+
+  const handleEndMeetingAlert = () => {
+    if (isMount) {
+     // handleEndMeeting(true);
+      Meeting.stop();
+      
+    }
+  };
+
+
+
+
   /**
    * Handles the event when an attendee leaves the meeting.
    * @param {string} attendeeId - The ID of the attendee who left.
    * @param {number} userId - The ID of the user who left.
    * @returns None
    */
-  const onLeaveAttendee = (attendeeId: string, userId: number) => {
-    if (getHostUserId() === userId) {
-      handleEndMeeting(false);
+  const onLeaveAttendee = (attendeeId: string, userId: string) => {
+    console.log('attendiId '+attendeeId+" leftingUserId "+userId);
+    let coHostAvailable = usersList.find((item)=>item.isCoHost);
+
+    if (getHostUserId() === userId && !attendeeId.includes('#content')) {
+      console.log('host and user was same '+getHostUserId()+" userID "+userId +" "+Platform.OS);
+     // handleEndMeeting(false);
+     // Meeting.stop();
+     handleUserLefted(attendeeId, userId,false);
     } else {
+      console.log('host and user was not same  attendi'+attendeeId);
+
       handleUserLefted(attendeeId, userId, attendeeId.includes('#content'));
     }
   };
@@ -751,6 +1007,7 @@ const MeetingUI = ({
    */
   const onMuteUnMuteAttendee = (attendeeId: string, isMute: boolean) => {
     if (isMount) {
+      console.log('attendi_muted_id'+" side= "+profile?.user_id+" mic_to_be= "+isMute ,attendeeId)
       const attendeeData = [...data.attendees].find(
         item => item.attendeeId === attendeeId,
       );
@@ -758,7 +1015,7 @@ const MeetingUI = ({
         setusersList(preList => {
           let tempPreList = [...preList];
           const ind = tempPreList.findIndex(
-            item => item.userId === attendeeData.userId,
+            item => item.userRefId === attendeeData.userRefId,
           );
           if (ind !== -1) {
             tempPreList[ind] = {...tempPreList[ind], audio: !isMute};
@@ -785,6 +1042,7 @@ const MeetingUI = ({
       setdata(pre => {
         let tempAttendeesList = [...pre.attendees];
         let tempUsersList = [...usersList];
+        console.log('on_video_tile_add')
 
         const ind = tempAttendeesList.findIndex(
           item => item.attendeeId === attendeeId,
@@ -792,7 +1050,7 @@ const MeetingUI = ({
         if (ind !== -1) {
           tempAttendeesList[ind] = {...tempAttendeesList[ind], tileId: tileId};
           const userIndex = [...tempUsersList].findIndex(
-            item => item.userId === tempAttendeesList[ind].userId,
+            item => item.userRefId === tempAttendeesList[ind].userRefId,
           );
           if (userIndex !== -1) {
             tempUsersList[userIndex] = {
@@ -833,7 +1091,7 @@ const MeetingUI = ({
             tileId: undefined,
           };
           const userIndex = [...tempUsersList].findIndex(
-            item => item.userId === tempAttendeesList[ind].userId,
+            item => item.userRefId === tempAttendeesList[ind].userId,
           );
           if (userIndex !== -1) {
             tempUsersList[userIndex] = {
@@ -946,14 +1204,16 @@ const MeetingUI = ({
    * @returns {boolean} - True if the self attendee is muted, false otherwise.
    */
   const getIsSelfMuted = (): boolean => {
+    console.log('self_attendi_id',selfAttendeeId);
     const attendeeData = [...data.attendees].find(
       item => item.attendeeId === selfAttendeeId,
     );
     if (attendeeData) {
       const userData = [...usersList].find(
-        item => item.userId === attendeeData.userId,
+        item => item.userRefId === attendeeData.userRefId,
       );
       if (userData) {
+        console.log('was self muted',!userData.audio);
         return !userData.audio;
       }
     }
@@ -970,7 +1230,7 @@ const MeetingUI = ({
     );
     if (attendeeData) {
       const userData = [...usersList].find(
-        item => item.userId === attendeeData.userId,
+        item => item.userRefId === attendeeData.userRefId,
       );
       if (userData) {
         return userData.handRaised;
@@ -1149,15 +1409,30 @@ const MeetingUI = ({
    * @returns None
    */
   const onExitEndMeeting = (isEnd = false) => {
-    const isHost = getHostUserId() === getSelfUserId();
+
+    console.log('isEnd',isEnd);
+    
+
+    let coHostAvailable = usersList.find((item)=>item.isCoHost);
+    let coHosts = usersList.filter((item)=>item.isCoHost);
+    let MainHostAvailable = usersList.find((item)=>item.isHost);
+    if(!MainHostAvailable && !isEnd && !(coHosts?.length>1) && meetingSetting.type== 1){
+      Alert.alert('Not Allowed', 'You can not exit from meeting if there is no host or co host available except you. Please end meeting instead.', [
+         
+          {text: 'OK', onPress: () => console.log('OK Pressed')},
+        ]);
+        return;
+    }
+    const isHost = (getHostUserId() === getSelfUserId());
+    console.log('hostAvailable',coHostAvailable);
     const alertConfig = {
       title: 'Exit Meeting!',
-      message: 'Are you sure you want to exit from this meeting?',
+      message: 'Do you really want to exit from this meeting?',
     };
-    if (isEnd && isHost) {
+    if (isEnd && (isHost||isCoHost)) {
       alertConfig.title = 'End Meeting';
-      alertConfig.message = 'Are you sure you want to end this meeting?';
-    } else if (isHost) {
+      alertConfig.message = 'Do you really want to end this meeting?';
+    } else if (isHost && !coHostAvailable) {
       alertConfig.message =
         'Please make someone as host before leaving the meeting.';
     }
@@ -1174,12 +1449,52 @@ const MeetingUI = ({
         {
           text: 'OK',
           onPress: () => {
-            if (isHost) {
+            if (isHost || isCoHost) {
+              if(isCoHost){
+                  console.log('isCost',isCoHost);
+                if(isEnd){
+                  
+                 // handleEndMeeting(true);
+                  // meetingEndAlert({
+                  //   userId: getSelfUserId(),
+                  //   refId: meetingSetting.ref_id,
+                  // });
+                  handleEndMeeting(true);
+                }else{
+                  userLeft({
+                      refId: meetingSetting.ref_id,
+                      userId: getSelfUserId(),
+                    });
+                    handleExitMeeting();
+                }
+                
+              }else{
               if (isEnd) {
+                // meetingEndAlert({
+                //   userId: getSelfUserId(),
+                //   refId: meetingSetting.ref_id,
+                // });
                 handleEndMeeting(true);
               } else {
-                handleOpenParticipantsModal();
+                if(usersList.length>1){
+                  if(coHostAvailable){
+                   // handleEndMeeting(false);
+                    userLeft({
+                      refId: meetingSetting.ref_id,
+                      userId: profile?.user_id,
+                    });
+                    handleExitMeeting();
+                  }else{
+                  handleOpenParticipantsModal();
+
+                  }
+                  
+                }else{
+                  handleOpenParticipantsModal();
+                }
+                
               }
+            }
             } else {
               userLeft({
                 refId: meetingSetting.ref_id,
@@ -1226,6 +1541,8 @@ const MeetingUI = ({
    * @param {string} name - The name of the user to be removed.
    * @returns None
    */
+
+  
   const onRemoveUser = (userId: number, name: string) => {
     Alert.alert(
       'Kick User!',
@@ -1246,6 +1563,45 @@ const MeetingUI = ({
               userId,
             });
           },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
+  const onMakeRemoveCoHost = (userId: number, name: string) => {
+    
+    Alert.alert(
+      selectedUserItem?.isCoHost?'Remove Co Host':'Make Co Host!',
+      selectedUserItem?.isCoHost?`Are you sure you want to remove ${name} as Co Host?`:`Are you sure you want ${name} to make Co Host?`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+           // handleRemoveUser(userId);
+           if(!selectedUserItem?.isCoHost){
+            handleMakeeHost(userId);
+            makeHost
+            ({
+              hostId: getHostUserId(),
+              refId: meetingSetting.ref_id,
+              userId,
+            });
+          }else{
+            handleRemoveHost(userId);
+            removeHost
+            ({
+              hostId: getHostUserId(),
+              refId: meetingSetting.ref_id,
+              userId,
+            });
+          }
+          }
+          
         },
       ],
       {cancelable: false},
@@ -1301,8 +1657,38 @@ const MeetingUI = ({
 
     setEmojis(preEmojis => [...preEmojis, newEmoji]);
     startAnimation(newEmoji);
+    sendEmojee({
+      refId: meetingSetting.ref_id,
+      userId: getSelfUserId(),
+      emoji: emoji,
+      senderName: profile?.name ?? 'User'
+      
+    },);
+
+    
   };
+  /**
+   * Adds an emoji Received from other users to the list of emojis and starts the animation for the new emoji.
+   * @param {string} emoji - The emoji to add.
+   * @returns None
+   */
+  const handleEmoji = (emoji: string) => {
+    const newEmoji = {
+      position: new Animated.ValueXY({x: Math.random() * 300, y: 600}),
+      opacity: new Animated.Value(1),
+      emoji
+    };
+
+    setEmojis(preEmojis => [...preEmojis, newEmoji]);
+    startAnimation(newEmoji);
+
+    
+  };
+  
+
   // Reactions Animations functions end
+
+
 
   /**
    * Handles the onPress event for the microphone button.
@@ -1311,7 +1697,9 @@ const MeetingUI = ({
    * @returns None
    */
   const onPressMic = (userId: number, requestStatus: boolean) => {
+    console.log('mic_pressed '+'user_id '+userId+" requestStatus "+requestStatus)
     if (userId === getSelfUserId()) {
+      console.log('self audio')
       if (getSelfUserId() === getHostUserId()) {
         Meeting.setMute(!getIsSelfMuted());
       } else {
@@ -1319,9 +1707,23 @@ const MeetingUI = ({
 
         if (userData) {
           if (userData.audioDisabledByHost) {
+            if(isCoHost){
+              Meeting.setMute(!getIsSelfMuted());
+            }else{
             triggerToast('Your audio disabled by host');
+            }
           } else {
-            Meeting.setMute(!getIsSelfMuted());
+            console.log('i am here ok by saqlain');
+           // Meeting.setMute(!getIsSelfMuted());
+          // Meeting.setMute(!getIsSelfMuted());
+           Meeting.setMute(!getIsSelfMuted());
+            // enableAudio({
+            //   hostId: getHostUserId(),
+            //   refId: meetingSetting.ref_id,
+            //   status: requestStatus,
+            //   userId: userId,
+            // });
+            
           }
         } else {
           triggerToast('Something went wrong');
@@ -1335,6 +1737,15 @@ const MeetingUI = ({
           status: requestStatus,
           userId: userId,
         });
+      }else{
+        if (getIfCoHost()) {
+          enableAudio({
+            hostId: getSelfUserId(),
+            refId: meetingSetting.ref_id,
+            status: requestStatus,
+            userId: userId,
+          });
+        }
       }
     }
   };
@@ -1346,6 +1757,7 @@ const MeetingUI = ({
    * @returns None
    */
   const onPressVideo = (userId: number, requestStatus: boolean) => {
+    
     if (userId === getSelfUserId()) {
       if (getSelfUserId() === getHostUserId()) {
         Meeting.setCameraOn(!data.selfVideoEnabled);
@@ -1353,7 +1765,11 @@ const MeetingUI = ({
         const userData = [...usersList].find(item => item.userId === userId);
         if (userData) {
           if (userData.videoDisabledByHost) {
+            if(isCoHost){
+              Meeting.setCameraOn(!data.selfVideoEnabled);
+            }else{
             triggerToast('Your video disabled by host');
+          }
           } else {
             Meeting.setCameraOn(!data.selfVideoEnabled);
           }
@@ -1370,6 +1786,16 @@ const MeetingUI = ({
           userId: userId,
         });
       }
+      else{
+        if (getIfCoHost()) {
+          enableVideo({
+            hostId: getSelfUserId(),
+            refId: meetingSetting?.ref_id,
+            status: requestStatus,
+            userId: userId,
+          });
+         }
+      }
     }
   };
 
@@ -1378,6 +1804,7 @@ const MeetingUI = ({
    * @returns None
    */
   const onPressRaiseHand = () => {
+   // console.log('wahabeee',eventSettings);
     raiseHand({
       refId: meetingSetting?.ref_id,
       status: !getIsSelfHandRaised(),
@@ -1402,9 +1829,10 @@ const MeetingUI = ({
     | undefined
   )[] => {
     return [...data.attendees]
+   // return [...usersList]
       .map((item: AttendeeDetailProp) => {
         const userData: UserDataProp | undefined = [...usersList].find(
-          (ele: UserDataProp) => ele.userId === item.userId,
+          (ele: UserDataProp) => ele.userRefId === item.userRefId,
         );
         if (userData) {
           const videoUserData: UserVideoItemDetailsProp = {
@@ -1428,7 +1856,7 @@ const MeetingUI = ({
     return [...usersList]
       .map((item: UserDataProp) => {
         const attendeeData = [...data.attendees].find(
-          ele => ele.userId === item.userId,
+          ele => ele.userRefId === item.userRefId,
         );
         if (attendeeData) {
           return {...item};
@@ -1449,7 +1877,7 @@ const MeetingUI = ({
     return [...usersList]
       .map((item: UserDataProp) => {
         const attendeeData = [...data.attendees].find(
-          ele => ele.userId === item.userId,
+          ele => ele.userRefId === item.userRefId,
         );
         if (attendeeData) {
           const itemData: UserVideoItemDetailsProp = {
@@ -1477,7 +1905,7 @@ const MeetingUI = ({
     );
     if (attendeeData) {
       const userData = [...usersList].find(
-        item => item.userId === attendeeData.userId,
+        item => item.userRefId === attendeeData.userRefId,
       );
       if (userData) {
         return {
@@ -1528,6 +1956,9 @@ const MeetingUI = ({
         attendeeDetail={item}
         hostUserId={getHostUserId()}
         selfUserId={getSelfUserId()}
+       // isCoHost={getIfCoHost()}
+        isCoHost={isCoHost}
+
         onPressMic={onPressMic}
         isEnableFullScreen={isAttendeeFullScreenEnable}
         onPressVideo={onPressVideo}
@@ -1624,6 +2055,7 @@ const MeetingUI = ({
       'participants',
       'screenshare_permission',
       'end_meeting',
+      
     ];
     if (
       (getHostUserId() === getSelfUserId() &&
@@ -1736,6 +2168,8 @@ const MeetingUI = ({
         refValue={participantsListModalRef}
         onCloseModal={handleCloseParticipantsModal}>
         <ParticipantsList
+          //isCoHost={getIfCoHost()}
+          isCoHost={isCoHost}
           onClose={handleCloseParticipantsModal}
           hostUserId={getHostUserId()}
           selfUserId={getSelfUserId()}
@@ -1747,11 +2181,15 @@ const MeetingUI = ({
           isEnableItemPress={true}
           onPressItem={userItem => {
             if (isMount) {
+             // console.log('user_item',userItem);
               setselectedUserItem(userItem);
             }
+             
             const menuList = GetMeetingOptionsMenuList({
               hostUserId: getHostUserId(),
               selfUserId: getSelfUserId(),
+             // isCoHost:getIfCoHost(),
+              isCoHost:isCoHost,
               eventType,
               isAllowedScreenShare: meetingSetting.user_screenshare === 1,
               userData: userItem,
@@ -1764,9 +2202,11 @@ const MeetingUI = ({
                 'remove_user',
               ],
             });
-
+            console.log('menu_list',menuList);
             if (menuList.length === 1) {
+              
               const menuItem = {...menuList[0]};
+              console.log('menu_item',menuItem);
               if (menuItem.id === 'in_call_message') {
                 handleOpenInCallMessagesModal();
               } else if (menuItem.id === 'rename') {
@@ -1775,7 +2215,12 @@ const MeetingUI = ({
                 handleOpenUserOptionsModal();
               }
             } else {
-              handleOpenUserOptionsModal();
+              if(getIfCoHost() && userItem?.isHost){
+                handleOpenInCallMessagesModal();
+              }else{
+                handleOpenUserOptionsModal();
+              }
+              
             }
           }}
           participantsList={getParticipantsList()}
@@ -1792,27 +2237,27 @@ const MeetingUI = ({
             });
           }}
           onPressGlobalMic={requestedStatus => {
-            if (getHostUserId() === getSelfUserId()) {
+            if ((getHostUserId() === getSelfUserId())||getIfCoHost()) {
               setmeetingSetting(preData => ({
                 ...preData,
                 default_guest_audio: requestedStatus ? 1 : 0,
               }));
               enableAudio({
-                hostId: getHostUserId(),
+                hostId: getSelfUserId(),
                 refId: meetingSetting.ref_id,
                 status: requestedStatus,
               });
             }
           }}
           onPressGlobalVideo={requestedStatus => {
-            if (getHostUserId() === getSelfUserId()) {
+            if ((getHostUserId() === getSelfUserId())||getIfCoHost()) {
               setmeetingSetting(preData => ({
                 ...preData,
                 default_guest_video: requestedStatus ? 1 : 0,
               }));
 
               enableVideo({
-                hostId: getHostUserId(),
+                hostId: getSelfUserId(),
                 refId: meetingSetting.ref_id,
                 status: requestedStatus,
               });
@@ -1836,17 +2281,20 @@ const MeetingUI = ({
             } else if (buttonId === 'participants') {
               handleOpenParticipantsModal();
             } else if (buttonId === 'screenshare_permission') {
+              console.log('screen_share_press');
               if (isMount) {
-                if (getHostUserId() === getSelfUserId()) {
+                if ((getHostUserId() === getSelfUserId())||isCoHost) {
                   if (isMount) {
                     setmeetingSetting(preSetting => ({
                       ...preSetting,
                       user_screenshare:
                         preSetting.user_screenshare === 1 ? 0 : 1,
+                       // preSetting.user_screenshare === 1 ? 1 : 0,
                     }));
                   }
                   enableShareScreen({
-                    hostId: getHostUserId(),
+                    //hostId: getHostUserId(),
+                    hostId: getSelfUserId(),
                     refId: meetingSetting.ref_id,
                     status: meetingSetting.user_screenshare !== 1,
                   });
@@ -1868,6 +2316,7 @@ const MeetingUI = ({
             addEmoji(emoji);
           }}
           selfUserId={getSelfUserId()}
+          isCoHost={isCoHost}
           hostUserId={getHostUserId()}
           isAllowedScreenShare={meetingSetting.user_screenshare === 1}
           eventType={eventType}
@@ -1883,12 +2332,14 @@ const MeetingUI = ({
         heightPercentage="30%">
         <MeetingMoreOptions
           onPress={(buttonId: MEETING_MENU_IDS) => {
+            
             handleCloseUserOptionsModal();
             if (buttonId === 'in_call_message') {
               handleOpenInCallMessagesModal();
             } else if (buttonId === 'rename') {
               handleOpenRenameUserModal();
             } else if (buttonId === 'enable_disable_audio') {
+              console.log('audiPrees');
               onPressMic(
                 selectedUserItem?.userId ?? 0,
                 !selectedUserItem?.audio,
@@ -1910,6 +2361,12 @@ const MeetingUI = ({
                 selectedUserItem?.userId ?? 0,
                 selectedUserItem?.name ?? '',
               );
+            }else if (buttonId === 'make_co_host') {
+              console.log('selected_user_modal',selectedUserItem);
+              onMakeRemoveCoHost(
+                selectedUserItem?.userId ?? 0,
+                selectedUserItem?.name ?? '',
+              );
             }
           }}
           userData={selectedUserItem}
@@ -1921,9 +2378,12 @@ const MeetingUI = ({
             'enable_disable_video',
             'raise_hand',
             'remove_user',
+            'make_co_host',
           ]}
           selfUserId={getSelfUserId()}
           hostUserId={getHostUserId()}
+          isCoHost = {isCoHost}
+          
           isEnableReactionsWithCondition={false}
         />
       </CustomBottomSheetModal>
@@ -1946,6 +2406,8 @@ const MeetingUI = ({
           messagesList={messagesList}
           setisEnableContentPanningGesture={setisEnableContentPanningGesture}
           onSendMessage={(msg, userData) => {
+            if(isNetConnected){
+            console.log('net connected')  
             const myUserData: UserDataProp | undefined = [...usersList].find(
               item => item.userId === getSelfUserId(),
             );
@@ -1969,10 +2431,27 @@ const MeetingUI = ({
                 sendMessageToSingleUser({
                   ...sendData,
                   isPrivate: true,
-                  send_to: {...userData},
+                  userId:userData.userId,
+
+                  isHost:false,
+                  
+
+                  send_to: {...userData,
+
+
+                  audioDisabledByHost:false,
+                  kicked:false,
+                  screenShare:1,
+                  isHost:false,
+                  videoDisabledByHost:true,
+                  
+                },
                 });
               }
             }
+          }else{
+            Toast.fail('Internet not connected')
+          }
           }}
         />
       </CustomBottomSheetModal>
