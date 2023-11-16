@@ -20,6 +20,8 @@ export interface AttendeeDetailProp {
   attendeeId: string;
   tileId?: number | string;
   userId: number;
+  userRefId:string;
+  
 }
 
 export interface UserVideoItemDetailsProp
@@ -32,6 +34,7 @@ type Props = {
   isEnableFullScreen?: boolean;
   hostUserId: number;
   selfUserId: number;
+  isCoHost:boolean;
   nameCharactersLength?: number;
   onPressName?: () => void;
   onPressFullScreen?: () => void;
@@ -46,6 +49,7 @@ const MeetingVideoView = ({
   style,
   hostUserId,
   selfUserId,
+  
   isEnableFullScreen,
   nameCharactersLength = 20,
   onPressName,
@@ -56,8 +60,9 @@ const MeetingVideoView = ({
 }: Props) => {
   const timer: any = useRef();
   const [isViewOverlay, setisViewOverlay] = useState(false);
-  const {tileId, name, userId, audio, video, attendeeId, image} =
+  const {tileId, name, userId,userRefId, audio, video, attendeeId, image,isCoHost} =
     attendeeDetail;
+  //console.log('i_am_in_video_view',userRefId)  
   const isVideoEnabled =
     //@ts-ignore
     (typeof tileId === 'number' || typeof tileId === 'string') && video;
@@ -143,7 +148,7 @@ const MeetingVideoView = ({
                 ? 'You'
                 : getSlicedText(
                     name,
-                    getIsHost()
+                    (getIsHost()|| isCoHost)
                       ? nameCharactersLength - 9
                       : nameCharactersLength,
                   )
@@ -157,6 +162,14 @@ const MeetingVideoView = ({
             </StyledText>
           </View>
         )}
+        {isCoHost && (!getIsHost())&&(
+          <View style={styles.hostTextContainer}>
+            <StyledText style={[styles.nameText, {fontSize: 12}]}>
+              Co Host
+            </StyledText>
+          </View>
+        )}
+        
       </View>
       {isViewOverlay && (
         <TouchableOpacity
@@ -179,6 +192,7 @@ const MeetingVideoView = ({
                 onPress={() => {
                   if (onPressMic) {
                     onPressMic(userId, !audio);
+                   // onPressMic(userId, true);
                     autoDisableOverlay();
                   }
                 }}

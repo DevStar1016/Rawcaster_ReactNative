@@ -50,6 +50,7 @@ type Props = {
   ) => void;
   listTitle?: string;
   isShowCount?: boolean;
+  isCoHost:boolean;
   globalSettingsData?: GlobalSettingsProps;
 };
 
@@ -64,6 +65,7 @@ const ParticipantsList = ({
   hostUserId,
   selfUserId,
   meetingRefId,
+  isCoHost,
   isShowActionsButtons = true,
   isEnableItemPress = false,
   onPressItem,
@@ -98,6 +100,7 @@ const ParticipantsList = ({
       return null;
     }
     const isHost = hostUserId === item.userId;
+    const isCoHost = item.isCoHost;
     const isSelf = selfUserId === item.userId;
     const isVideoEnabled =
       //@ts-ignore
@@ -143,11 +146,14 @@ const ParticipantsList = ({
                   iconSize={17}
                   onPress={() => {
                     if (onPressAccept) {
+                      console.log("this_is_pressed_item",item)
+
                       onPressAccept({
                         name: item.name,
                         image: item.image,
                         userId: item.userId,
                         refId: meetingRefId,
+                        userRefId:item.userRefId,
                       });
                     }
                   }}
@@ -184,6 +190,15 @@ const ParticipantsList = ({
                     <StyledText style={styles.hostText}>Host</StyledText>
                   </View>
                 )}
+                {isCoHost && (
+                  <View
+                    style={[
+                      styles.hostTextContainer,
+                      {marginLeft: item.handRaised ? 0 : 10},
+                    ]}>
+                    <StyledText style={styles.hostText}>Co Host</StyledText>
+                  </View>
+                )}
 
                 <SVGIcon
                   icon={item.audio ? 'mic_white' : 'mic_off_white'}
@@ -205,6 +220,18 @@ const ParticipantsList = ({
                   onPress={() => {
                     if (onPressVideo) {
                       onPressVideo(item.userId, !isVideoEnabled);
+                    }
+                  }}
+                />
+                 <SVGIcon
+                 height={15}
+                  icon={
+                    isVideoEnabled ? 'menu_vertical' : 'menu_vertical'
+                  }
+                  isButton={isEnableAudioVideoActions}
+                  onPress={() => {
+                    if (onPressItem && !item.isRequested) {
+                      onPressItem(item);
                     }
                   }}
                 />
@@ -250,7 +277,7 @@ const ParticipantsList = ({
                 text={searchText}
               />
             </View>
-            {isShowActionsButtons && hostUserId === selfUserId && (
+            {isShowActionsButtons && ((hostUserId === selfUserId)|| isCoHost) && (
               <View style={styles.globalSettingsContainer}>
                 <StyledText style={styles.globalSettingsText}>
                   Global Settings
@@ -266,6 +293,7 @@ const ParticipantsList = ({
                     width={22}
                     marginRight={10}
                     onPress={() => {
+                      console.log('onGlobleMic');
                       if (onPressGlobalMic) {
                         onPressGlobalMic(
                           !globalSettingsData?.participantsAudio,
@@ -289,6 +317,7 @@ const ParticipantsList = ({
                       }
                     }}
                   />
+                  
                 </View>
               </View>
             )}

@@ -17,12 +17,18 @@ import Loader from '../../../Components/Loader';
 import {chimeSocketListen} from '../../../Services/ChimeSocket/ChimeSocket';
 import {ChimeSocketEvents} from '../../../Services/ChimeSocket/ChimeSocketEvents';
 import Toast from '../../../Components/Toast';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { setMeetInviteRefId } from '../../../Store/Slices/MeetInviteRefIdSlice';
 
 var isMount: boolean = true;
 var timer: any = undefined;
-const Events = () => {
+const Events = ({route}) => {
   const navigation = useNavigation();
-  const profile: any = useProfile();
+  const dispatch = useDispatch();
+  const profile = useProfile();
+  const meet_invite_ref_id = useSelector((state)=>state.meeting_invite_refId.value);
+
   const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [isOpenHostingScreen, setisOpenHostingScreen] = useState(false);
@@ -42,6 +48,54 @@ const Events = () => {
     };
   }, []);
 
+
+  ///////////// Referece ids of events from shared url handle here
+  /////////////////////////////
+
+  useEffect(()=>{
+    //const unsubscribe = navigation.addListener('focus', () => {
+      if(meet_invite_ref_id){
+        console.log('ref_id_received_in_event',meet_invite_ref_id);
+        postData(meet_invite_ref_id);
+      }
+   // });
+
+   // return unsubscribe;
+    
+  },[navigation,meet_invite_ref_id]);
+
+  const postData = async (ref_id:any) => {
+    try {
+      const apiUrl = 'https://devapi.rawcaster.com/rawcaster/externaluserjoin';
+      const dataToSend = {
+        reference_id: ref_id,
+        email_id: profile?.email_id,
+        name:profile?.name
+      };
+      const response = await axios.post(apiUrl, dataToSend);
+        console.log('response:', response.data);
+        dispatch(setMeetInviteRefId(null));
+        
+        if (response.data.status === 1) {
+            setstartEventDetails(response.data.event);
+            if (response.data.event.waiting_room === 1) {
+              setisOpenHostingScreen(true);
+            } else {
+              handleStartHosting(response.data.event);
+              setisLoading(true);
+              handleMeetingRequestingTimeout();
+            }
+      }
+    } catch (error) {
+      // Handle any errors
+      console.error('share url join Error:', error);
+    }
+  };
+
+
+  /////////////////////////////
+  ////////////////////////////////
+
   // Meeting Room - Host Accept or Reject Join Request Response Received here - Socket
   useEffect(() => {
     /**
@@ -49,9 +103,11 @@ const Events = () => {
      * @param {MeetingJoinedDataProp} joinedData - The data received from the join request answer event.
      * @returns None
      */
+   // if(isRequestingMeeting){
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestAnswer,
       (joinedData: MeetingJoinedDataProp) => {
+        console.log('join_answer',joinedData);
         if (isMount) {
           if (isRequestingMeeting) {
             setisRequestingMeeting(false);
@@ -63,6 +119,7 @@ const Events = () => {
         if (joinedData.statusCode === 1) {
           onCloseWaitingRoom();
           if (joinedData?.joinInfo?.result) {
+            console.log('meeting_setting_from_server',joinedData);
             handleJoinMeeting(joinedData);
           } else {
             Toast.fail(joinedData?.joinInfo?.message ?? 'Something went wrong');
@@ -77,6 +134,9 @@ const Events = () => {
         }
       },
     );
+  // }else{
+  //   chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
+  // }
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
     };
@@ -108,9 +168,11 @@ const Events = () => {
     }
     joinRequest({
       refId: eventItem.reference_id,
-      userId: profile.user_id,
-      image: profile.profile_image,
-      name: profile.name,
+      userId: profile?.user_id,
+      image: profile?.profile_image,
+      name: profile?.name,
+      userRefId: profile?.user_ref_id
+
     });
   };
 
@@ -120,6 +182,7 @@ const Events = () => {
    * @returns None
    */
   const handleJoinMeeting = (meetingData: MeetingJoinedDataProp) => {
+    
     // @ts-ignore
     navigation.navigate('EventHostScreen', {
       meetingData: meetingData.joinInfo.result?.meeting,
@@ -140,6 +203,9 @@ const Events = () => {
    * @returns None
    */
   const onCloseWaitingRoom = () => {
+   console.log('cross');
+    setisRequestingMeeting(false);
+    
     if (isMount && isOpenHostingScreen) {
       setmeetingJoiningStatus({
         statusCode: undefined,
@@ -166,7 +232,7 @@ const Events = () => {
         }
         clearTimeout(timer);
       }
-    }, 5000);
+    }, 120000);
   };
 
   return (

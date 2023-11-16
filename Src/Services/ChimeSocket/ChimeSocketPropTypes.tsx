@@ -26,7 +26,18 @@ export type ChimeEventsType =
   | 'kickUser'
   | 'kickUserAnswer'
   | 'endMeeting'
-  | 'endMeetingAnswer';
+  | 'endMeetingAnswer'
+  | 'makeHost'
+  | 'makeHostAnswer'
+  | 'removeHost'
+  | 'removeHostAnswer'
+  | 'meetingEndAlert'
+  | 'meetingEndAlertAnswer'
+  |  'joinEventRoom'
+  |  'postReaction'
+  |'postReactionAnswer'
+
+
 
 export type ChimeEventsProps = {
   joinSocket: 'joinSocket';
@@ -44,6 +55,9 @@ export type ChimeEventsProps = {
   inCallEvents: 'inCallEvents';
   userLefted: 'userLefted';
   userLeft: 'userLeft';
+  meetingEndAlert:'meetingEndAlert';
+  meetingEndAlertAnswer:'meetingEndAlertAnswer';
+  endMeetingAlertAnswer:'endMeetingAlertAnswer';
   newUserJoined: 'newUserJoined';
   enableVideo: 'enableVideo';
   enableVideoAnswer: 'enableVideoAnswer';
@@ -57,6 +71,16 @@ export type ChimeEventsProps = {
   kickUserAnswer: 'kickUserAnswer';
   endMeeting: 'endMeeting';
   endMeetingAnswer: 'endMeetingAnswer';
+  makeHost: 'makeHost';
+  makeHostAnswer: 'makeHostAnswer';
+  removeHost: 'removeHost';
+  removeHostAnswer: 'removeHostAnswer';
+  joinEventRoom:'joinEventRoom',
+  sendEmojee:'postReaction',
+  emojeeAnswer:'postReactionAnswer',
+
+
+ 
 };
 export type JoinRequestStatusCodes = 'host_not_available';
 export type JoinRequestStatusCodeProp = {
@@ -75,6 +99,10 @@ export interface UserDataProp {
   audioDisabledByHost?: boolean;
   videoDisabledByHost?: boolean;
   isRequested?: boolean;
+  isCoHost?:boolean;
+  attendeeId:string;
+  userRefId:string
+
 }
 
 export type CreateMeetingRoomMessageData = {
@@ -102,6 +130,7 @@ export interface JoinRequestMessageData {
   userId: number;
   name: string;
   image?: string;
+  userRefId:string;
 }
 export interface JoinRequestRejectActionProp {
   userId: number;
@@ -120,6 +149,12 @@ export interface HostProcessProp {
 export interface UserLeftMessageData {
   refId: string;
   userId: number;
+}
+export interface SendEmojiData {
+  refId: string,
+  userId: number,
+  emoji: string,
+  senderName: string
 }
 
 export interface EnableDisableMessageData extends HostProcessProp {

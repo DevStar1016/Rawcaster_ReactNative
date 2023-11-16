@@ -1,29 +1,40 @@
-import {BackHandler, StyleSheet} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import HOCView from '../../../../Components/HOCView';
-import {COLORS} from '../../../../Utilities/Colors';
+import { COLORS } from '../../../../Utilities/Colors';
 import {
   MeetingEvent,
   Meeting,
   MeetingEmitter,
 } from '../../../../Native/Bridges/ChimeMeetingBridge';
-import {useNavigation} from '@react-navigation/native';
-import {useProfile, useToken} from '../../../../Utilities/StoreData';
+import { useNavigation } from '@react-navigation/native';
+import { useProfile, useToken } from '../../../../Utilities/StoreData';
 import MeetingUI from '../../../../Components/Meeting/MeetingUI';
 import Toast from '../../../../Components/Toast';
-import {endMeeting} from '../../../../Services/ApiService';
-import {getSlicedText} from '../../../../Utilities/Methods';
-import {EVENT_TYPE} from '../../../../Utilities/Constants';
-import {userLeft} from '../../../../Services/ChimeSocket/ChimeSocketRequests';
+import { endMeeting } from '../../../../Services/ApiService';
+import { getSlicedText } from '../../../../Utilities/Methods';
+import { EVENT_TYPE } from '../../../../Utilities/Constants';
+import { joinEventRoom, joinRequest, meetingEndAlert, userLeft } from '../../../../Services/ChimeSocket/ChimeSocketRequests';
+import { useDispatch, useSelector } from 'react-redux';
+import { setExistFromHost } from '../../../../Store/Slices/MeetingExitSlice';
+import MeetingCountDown from '../../../../Components/MeetingCountDown';
+import { FONTS } from '../../../../Utilities/Fonts';
+import StyledText from '../../../../Components/StyledText';
+import { setMeetRemainingTime } from '../../../../Store/Slices/MeetingRemainingTimeSlice';
 
 var isMount = true;
 var onMeetingStartSubscription = undefined;
 var onMeetingEndSubscription = undefined;
 var onErrorSubscription = undefined;
 
-const EventHostScreen = ({route}) => {
+const EventHostScreen = ({ route }) => {
   const navigation = useNavigation();
   const profile = useProfile();
+  const dispatch = useDispatch();
+
+  const meetingExit = useSelector((state) => state.meeting_exit_slice.value);
+  const meet_remaining_time = useSelector((state) => state.meet_remaining_time_slice.value);
+  console.log('remaining_updated', meet_remaining_time);
 
   const {
     meetingData,
@@ -36,16 +47,24 @@ const EventHostScreen = ({route}) => {
   const token = useToken();
   const [loaderData, setloaderData] = useState({
     status: true,
-    text: 'Meeting being started',
+    //text: 'Meeting being started',
+    text: 'Starting meeting. Please wait...',
   });
   const [isInMeeting, setisInMeeting] = useState(false);
   const [isKicked, setisKicked] = useState(false);
 
   useEffect(() => {
+
+    console.log("meeting_data   " + JSON.stringify(meetingData) + "   ", "attendi_data   " + JSON.stringify(attendeeData));
     isMount = true;
+
+    let abc = { ...attendeeData };
+    // abc.ExternalUserId = '11111222';
     Meeting.start(meetingData, attendeeData);
     return () => {
       isMount = false;
+      dispatch(setMeetRemainingTime(null));
+
     };
   }, []);
 
@@ -78,6 +97,16 @@ const EventHostScreen = ({route}) => {
         if (isMount) {
           setisInMeeting(true);
           stopLoader();
+          console.log('meeting_started');
+          // console.log('meeting_started_here' + profile.user_id + " meeting", meetingSetting);
+          // if (meetingSetting.created_by == profile?.user_id) {
+          joinEventRoom({
+            refId: meetingSetting.ref_id,
+            userId: profile?.user_id,
+            userRefId: profile?.user_ref_id,
+
+          });
+
         }
       },
     );
@@ -91,15 +120,30 @@ const EventHostScreen = ({route}) => {
     onMeetingEndSubscription = MeetingEmitter.addListener(
       MeetingEvent.onEnd,
       () => {
+
         if (isMount) {
           setisInMeeting(false);
           stopLoader();
         }
-        userLeft({
-          user_id: profile.user_id,
-          meetingId: meetingData.MeetingId,
-          user_name: getSlicedText(profile.name, 18),
-        });
+        console.log('saqiiiiii', attendeeData);
+        console.log('meeting_exist', meetingExit);
+        if (!meetingExit) {
+          meetingEndAlert({
+            userId: profile.user_id,
+            refId: meetingSetting.ref_id,
+          });
+        }
+
+        //Meeting.stop();
+        // Meeting.stop();
+        // handleEndMeeting(true);
+
+
+        // userLeft({
+        //     user_id: profile.user_id,
+        //     meetingId: meetingData.MeetingId,
+        //     user_name: getSlicedText(profile.name, 18),
+        // });
         if (isKicked) {
           Toast.fail('You are removed from the meeting by host.');
         } else {
@@ -167,11 +211,12 @@ const EventHostScreen = ({route}) => {
    * @returns None
    */
   const handleEndMeeting = () => {
-    startLoader('Meeting being ended');
+    // startLoader('Meeting being ended');
+    startLoader('Ending meeting. Please wait...');
     if (isMount) {
       setloaderData({
         status: true,
-        text: 'Meeting being ended',
+        text: 'Ending meeting. Please wait...',
       });
     }
     const formData = new FormData();
@@ -181,6 +226,10 @@ const EventHostScreen = ({route}) => {
       .then(res => {
         if (res.data.status === 1) {
           Meeting.stop();
+          meetingEndAlert({
+            userId: profile.user_id,
+            refId: meetingSetting.ref_id,
+          });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
           stopLoader();
@@ -238,20 +287,38 @@ const EventHostScreen = ({route}) => {
       isEnableRLogo={false}
       isEnableDefaultBackground
       paddingHorizontal={0}>
+      {meet_remaining_time &&
+        <View style={{ position: 'absolute', top: -50, width: '100%', backgroundColor: COLORS.secondary, height: 50, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <StyledText style={styles.timerText}>{`This meeting will end in `}</StyledText>
+          <MeetingCountDown initialTimeInMilliseconds={meet_remaining_time} onTimeFinish={() => { handleEndMeeting(); dispatch(setMeetRemainingTime(null)) }} />
+        </View>
+      }
+
       {isInMeeting && (
         // This is the Meeting UI If the Meeting Started then this component will be rendered
         <MeetingUI
           eventType={eventType}
-          handleEndMeeting={isHost => {
-            if (isHost) {
+          handleEndMeeting={isEnd => {
+            if (isEnd) {
+              console.log('zzzzzzz');
+              console.log('meeting_should_end_only');
+
               handleEndMeeting();
             } else {
+              console.log('yyyyyyy');
+              console.log('meeting_should_stop_only');
               Meeting.stop();
+              // handleEndMeeting();
+              // handleExitMeeting();
             }
           }}
           handleExitMeeting={isKicked => {
             if (isMount) {
+              console.log('this one called user_id', profile.user_id);
               setisKicked(isKicked);
+
+              // dispatch(setExistFromHost(false));
+
             }
             Meeting.stop();
           }}
@@ -266,3 +333,12 @@ const EventHostScreen = ({route}) => {
 };
 
 export default EventHostScreen;
+const styles = StyleSheet.create({
+  timerText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontFamily: FONTS.DMSans.bold,
+    alignSelf: 'center',
+    paddingVertical: 5,
+  },
+});

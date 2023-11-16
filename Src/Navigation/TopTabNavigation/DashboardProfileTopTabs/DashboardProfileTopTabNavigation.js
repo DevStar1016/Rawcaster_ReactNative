@@ -1,15 +1,19 @@
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import BottomTabNavigation from '../../BottomTabNavigation';
 import ProfileStack from '../../../Stacks/ProfileStack';
 import DefaultBackground from '../../../Components/DefaultBackground';
-import {DashboardProfileContext} from '../../../Utilities/Contexts';
-import {useState} from 'react';
+import { DashboardProfileContext } from '../../../Utilities/Contexts';
+import { useState } from 'react';
+import { useProfile, useToken } from '../../../Utilities/StoreData';
 
 const Tab = createMaterialTopTabNavigator();
 
 function DashboardProfileTopTabNavigation() {
   const [swipeEnabled, setswipeEnabled] = useState(true);
   const [focusedNuggetUserId, setfocusedNuggetUserId] = useState(null);
+
+  const token = useToken();
+  const profile = useProfile();
 
   const value = {
     setswipeEnabled,
@@ -28,20 +32,30 @@ function DashboardProfileTopTabNavigation() {
           lazy: true,
           lazyPlaceholder: () => <DefaultBackground />,
         }}>
-        <Tab.Screen
-          name="BottomTabNavigationAfterLogin"
-          component={BottomTabNavigation}
-          options={{
-            title: '',
-          }}
-        />
-        <Tab.Screen
-          name="SwipeableProfileStack"
-          component={ProfileStack}
-          options={{
-            title: '',
-          }}
-        />
+        {token ?
+          <>
+            <Tab.Screen
+              name="BottomTabNavigationAfterLogin"
+              component={BottomTabNavigation}
+              options={{
+                title: '',
+              }}
+            />
+            <Tab.Screen
+              name="SwipeableProfileStack"
+              component={ProfileStack}
+              options={{
+                title: '',
+              }}
+            /></> :
+          <Tab.Screen
+            name="BottomTabNavigationBeforeLogin"
+            component={BottomTabNavigation}
+            options={{
+              title: '',
+            }}
+          />
+        }
       </Tab.Navigator>
     </DashboardProfileContext.Provider>
   );

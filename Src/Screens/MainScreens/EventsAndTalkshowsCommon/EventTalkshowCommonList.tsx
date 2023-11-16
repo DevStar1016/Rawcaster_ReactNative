@@ -71,7 +71,9 @@ const EventTalkshowCommonScreen = ({
       setisListLoading(true);
       seteventsList([]);
     }
+    if(token){
     listEventsTalkshowApiCall(1);
+  }
   }, [eventFilterType]);
 
   /**
@@ -93,6 +95,7 @@ const EventTalkshowCommonScreen = ({
             if (pageNumber === 1) {
               totalPages = parseInt(res.data.total_pages);
               seteventsList(res.data.events_list);
+            //  console.log('mm_events',res.data.events_list);
             } else {
               seteventsList(preList => [...preList, ...res.data.events_list]);
             }
@@ -119,7 +122,7 @@ const EventTalkshowCommonScreen = ({
   const onPressDelete = (eventId: any) =>
     Alert.alert(
       'Delete!',
-      'Do you want to delete this talkshow?',
+      `Do you want to delete this ${screenType === 'talkshow' ?'talkshow':'event'}?`,
       [
         {
           text: 'Cancel',
@@ -199,7 +202,9 @@ const EventTalkshowCommonScreen = ({
     if (isMount) {
       setrefreshing(true);
     }
+    if(token){
     listEventsTalkshowApiCall(1);
+  }
   };
 
   /**
@@ -240,12 +245,10 @@ const EventTalkshowCommonScreen = ({
     ) : null;
   };
 
-  const ScreenType = screenType === 'talkshow' ? 'Talkshow' : 'Events';
-
   return (
     <View style={{flex: 1}}>
       <CustomHomeHeader
-        title={ScreenType}
+        title={screenType === 'talkshow' ? 'Talkshow' : 'Events'}
         bgColor={COLORS.transparent}
         isEnableSafeArea
         isEnableSearch={true}
@@ -257,9 +260,11 @@ const EventTalkshowCommonScreen = ({
         isEnableLoading={isListLoading}
         centerText={
           isListLoading
-            ? `Fetching ${ScreenType} List`
+            ? `Fetching ${
+                screenType === 'talkshow' ? 'Talkshow' : 'Events'
+              } List`
             : getEventsList().length <= 0
-            ? `No new or future ${ScreenType.toLowerCase()} found`
+            ? 'No data found'
             : ''
         }
       />
@@ -335,6 +340,7 @@ const EventTalkshowCommonScreen = ({
                 );
               }}
               onPressDelete={() => {
+                console.log('this_is_my_item',item);
                 onPressDelete(item?.event_id);
               }}
               onPressStartJoinEvent={() => {

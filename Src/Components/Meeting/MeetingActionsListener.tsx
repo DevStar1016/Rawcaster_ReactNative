@@ -17,8 +17,8 @@ export type DataMessage = {
 };
 
 type Props = {
-  onJoinAttendee: (attendeeId: string, externalUserId: number) => void;
-  onLeaveAttendee: (attendeeId: string, externalUserId: number) => void;
+  onJoinAttendee: (attendeeId: string, externalUserId: string) => void;
+  onLeaveAttendee: (attendeeId: string, externalUserId: string) => void;
   onMuteUnMuteAttendee: (attendeeId: string, isMute: boolean) => void;
   onEnableScreenShare: (tileId: number, attendeeId: string) => void;
   onAddVideoTile: (
@@ -73,7 +73,12 @@ const MeetingActionsListener = ({
     onAttendeesJoinSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesJoin,
       ({attendeeId, externalUserId}: AttendeeJoinResponseProps) => {
-        onJoinAttendee(attendeeId, parseInt(externalUserId));
+        ////mmm_id_change
+        ///////
+       // onJoinAttendee(attendeeId, parseInt(externalUserId));
+       console.log('onJoinAttendi',attendeeId+" "+externalUserId)
+        onJoinAttendee(attendeeId, externalUserId);
+
       },
     );
 
@@ -86,7 +91,7 @@ const MeetingActionsListener = ({
     onAttendeesLeaveSubscription = MeetingEmitter.addListener(
       MeetingEvent.onAttendeesLeave,
       ({attendeeId, externalUserId}) => {
-        onLeaveAttendee(attendeeId, parseInt(externalUserId));
+        onLeaveAttendee(attendeeId, externalUserId);
       },
     );
 
@@ -130,6 +135,7 @@ const MeetingActionsListener = ({
         if (tileState.isScreenShare) {
           onEnableScreenShare(tileState.tileId, tileState.attendeeId);
         } else {
+          console.log('tileeeee',tileState);
           onAddVideoTile(
             tileState.tileId,
             tileState.isLocal,
