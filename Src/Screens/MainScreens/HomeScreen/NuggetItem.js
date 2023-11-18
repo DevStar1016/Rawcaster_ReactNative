@@ -59,7 +59,7 @@ function NuggetItem({
     // if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
     //   return true;
     // }
-    console.log(isViewableItemSet, 'isViewableItemSet', nugget.nugget_id);
+
     return (
       isAppForeground &&
       viewableItem === mediaItem.media_id &&

@@ -56,7 +56,15 @@ const RadioButton = ({
         ) : null}
       </View>
       <View>
-        <StyledText style={nameTextStyle}>{text}</StyledText>
+        <StyledText
+          style={[
+            nameTextStyle,
+            {
+              color: disabled ? COLORS.grey : COLORS.black,
+            },
+          ]}>
+          {text}
+        </StyledText>
       </View>
     </TouchableOpacity>
   );

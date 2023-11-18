@@ -280,6 +280,7 @@ export const getLocationAddress = () => {
             });
           },
           error => {
+            console.log(error, 'error');
             reject(error);
           },
         );

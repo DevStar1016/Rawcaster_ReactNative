@@ -1,6 +1,6 @@
-import { Linking, Modal } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import {Linking, Modal} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
 import Loader from '../Components/Loader';
 import {
   useGlobalLoaderData,
@@ -9,15 +9,16 @@ import {
   useProfile,
   useSettings,
   useToken,
+  useinActiveAlert,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import { getAuthCode } from '../Utilities/Methods';
+import {getAuthCode} from '../Utilities/Methods';
 import {
   complementaryMembershipService,
   getInfluencerCategoryService,
   listAllFriendRequestsService,
 } from '../Services/ApiService';
-import { useDispatch } from 'react-redux';
+import {useDispatch} from 'react-redux';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
@@ -32,33 +33,42 @@ import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
-import { initiateAllNuggetsLoadingTotalPages } from '../Store/Slices/NuggetsListSlice';
+import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
-import { COLORS } from '../Utilities/Colors';
+import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
 import ChimeSocketConnectionListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketConnectionListener';
 import PlansAndPrice from '../Screens/MainScreens/PlansAndPrice';
 import ConfirmationPopup from '../Modals/ConfirmationPopup';
-import { setPremiumAlert } from '../Store/Slices/UtilitySlice';
-import { getFocusedRouteNameFromRoute, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  setPremiumAlert,
+  setisInActivePopup,
+} from '../Store/Slices/UtilitySlice';
+import {
+  getFocusedRouteNameFromRoute,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {
   getAllFriendsGroupsList,
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
-import { decode } from 'base-64';
+import {decode} from 'base-64';
 import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
-import { setMyProfile } from '../Store/Slices/AuthSlice';
-import { setMeetInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
+import {setMyProfile} from '../Store/Slices/AuthSlice';
+import {setMeetInviteRefId} from '../Store/Slices/MeetInviteRefIdSlice';
+import InActiveModal from '../Modals/InActiveModal';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
   const profile = useProfile();
   const [isLoading, setisLoading] = useState(true);
+  const [isLogout, setisLogout] = useState(false);
   const route = useRoute();
   // Get Nested Route Name
   const isVisibleInfluencers = useIsVisibleInfluencers();
@@ -69,6 +79,7 @@ const MainStack = () => {
   const navigation = useNavigation();
   const userSettings = useSettings();
   const premiumALert = usePremiumAlert();
+  const isInActiveAlert = useinActiveAlert();
   const [isComplimentoryAlert, setisComplimentoryAlert] = useState({
     status: false,
     text: '',
@@ -79,30 +90,31 @@ const MainStack = () => {
   }, []);
 
   useEffect(() => {
-
     const subscription = Linking.addEventListener('url', event => {
-
-      if (event.url?.includes('https://dev.rawcaster.com/join/event') || event.url?.includes('https://dev.rawcaster.com/join/talkshow')) {
+      if (
+        event.url?.includes('https://dev.rawcaster.com/join/event') ||
+        event.url?.includes('https://dev.rawcaster.com/join/talkshow')
+      ) {
         setTimeout(() => {
-          console.log('from here 123')
-          handleOpenUrl(event.url)
+          console.log('from here 123');
+          handleOpenUrl(event.url);
         }, 3000);
-      }
-      else {
+      } else {
         ////////// Change from indian team
         //////////////////////
-        OpenLinkingUrl(event.url)
+        OpenLinkingUrl(event.url);
         ///////
         //////////
       }
-
-    }
-    );
+    });
     Linking?.getInitialURL()
-      .then((url) => {
-        if (url?.includes('https://dev.rawcaster.com/join/event') || url?.includes('https://dev.rawcaster.com/join/talkshow')) {
+      .then(url => {
+        if (
+          url?.includes('https://dev.rawcaster.com/join/event') ||
+          url?.includes('https://dev.rawcaster.com/join/talkshow')
+        ) {
           setTimeout(() => {
-            console.log('from here')
+            console.log('from here');
             handleOpenUrl(url);
           }, 3000);
         } else {
@@ -111,7 +123,6 @@ const MainStack = () => {
           OpenLinkingUrl(url);
           ////////////
         }
-
       })
 
       .catch(e => {
@@ -177,7 +188,7 @@ const MainStack = () => {
         }
         return res;
       })
-      .catch(e => { })
+      .catch(e => {})
       .finally(() => {
         setisLoading(false);
         dispatch(getAllFriendsGroupsList());
@@ -201,12 +212,17 @@ const MainStack = () => {
       } else {
         if (url?.includes('https://dev.rawcaster.com/join/event')) {
           console.log('incluededddddd');
-          const ref_id = url.replace('https://dev.rawcaster.com/join/event/', '').trim();
+          const ref_id = url
+            .replace('https://dev.rawcaster.com/join/event/', '')
+            .trim();
           console.log('ref_id', ref_id);
           console.log('route', route);
           const routeName = getFocusedRouteNameFromRoute(route);
           console.log('route_name', routeName);
-          if (routeName == "DashboardProfileTopTabNavigation" || routeName == undefined) {
+          if (
+            routeName == 'DashboardProfileTopTabNavigation' ||
+            routeName == undefined
+          ) {
             console.log('im_in', routeName);
             dispatch(setMeetInviteRefId(ref_id));
           } else {
@@ -222,14 +238,16 @@ const MainStack = () => {
               params: {
                 screen: 'Events',
                 params: {
-                  ref_id: ref_id
+                  ref_id: ref_id,
                 },
               },
             },
           });
         } else {
           if (url?.includes('https://dev.rawcaster.com/join/talkshow')) {
-            const ref_id = url.replace('https://dev.rawcaster.com/join/talkshow/', '').trim();
+            const ref_id = url
+              .replace('https://dev.rawcaster.com/join/talkshow/', '')
+              .trim();
             console.log('ref_id', ref_id);
             navigation.navigate('DashboardProfileTopTabNavigation', {
               screen: 'BottomTabNavigationAfterLogin',
@@ -238,7 +256,7 @@ const MainStack = () => {
                 params: {
                   screen: 'Talkshow',
                   params: {
-                    ref_id: ref_id
+                    ref_id: ref_id,
                   },
                 },
               },
@@ -248,7 +266,6 @@ const MainStack = () => {
       }
     }
   };
-
 
   const HandleUpgradeComplimentory = () => {
     const formData = new FormData();
@@ -278,7 +295,7 @@ const MainStack = () => {
 
   return isLoading ? (
     <Loader
-      loaderText={'Fetching User Profile'}
+      loaderText={isLogout ? 'Logging out...' : 'Fetching User Profile'}
       isEnableDefaultLoaderBackground={true}
     />
   ) : (
@@ -291,7 +308,10 @@ const MainStack = () => {
           ...StackAnimation,
         }}>
         {isVisibleInfluencers ? (
-          <Stack.Screen name="InfluencersList" component={InfluencersList} />
+          <>
+            <Stack.Screen name="InfluencersList" component={InfluencersList} />
+            <Stack.Screen name="SettingsStack" component={SettingsStack} />
+          </>
         ) : (
           <>
             <Stack.Screen
@@ -351,7 +371,7 @@ const MainStack = () => {
       )}
       {premiumALert?.status && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={premiumALert.status}>
@@ -365,14 +385,29 @@ const MainStack = () => {
                 }),
               );
             }}
-            positiveButtonText={'Upgrade'}
-            negativeButtonText={'Later'}
+            positiveButtonText={
+              premiumALert.isModifyButton && premiumALert.SuccessButtonText
+                ? premiumALert.SuccessButtonText
+                : 'Ok'
+            }
+            isEnableNegativeButton={
+              premiumALert.isModifyButton &&
+              premiumALert.isFailureButtonAvailable
+            }
+            negativeButtonText={
+              premiumALert.isModifyButton && premiumALert.FailureButtonText
+                ? premiumALert.FailureButtonText
+                : 'Cancel'
+            }
             onPressPositiveButton={() => {
-              if (userSettings.complementary_status === 1) {
-                HandleUpgradeComplimentory();
-              } else {
-                navigation.navigate('PlansAndPrice');
+              if (!premiumALert.isModifyButton) {
+                if (userSettings.complementary_status === 1) {
+                  HandleUpgradeComplimentory();
+                } else {
+                  navigation.navigate('PlansAndPrice');
+                }
               }
+
               dispatch(
                 setPremiumAlert({
                   status: false,
@@ -386,7 +421,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>
@@ -401,6 +436,47 @@ const MainStack = () => {
               });
             }}
             content={isComplimentoryAlert.text}
+          />
+        </Modal>
+      )}
+      {isComplimentoryAlert?.status && (
+        <Modal
+          onRequestClose={() => {}}
+          // style={{zIndex: 10000}}
+          transparent
+          visible={isComplimentoryAlert.status}>
+          <ConfirmationPopup
+            isEnableClose={false}
+            isEnableNegativeButton={false}
+            positiveButtonText={'Ok'}
+            onPressPositiveButton={() => {
+              setisComplimentoryAlert({
+                status: false,
+                text: '',
+              });
+            }}
+            content={isComplimentoryAlert.text}
+          />
+        </Modal>
+      )}
+      {isInActiveAlert && (
+        <Modal
+          onRequestClose={() => {}}
+          // style={{zIndex: 10000}}
+          transparent
+          visible={isInActiveAlert}>
+          <InActiveModal
+            onLogout={status => {
+              setisLoading(status);
+              if (status) {
+                setisLogout(true);
+              } else {
+                setisLogout(false);
+              }
+            }}
+            onClose={() => {
+              dispatch(setisInActivePopup(false));
+            }}
           />
         </Modal>
       )}

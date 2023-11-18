@@ -38,6 +38,7 @@ import {
   setInsets,
   setIsAppForeground,
   setIsGroupJoinAlert,
+  setisInActivePopup,
 } from './Src/Store/Slices/UtilitySlice';
 import {
   GOOGLE_PLACES_API_KEY,
@@ -169,6 +170,9 @@ const App = () => {
       .then(res => {
         if (res[1].data.status === 1) {
           dispatch(setSettings(res[1].data.settings));
+          if (res[1].data.settings.account_active_inactive === 0) {
+            dispatch(setisInActivePopup(true));
+          }
         }
         return res;
       })

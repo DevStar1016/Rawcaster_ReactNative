@@ -25,6 +25,7 @@ export const initialState: UtilityDataProp = {
     text: '',
   },
   isOpenVerifyPopup: false,
+  isInActivePopup: false,
   globalLoaderData: {
     status: false,
     text: '',
@@ -64,6 +65,9 @@ const UtilitySlice = createSlice({
     },
     setPremiumAlert: (state, action) => {
       state.premiumAlert = action.payload;
+    },
+    setisInActivePopup: (state, action) => {
+      state.isInActivePopup = action.payload;
     },
     setIsOpenVerifyPopup: (state, action) => {
       state.isOpenVerifyPopup = action.payload;
@@ -108,5 +112,6 @@ export const {
   setGlobalLoaderData,
   clearUtilityReduxData,
   setIsGroupJoinAlert,
+  setisInActivePopup,
 } = UtilitySlice.actions;
 export default UtilitySlice.reducer;

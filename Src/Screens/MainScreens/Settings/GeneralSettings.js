@@ -1,4 +1,12 @@
-import {Alert, Modal, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HeaderWithBack from '../../../Components/HeaderWithBack';
 import StyledText from '../../../Components/StyledText';
@@ -44,6 +52,7 @@ import {setTranslatedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
 import {useNavigation} from '@react-navigation/native';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 import InputPopup from '../../../Modals/InputPopup';
+import {setisInActivePopup} from '../../../Store/Slices/UtilitySlice';
 
 var isMount = true;
 const CHOICE_CONTAINERS_LIST = [
@@ -129,6 +138,7 @@ const GeneralSettings = () => {
     listFieldName: '',
     specificListType: null, // 1 - connections, 2 - group
   });
+  const isInActive = settings && settings?.account_active_inactive === 0;
 
   const [loaderText, setloaderText] = useState(
     'Fetching Languages and Timezones',
@@ -509,6 +519,7 @@ const GeneralSettings = () => {
     selectedId,
     choiceList = [...VISIBLE_CHOICES_LIST],
     onSelectRadioOption,
+    isInActiveState = isInActive,
   }) {
     return (
       <View style={styles.choiceContainer}>
@@ -520,6 +531,7 @@ const GeneralSettings = () => {
                 key={item.id.toString()}
                 isSelected={selectedId === item.id}
                 text={item.name}
+                disabled={isInActiveState}
                 onPress={() => {
                   onSelectRadioOption(item.id);
                 }}
@@ -531,9 +543,24 @@ const GeneralSettings = () => {
     );
   }
 
+  useEffect(() => {
+    navigation.addListener('beforeRemove', e => {
+      if (settingsData?.account_active_inactive === 0) {
+        dispatch(setisInActivePopup(true));
+      } else if (settingsData?.account_active_inactive === 1) {
+        dispatch(setisInActivePopup(false));
+      }
+    });
+    return () => navigation.removeListener();
+  }, [settingsData]);
+
   return (
     <View style={styles.mainContainer}>
-      <HeaderWithBack title="General Settings" isEnableSafeArea />
+      <HeaderWithBack
+        title="General Settings"
+        isEnableSafeArea
+        isEnableBackButton={!isInActive}
+      />
       <View style={styles.contentContainer}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -546,6 +573,7 @@ const GeneralSettings = () => {
           <RowContainer leftText="User Type" rightText={profile?.user_type} />
           <DropDownPicker
             title="Default Rawcaster page"
+            isDisabled={isInActive}
             value={getDefaultPage()}
             listTitle=""
             titleStyle={styles.titleText}
@@ -632,6 +660,7 @@ const GeneralSettings = () => {
             title="Profile Privacy"
             description="Choose if you want to lock your Nuggets, Fans, Connections and Influencers list from other users"
             switchItemContainerStyle={{width: '48%', marginBottom: 10}}
+            isDisabled={isInActive}
             isSwitchesFlexStart={true}
             switchesList={[...PRIVACY_SWITCHES_LIST]}
             onStatusSwitchesIdsList={getEnabledSwitchesIds()}
@@ -682,6 +711,7 @@ const GeneralSettings = () => {
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={readoutLanguagesList}
+            isDisabled={isInActive}
             fieldName="name"
             onSelectItem={selectedItem => {
               handleChangeSettingsData({
@@ -697,7 +727,7 @@ const GeneralSettings = () => {
             value={getSelectedReadoutAccent()}
             listTitle=""
             placeHolderText="Select Accent"
-            isDisabled={getReadoutAccentList().length <= 0}
+            isDisabled={getReadoutAccentList().length <= 0 || isInActive}
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={getReadoutAccentList()}
@@ -714,6 +744,7 @@ const GeneralSettings = () => {
             value={getSelectedTimeZone()}
             listTitle="Timezone Selection"
             listType="large"
+            isDisabled={isInActive}
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={timeZonesList}
@@ -729,6 +760,7 @@ const GeneralSettings = () => {
             title="Date Format"
             value={getDefaultDateFormate()}
             listTitle=""
+            isDisabled={isInActive}
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
             dataList={DEFAULT_DATE_FORMAT_LIST}
@@ -743,6 +775,7 @@ const GeneralSettings = () => {
           />
           <ChoiceContainer
             title="Rawcaster Account"
+            isInActiveState={false}
             selectedId={settingsData.account_active_inactive}
             choiceList={[...ACCOUNT_ACTIVE_STATUS_LIST]}
             onSelectRadioOption={selectedId => {

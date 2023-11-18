@@ -47,19 +47,22 @@ const validationSchema = yup.object().shape({
     .string()
     .min(2, 'Enter valid First name')
     .max(20, 'First name is too long')
-    .required('Required'),
+    .required('First name is Required'),
   lastName: yup
     .string()
     .min(1, 'Enter Valid Last name')
     .max(20, 'Last name is too long')
-    .required('Required'),
+    .required('Last name is Required'),
   dob: yup.string().required('Date of birth is required'),
   mobileNumber: yup
     .string()
     .matches(PHONE_REGEX, 'Invalid Phone number')
-    .required('Required'),
-  email: yup.string().email('Enter valid Email').required('Required'),
-  location: yup.string().min(2, 'Enter Valid location').required('Required'),
+    .required('Phone number is Required'),
+  email: yup.string().email('Enter valid Email').required('Email is Required'),
+  location: yup
+    .string()
+    .min(2, 'Enter Valid location')
+    .required('Location is Required'),
 });
 
 const ClaimAccount = ({route}) => {
@@ -293,7 +296,11 @@ const ClaimAccount = ({route}) => {
         }
       })
       .catch(e => {
-        Toast.fail(e.message);
+        if (typeof e === 'string') {
+          Toast.fail(e);
+        } else {
+          Toast.fail(e.message ?? 'Something went wrong');
+        }
       })
       .finally(() => {
         if (isMount) {

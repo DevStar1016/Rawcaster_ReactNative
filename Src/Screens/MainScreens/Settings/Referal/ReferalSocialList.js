@@ -485,7 +485,8 @@ const ReferalSocialList = () => {
       },
     );
     const validArray = [...sortedContactsList].filter(
-      ele => !searchKey || ele.name.includes(searchKey),
+      ele =>
+        !searchKey || ele.name.toLowerCase().includes(searchKey.toLowerCase()),
     );
     const sections = [...validArray].reduce((resultSections, item) => {
       if (isAlphabet(item.name[0])) {

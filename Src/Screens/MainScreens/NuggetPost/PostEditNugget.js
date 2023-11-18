@@ -1192,12 +1192,26 @@ const PostEditNugget = ({route}) => {
                         false,
                       ),
                     );
-                    console.log('test123');
+
                     Keyboard.dismiss();
                     dispatch(
                       setPremiumAlert({
                         status: true,
                         text: 'You have reached your character limit, to increase the limit upgrade your membership',
+                      }),
+                    );
+                  } else if (
+                    text.length > profile?.nugget_content_length &&
+                    profile?.user_status_id === 4
+                  ) {
+                    dispatch(
+                      setPremiumAlert({
+                        status: true,
+                        text: 'You have reached your character limit',
+                        isModifyButton: true,
+                        isSuccessbuttonAvailable: true,
+                        isFailureButtonAvailable: false,
+                        SuccessButtonText: 'Ok',
                       }),
                     );
                   } else {

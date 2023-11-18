@@ -18,6 +18,7 @@ import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 import SVGIcon from '../../../Components/SVGIcon';
 import MenuContainer from '../../../Modals/MenuContainer';
+import Clipboard from '@react-native-community/clipboard';
 
 const MENU_LIST = [
   {id: 1, buttonName: 'Remove Friend'},

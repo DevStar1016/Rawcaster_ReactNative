@@ -800,7 +800,7 @@ const Profile = ({route}) => {
           isDisableVerifyAccount={getIsDisableVerifyAccount()}
           verifyAccountButtonText={getVerifyAccountButtonText()}
           onPressVerifyAccount={() => {
-            if (parseInt(profile?.user_status_id) === 4) {
+            if (parseInt(profile?.user_status_id) >= 4) {
               navigation.navigate('ClaimAccount', {
                 isVerifyAccount: true,
               });

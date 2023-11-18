@@ -111,6 +111,10 @@ export const usePremiumAlert = () => {
   return useAppSelector(state => state.utility.premiumAlert);
 };
 
+export const useinActiveAlert = () => {
+  return useAppSelector(state => state.utility.isInActivePopup);
+};
+
 export const useIsOpenVerifyPopup = () => {
   return useAppSelector(state => state.utility.isOpenVerifyPopup);
 };

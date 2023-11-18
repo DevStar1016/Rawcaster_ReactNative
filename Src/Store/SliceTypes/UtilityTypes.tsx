@@ -14,10 +14,16 @@ type GlobalLoaderProp = {
 type PremiumAlertProp = {
   status: boolean;
   text: string;
+  isModifyButton?: boolean;
+  isSuccessbuttonAvailable?: boolean;
+  isFailureButtonAvailable?: boolean;
+  SuccessButtonText?: string;
+  FailureButtonText?: string;
 };
 
 export type UtilityDataProp = {
   insets: InsetsDataProp;
+  isInActivePopup: boolean;
   isGroupJoinAlert: PremiumAlertProp;
   locationDetails: any;
   isBottomTabBarAbsolute: boolean;

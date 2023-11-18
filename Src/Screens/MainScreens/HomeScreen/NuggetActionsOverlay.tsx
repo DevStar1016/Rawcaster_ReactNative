@@ -75,7 +75,7 @@ import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
 import {SOCIAL_SHARE_LINK} from '../../../Services/ServiceConstants';
-import RNFetchBlob from 'rn-fetch-blob';
+import RNFetchBlob, {RNFetchBlobConfig} from 'rn-fetch-blob';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 type Props = {
@@ -354,8 +354,8 @@ function NuggetActionsOverlay({
     if (
       nugget.media_list &&
       nugget.media_list[0] &&
-      nugget.media_list[0]?.media_type?.includes('image') &&
-      nugget.share_type === 1
+      nugget.share_type === 1 &&
+      profile?.user_status_id === 4
     ) {
       const downloadOption = [...NUGGET_ACTIONS].find(item => item.id === 6);
       if (downloadOption) {
@@ -370,7 +370,7 @@ function NuggetActionsOverlay({
    * @returns None
    */
   const onShareLink = async () => {
-    const shareMessage = `${SOCIAL_SHARE_LINK}` + `${encode(nugget.nugget_id)}`;
+    const shareMessage = nugget.share_link;
     try {
       const result = await Share.share({
         message: shareMessage,
@@ -391,19 +391,55 @@ function NuggetActionsOverlay({
     }
   };
 
-  const downloadMedia = async (url: string, fileName: string) => {
+  const downloadMedia = async (
+    url: string,
+    fileName: string,
+    type: 'image' | 'video' | 'audio',
+  ) => {
     Toast.success('Downloading Media');
+    console.log(type);
+
     if (IS_IOS) {
-      CameraRoll.save(url, {
-        album: 'Rawcaster',
-        type: 'photo',
-      })
-        .then(res => {
-          Toast.success('Media Downloaded');
+      if (type === 'image') {
+        CameraRoll.save(url, {
+          album: 'Rawcaster',
+          type: 'photo',
         })
-        .catch(e => {
-          Toast.fail(e.message);
-        });
+          .then(res => {
+            Toast.success('Media Downloaded');
+          })
+          .catch(e => {
+            Toast.fail(e.message);
+          });
+      } else {
+        const {config, fs} = RNFetchBlob;
+        let downloadDir = fs.dirs.PictureDir;
+        let options: RNFetchBlobConfig = {
+          fileCache: true,
+          path: downloadDir + '/' + fileName,
+          //@ts-ignore
+          notification: true,
+          title: fileName,
+          IOSBackgroundTask: true,
+          addAndroidDownloads: {
+            //Related to the Android only
+            useDownloadManager: true,
+            notification: true,
+            path: downloadDir + '/' + fileName,
+            description: 'Nugget Download',
+          },
+        };
+        config(options)
+          .fetch('GET', url)
+          .then(res => {
+            console.log(res);
+
+            Toast.success('Media Downloaded');
+          })
+          .catch(e => {
+            Toast.success(e.message);
+          });
+      }
     } else {
       const {config, fs} = RNFetchBlob;
       let downloadDir = fs.dirs.PictureDir;
@@ -520,7 +556,12 @@ function NuggetActionsOverlay({
       case 6:
         if (nugget?.media_list && nugget?.media_list[0]) {
           const mediaFile = nugget?.media_list[0];
-          downloadMedia(mediaFile.path, getFileName(mediaFile.path));
+
+          downloadMedia(
+            mediaFile.path,
+            getFileName(mediaFile.path),
+            mediaFile.media_type,
+          );
           // handleDownloadMedia({
           //   fileName: getFileName(mediaFile.path),
           //   path: mediaFile.path,

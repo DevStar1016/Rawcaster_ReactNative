@@ -129,7 +129,7 @@ const TagsSearch = () => {
           <View style={{maxWidth: '80%'}}>
             <StyledText>Trending in {item?.country}</StyledText>
           </View>
-          <SVGIcon icon="menu_horizontal" isButton height={20} width={20} />
+          {/* <SVGIcon icon="menu_horizontal" isButton height={20} width={20} /> */}
         </View>
         <View style={styles.itemRowContainer}>
           <View style={{width: (DIMENSIONS.window.width - 30) / 2}}>

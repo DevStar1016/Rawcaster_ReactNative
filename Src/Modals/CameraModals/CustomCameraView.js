@@ -34,6 +34,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
   const camera = useRef(null);
   const device = useCameraDevices();
   const [isVideoRecording, setisVideoRecording] = useState(false);
+  const isRecordingRef = useRef();
   const [mediaData, setmediaData] = useState({
     uri: '',
     mediaType: '',
@@ -136,6 +137,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
    * @throws {Error} If there is an error stopping the video recording.
    */
   const handleStopVideoRecording = async () => {
+    isRecordingRef.current = false;
     try {
       await camera.current.stopRecording();
       setisVideoRecording(false);
@@ -156,8 +158,14 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
           flash: getFlashMode(),
           onRecordingFinished: onVideoRecordFinished,
           onRecordingError: onVideoRecordError,
+          maxDuration: 1 * 60,
         };
         camera.current.startRecording(options);
+        setTimeout(() => {
+          if (isRecordingRef.current) {
+            handleStopVideoRecording();
+          }
+        }, 5 * 60 * 1000);
       } catch (e) {
         setisVideoRecording(false);
       }
@@ -189,6 +197,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         delayLongPress={400}
         onLongPress={() => {
           if (!isVideoRecording) {
+            isRecordingRef.current = true;
             handleRecordVideo();
           }
         }}
@@ -247,7 +256,7 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         children={isCameraInit ? null : <Loader bgColor={COLORS.primaryDark} />}
         onInitialized={() => {
           setisCameraInit(true);
-          console.log('Initiated');
+
           // Camera is initialized, you can start using it.
         }}
         enableZoomGesture={true}

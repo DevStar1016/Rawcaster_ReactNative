@@ -25,6 +25,7 @@ type Props = {
   switchesList?: SwitchItem[];
   isSwitchesFlexStart?: boolean;
   onChangeButtonStatus: (id: number | string) => void;
+  isDisabled?: boolean;
 };
 
 const SwtchesContainer = ({
@@ -36,6 +37,7 @@ const SwtchesContainer = ({
   titleDescriptionContainerProps,
   onChangeButtonStatus,
   switchItemContainerStyle,
+  isDisabled = false,
 }: Props) => {
   function SwitchItem({name = '', id}: SwitchItem) {
     return (
@@ -52,6 +54,7 @@ const SwtchesContainer = ({
           buttonSize={15}
           borderWidth={0}
           spaceBetween={1}
+          disabled={isDisabled}
           sliderHeight={25}
           sliderWidth={55}
           buttonOffsetRight={6}
