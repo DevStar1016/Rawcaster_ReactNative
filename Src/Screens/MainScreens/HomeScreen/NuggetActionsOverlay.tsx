@@ -355,7 +355,8 @@ function NuggetActionsOverlay({
       nugget.media_list &&
       nugget.media_list[0] &&
       nugget.share_type === 1 &&
-      profile?.user_status_id === 4
+      //@ts-ignore
+      profile?.user_status_id >= 4
     ) {
       const downloadOption = [...NUGGET_ACTIONS].find(item => item.id === 6);
       if (downloadOption) {
@@ -413,11 +414,27 @@ function NuggetActionsOverlay({
             Toast.fail(e.message);
           });
       } else {
+        const getFileExtention = (fileUrl: string) => {
+          // To get the file extension
+          return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
+        };
+        let date = new Date();
+        // File URL which we want to download
+        let FILE_URL = url;
+        // Function to get extention of the file url
+        //@ts-ignore
+        let file_ext: string = getFileExtention(FILE_URL);
+
+        file_ext = '.' + file_ext[0];
         const {config, fs} = RNFetchBlob;
-        let downloadDir = fs.dirs.PictureDir;
+        let RootDir = fs.dirs.DocumentDir;
         let options: RNFetchBlobConfig = {
           fileCache: true,
-          path: downloadDir + '/' + fileName,
+          path:
+            RootDir +
+            '/file_' +
+            Math.floor(date.getTime() + date.getSeconds() / 2) +
+            file_ext,
           //@ts-ignore
           notification: true,
           title: fileName,
@@ -426,19 +443,33 @@ function NuggetActionsOverlay({
             //Related to the Android only
             useDownloadManager: true,
             notification: true,
-            path: downloadDir + '/' + fileName,
+            path:
+              RootDir +
+              '/file_' +
+              Math.floor(date.getTime() + date.getSeconds() / 2) +
+              file_ext,
             description: 'Nugget Download',
           },
         };
+        console.log(options);
         config(options)
           .fetch('GET', url)
           .then(res => {
-            console.log(res);
+            if (IS_IOS) {
+              RNFetchBlob.ios.openDocument(
+                RootDir +
+                  '/file_' +
+                  Math.floor(date.getTime() + date.getSeconds() / 2) +
+                  file_ext,
+              );
+            }
 
             Toast.success('Media Downloaded');
           })
           .catch(e => {
-            Toast.success(e.message);
+            console.log(e.message);
+
+            // Toast.success(e.message);
           });
       }
     } else {
@@ -457,13 +488,15 @@ function NuggetActionsOverlay({
           description: 'Nugget Download',
         },
       };
+      console.log(options);
+
       config(options)
         .fetch('GET', url)
         .then(res => {
           Toast.success('Media Downloaded');
         })
         .catch(e => {
-          Toast.success(e.message);
+          // Toast.success(e.message);
         });
     }
   };

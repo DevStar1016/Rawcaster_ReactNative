@@ -98,6 +98,7 @@ const EventDetailScreen = ({route}: any) => {
             {dateToShortTextDate(
               //@ts-ignore
               eventDetail.start_date_time,
+              //@ts-ignore
               userSettings.time_zone,
               true,
             )}
@@ -133,7 +134,7 @@ const EventDetailScreen = ({route}: any) => {
                   textAlign: 'center',
                 },
               ]}>
-              {` Maximun Participants : ${eventDetail.no_of_participants.toString()}`}
+              {` Maximum Participants : ${eventDetail.no_of_participants.toString()}`}
             </StyledText>
             <StyledText
               style={[

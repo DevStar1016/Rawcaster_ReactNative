@@ -14,6 +14,7 @@ import {COLORS} from '../Utilities/Colors';
 import {getFileName, getUrlWithFilePrefix} from '../Utilities/Methods';
 import {IconType} from '../Utilities/Icons';
 import DeafaultProfile from '../Assets/Png/default_profile.png';
+import Toast from './Toast';
 
 type ProfileImageProps = {
   uri: string;
@@ -117,7 +118,9 @@ const ProfileWithBadge = ({
           });
         }
       })
-      .catch(err => {});
+      .catch(err => {
+        Toast.fail(err.message ?? 'Something went wrong');
+      });
   };
 
   return (

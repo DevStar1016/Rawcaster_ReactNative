@@ -117,7 +117,7 @@ const ProfileTopSection = ({
     if (!isFan() || myProfile?.user_id === profile?.user_id) {
       tempMenuList = tempMenuList.filter(item => item.id !== 2);
     }
-    if (myProfile?.user_id !== profile?.user_id) {
+    if (!myProfile?.user_id) {
       tempMenuList = tempMenuList.filter(item => item.id !== 3);
     }
     return [...tempMenuList];
@@ -142,7 +142,9 @@ const ProfileTopSection = ({
                   setActionLoader(true, 'Updating Cover Image');
                   profileUpdateAPICall(2, {...res});
                 })
-                .catch(e => {});
+                .catch(e => {
+                  Toast.fail(e.message ?? 'Something went wrong');
+                });
             }}
             buttonStyle={styles.cameraIconContainer}
           />

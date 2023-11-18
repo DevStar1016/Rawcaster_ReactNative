@@ -459,6 +459,7 @@ const ClaimAccount = ({route}) => {
                   text: '',
                   isPositive: false,
                 });
+                navigation.goBack();
                 navigation.navigate('ClaimAccount', {
                   isVerifyAccount: true,
                 });

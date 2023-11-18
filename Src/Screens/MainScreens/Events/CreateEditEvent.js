@@ -647,6 +647,22 @@ const CreateEditEvent = ({route}) => {
           datePickerProps={{
             mode: 'time',
             is24Hour: false,
+            // minimumDate: () => {
+            //   console.log(
+            //     getDisplayEventDate(
+            //       liveEventDate,
+            //       settings?.default_date_format,
+            //     ),
+            //   );
+            //   if (
+            //     getDisplayEventDate(
+            //       liveEventDate,
+            //       settings?.default_date_format,
+            //     ) === new Date()
+            //   ) {
+            //     return new Date();
+            //   }
+            // },
           }}
           dropDownIcon="clock_black"
           placeHolderText={getDisplayEventTime(new Date())}

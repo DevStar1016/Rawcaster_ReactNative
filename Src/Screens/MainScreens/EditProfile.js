@@ -271,7 +271,9 @@ const EditProfile = ({route}) => {
           setselectedProfileImage(res);
         }
       })
-      .catch(err => {});
+      .catch(err => {
+        Toast.fail(err.message ?? 'Something went wrong');
+      });
   };
 
   /**
