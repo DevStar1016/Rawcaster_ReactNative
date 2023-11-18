@@ -1433,11 +1433,11 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
      // console.log('hostAvailable',coHostAvailable);
       const alertConfig = {
         title: 'Leave Stream!',
-        message: 'Do you really want to leave from this streaming?',
+        message: 'Are you sure you want to leave this Talkshow event?',
       };
       if (isEnd && isHost) {
         alertConfig.title = 'Stop Streaming';
-        alertConfig.message = 'Do you really want to stop streaming?';
+        alertConfig.message = 'Are you sure you want to end this Talkshow event?';
       } 
   
       Alert.alert(
@@ -2019,8 +2019,11 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
       index: number,
       isListHorizontal: boolean = false,
     ): React.ReactNode | null {
-      const listLength = data.attendees.length;
-      const isCoHostExist = data.attendees.find((item)=>item.isCohost == true);
+      //const listLength = data.attendees.length;
+      console.log('attendeessssss',usersList);
+      const listLength = (usersList.filter((item)=>item.isHost || item.isCoHost)).length;
+
+      console.log('attendeessssss_lenght',listLength);
       const maxHeight = containerHeight - 50;
       const maxWidth = DIMENSIONS.window.width - 50;
   
@@ -2119,7 +2122,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
                 contentContainerStyle={styles.videoTilesContainer}>
                 {getAttendeesUsersTileList().map((item, index) => {
                   if(item?.isCoHost || item?.isHost){
-                    return getVideoItem(item, index, true);
+                    return getVideoItem(item, index, false);
                   }
                 })}
               </ScrollView>

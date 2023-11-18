@@ -15,13 +15,17 @@ import {
 import { COLORS } from '../../../Utilities/Colors';
 import { EVENT_TYPE } from '../../../Utilities/Constants';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 var isMount = true;
 const Talkshow = ({ route }) => {
   const navigation = useNavigation();
   const profile = useProfile();
+  const meet_invite_ref_id = useSelector((state) => state.meeting_invite_refId.value);
+
   const [eventDetails, seteventDetails] = useState(null);
   const [isLoading, setisLoading] = useState(false);
+
 
   useEffect(() => {
     isMount = true;
@@ -36,19 +40,16 @@ const Talkshow = ({ route }) => {
   /////////////////////////////
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      if (route?.params?.ref_id) {
-        console.log('ref_id_received_in_talkshow', route.params.ref_id);
-        postData(route.params.ref_id);
-        const updatedParams = { ...route.params };
-        delete updatedParams.ref_id;
-        navigation.setParams(updatedParams);
-      }
-    });
+    //const unsubscribe = navigation.addListener('focus', () => {
+    if (meet_invite_ref_id) {
+      console.log('ref_id_received_in_talkshow', meet_invite_ref_id);
+      postData(meet_invite_ref_id);
+    }
+    // });
 
-    return unsubscribe;
+    // return unsubscribe;
 
-  }, [navigation]);
+  }, [navigation, meet_invite_ref_id]);
 
   const postData = async (ref_id) => {
     try {
@@ -103,6 +104,8 @@ const Talkshow = ({ route }) => {
         } else {
           if (joinedData.allow === false || joinedData.statusCode === 'host_not_available') {
             Toast.fail(joinedData.msg ? joinedData.msg : joinedData.message);
+          } else {
+            Toast.fail(joinedData.msg ? joinedData.msg : joinedData.message);
           }
         }
       },
@@ -133,8 +136,11 @@ const Talkshow = ({ route }) => {
   const onStartHosting = eventItem => {
     if (getIsOwner(eventItem)) {
       //  console.log('talkshow_started', eventItem);
-      createMeetingRoom({
-        // meetingId: eventItem.chime_meeting_id,
+      // createMeetingRoom({
+      //   // meetingId: eventItem.chime_meeting_id,
+      //   refId: eventItem.reference_id,
+      // });
+      joinMeetingRoom({
         refId: eventItem.reference_id,
       });
 

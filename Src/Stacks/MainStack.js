@@ -249,6 +249,17 @@ const MainStack = () => {
               .replace('https://dev.rawcaster.com/join/talkshow/', '')
               .trim();
             console.log('ref_id', ref_id);
+            const routeName = getFocusedRouteNameFromRoute(route);
+            console.log('route_name', routeName);
+            if (routeName == "DashboardProfileTopTabNavigation" || routeName == undefined) {
+              console.log('im_in', routeName);
+              dispatch(setMeetInviteRefId(ref_id));
+            } else {
+              console.log('im_out', routeName);
+              setTimeout(() => {
+                dispatch(setMeetInviteRefId(ref_id));
+              }, 4000);
+            }
             navigation.navigate('DashboardProfileTopTabNavigation', {
               screen: 'BottomTabNavigationAfterLogin',
               params: {

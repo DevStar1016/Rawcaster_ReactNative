@@ -19,8 +19,7 @@ const validationSchema = Yup.object({
 
 
 const PublicJoinEventCredentialModal = ({ isVisible, closeModal, onJoinMeeting }) => {
-    const [email, setEmail] = useState('abc@gmail.com');
-    const [name, setName] = useState('Hamas Khan');
+
 
 
     const { handleSubmit, handleChange, values, errors, touched } = useFormik({

@@ -1,7 +1,7 @@
-import {useEffect} from 'react';
-import ConnectChimeSocket, {chimeSocketListen} from '../ChimeSocket';
-import {useProfile} from '../../../Utilities/StoreData';
-import {ChimeSocketEvents} from '../ChimeSocketEvents';
+import { useEffect } from 'react';
+import ConnectChimeSocket, { chimeSocketListen } from '../ChimeSocket';
+import { useProfile } from '../../../Utilities/StoreData';
+import { ChimeSocketEvents } from '../ChimeSocketEvents';
 
 const ChimeSocketConnectionListener = () => {
   const profile = useProfile();
@@ -14,7 +14,7 @@ const ChimeSocketConnectionListener = () => {
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.joinSocket);
     };
-  }, []);
+  }, [profile]);
 
   //Socket Connect and Disconnect Status
   useEffect(() => {
