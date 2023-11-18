@@ -16,6 +16,7 @@ import { setMeetInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
+import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
 
 const Stack = createStackNavigator();
 
@@ -116,12 +117,20 @@ const RootStack = () => {
           if (url?.includes('https://dev.rawcaster.com/join/talkshow')) {
             const ref_id = url.replace('https://dev.rawcaster.com/join/talkshow/', '').trim();
             console.log('ref_id', ref_id);
+            if (currentRout.name == 'RootStack') {
+              dispatch(setMeetInviteRefId(ref_id));
+
+            } else {
+              setTimeout(() => {
+                dispatch(setMeetInviteRefId(ref_id));
+              }, 4000);
+            }
             navigation.navigate('DashboardProfileTopTabNavigation', {
               screen: 'BottomTabNavigationBeforeLogin',
               params: {
                 screen: 'TalkshowStack',
                 params: {
-                  screen: 'Talkshow',
+                  screen: 'TalkshowPublic',
                   params: {
                     ref_id: ref_id
                   },
@@ -155,6 +164,13 @@ const RootStack = () => {
         <Stack.Screen
           name="EventHostScreen"
           component={EventHostScreen}
+          options={{
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen
+          name="TalkShowHostScreen"
+          component={TalkShowHostScreen}
           options={{
             gestureEnabled: false,
           }}

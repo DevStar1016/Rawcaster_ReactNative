@@ -61,30 +61,7 @@ const EventsPublic = ({route}) => {
   ///////////// Referece ids of events from shared url handle here
   /////////////////////////////
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     if (!executed && route?.params?.ref_id) {
-  //       console.log('ref_id_received_in_event', route.params.ref_id);
-  //       console.log('focus_called_again');
-  //       setShowPublicCredentialsModal(true);
-
-  //       const updatedParams = { ...route.params };
-  //       console.log('before_params', updatedParams);
-  //       setEventRefId(updatedParams.ref_id);
-  //       delete updatedParams.ref_id;
-  //       console.log('after_params', updatedParams);
-
-  //       navigation.setParams(updatedParams);
-  //       setExecuted(true);
-  //     }
-
-  //     return () => {
-  //       // Reset the executed state when navigating away
-  //       setExecuted(false);
-  //       // Add any other cleanup logic here
-  //     };
-  //   }, [route.params, navigation])
-  // );
+  
 
   useEffect(()=>{
     // const unsubscribe = navigation.addListener('focus', () => {
@@ -93,8 +70,6 @@ const EventsPublic = ({route}) => {
        // ;
        console.log('focus_called_again')
        setShowPublicCredentialsModal(true);
-       
-       
       }
    // });
 
@@ -117,8 +92,7 @@ const EventsPublic = ({route}) => {
         dispatch(setMeetInviteRefId(null))
         if (response.data.status === 1) {
             let user = {...response.data.user}
-            user.user_ref_id = "RC3423423"
-            user.user_id = 1234
+            user.user_ref_id = (Math.floor(Math.random() * (100000 - 1000) + 1000)).toString();
             user.userId = 1234
             setProfile(user);
             dispatch(setMyProfile(user));
@@ -161,7 +135,7 @@ const EventsPublic = ({route}) => {
      * @param {MeetingJoinedDataProp} joinedData - The data received from the join request answer event.
      * @returns None
      */
-    if(isRequestingMeeting){
+   if(isRequestingMeeting){
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestAnswer,
       (joinedData: MeetingJoinedDataProp) => {

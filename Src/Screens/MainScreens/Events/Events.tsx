@@ -103,7 +103,7 @@ const Events = ({route}) => {
      * @param {MeetingJoinedDataProp} joinedData - The data received from the join request answer event.
      * @returns None
      */
-   // if(isRequestingMeeting){
+    if(isRequestingMeeting){
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestAnswer,
       (joinedData: MeetingJoinedDataProp) => {
@@ -134,9 +134,9 @@ const Events = ({route}) => {
         }
       },
     );
-  // }else{
-  //   chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
-  // }
+  }else{
+    chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
+  }
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
     };
