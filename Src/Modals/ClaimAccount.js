@@ -237,10 +237,13 @@ const ClaimAccount = ({route}) => {
     setisLoading(true);
     StartIdenfyVerification(token)
       .then(response => {
+        console.log(response, 'RESPONSEEE');
         navigation.goBack();
         HandleAutomatedVerify(response);
       })
-      .catch(error => {})
+      .catch(error => {
+        console.log(error, 'ERROR');
+      })
       .finally(() => {
         setisLoading(false);
       });

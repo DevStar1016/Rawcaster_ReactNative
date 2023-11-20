@@ -349,6 +349,10 @@ const EditProfile = ({route}) => {
           onChangeText={handleChange('firstName')}
           titlePaddingVertical={3}
           maxLength={20}
+          isEditable={profile?.account_verify_type === 0}
+          textColor={
+            profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
+          }
           inputContainerMarginVertical={0}
           placeHolder={'Enter your first name'}
         />
@@ -359,6 +363,10 @@ const EditProfile = ({route}) => {
           onChangeText={handleChange('lastName')}
           titlePaddingVertical={3}
           maxLength={20}
+          isEditable={profile?.account_verify_type === 0}
+          textColor={
+            profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
+          }
           inputContainerMarginVertical={0}
           placeHolder={'Enter your last name'}
         />
@@ -377,6 +385,8 @@ const EditProfile = ({route}) => {
           title={'Sex'}
           errorText={touched.sex && errors.sex}
           value={values.sex}
+          isDisabled={profile?.account_verify_type !== 0}
+          isEditable={profile?.account_verify_type === 0}
           fieldName="name"
           onSelectItem={item => {
             setFieldValue('sex', item);

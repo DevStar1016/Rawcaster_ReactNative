@@ -33,6 +33,7 @@ const InfluencerItem = ({
 }: Props) => {
   const [isOpenCategoriesListModal, setisOpenCategoriesListModal] =
     useState<boolean>(false);
+  const [isExtendText, setisExtendText] = useState(false);
 
   /**
    * Retrieves the list of selected categories from the item object.
@@ -131,14 +132,29 @@ const InfluencerItem = ({
           )}
         </View>
 
-        {item.bio_data && (
-          <StyledText
-            style={{paddingVertical: 5}}
-            textMode="read_more"
-            numberOfLines={2}>
-            {item.bio_data}
-          </StyledText>
-        )}
+        {item.bio_data &&
+          (isExtendText ? (
+            <StyledText
+              style={{paddingVertical: 5}}
+              textMode="read_more_hyper_link"
+              isReadmoreEnable
+              onReadMore={() => {
+                setisExtendText(false);
+              }}>
+              {item.bio_data}
+            </StyledText>
+          ) : (
+            <StyledText
+              style={{paddingVertical: 5}}
+              textMode="read_more_hyper_link"
+              isReadmoreEnable
+              onReadMore={() => {
+                setisExtendText(true);
+              }}
+              numberOfLines={2}>
+              {item.bio_data}
+            </StyledText>
+          ))}
         {/* {getBioData() ? (
           <StyledText
             style={{paddingVertical: 5}}

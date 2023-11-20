@@ -251,7 +251,10 @@ const MainStack = () => {
             console.log('ref_id', ref_id);
             const routeName = getFocusedRouteNameFromRoute(route);
             console.log('route_name', routeName);
-            if (routeName == "DashboardProfileTopTabNavigation" || routeName == undefined) {
+            if (
+              routeName == 'DashboardProfileTopTabNavigation' ||
+              routeName == undefined
+            ) {
               console.log('im_in', routeName);
               dispatch(setMeetInviteRefId(ref_id));
             } else {
@@ -399,7 +402,7 @@ const MainStack = () => {
             positiveButtonText={
               premiumALert.isModifyButton && premiumALert.SuccessButtonText
                 ? premiumALert.SuccessButtonText
-                : 'Ok'
+                : 'Upgrade'
             }
             isEnableNegativeButton={
               premiumALert.isModifyButton &&
@@ -412,7 +415,7 @@ const MainStack = () => {
             }
             onPressPositiveButton={() => {
               if (!premiumALert.isModifyButton) {
-                if (userSettings.complementary_status === 1) {
+                if (profile.complementary_status === 1) {
                   HandleUpgradeComplimentory();
                 } else {
                   navigation.navigate('PlansAndPrice');

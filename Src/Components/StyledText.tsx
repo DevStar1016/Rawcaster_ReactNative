@@ -101,6 +101,8 @@ function StyledText({
               {color: COLORS.secondary, ...readMoreButtonTextStyle},
             ]}
             onPress={() => {
+              console.log(isEnableFullText, 'JHJJ');
+
               setisEnableFullText(pre => {
                 if (onReadMore) {
                   onReadMore(!pre);

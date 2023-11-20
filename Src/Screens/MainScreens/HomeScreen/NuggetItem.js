@@ -55,7 +55,7 @@ function NuggetItem({
 
   const isAppForeground = useIsAppForeground();
 
-  const shouldPauseVideo = useMemo(() => {
+  const shouldPlayVideo = useMemo(() => {
     // if (!viewableNuggetItem && parentNuggetIndex === 0 && isAutoPlay) {
     //   return true;
     // }
@@ -99,8 +99,8 @@ function NuggetItem({
   ]);
 
   useEffect(() => {
-    setpaused(!shouldPauseVideo);
-  }, [shouldPauseVideo]);
+    setpaused(!shouldPlayVideo);
+  }, [shouldPlayVideo]);
 
   useEffect(() => {
     if (!shouldPauseReadAudio) {
@@ -149,7 +149,7 @@ function NuggetItem({
         <AudioNugget
           audioPlayer={videoPlayer}
           setisLoadingVideo={setisLoadingVideo}
-          paused={paused || !shouldPauseVideo}
+          paused={paused || !shouldPlayVideo}
           duration={duration}
           setduration={setduration}
           progress={progress}
@@ -188,6 +188,7 @@ function NuggetItem({
           setpaused={setpaused}
           duration={duration}
           progress={progress}
+          numberOfLines={2}
           mediaSeekUpdate={seekUpdate}
           onReportAbouseNugget={onReportAbouseNugget}
           nuggetContentController={nuggetContentController}

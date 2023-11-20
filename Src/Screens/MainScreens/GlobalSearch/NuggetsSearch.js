@@ -63,6 +63,7 @@ const NuggetsSearch = () => {
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const nuggetContentController = useRef(null);
   const onViewRef = useRef(viewableItems => {
+    console.log('TESTTTT');
     if (viewableItems?.viewableItems?.length > 0) {
       setviewableItem(viewableItems.viewableItems[0].item.nugget_id || 0);
     }
@@ -83,9 +84,18 @@ const NuggetsSearch = () => {
   useEffect(() => {
     // if (searchText !== null) {
     setisListLoading(true);
+    dispatch(setSearchedNuggetsList([]));
     nuggetsSearchAPICall(1);
     // }
   }, [searchText]);
+
+  useEffect(() => {
+    if (getNuggetsList() && getNuggetsList().length > 0 && !isListLoading) {
+      console.log(getNuggetsList()[0].nugget_id, 'JKJKKJ');
+      setviewableItem(getNuggetsList()[0].nugget_id || 0);
+    }
+  }, [searchedNuggetsList, isListLoading]);
+
   useEffect(() => {
     if (!isFocused) {
       if (nuggetContentController.current) {
@@ -122,7 +132,6 @@ const NuggetsSearch = () => {
                 translated_content: '',
               };
             });
-            console.log(JSON.stringify(decodedNuggetList[0]), 'LIST');
 
             const tempFollowingUsersList = getFilteredDuplicatesList(
               [...res.data.nuggets_list],
@@ -216,6 +225,8 @@ const NuggetsSearch = () => {
     totalPages = 1;
     if (isMount) {
       setisRefreshing(true);
+      setisListLoading(true);
+      dispatch(setSearchedNuggetsList([]));
       nuggetsSearchAPICall(1);
     }
   };
@@ -246,6 +257,7 @@ const NuggetsSearch = () => {
     isAutoPlay: true,
     setisMuted: setisMuted,
     viewableNuggetItem: viewableItem,
+    isViewableItemSet: viewableItem,
     isFromGlobalSearch: true,
     isEnableADDButton: false,
     isEnableTopInsetsPadding: false,
@@ -349,7 +361,7 @@ const NuggetsSearch = () => {
     return (
       <View style={[styles.emptyComponent, {height: listContainerHeight}]}>
         <StyledText style={{color: COLORS.white, paddingVertical: 5}}>
-          We didn't find any results!
+          {isListLoading ? 'Loading' : "We didn't find any results!"}
         </StyledText>
       </View>
     );
@@ -388,6 +400,10 @@ const NuggetsSearch = () => {
             ListEmptyComponent={renderEmptyComponent}
             onViewableItemsChanged={onViewRef.current}
             renderFooter={renderFooter}
+            nestedScrollEnabled
+            alwaysBounceVertical={false}
+            footerHeight={50}
+            initialScrollIndex={0}
           />
           // <FlatList
           //   ref={flatlistRef}

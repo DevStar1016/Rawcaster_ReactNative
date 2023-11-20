@@ -122,7 +122,7 @@ const DropDownPicker = ({
         <StyledText
           style={[
             {paddingVertical: titlePaddingVertical},
-            isDisabled && {opacity: 0.4},
+            // isDisabled && {opacity: 0.4},
             titleStyle,
           ]}>
           {title}
@@ -155,11 +155,14 @@ const DropDownPicker = ({
         }}>
         <View style={[styles.dropDownTextContainer]}>
           <StyledText
-            style={{
-              color: value ? valueTextColor : COLORS.placeHolderColor,
-              fontSize: fontSize,
-              paddingVertical: 5,
-            }}>
+            style={[
+              {
+                color: value ? valueTextColor : COLORS.placeHolderColor,
+                fontSize: fontSize,
+                paddingVertical: 5,
+              },
+              isDisabled && {color: COLORS.grey},
+            ]}>
             {getValueText()}
           </StyledText>
         </View>

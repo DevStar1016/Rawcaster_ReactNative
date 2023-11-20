@@ -283,7 +283,7 @@ export const RAWCASTER_DEFAULT_MESSAGE = {
   UNFOLLOW_MESSAGE:
     'Are you sure you want to stop being a fan of this Influencer?',
   VERIFY_UPGRADE_MESSAGE:
-    ' Verified account feature is only for Diamond members and Influencers',
+    'Account verification feature is only for Premium, Diamond members and Influencers',
   UPGRADE_MESSAGE:
     'To access this feature you need to become a premium member!',
 };
