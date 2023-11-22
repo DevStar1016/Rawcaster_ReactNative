@@ -159,7 +159,6 @@ const SignupWithPhone = ({route}) => {
     }
     getLocationAddress()
       .then(res => {
-        console.log(res, 'RESSSSS');
         dispatch(setLocationDetails(res));
 
         handleSignupWithPhone(values, res);
@@ -222,7 +221,6 @@ const SignupWithPhone = ({route}) => {
 
     // formData.append("voip_token", IS_IOS ? "" : null);
     formData.append('app_type', IS_IOS ? 2 : 1);
-    console.log(formData, 'SIGNUP FORMDATA');
     signupService(formData)
       .then(res => {
         if (res.data.status === 1) {

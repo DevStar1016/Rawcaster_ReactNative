@@ -39,22 +39,23 @@ const resetPasswordSchema = Yup.object({
 
 const ResetPasswordOTP = ({route}) => {
   const navigation = useNavigation();
-  const {otp_ref_id, remaining_seconds} = route.params;
+  const {otp_ref_id, remaining_seconds, sms_type, msg} = route.params;
   const [timer, settimer] = useState(remaining_seconds);
   const [isLoading, setisLoading] = useState(false);
 
-  const {handleSubmit, handleChange, values, errors, touched} = useFormik({
-    initialValues: {
-      otp: '',
-      password: '',
-      confirm_password: '',
-    },
-    validationSchema: resetPasswordSchema,
-    onSubmit: values => {
-      setisLoading(true);
-      handleVerifyOtpResetPassword(values);
-    },
-  });
+  const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
+    useFormik({
+      initialValues: {
+        otp: '',
+        password: '',
+        confirm_password: '',
+      },
+      validationSchema: resetPasswordSchema,
+      onSubmit: values => {
+        setisLoading(true);
+        handleVerifyOtpResetPassword(values);
+      },
+    });
 
   useEffect(() => {
     AvoidSoftInput.setAdjustResize();
@@ -68,6 +69,7 @@ const ResetPasswordOTP = ({route}) => {
   function onResendOtp() {
     settimer(0);
     setisLoading(true);
+    setFieldValue('otp', '');
     handleResendOTP();
   }
 
@@ -85,6 +87,7 @@ const ResetPasswordOTP = ({route}) => {
     const formData = new FormData();
     formData.append('otp_ref_id', otp_ref_id);
     formData.append('auth_code', getAuthCode(otp_ref_id));
+    formData.append('sms_type', sms_type);
     resendOTPService(formData)
       .then(res => {
         if (res.data.status === 1) {
@@ -154,8 +157,11 @@ const ResetPasswordOTP = ({route}) => {
           <View style={styles.titleContainer}>
             <StyledText style={styles.title}>Reset Password</StyledText>
             <StyledText style={{paddingVertical: 5, textAlign: 'center'}}>
-              A one time passcode (OTP) has been sent to the email address you
-              provided
+              {msg
+                ? msg
+                : `A one time passcode (OTP) has been sent to the ${
+                    sms_type === 1 ? 'email address' : 'phone number'
+                  } you provided`}
             </StyledText>
           </View>
 

@@ -22,7 +22,7 @@ import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import VideoRecordTimer from '../../Components/VideoRecordTimer';
 
-const MAX_VIDEO_SECONDS = 180;
+const MAX_VIDEO_SECONDS = 300;
 
 const CustomCameraView = ({setModal, onSendMedia}) => {
   const [cameraSetting, setcameraSetting] = useState({
@@ -158,14 +158,15 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
           flash: getFlashMode(),
           onRecordingFinished: onVideoRecordFinished,
           onRecordingError: onVideoRecordError,
-          maxDuration: 1 * 60,
+          // maxDuration: 1 * 60,
         };
         camera.current.startRecording(options);
-        setTimeout(() => {
-          if (isRecordingRef.current) {
-            handleStopVideoRecording();
-          }
-        }, 5 * 60 * 1000);
+        // setTimeout(() => {
+        //   console.log('IUIUIU');
+        //   if (isRecordingRef.current) {
+        //     handleStopVideoRecording();
+        //   }
+        // }, 5 * 60 * 1000);
       } catch (e) {
         setisVideoRecording(false);
       }

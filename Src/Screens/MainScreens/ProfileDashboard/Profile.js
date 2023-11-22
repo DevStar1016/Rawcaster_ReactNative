@@ -74,6 +74,7 @@ import {
 import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 import {setMyProfile} from '../../../Store/Slices/AuthSlice';
 import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
+import {setLikedSavedNuggets} from '../../../Store/Slices/NuggetActionsSlice';
 const PADDING_HORIZONTAL = 10;
 var currentPage = 1;
 var totalPages = 1;
@@ -84,7 +85,7 @@ const Profile = ({route}) => {
   const isMount = useRef(true);
   const dispatch = useDispatch();
   const profile = useProfile();
-  const isFocused = useIsFocused();
+  const isFocused = useRef(useIsFocused());
   const [isunclaimeduserAlert, setisunclaimeduserAlert] = useState({
     status: false,
     text: '',
@@ -147,13 +148,13 @@ const Profile = ({route}) => {
     return <View style={styles.divider} />;
   };
   useEffect(() => {
-    if (!isFocused) {
+    if (!isFocused.current) {
       if (nuggetContentController.current) {
         nuggetContentController.current.abort();
       }
       handleStopAudio();
     }
-  }, [isFocused]);
+  }, [isFocused.current]);
 
   useEffect(() => {
     currentPage = 1;
@@ -390,6 +391,7 @@ const Profile = ({route}) => {
     if (tab === 2) {
       formData.append('saved', 1);
     }
+    console.log(formData, 'FORMDATAA');
     listNuggetsService(formData, nuggetsController.signal)
       .then(res => {
         if (isMount.current) {
@@ -403,6 +405,22 @@ const Profile = ({route}) => {
                 translated_content: '',
               };
             });
+
+            const tempLikedNuggets = [...res.data.nuggets_list]
+              .filter(item => item.liked)
+              .map(item => ({
+                id: item.nugget_id,
+                total_likes: item.total_likes,
+              }));
+            const tempSavedNuggetsIds = [...res.data.nuggets_list]
+              .filter(item => item.saved)
+              .map(item => item.nugget_id);
+            dispatch(
+              setLikedSavedNuggets({
+                likedNuggets: [...tempLikedNuggets],
+                savedNuggetsIds: [...tempSavedNuggetsIds],
+              }),
+            );
 
             if (isMount.current) {
               if (pageNumber === 1) {
@@ -648,7 +666,7 @@ const Profile = ({route}) => {
     return 'Verify My Account';
   }
 
-  const keyExtractor = useCallback((item, _) => item.nugget_id.toString(), []);
+  const keyExtractor = useCallback((item, ind) => ind.toString(), []);
   const getItemLayout = useCallback(
     (_, index) => ({
       length: insets.mediaHeight,
@@ -701,8 +719,8 @@ const Profile = ({route}) => {
     setisMuted: setisMuted,
     isAutoPlay: false,
     isFrom: 'profile',
-    isFocused,
-    profileFocused: isFocused,
+    isFocused: isFocused.current,
+    profileFocused: isFocused.current,
     categoryName: 'forYou',
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
@@ -888,6 +906,8 @@ const Profile = ({route}) => {
                 style={styles.nuggetFilter}
                 onPress={() => {
                   if (isMount.current) {
+                    currentPage = 1;
+                    totalPages = 1;
                     setselectedTab(1);
                     setisListLoading(true);
 
@@ -912,6 +932,8 @@ const Profile = ({route}) => {
                 style={styles.nuggetFilter}
                 onPress={() => {
                   if (isMount.current) {
+                    currentPage = 1;
+                    totalPages = 1;
                     setselectedTab(2);
                     setisListLoading(true);
 
@@ -964,7 +986,7 @@ const Profile = ({route}) => {
       othersProfile,
       profile,
       connections,
-      isFocused,
+      isFocused.current,
       selectedTab,
       nuggetsCount,
       savedNuggetsList,
@@ -1011,7 +1033,8 @@ const Profile = ({route}) => {
             }}
           />
         </View>
-        {((focusedNuggetUserId && isFocused) || !focusedNuggetUserId) && (
+        {((focusedNuggetUserId && isFocused.current) ||
+          !focusedNuggetUserId) && (
           <>
             {isLoading ? (
               <Loader
@@ -1099,7 +1122,7 @@ const Profile = ({route}) => {
           </Modal>
         )}
 
-        {!isFocused && <DefaultBackground />}
+        {!isFocused.current && <DefaultBackground />}
       </View>
     </NuggetParentActionsContext.Provider>
   );

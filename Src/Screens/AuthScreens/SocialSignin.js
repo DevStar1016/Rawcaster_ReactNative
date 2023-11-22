@@ -74,7 +74,6 @@ const SocialSignin = ({pushId, isLogin = false, refId}) => {
     }
     // formData.append("voip_token", IS_IOS ? "" : null);
     formData.append('app_type', IS_IOS ? 2 : 1);
-    console.log(formData, 'SIGNUP FORMDATA');
     socialMediaLoginService(formData)
       .then(res => {
         if (res.data.status === 1) {

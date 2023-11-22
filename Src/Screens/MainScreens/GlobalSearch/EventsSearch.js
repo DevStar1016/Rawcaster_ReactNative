@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   divider: {
-    backgroundColor: COLORS.borderColor,
+    backgroundColor: COLORS.white,
     height: 15,
   },
   emptyComponent: {

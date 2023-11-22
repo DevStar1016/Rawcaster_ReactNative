@@ -434,6 +434,7 @@ const EditProfile = ({route}) => {
           onSelectDateMonthYearError={() => {
             setFieldValue('dob', '');
           }}
+          isDisabled={profile?.account_verify_type !== 0}
           inputContainerMarginVertical={0}
           mainContainerMarginVertical={2}
         />

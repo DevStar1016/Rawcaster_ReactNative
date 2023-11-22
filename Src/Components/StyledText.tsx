@@ -25,6 +25,7 @@ export interface StyledTextProps {
   onPress?: () => void;
   onReadMore?: (value: boolean) => void;
   isReadmoreEnable?: boolean;
+  isChangeReadMore?: boolean;
 }
 
 function StyledText({
@@ -37,6 +38,7 @@ function StyledText({
   onReadMore,
   readMoreButtonTextStyle = {},
   style,
+  isChangeReadMore = true,
   normalTextModeTextProps,
 }: StyledTextProps) {
   const [lengthMore, setLengthMore] = useState(false);
@@ -65,7 +67,6 @@ function StyledText({
       </Text>
     );
   }
-
   const renderReadMoreText = () => {
     return (
       <View>
@@ -101,13 +102,11 @@ function StyledText({
               {color: COLORS.secondary, ...readMoreButtonTextStyle},
             ]}
             onPress={() => {
-              console.log(isEnableFullText, 'JHJJ');
-
               setisEnableFullText(pre => {
                 if (onReadMore) {
                   onReadMore(!pre);
                 }
-                return isReadmoreEnable ? pre : !pre;
+                return isChangeReadMore ? !pre : pre;
               });
             }}>
             {isEnableFullText ? 'Read less' : 'Read more'}

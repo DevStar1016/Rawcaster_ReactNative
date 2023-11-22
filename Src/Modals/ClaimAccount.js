@@ -10,6 +10,7 @@ import CustomDateMonthYearPicker from '../Components/CustomDateMonthYearPicker';
 import DropDownPicker from '../Components/DropDownPicker';
 import {getLocationAddress} from '../Utilities/Methods';
 import {
+  GENDER_LIST,
   IDENFY_STATUS,
   IDENFY_STATUS_MESSAGE,
   PHONE_REGEX,
@@ -42,29 +43,6 @@ import {StartIdenfyVerification} from '../Hooks/IdenfyHooks';
 
 var isMount = true;
 
-const validationSchema = yup.object().shape({
-  firstName: yup
-    .string()
-    .min(2, 'Enter valid First name')
-    .max(20, 'First name is too long')
-    .required('First name is Required'),
-  lastName: yup
-    .string()
-    .min(1, 'Enter Valid Last name')
-    .max(20, 'Last name is too long')
-    .required('Last name is Required'),
-  dob: yup.string().required('Date of birth is required'),
-  mobileNumber: yup
-    .string()
-    .matches(PHONE_REGEX, 'Invalid Phone number')
-    .required('Phone number is Required'),
-  email: yup.string().email('Enter valid Email').required('Email is Required'),
-  location: yup
-    .string()
-    .min(2, 'Enter Valid location')
-    .required('Location is Required'),
-});
-
 const ClaimAccount = ({route}) => {
   const dispatch = useDispatch();
   const unclaimedAccountsList = useUnclaimedAccountsList();
@@ -87,6 +65,35 @@ const ClaimAccount = ({route}) => {
     message: '',
   });
 
+  const validationSchema = yup.object().shape({
+    firstName: yup
+      .string()
+      .min(2, 'Enter valid First name')
+      .max(20, 'First name is too long')
+      .required('First name is Required'),
+    lastName: yup
+      .string()
+      .min(1, 'Enter Valid Last name')
+      .max(20, 'Last name is too long')
+      .required('Last name is Required'),
+    dob: yup.string().required('Date of birth is required'),
+    sex: isVerifyAccount
+      ? yup.object().nullable().required('Required')
+      : yup.object().nullable(),
+    mobileNumber: yup
+      .string()
+      .matches(PHONE_REGEX, 'Invalid Phone number')
+      .required('Phone number is Required'),
+    email: yup
+      .string()
+      .email('Enter valid Email')
+      .required('Email is Required'),
+    location: yup
+      .string()
+      .min(2, 'Enter Valid location')
+      .required('Location is Required'),
+  });
+
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
     useFormik({
       initialValues: {
@@ -96,6 +103,7 @@ const ClaimAccount = ({route}) => {
         mobileNumber: profile?.mobile ?? '',
         email: profile?.email_id ?? '',
         location: profile?.geo_location ?? '',
+        sex: GENDER_LIST.find(item => item.id === profile?.gender) ?? null,
       },
       validationSchema: validationSchema,
       onSubmit: values => {
@@ -237,7 +245,6 @@ const ClaimAccount = ({route}) => {
     setisLoading(true);
     StartIdenfyVerification(token)
       .then(response => {
-        console.log(response, 'RESPONSEEE');
         navigation.goBack();
         HandleAutomatedVerify(response);
       })
@@ -260,6 +267,7 @@ const ClaimAccount = ({route}) => {
     formData.append('telephone', values.mobileNumber.toString().trim());
     formData.append('email_id', values.email.trim());
     formData.append('dob', values.dob);
+    formData.append('gender', values.sex.id);
     formData.append('location', values.location);
     verifyAccountService(formData)
       .then(res => {
@@ -358,6 +366,10 @@ const ClaimAccount = ({route}) => {
             title="First Name"
             placeHolder="Enter your First Name"
             value={values.firstName}
+            isEditable={profile?.account_verify_type === 0}
+            textColor={
+              profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
+            }
             errorText={
               errors.firstName && touched.firstName ? errors.firstName : ''
             }
@@ -367,11 +379,32 @@ const ClaimAccount = ({route}) => {
             title="Last Name"
             placeHolder="Enter your Last Name"
             value={values.lastName}
+            isEditable={profile?.account_verify_type === 0}
+            textColor={
+              profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
+            }
             errorText={
               errors.lastName && touched.lastName ? errors.lastName : ''
             }
             onChangeText={handleChange('lastName')}
           />
+          {isVerifyAccount && (
+            <DropDownPicker
+              dataList={GENDER_LIST}
+              title={'Sex'}
+              errorText={touched.sex && errors.sex}
+              value={values.sex}
+              isDisabled={profile?.account_verify_type !== 0}
+              isEditable={profile?.account_verify_type === 0}
+              fieldName="name"
+              onSelectItem={item => {
+                setFieldValue('sex', item);
+              }}
+              titlePaddingVertical={3}
+              inputContainerMarginVertical={0}
+              placeHolderText={'Select Sex'}
+            />
+          )}
           <TextBox
             title="Phone Number"
             placeHolder="Enter your Phone Number"
@@ -382,6 +415,16 @@ const ClaimAccount = ({route}) => {
                 : ''
             }
             onChangeText={handleChange('mobileNumber')}
+            isEditable={profile?.is_mobile_no_verified !== 1}
+            textColor={
+              profile?.is_mobile_no_verified === 1 ? COLORS.grey : COLORS.black
+            }
+            isEnableAlternateIconOfSecureIcon={
+              profile?.is_mobile_no_verified === 1
+            }
+            alternateIconProps={{
+              icon: 'verified_sign',
+            }}
           />
           <TextBox
             title="Email"
@@ -389,11 +432,22 @@ const ClaimAccount = ({route}) => {
             value={values.email}
             errorText={errors.email && touched.email ? errors.email : ''}
             onChangeText={handleChange('email')}
+            isEditable={profile?.is_email_id_verified !== 1}
+            textColor={
+              profile?.is_email_id_verified === 1 ? COLORS.grey : COLORS.black
+            }
+            isEnableAlternateIconOfSecureIcon={
+              profile?.is_email_id_verified === 1
+            }
+            alternateIconProps={{
+              icon: 'verified_sign',
+            }}
           />
           <CustomDateMonthYearPicker
             value={values.dob}
             errorText={errors.dob && touched.dob ? errors.dob : ''}
             onSelect={handleChange('dob')}
+            isDisabled={profile?.account_verify_type !== 0}
             onSelectDateMonthYearError={() => {
               if (isMount) {
                 setFieldValue('dob', '');

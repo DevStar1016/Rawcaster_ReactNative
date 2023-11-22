@@ -972,6 +972,7 @@ function NuggetActionsOverlay({
                   numberOfLines={numberOfLines}
                   isReadmoreEnable={true}
                   onPressUrl={onPressUrl}
+                  isChangeReadMore={false}
                   onReadMore={val => {
                     if (onReadMore) {
                       onReadMore({

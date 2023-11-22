@@ -52,8 +52,11 @@ const ForgotPassword = () => {
     forgotPasswordService(formData)
       .then(res => {
         if (res.data.status === 1) {
+          console.log(res.data, 'GHGHGH');
           navigation.navigate('ResetPasswordOTP', {
+            msg: res.data.msg,
             otp_ref_id: res.data.otp_ref_id,
+            sms_type: res.data.sms_type,
             remaining_seconds: parseInt(res.data.remaining_seconds),
           });
         } else if (res.data.status === 0) {

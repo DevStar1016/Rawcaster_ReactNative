@@ -144,7 +144,6 @@ const EmailPhoneVerification = ({route}) => {
     signupVerifyService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          console.log(res.data);
           if (res.data.group_name) {
             dispatch(
               setIsGroupJoinAlert({

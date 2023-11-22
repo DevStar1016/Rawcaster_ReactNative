@@ -70,8 +70,6 @@ const OTPInput = ({
   };
 
   const handleOtpChange = (value: string, index: number) => {
-    console.log(value, 'value');
-
     seterrorString('');
     let isInvalid = false;
     value.split('').map(val => {
@@ -138,7 +136,6 @@ const OTPInput = ({
           numberOfDigits={numberOfDigits}
           onResult={value => {
             setotp(value);
-            console.log(value);
           }}
         />
       )}
@@ -183,6 +180,7 @@ const OTPInput = ({
           }}
           onPress={() => {
             if (timer === 0 && onResendOtp) {
+              setotp(['', '', '', '', '', '']);
               onResendOtp();
             }
           }}>

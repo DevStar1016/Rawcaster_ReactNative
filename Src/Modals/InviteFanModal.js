@@ -51,7 +51,6 @@ const InviteFanModal = ({setModal}) => {
       formData.append('token', token);
       formData.append('email_id', JSON.stringify(emailList));
       formData.append('auth_code', getAuthCode(token));
-      console.log(formData);
       inviteToRawcasterService(formData)
         .then(response => {
           if (response.data.status === 1) {
