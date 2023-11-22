@@ -402,7 +402,7 @@ const MainStack = () => {
             positiveButtonText={
               premiumALert.isModifyButton && premiumALert.SuccessButtonText
                 ? premiumALert.SuccessButtonText
-                : 'Upgrade'
+                : 'Upgrade Now'
             }
             isEnableNegativeButton={
               premiumALert.isModifyButton &&

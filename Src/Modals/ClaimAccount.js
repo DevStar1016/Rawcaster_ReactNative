@@ -13,6 +13,7 @@ import {
   GENDER_LIST,
   IDENFY_STATUS,
   IDENFY_STATUS_MESSAGE,
+  NAME_REGEX,
   PHONE_REGEX,
   RAWCASTER_DEFAULT_MESSAGE,
 } from '../Utilities/Constants';
@@ -68,30 +69,32 @@ const ClaimAccount = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
-      .min(2, 'Enter valid First name')
+      .min(2, 'Enter valid first name')
       .max(20, 'First name is too long')
-      .required('First name is Required'),
+      .matches(NAME_REGEX, 'Enter valid first name')
+      .required('First name is required'),
     lastName: yup
       .string()
-      .min(1, 'Enter Valid Last name')
+      .min(1, 'Enter valid last name')
       .max(20, 'Last name is too long')
-      .required('Last name is Required'),
+      .matches(NAME_REGEX, 'Enter valid last name')
+      .required('Last name is required'),
     dob: yup.string().required('Date of birth is required'),
     sex: isVerifyAccount
       ? yup.object().nullable().required('Required')
       : yup.object().nullable(),
     mobileNumber: yup
       .string()
-      .matches(PHONE_REGEX, 'Invalid Phone number')
-      .required('Phone number is Required'),
+      .matches(PHONE_REGEX, 'Invalid phone number')
+      .required('Phone number is required'),
     email: yup
       .string()
-      .email('Enter valid Email')
-      .required('Email is Required'),
+      .email('Enter valid email')
+      .required('Email is required'),
     location: yup
       .string()
-      .min(2, 'Enter Valid location')
-      .required('Location is Required'),
+      .min(2, 'Enter valid location')
+      .required('Location is required'),
   });
 
   const {handleSubmit, handleChange, values, errors, touched, setFieldValue} =
@@ -219,6 +222,7 @@ const ClaimAccount = ({route}) => {
         HandleDisplayMessage(IDENFY_STATUS_MESSAGE.INACTIVE);
         break;
       default:
+        navigation.goBack();
         Toast.fail(IDENFY_STATUS_MESSAGE.OTHERS);
         break;
     }
@@ -236,6 +240,7 @@ const ClaimAccount = ({route}) => {
         HandleDisplayMessage(IDENFY_STATUS_MESSAGE.UNVERIFIED);
         break;
       default:
+        navigation.goBack();
         Toast.fail(IDENFY_STATUS_MESSAGE.OTHERS);
         break;
     }
@@ -245,7 +250,7 @@ const ClaimAccount = ({route}) => {
     setisLoading(true);
     StartIdenfyVerification(token)
       .then(response => {
-        navigation.goBack();
+        // navigation.goBack();
         HandleAutomatedVerify(response);
       })
       .catch(error => {

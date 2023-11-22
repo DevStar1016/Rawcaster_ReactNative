@@ -17,7 +17,7 @@ import {useProfile, useToken} from '../../Utilities/StoreData';
 import ImagePicker from 'react-native-image-crop-picker';
 import TextBox from '../../Components/TextBox';
 import DropDownPicker from '../../Components/DropDownPicker';
-import {GENDER_LIST, PHONE_REGEX} from '../../Utilities/Constants';
+import {GENDER_LIST, NAME_REGEX, PHONE_REGEX} from '../../Utilities/Constants';
 import CustomDateMonthYearPicker from '../../Components/CustomDateMonthYearPicker';
 import SubmitButton from '../../Components/SubmitButton';
 import PoliciesFooter from '../../Components/PoliciesFooter';
@@ -63,13 +63,15 @@ const EditProfile = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
-      .min(2, 'Enter valid First name')
+      .min(2, 'Enter valid first name')
       .max(20, 'First name is too long')
+      .matches(NAME_REGEX, 'Enter valid first name')
       .required('Required'),
     lastName: yup
       .string()
-      .min(1, 'Enter Valid Last name')
+      .min(1, 'Enter Valid last name')
       .max(20, 'Last name is too long')
+      .matches(NAME_REGEX, 'Enter valid last name')
       .required('Required'),
     displayName: yup
       .string()

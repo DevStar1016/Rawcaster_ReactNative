@@ -209,9 +209,9 @@ const ProfileNameBioContainer = ({
               }}>
               {/* {getSlicedText(profile?.name, 50)} */}
               {profile?.name}
-              {profile?.account_verify_type === 2 && (
+              {/* {profile?.account_verify_type === 2 && (
                 <SVGIcon icon="diamond_verified" height={15} width={15} />
-              )}
+              )} */}
             </StyledText>
           </View>
 

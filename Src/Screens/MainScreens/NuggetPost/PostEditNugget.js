@@ -178,7 +178,6 @@ const PostEditNugget = ({route}) => {
       value: '',
     },
   ]);
-  console.log(preContent);
 
   useEffect(() => {
     const backAction = () => {
@@ -568,19 +567,21 @@ const PostEditNugget = ({route}) => {
           ? [{...selectedMediaList}]
           : [...selectedMediaList]; // when edit multiple option false. so the mediaList is as an object
 
-        if (isMount) {
-          setloadingData({
-            status: true,
-            text: 'Selected media being compressed',
-          });
-        }
-        let mediaType = type === 'photo' ? 1 : 2;
+        // if (isMount) {
+        //   setloadingData({
+        //     status: true,
+        //     text: 'Selected media being compressed',
+        //   });
+        // }
+        // let mediaType = type === 'photo' ? 1 : 2;
         Promise.all(
           mediaList.map(async item => {
-            let mediaPath = await compressMedia(mediaType, item.path);
+            // let mediaPath = await compressMedia(mediaType, item.path);
             return {
-              uri: getUrlWithFilePrefix(mediaPath),
-              name: getFileName(mediaPath),
+              // uri: getUrlWithFilePrefix(mediaPath),
+              // name: getFileName(mediaPath),
+              uri: getUrlWithFilePrefix(item.path),
+              name: getFileName(item.path),
               type: item.mime,
               duration: item.duration,
             };
@@ -710,34 +711,38 @@ const PostEditNugget = ({route}) => {
    * @returns None
    */
   async function onSelectMediaFromCamera(mediaItem) {
-    let mediaType = mediaItem.type.includes('image') ? 1 : 2;
-    setloadingData({
-      status: true,
-      text: 'Media being compressed',
-    });
-    let mediaPath = await compressMedia(mediaType, mediaItem.uri);
+    // let mediaType = mediaItem.type.includes('image') ? 1 : 2;
+    // setloadingData({
+    //   status: true,
+    //   text: 'Media being compressed',
+    // });
+    // let mediaPath = await compressMedia(mediaType, mediaItem.uri);
     if (nugget) {
       setselectedMediaList([
         {
-          name: getFileName(mediaPath),
+          // name: getFileName(mediaPath),
+          name: getFileName(mediaItem.uri),
           type: mediaItem.type,
-          uri: mediaPath,
+          // uri: mediaPath,
+          uri: mediaItem.uri,
         },
       ]);
     } else {
       setselectedMediaList(pre => [
         ...pre,
         {
-          name: getFileName(mediaPath),
+          // name: getFileName(mediaPath),
+          name: getFileName(mediaItem.uri),
           type: mediaItem.type,
-          uri: mediaPath,
+          // uri: mediaPath,
+          uri: mediaItem.uri,
         },
       ]);
     }
-    setloadingData({
-      status: false,
-      text: '',
-    });
+    // setloadingData({
+    //   status: false,
+    //   text: '',
+    // });
   }
 
   /**

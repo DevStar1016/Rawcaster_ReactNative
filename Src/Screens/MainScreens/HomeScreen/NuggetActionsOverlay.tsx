@@ -363,6 +363,21 @@ function NuggetActionsOverlay({
         result.push({...downloadOption});
       }
     }
+
+    let isHaveShareLink = [...result].find(item => item.id === 5);
+    if (isHaveShareLink) {
+      if (nugget.share_type !== 1) {
+        result = [...result].filter(item => item.id !== 5);
+      }
+    } else {
+      if (nugget.share_type === 1) {
+        const shareLinkOption = [...NUGGET_ACTIONS].find(item => item.id === 5);
+        if (shareLinkOption) {
+          result.push({...shareLinkOption});
+        }
+      }
+    }
+
     return result;
   };
 
