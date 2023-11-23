@@ -1,21 +1,21 @@
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import moment from 'moment';
-import {PermissionsAndroid, Platform} from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import Geolocation from 'react-native-geolocation-service';
 import Geocode from 'react-geocode';
 import sha1 from 'sha1';
 import Compressor from 'react-native-compressor';
-import {SALT_KEY} from '../Services/ServiceConstants';
-import {clearAuthReduxData, setToken} from '../Store/Slices/AuthSlice';
+import { SALT_KEY } from '../Services/ServiceConstants';
+import { clearAuthReduxData, setToken } from '../Store/Slices/AuthSlice';
 import momentTZ from 'moment-timezone';
-import {ISLOGIN} from './EncryptedStoreConstants';
-import {decode as htmldecode} from 'html-entities';
-import {getTimezone} from 'countries-and-timezones';
-import {clearHomeReduxData} from '../Store/Slices/HomeSlice';
-import {clearNuggetsListReduxData} from '../Store/Slices/NuggetsListSlice';
-import {clearNuggetActionsReduxData} from '../Store/Slices/NuggetActionsSlice';
-import {clearUtilityReduxData} from '../Store/Slices/UtilitySlice';
+import { ISLOGIN } from './EncryptedStoreConstants';
+import { decode as htmldecode } from 'html-entities';
+import { getTimezone } from 'countries-and-timezones';
+import { clearHomeReduxData } from '../Store/Slices/HomeSlice';
+import { clearNuggetsListReduxData } from '../Store/Slices/NuggetsListSlice';
+import { clearNuggetActionsReduxData } from '../Store/Slices/NuggetActionsSlice';
+import { clearUtilityReduxData } from '../Store/Slices/UtilitySlice';
 
 /**
  * Generates an authentication code by hashing the given value with a salt key.
@@ -40,7 +40,7 @@ export const storeToken = async (token, dispatch) => {
   try {
     await EncryptedStorage.setItem(ISLOGIN, token);
     dispatch(setToken(token));
-  } catch (error) {}
+  } catch (error) { }
 };
 
 /**
@@ -62,7 +62,7 @@ export const removeToken = async dispatch => {
     if (isGoogleSignedIn) {
       await GoogleSignin.signOut();
     }
-  } catch (error) {}
+  } catch (error) { }
 };
 
 /**
@@ -94,7 +94,7 @@ export const getSlicedText = (
  * @param {number} [options.decreasedYears=0] - The number of years to decrease from the current year.
  * @returns {number[]} An array of years.
  */
-export function getyears({startingYear = 1900, decreasedYears = 0}) {
+export function getyears({ startingYear = 1900, decreasedYears = 0 }) {
   let thisYear = new Date().getFullYear() - decreasedYears;
   const offset = thisYear - startingYear;
   let allYears = [];
@@ -231,7 +231,7 @@ const getLatitudeLongitude = async () => {
           error => {
             reject(error);
           },
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
         );
       } else {
         reject('Permission not granted');
@@ -412,7 +412,7 @@ export const compressMedia = async (mediaType, mediaPath) => {
       {
         compressionMethod: 'auto',
       },
-      progress => {},
+      progress => { },
     );
   }
 
@@ -437,7 +437,7 @@ export const getTimezoneName = str => {
   let index;
   try {
     index = str.indexOf('(');
-  } catch (error) {}
+  } catch (error) { }
   if (index > -1) return str.substr(0, index - 1).trim();
   else return str;
 };
@@ -485,7 +485,7 @@ export const getUtcToSystemTime = dateTime => {
  * @param {string} moment.tz.guess() - The guessed timezone string.
  * @returns The UTC offset string for the current timezone.
  */
-export const {utcOffsetStr} = getTimezone(moment.tz.guess());
+export const { utcOffsetStr } = getTimezone(moment.tz.guess());
 
 /**
  * Converts a given time string to a formatted display event time.
@@ -711,4 +711,31 @@ export const getLinkInfo = val => {
   } else {
     return null;
   }
+};
+
+
+/**
+ * Sorts the attendeelist in chime talkshow meeting making host and cohosts on the top of the list
+ * and nuggets list.
+ * @param {attendiFirst} attendiFirst - Attendi to compare.
+ * @param {attendiSecond} attendiSecond - Attendi to compare.
+ * @returns {Object} - The formatted data object for the Redux store.
+ */
+export const sorAttendeesList = (attendiFirst, attendiSecond) => {
+  // The host should come first
+  if (attendiFirst.isHost) {
+    return -1;
+  } else if (attendiSecond.isHost) {
+    return 1;
+  }
+
+  // Co-hosts come next
+  if (attendiFirst.isCoHost && !attendiSecond.isHost) {
+    return -1;
+  } else if (attendiSecond.isCoHost && !attendiFirst.isHost) {
+    return 1;
+  }
+
+  // For other roles, maintain the order
+  return 0;
 };

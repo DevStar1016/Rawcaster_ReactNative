@@ -29,14 +29,14 @@ var timer: any = undefined;
 const EventsPublic = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const meet_invite_ref_id = useSelector((state)=>state.meeting_invite_refId.value);
+  const meet_invite_ref_id = useSelector((state)=>state.meeting_invite_refId.meeting_ref_id);
   console.log('meeeee',meet_invite_ref_id);
 
-  const [profile,setProfile]= useState(null);
+  //const [profile,setProfile]= useState<any>(null);
  
   
 
-  //const profile = useProfile();
+  const profile = useProfile();
   const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [showPublicCredentailsModal,setShowPublicCredentialsModal]= useState(false);
@@ -91,19 +91,26 @@ const EventsPublic = ({route}) => {
         console.log('response:', response.data);
         dispatch(setMeetInviteRefId(null))
         if (response.data.status === 1) {
-            let user = {...response.data.user}
+            var user  = {...response.data.user}
             user.user_ref_id = (Math.floor(Math.random() * (100000 - 1000) + 1000)).toString();
             user.userId = 1234
-            setProfile(user);
+           // setProfile(user);
+            console.log('profile_set',user);
             dispatch(setMyProfile(user));
-            setstartEventDetails(response.data.event);
-            if (response.data.event.waiting_room === 1) {
-              setisOpenHostingScreen(true);
-            } else {
-              handleStartHosting(response.data.event);
-              setisLoading(true);
-              handleMeetingRequestingTimeout();
-            }
+            setTimeout(() => {
+              setstartEventDetails(response.data.event);
+           
+              if (response.data.event.waiting_room === 1) {
+                setisOpenHostingScreen(true);
+              } else {
+                handleStartHosting(response.data.event,user);
+                setisLoading(true);
+                handleMeetingRequestingTimeout();
+              }
+            }, 2000);
+            
+           
+           
       }
     } catch (error) {
       // Handle any errors
@@ -139,7 +146,7 @@ const EventsPublic = ({route}) => {
     chimeSocketListen.on(
       ChimeSocketEvents.joinRequestAnswer,
       (joinedData: MeetingJoinedDataProp) => {
-        console.log('join_answer',joinedData);
+        console.log('join_answer_public',joinedData);
         if (isMount) {
           if (isRequestingMeeting) {
             setisRequestingMeeting(false);
@@ -157,12 +164,17 @@ const EventsPublic = ({route}) => {
             Toast.fail(joinedData?.joinInfo?.message ?? 'Something went wrong');
           }
         } else {
+          if(joinedData.statusCode === 0){
+            Toast.fail(joinedData?.message ?? 'Something went wrong');
+
+          }
+          else{
           if (isMount) {
             setmeetingJoiningStatus({
               text: joinedData.message,
               statusCode: joinedData.statusCode,
             });
-          }
+          }}
         }
       },
     );
@@ -182,11 +194,11 @@ const EventsPublic = ({route}) => {
    * @param {any} eventItem - The event item object.
    * @returns None
    */
-  const handleStartHosting = (eventItem: any) => {
+  const handleStartHosting = (eventItem: any,user) => {
     if (isMount && eventItem.waiting_room === 1) {
       setmeetingJoiningStatus({
         text: `Please wait for a moment ${
-          eventItem.original_user_id !== profile.user_id
+          eventItem.original_user_id !== user.user_id
             ? 'while host approves your request'
             : ''
         }.`,
@@ -196,20 +208,26 @@ const EventsPublic = ({route}) => {
         handleMeetingRequestingTimeout();
       }
     }
-    if (profile?.user_id !== eventItem.original_user_id) {
-        console.log('joning_meeting_id_now '+eventItem.reference_id +'user_id '+profile?.user_id);
+    if (user?.user_id !== eventItem.original_user_id) {
+        console.log('joning_meeting_id_now '+eventItem.reference_id +'user_id '+user?.user_id);
       joinMeetingRoom({
         refId: eventItem.reference_id,
       });
+      setisRequestingMeeting(true);
     }
-    joinRequest({
-      refId: eventItem.reference_id,
-      userId: profile?.user_id,
-      image: profile?.profile_image,
-      name: profile?.name,
-      userRefId: profile?.user_ref_id
-
-    });
+   
+      console.log('profile_now',user);
+      joinRequest({
+        refId: eventItem.reference_id,
+        userId: user?.user_id,
+        image: user?.profile_image,
+        name: user?.name,
+        userRefId: user?.user_ref_id
+  
+      });
+      
+   
+   
   };
 
   /**
@@ -281,7 +299,7 @@ const EventsPublic = ({route}) => {
             if (eventDetails.waiting_room === 1) {
               setisOpenHostingScreen(true);
             } else {
-              handleStartHosting(eventDetails);
+              handleStartHosting(eventDetails,profile);
               setisLoading(true);
               handleMeetingRequestingTimeout();
             }
@@ -299,7 +317,7 @@ const EventsPublic = ({route}) => {
         <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
           <StartJoinEventWaitingRoom
             eventItem={startEventDetails}
-            onStartHosting={handleStartHosting}
+            onStartHosting={(event)=>handleStartHosting(event,profile)}
             onClose={onCloseWaitingRoom}
             meetingJoiningStatus={meetingJoiningStatus}
             isRequestingMeeting={isRequestingMeeting}

@@ -139,6 +139,14 @@ export const enableAudio = (messageData: EnableDisableMessageData) => {
 
 /**
  *
+ * @param messageData allowToSpeakData Props
+ */
+export const allToSpeak = (messageData: EnableDisableMessageData) => {
+  sendChimeSocketMessage(messageData, ChimeSocketEvents.allowToSpeak);
+};
+
+/**
+ *
  * @param messageData EnableDisableMessageData Props
  */
 export const sendEmojee = (messageData: SendEmojiData) => {

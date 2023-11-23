@@ -41,7 +41,9 @@ export const ChimeSocketEvents: ChimeEventsProps = {
   removeHost: 'removeHost',
   removeHostAnswer: 'removeHostAnswer',
   sendEmojee:'postReaction',
-  emojeeAnswer:'postReactionAnswer'
+  emojeeAnswer:'postReactionAnswer',
+  allowToSpeakAnswer: 'allowToSpeakAnswer',
+  allowToSpeak: 'allowToSpeak'
 
 };
 
