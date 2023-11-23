@@ -40,6 +40,7 @@ import {
     userLeft,
     meetingEndAlert,
     sendEmojee,
+    allToSpeak,
   } from '../../Services/ChimeSocket/ChimeSocketRequests';
   import {useProfile} from '../../Utilities/StoreData';
   import Toast from '../Toast';
@@ -65,6 +66,7 @@ import MeetingActionsContainerTalkshow from './MeetingActionsContainerTalkshow';
 import ParticipantsListTalkshow from './ParticipantsListTalkshow';
 import CustomBottomSheetModalTalkshow from '../CustomBottomSheetModalTalkshow';
 import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
+import { sorAttendeesList } from '../../Utilities/Methods';
   
   export type MeetingSettingProp = {
     id: number;
@@ -220,6 +222,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
     const renameUserModalRef = useRef<BottomSheetModal>();
   
     const [containerHeight, setcontainerHeight] = useState(0);
+    const [allowedToSpeak, setAllowedToSpeak] = useState(false);
     const [selectedUserItem, setselectedUserItem] = useState<
       UserDataProp | UserVideoItemDetailsProp | undefined
     >(undefined);
@@ -676,6 +679,29 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
       chimeSocketListen.off(ChimeSocketEvents.removeHostAnswer);
     };
   }, []);
+
+   // Listen  AllowToSpeak  Received Here - Socket
+   useEffect(() => {
+    chimeSocketListen.on(
+      ChimeSocketEvents.allowToSpeakAnswer,
+      (coHostUserData: MakeRemoveHostDataProp) => {
+        console.log('allow_to_spean_answer ' +getSelfUserId(),coHostUserData);
+       // handleRemoveHost(coHostUserData.updatedUser.userId);
+       if(coHostUserData.updatedUser.userId === getSelfUserId()){
+        setAllowedToSpeak(coHostUserData.status);
+        if(coHostUserData.status){
+          triggerToast(`Host requests you to unmute your microphone`);
+        }else{
+          Meeting.setMute(true);
+
+        }
+       }
+      },
+    );
+    return () => {
+      chimeSocketListen.off(ChimeSocketEvents.allowToSpeakAnswer);
+    };
+  }, []);
   
    // const getHostUserId = () => profile?.user_id;
     const getHostUserId = () => ([...usersList].find((item:UserDataProp)=>item.isHost))?.userId;
@@ -774,7 +800,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
         } else {
           tempUsersList[ind] = {...userData};
         }
-        return [...tempUsersList];
+        return [...tempUsersList.sort(sorAttendeesList)];
       });
     };
   
@@ -873,7 +899,8 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
           if (ind !== -1) {
             tempUsersList[ind] = {...tempUsersList[ind], isCoHost:true};
           }
-          return [...tempUsersList];
+
+          return [...tempUsersList.sort(sorAttendeesList)];
         });
       }
     };
@@ -889,7 +916,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
           if (ind !== -1) {
             tempUsersList[ind] = {...tempUsersList[ind], isCoHost:false};
           }
-          return [...tempUsersList];
+          return [...tempUsersList.sort(sorAttendeesList)];
         });
       }
     };
@@ -937,7 +964,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
      * @returns None
      */
     const onJoinAttendee = (attendeeId: string, userRefId: string) => {
-      console.log('before mount',isMount);
+      console.log('before mount',data);
       if (isMount) {
         setdata(pre => {
           let tempAttendeesList = [...pre.attendees];
@@ -956,6 +983,8 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
               tempAttendeesList = [...tempAttendeesList, {attendeeId, userRefId}];
             }
           }
+          
+          
           
           return {
             ...pre,
@@ -1244,6 +1273,8 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
       }
       return false;
     };
+
+    
   
     /**
      * Handles the action of hiding the toast message.
@@ -1713,7 +1744,11 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
               if(isCoHost){
                 Meeting.setMute(!getIsSelfMuted());
               }else{
-              triggerToast('Your audio disabled by host');
+             // triggerToast('Your audio disabled by host');
+              Meeting.setMute(!getIsSelfMuted());
+              if(!getIsSelfMuted()){
+                setAllowedToSpeak(false);
+              }
               }
             } else {
               console.log('i am here ok by saqlain');
@@ -1734,7 +1769,8 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
         }
       } else {
         if (getSelfUserId() === getHostUserId()) {
-          enableAudio({
+
+          allToSpeak({
             hostId: getHostUserId(),
             refId: meetingSetting.ref_id,
             status: requestStatus,
@@ -2137,6 +2173,8 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
             onChangeVideoStatus={() => {
               onPressVideo(getSelfUserId(), !data.selfVideoEnabled);
             }}
+            videoButtonVisible={isCoHost||getHostUserId() === getSelfUserId()}
+            audioButtonVisible={(isCoHost||getHostUserId() === getSelfUserId())||allowedToSpeak}
             onPressEnd={() => {
               onExitEndMeeting(getHostUserId() === getSelfUserId()?true:false);
             }}
@@ -2179,6 +2217,7 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
           <ParticipantsListTalkshow
             //isCoHost={getIfCoHost()}
             isCoHost={isCoHost}
+            allowedToSpeak={allowedToSpeak}
             onClose={handleCloseParticipantsModal}
             hostUserId={getHostUserId()}
             selfUserId={getSelfUserId()}
@@ -2380,11 +2419,17 @@ import MeetingMoreOptionsTalkshow from './MeetingMoreOptionsTalkshow';
             }}
             userData={selectedUserItem}
             onClose={handleCloseUserOptionsModal}
-            visibleMenuIds={[
+            visibleMenuIds={(allowedToSpeak || isCoHost|| getSelfUserId()===getHostUserId())?[
               'rename',
               'in_call_message',
               'enable_disable_audio',
               //'enable_disable_video',
+              'raise_hand',
+              'remove_user',
+              'make_co_host',
+            ]:[
+              'rename',
+              'in_call_message',
               'raise_hand',
               'remove_user',
               'make_co_host',

@@ -21,6 +21,8 @@ type Props = {
   isVisibleRaiseHand?: boolean;
   eventType: number;
   participantsRequestCount: number;
+  videoButtonVisible:boolean;
+  audioButtonVisible:boolean;
 };
 
 type ActionButtonProps = {
@@ -42,6 +44,8 @@ const MeetingActionsContainerTalkshow = ({
   isHandRaised,
   isVisibleRaiseHand = true,
   participantsRequestCount = 0,
+  videoButtonVisible = false,
+  audioButtonVisible = false,
   onPressEnd,
   eventType,
 }: Props) => {
@@ -108,6 +112,7 @@ const MeetingActionsContainerTalkshow = ({
           paddingBottom: 10,
         },
       ]}>
+    { audioButtonVisible && (    
       <ActionButton
         text={isMuted ? 'Un Mute' : 'Mute'}
         icon={isMuted ? 'mic_off_white' : 'mic_white'}
@@ -117,8 +122,9 @@ const MeetingActionsContainerTalkshow = ({
             ? COLORS.secondary
             : COLORS.transparentDimColor
         }
-      />
-      {/* <ActionButton
+      />)}
+      { videoButtonVisible && (
+      <ActionButton
         text={isVideoEnabled ? 'Stop Video' : 'Start Video'}
         icon={isVideoEnabled ? 'video_call_white' : 'video_disabled_white'}
         onPress={onChangeVideoStatus}
@@ -127,7 +133,7 @@ const MeetingActionsContainerTalkshow = ({
             ? COLORS.secondary
             : COLORS.transparentDimColor
         }
-      /> */}
+      />)}
       {eventType === EVENT_TYPE.talkshow && (
         <ActionButton
           text="Stop"

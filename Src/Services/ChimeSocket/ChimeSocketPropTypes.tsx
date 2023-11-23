@@ -36,6 +36,8 @@ export type ChimeEventsType =
   |  'joinEventRoom'
   |  'postReaction'
   |'postReactionAnswer'
+  |'allowToSpeak'
+  |'allowToSpeakAnswer'
 
 
 
@@ -75,6 +77,8 @@ export type ChimeEventsProps = {
   makeHostAnswer: 'makeHostAnswer';
   removeHost: 'removeHost';
   removeHostAnswer: 'removeHostAnswer';
+  allowToSpeakAnswer: 'allowToSpeakAnswer';
+  allowToSpeak: 'allowToSpeak';
   joinEventRoom:'joinEventRoom',
   sendEmojee:'postReaction',
   emojeeAnswer:'postReactionAnswer',

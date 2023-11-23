@@ -12,7 +12,7 @@ import { Linking } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ChimeSocketConnectionListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketConnectionListener';
 import { useDispatch } from 'react-redux';
-import { setMeetInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
+import { setMeetInviteRefId, setTalkShowInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
@@ -118,11 +118,11 @@ const RootStack = () => {
             const ref_id = url.replace('https://dev.rawcaster.com/join/talkshow/', '').trim();
             console.log('ref_id', ref_id);
             if (currentRout.name == 'RootStack') {
-              dispatch(setMeetInviteRefId(ref_id));
+              dispatch(setTalkShowInviteRefId(ref_id));
 
             } else {
               setTimeout(() => {
-                dispatch(setMeetInviteRefId(ref_id));
+                dispatch(setTalkShowInviteRefId(ref_id));
               }, 4000);
             }
             navigation.navigate('DashboardProfileTopTabNavigation', {

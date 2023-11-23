@@ -656,7 +656,7 @@ useEffect(() => {
   return () => {
     chimeSocketListen.off(ChimeSocketEvents.endMeetingAlertAnswer);
   };
-}, []);
+}, [isMount,data]);
  // Listen  Make Co Host Received Here - Socket
  useEffect(() => {
   chimeSocketListen.on(
