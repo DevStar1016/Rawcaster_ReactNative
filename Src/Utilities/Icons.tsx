@@ -184,6 +184,7 @@ import FilterLineBlackIcon from '../Assets/Svg/filter_line_black.svg';
 import VerifiedSignIcon from '../Assets/Svg/verified_sign.svg';
 import CloseBlackIcon from '../Assets/Svg/close_black.svg';
 import ClaimUserIcon from '../Assets/Svg/claim_user.svg';
+import UserUnverifiedIcon from '../Assets/Svg/user_unverified.svg';
 import TwitterXlogo from '../Assets/Svg/twitter_x_logo.svg';
 import ValuedIcon from '../Assets/Svg/Badges/MemberShip/valued.svg';
 import PremiumIcon from '../Assets/Svg/Badges/MemberShip/premium.svg';
@@ -339,6 +340,7 @@ export type IconType =
   | 'translation_white'
   | 'close_black'
   | 'claim_user'
+  | 'user_unverified'
   | 'menu_vertical_white'
   | 'open_ai_white'
   | 'mic_fill_secondary'
@@ -536,6 +538,7 @@ export const ICONS = {
   verified_sign: VerifiedSignIcon,
   close_black: CloseBlackIcon,
   claim_user: ClaimUserIcon,
+  user_unverified: UserUnverifiedIcon,
   menu_vertical_white: MenuVerticalWhiteIcon,
   open_ai_white: OpenAIWhiteIcon,
   stop_fill__white: StopFillWhiteIcon,

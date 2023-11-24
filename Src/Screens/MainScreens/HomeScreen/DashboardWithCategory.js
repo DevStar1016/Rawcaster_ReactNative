@@ -525,6 +525,7 @@ const DashboardWithCategory = ({route}) => {
     dashboardFocused: isFocused,
     isPaused: false,
     isFocused,
+    setisViewableItemSet: setisViewableItemSet,
     ActivecategoryName: ActivecategoryName,
     setisMuted: setisMuted,
     categoryName: categoryName ?? 'forYou',

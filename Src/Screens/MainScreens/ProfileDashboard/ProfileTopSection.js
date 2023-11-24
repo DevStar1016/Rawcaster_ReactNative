@@ -234,8 +234,8 @@ const ProfileTopSection = ({
             } else if (selectedId === 2) {
               onUnfollow();
             } else if (selectedId === 3) {
-              if (myProfile.profile_url) {
-                Clipboard.setString(myProfile.profile_url);
+              if (profile.profile_url) {
+                Clipboard.setString(profile.profile_url);
                 Toast.success('Profile Link Copied');
               }
             }

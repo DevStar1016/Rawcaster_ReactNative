@@ -111,6 +111,7 @@ const PostEditNugget = ({route}) => {
   const [urlMetaData, seturlMetaData] = useState(
     nugget?.metadata ? getMetaDataArrayJSON() : null,
   );
+
   const [oldUrl, setoldUrl] = useState(null);
 
   const [isMediaAbove5Min, setisMediaAbove5Min] = useState(false);
@@ -128,7 +129,7 @@ const PostEditNugget = ({route}) => {
     status: false,
     text: '',
   });
-  const [typedText, settypedText] = useState('');
+  const [typedText, settypedText] = useState(nugget?.content ?? '');
 
   useEffect(() => {
     if (!typedText && focus) {
@@ -215,13 +216,21 @@ const PostEditNugget = ({route}) => {
 
   useEffect(() => {
     if (typedText && typedText.trim()) {
+      // console.log(typedText, 'TYPED TEXT');
+
       const url = getLinkInfo(typedText);
       if (url) {
         if (oldUrl !== url) {
           if (isMount) {
             setoldUrl(url);
           }
-          getUrlMetaDataAPICall(url);
+          if (
+            !nugget?.content ||
+            (nugget?.content &&
+              !nugget?.content?.toLowerCase().includes(typedText.toLowerCase()))
+          ) {
+            getUrlMetaDataAPICall(url);
+          }
         }
       } else {
         if (isMount) {

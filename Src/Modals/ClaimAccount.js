@@ -8,7 +8,11 @@ import {COLORS} from '../Utilities/Colors';
 import TextBox from '../Components/TextBox';
 import CustomDateMonthYearPicker from '../Components/CustomDateMonthYearPicker';
 import DropDownPicker from '../Components/DropDownPicker';
-import {getLocationAddress} from '../Utilities/Methods';
+import {
+  getAuthCode,
+  getLocationAddress,
+  htmlDecodeText,
+} from '../Utilities/Methods';
 import {
   GENDER_LIST,
   IDENFY_STATUS,
@@ -27,6 +31,7 @@ import SubmitButton from '../Components/SubmitButton';
 import Toast from '../Components/Toast';
 import {
   addClaimAccountService,
+  getMyProfileService,
   verifyAccountService,
 } from '../Services/ApiService';
 import {useNavigation} from '@react-navigation/native';
@@ -64,6 +69,7 @@ const ClaimAccount = ({route}) => {
   const [messageBoxData, setmessageBoxData] = useState({
     isOpen: false,
     message: '',
+    icon: 'claim_user',
   });
 
   const validationSchema = yup.object().shape({
@@ -183,6 +189,7 @@ const ClaimAccount = ({route}) => {
           setmessageBoxData({
             isOpen: true,
             message: res.data.msg,
+            icon: 'claim_user',
           });
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
@@ -198,22 +205,59 @@ const ClaimAccount = ({route}) => {
       });
   }
 
-  const HandleDisplayMessage = message => {
+  const HandleDisplayMessage = (message, status = 1) => {
     setmessageBoxData({
       isOpen: true,
       message: message,
+      icon: status === 1 ? 'claim_user' : 'user_unverified',
     });
+  };
+
+  const getMyProfileAPICall = idenfyResponse => {
+    setisLoading(true);
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('auth_code', getAuthCode(token));
+    getMyProfileService(formData)
+      .then(res => {
+        if (res.data.status === 1) {
+          let profile = {...res.data.profile};
+          profile = {
+            ...profile,
+            name: htmlDecodeText(profile?.name),
+            first_name: htmlDecodeText(profile?.first_name),
+            last_name: htmlDecodeText(profile?.last_name),
+            bio_data: htmlDecodeText(profile?.bio_data),
+          };
+
+          dispatch(setMyProfile(profile));
+
+          if (profile.verification_reason) {
+            HandleDisplayMessage(profile.verification_reason, 0);
+          } else {
+            HandleAutomatedVerify(idenfyResponse);
+          }
+        } else if (res.data.status === 0) {
+          Toast.fail(res.data.msg);
+          navigation.goBack();
+        }
+      })
+      .catch(e => {
+        Toast.fail(e.message);
+      })
+      .finally(() => {
+        setisLoading(false);
+      });
   };
 
   const HandleManualVerify = response => {
     switch (response.manualIdentificationStatus) {
       case IDENFY_STATUS.APPROVED:
-        dispatch(setMyProfile({...profile, acc_verify_status: 1}));
+        // dispatch(setMyProfile({...profile, acc_verify_status: 1}));
         HandleDisplayMessage(IDENFY_STATUS_MESSAGE.APPROVED);
-
         break;
       case IDENFY_STATUS.FAILED:
-        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED);
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED, 0);
         break;
       case IDENFY_STATUS.WAITING:
         HandleDisplayMessage(IDENFY_STATUS_MESSAGE.WAITING);
@@ -234,10 +278,10 @@ const ClaimAccount = ({route}) => {
         HandleManualVerify(response);
         break;
       case IDENFY_STATUS.FAILED:
-        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED);
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED, 0);
         break;
       case IDENFY_STATUS.UNVERIFIED:
-        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.UNVERIFIED);
+        HandleDisplayMessage(IDENFY_STATUS_MESSAGE.UNVERIFIED, 0);
         break;
       default:
         navigation.goBack();
@@ -251,13 +295,12 @@ const ClaimAccount = ({route}) => {
     StartIdenfyVerification(token)
       .then(response => {
         // navigation.goBack();
-        HandleAutomatedVerify(response);
+        getMyProfileAPICall(response);
       })
       .catch(error => {
-        console.log(error, 'ERROR');
-      })
-      .finally(() => {
         setisLoading(false);
+        Toast.fail(typeof error == 'string' ? error : error.message);
+        console.log(error, 'ERROR');
       });
   };
   /**
@@ -335,6 +378,7 @@ const ClaimAccount = ({route}) => {
       setmessageBoxData({
         isOpen: false,
         message: '',
+        icon: 'claim_user',
       });
     }
     navigation.goBack();
@@ -546,7 +590,7 @@ const ClaimAccount = ({route}) => {
             closeMessageBox();
           }}
           titleContainerStyle={styles.confirmationTitleContainer}
-          bottomTitleLogo="claim_user"
+          bottomTitleLogo={messageBoxData.icon ?? 'claim_user'}
           bottomTitleLogoProps={{height: 55, width: 55}}
           bottomLogoContainerStyle={{paddingTop: 10}}
           titleTextStyle={{color: COLORS.white}}

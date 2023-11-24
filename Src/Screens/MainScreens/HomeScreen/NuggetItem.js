@@ -32,6 +32,7 @@ function NuggetItem({
     nuggetContentController,
     handleStopAudio,
     isReadMuted,
+    setisViewableItemSet,
     // isFocused,
   } = useNuggetParentActions();
   const insets = useInsets();
@@ -181,7 +182,14 @@ function NuggetItem({
           isPaused={paused}
           onPlayPauseVideo={() => {
             if (paused) {
+              if (setisViewableItemSet) {
+                setisViewableItemSet(nugget.nugget_id);
+              }
               handleStopAudio();
+            } else {
+              // if (setisViewableItemSet) {
+              //   setisViewableItemSet(null);
+              // }
             }
             setpaused(pre => !pre);
           }}

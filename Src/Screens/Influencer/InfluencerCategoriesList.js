@@ -7,8 +7,6 @@ import {useInfluencerCategoryList} from '../../Utilities/StoreData';
 const InfluencerCategoriesList = ({selectedCategoryId, onSelectCategory}) => {
   const categoryList = useInfluencerCategoryList() ?? [];
 
-  console.log(categoryList, 'LIST');
-
   const renderCategoryItem = ({item}) => {
     return (
       <SmallButton

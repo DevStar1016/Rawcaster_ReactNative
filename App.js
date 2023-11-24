@@ -176,7 +176,9 @@ const App = () => {
         }
         return res;
       })
-      .catch(e => {})
+      .catch(e => {
+        console.log(e, 'ERROR PROFILE');
+      })
       .finally(() => {
         setisFetchingToken(false);
         SplashScreen.hide();

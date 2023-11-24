@@ -135,7 +135,11 @@ export default function BottomTabNavigation() {
         <Tab.Screen name="NotificationsStack" component={NotificationsStack} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
         <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
-        <Tab.Screen name="UsersStack" component={UsersStack} />
+        <Tab.Screen
+          name="UsersStack"
+          component={UsersStack}
+          options={{unmountOnBlur: true}}
+        />
       </Tab.Navigator>
       <Modal onRequestClose={() => {}} transparent visible={isOpenVerifyPopup}>
         <ConfirmationPopup

@@ -126,12 +126,26 @@ const CommentItem = ({
       </View>
       <View style={styles.contentContainer}>
         <View style={styles.rowContainer}>
-          <View style={{flex: 1, paddingRight: 10}}>
+          <View
+            style={{
+              flex: 1,
+              paddingRight: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <StyledText
               style={styles.nameText}
               normalTextModeTextProps={{numberOfLines: 1}}>
               {htmlDecodeText(item.name)}
             </StyledText>
+            {item?.account_verify_status === 1 && (
+              <SVGIcon
+                icon="diamond_verified"
+                height={15}
+                width={15}
+                marginLeft={2}
+              />
+            )}
           </View>
           <View style={{paddingLeft: 5}}>
             <StyledText style={styles.text}>

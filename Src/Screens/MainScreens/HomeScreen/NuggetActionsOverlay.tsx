@@ -386,8 +386,7 @@ function NuggetActionsOverlay({
    * @returns None
    */
   const onShareLink = async () => {
-    const shareMessage =
-      `${SOCIAL_SHARE_LINK}` + `${encode(nugget.share_link)}`;
+    const shareMessage = `${SOCIAL_SHARE_LINK}` + `${encode(nugget.nugget_id)}`;
     try {
       const result = await Share.share({
         message: shareMessage,

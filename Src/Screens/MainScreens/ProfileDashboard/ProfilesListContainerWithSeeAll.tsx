@@ -87,7 +87,7 @@ const ProfilesListContainerWithSeeAll = ({
   const [isActionLoading, setisActionLoading] = useState(false);
   const PROFILE_SIZE =
     (DIMENSIONS.window.width -
-      paddingHorizontal * 2 -
+      paddingHorizontal * 3 -
       EXTRA_MARGIN * 3 -
       PROFILE_CONTAINER_MARGIN * 6) /
     3;
