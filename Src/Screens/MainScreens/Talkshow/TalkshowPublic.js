@@ -16,7 +16,7 @@ import { COLORS } from '../../../Utilities/Colors';
 import { EVENT_TYPE } from '../../../Utilities/Constants';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMeetInviteRefId } from '../../../Store/Slices/MeetInviteRefIdSlice';
+import { setTalkShowInviteRefId } from '../../../Store/Slices/MeetInviteRefIdSlice';
 import { setMyProfile } from '../../../Store/Slices/AuthSlice';
 import PublicJoinEventCredentialModal from '../../../Modals/PublicJoinEventCredentialsModal';
 
@@ -24,9 +24,10 @@ var isMount = true;
 const TalkshowPublic = ({ route }) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
-    const meet_invite_ref_id = useSelector((state) => state.meeting_invite_refId.value);
+    const meet_invite_ref_id = useSelector((state) => state.meeting_invite_refId.talkshow_ref_id);
+
     console.log('meeeee', meet_invite_ref_id);
-    const [profile, setProfile] = useState(null);
+    const profile = useProfile();
     const [showPublicCredentailsModal, setShowPublicCredentialsModal] = useState(false);
 
     const [eventDetails, seteventDetails] = useState(null);
@@ -66,7 +67,7 @@ const TalkshowPublic = ({ route }) => {
         console.log('i_am_pressed');
         console.log('modal', showPublicCredentailsModal);
         setShowPublicCredentialsModal(false);
-        dispatch(setMeetInviteRefId(null));
+        dispatch(setTalkShowInviteRefId(null));
     }
     const _handleJoinMeetinOnPublicCredentials = (email: any, name: any) => {
         console.log('iamcalled')
@@ -84,18 +85,20 @@ const TalkshowPublic = ({ route }) => {
             };
             const response = await axios.post(apiUrl, dataToSend);
             console.log('response:', response.data);
+            dispatch(setTalkShowInviteRefId(null));
+
             if (response.data.status === 1) {
 
                 let user = { ...response.data.user }
                 user.user_ref_id = (Math.floor(Math.random() * (100000 - 1000) + 1000)).toString();
                 user.userId = 1234
-                setProfile(user);
                 dispatch(setMyProfile(user));
-                // if (isMount) {
-                seteventDetails(response.data.event);
-                setisLoading(true);
-                //  }
-                onStartHosting(response.data.event);
+                setTimeout(() => {
+                    seteventDetails(response.data.event);
+                    setisLoading(true);
+                    onStartHosting(response.data.event, user);
+                }, 2000);
+
 
             }
         } catch (error) {
@@ -162,7 +165,7 @@ const TalkshowPublic = ({ route }) => {
      * @param {eventItem} eventItem - The event item object.
      * @returns None
      */
-    const onStartHosting = eventItem => {
+    const onStartHosting = (eventItem, user) => {
         if (getIsOwner(eventItem)) {
             //  console.log('talkshow_started', eventItem);
             // createMeetingRoom({
@@ -182,10 +185,10 @@ const TalkshowPublic = ({ route }) => {
         joinRequest({
             // meetingId: eventItem.chime_meeting_id,
             refId: eventItem.reference_id,
-            userId: profile?.user_id,
-            image: profile?.profile_image,
-            name: profile?.name,
-            userRefId: profile?.user_ref_id
+            userId: user?.user_id,
+            image: user?.profile_image,
+            name: user?.name,
+            userRefId: user?.user_ref_id
         });
     };
 
@@ -198,7 +201,7 @@ const TalkshowPublic = ({ route }) => {
                         seteventDetails(eventItem);
                         setisLoading(true);
                     }
-                    onStartHosting(eventItem);
+                    onStartHosting(eventItem, profile);
                 }}
             />
             <Modal onRequestClose={() => { }} transparent visible={isLoading}>

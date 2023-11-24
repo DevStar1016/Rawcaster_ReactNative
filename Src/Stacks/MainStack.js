@@ -1,6 +1,6 @@
-import {Linking, Modal} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { Linking, Modal } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import Loader from '../Components/Loader';
 import {
   useGlobalLoaderData,
@@ -12,13 +12,13 @@ import {
   useinActiveAlert,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import {getAuthCode} from '../Utilities/Methods';
+import { getAuthCode } from '../Utilities/Methods';
 import {
   complementaryMembershipService,
   getInfluencerCategoryService,
   listAllFriendRequestsService,
 } from '../Services/ApiService';
-import {useDispatch} from 'react-redux';
+import { useDispatch } from 'react-redux';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
@@ -33,9 +33,9 @@ import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
-import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
+import { initiateAllNuggetsLoadingTotalPages } from '../Store/Slices/NuggetsListSlice';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
-import {COLORS} from '../Utilities/Colors';
+import { COLORS } from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
@@ -55,13 +55,13 @@ import {
   getAllFriendsGroupsList,
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
-import {decode} from 'base-64';
+import { decode } from 'base-64';
 import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
-import {setMyProfile} from '../Store/Slices/AuthSlice';
-import {setMeetInviteRefId} from '../Store/Slices/MeetInviteRefIdSlice';
+import { setMyProfile } from '../Store/Slices/AuthSlice';
+import { setMeetInviteRefId, setTalkShowInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
 import InActiveModal from '../Modals/InActiveModal';
 const Stack = createStackNavigator();
 
@@ -188,7 +188,7 @@ const MainStack = () => {
         }
         return res;
       })
-      .catch(e => {})
+      .catch(e => { })
       .finally(() => {
         setisLoading(false);
         dispatch(getAllFriendsGroupsList());
@@ -256,11 +256,11 @@ const MainStack = () => {
               routeName == undefined
             ) {
               console.log('im_in', routeName);
-              dispatch(setMeetInviteRefId(ref_id));
+              dispatch(setTalkShowInviteRefId(ref_id));
             } else {
               console.log('im_out', routeName);
               setTimeout(() => {
-                dispatch(setMeetInviteRefId(ref_id));
+                dispatch(setTalkShowInviteRefId(ref_id));
               }, 4000);
             }
             navigation.navigate('DashboardProfileTopTabNavigation', {
@@ -385,7 +385,7 @@ const MainStack = () => {
       )}
       {premiumALert?.status && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={premiumALert.status}>
@@ -435,7 +435,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>
@@ -455,7 +455,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>
@@ -475,7 +475,7 @@ const MainStack = () => {
       )}
       {isInActiveAlert && (
         <Modal
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
           // style={{zIndex: 10000}}
           transparent
           visible={isInActiveAlert}>

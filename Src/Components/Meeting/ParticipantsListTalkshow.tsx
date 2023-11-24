@@ -52,6 +52,7 @@ import {
     isShowCount?: boolean;
     isCoHost:boolean;
     globalSettingsData?: GlobalSettingsProps;
+    allowedToSpeak:boolean;
   };
   
   const ParticipantsListTalkshow = ({
@@ -65,6 +66,7 @@ import {
     hostUserId,
     selfUserId,
     meetingRefId,
+    allowedToSpeak,
     isCoHost,
     isShowActionsButtons = true,
     isEnableItemPress = false,
@@ -199,7 +201,7 @@ import {
                       <StyledText style={styles.hostText}>Co Host</StyledText>
                     </View>
                   )}
-  
+                  {(isCoHost || isHost || allowedToSpeak) && (
                   <SVGIcon
                     icon={item.audio ? 'mic_white' : 'mic_off_white'}
                     height={22}
@@ -211,7 +213,7 @@ import {
                       }
                     }}
                     isButton={isEnableAudioVideoActions}
-                  />
+                  />)}
                  
 
                 

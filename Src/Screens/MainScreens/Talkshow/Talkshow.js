@@ -15,13 +15,15 @@ import {
 import { COLORS } from '../../../Utilities/Colors';
 import { EVENT_TYPE } from '../../../Utilities/Constants';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setTalkShowInviteRefId } from '../../../Store/Slices/MeetInviteRefIdSlice';
 
 var isMount = true;
 const Talkshow = ({ route }) => {
   const navigation = useNavigation();
   const profile = useProfile();
-  const meet_invite_ref_id = useSelector((state) => state.meeting_invite_refId.value);
+  const dispatch = useDispatch();
+  const meet_invite_ref_id = useSelector((state) => state.meeting_invite_refId.talkshow_ref_id);
 
   const [eventDetails, seteventDetails] = useState(null);
   const [isLoading, setisLoading] = useState(false);
@@ -41,6 +43,7 @@ const Talkshow = ({ route }) => {
 
   useEffect(() => {
     //const unsubscribe = navigation.addListener('focus', () => {
+    console.log('refffff', meet_invite_ref_id);
     if (meet_invite_ref_id) {
       console.log('ref_id_received_in_talkshow', meet_invite_ref_id);
       postData(meet_invite_ref_id);
@@ -61,6 +64,7 @@ const Talkshow = ({ route }) => {
       };
       const response = await axios.post(apiUrl, dataToSend);
       console.log('response:', response.data);
+      dispatch(setTalkShowInviteRefId(null));
       if (response.data.status === 1) {
         if (isMount) {
           seteventDetails(response.data.event);

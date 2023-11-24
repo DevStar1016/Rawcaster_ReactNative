@@ -27,7 +27,7 @@ const Events = ({route}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const profile = useProfile();
-  const meet_invite_ref_id = useSelector((state)=>state.meeting_invite_refId.value);
+  const meet_invite_ref_id = useSelector((state)=>state.meeting_invite_refId.meeting_ref_id);
 
   const [isRequestingMeeting, setisRequestingMeeting] = useState(false);
   const [isLoading, setisLoading] = useState(false);
@@ -125,12 +125,16 @@ const Events = ({route}) => {
             Toast.fail(joinedData?.joinInfo?.message ?? 'Something went wrong');
           }
         } else {
+          if(joinedData.statusCode === 0){
+            Toast.fail(joinedData.message);
+          }
+          else{
           if (isMount) {
             setmeetingJoiningStatus({
               text: joinedData.message,
               statusCode: joinedData.statusCode,
             });
-          }
+          }}
         }
       },
     );
@@ -139,6 +143,7 @@ const Events = ({route}) => {
   }
     return () => {
       chimeSocketListen.off(ChimeSocketEvents.joinRequestAnswer);
+      
     };
   }, [isLoading, isRequestingMeeting]);
 
@@ -148,6 +153,8 @@ const Events = ({route}) => {
    * @returns None
    */
   const handleStartHosting = (eventItem: any) => {
+    setisRequestingMeeting(true);
+
     if (isMount && eventItem.waiting_room === 1) {
       setmeetingJoiningStatus({
         text: `Please wait for a moment ${
