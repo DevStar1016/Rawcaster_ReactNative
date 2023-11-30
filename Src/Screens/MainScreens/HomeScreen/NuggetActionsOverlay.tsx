@@ -122,6 +122,8 @@ type DownloadFileProp = {
   fileName: string;
 };
 
+var urlThird = require('url');
+
 function NuggetActionsOverlay({
   nuggetType,
   isPaused,
@@ -355,8 +357,11 @@ function NuggetActionsOverlay({
       nugget.media_list &&
       nugget.media_list[0] &&
       nugget.share_type === 1 &&
-      //@ts-ignore
-      profile?.user_status_id >= 4
+      (((nugget.media_list[0].media_type.includes('video') ||
+        nugget.media_list[0].media_type.includes('audio')) &&
+        //@ts-ignore
+        profile?.user_status_id >= 4) ||
+        nugget.media_list[0].media_type.includes('image'))
     ) {
       const downloadOption = [...NUGGET_ACTIONS].find(item => item.id === 6);
       if (downloadOption) {
@@ -391,6 +396,7 @@ function NuggetActionsOverlay({
       const result = await Share.share({
         message: shareMessage,
       });
+
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
           // shared with activity type of result.activityType
@@ -401,6 +407,8 @@ function NuggetActionsOverlay({
         // dismissed
       }
     } catch (error) {
+      console.log(error, 'ERROR');
+
       if (setisVideoBackground) {
         setisVideoBackground(false);
       }
@@ -854,6 +862,7 @@ function NuggetActionsOverlay({
         }}
         onPress={() => {
           const url = getLinkInfo(nugget.content);
+          console.log(metaData[lastIndex], 'CONTENT');
           onPressUrl(url);
         }}>
         {metaData[lastIndex]?.open_graph_image && (
@@ -863,18 +872,17 @@ function NuggetActionsOverlay({
           />
         )}
         <View style={{flex: 1, paddingLeft: 10}}>
-          {metaData[lastIndex]?.title && (
-            <StyledText
-              style={styles.metaDataTitle}
-              normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData[lastIndex]?.title}
-            </StyledText>
-          )}
-          {metaData[lastIndex]?.title && (
+          <StyledText
+            style={styles.metaDataTitle}
+            normalTextModeTextProps={{numberOfLines: 2}}>
+            {metaData[lastIndex]?.title ?? metaData[lastIndex]?.url}
+          </StyledText>
+
+          {metaData[lastIndex]?.description && (
             <StyledText
               style={styles.metaDataDescription}
               normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData[lastIndex]?.title}
+              {metaData[lastIndex]?.description}
             </StyledText>
           )}
         </View>
@@ -1251,7 +1259,12 @@ function NuggetActionsOverlay({
                   )} */}
                 </StyledText>
                 {nugget.account_verify_type === 1 && (
-                  <SVGIcon icon="diamond_verified" height={15} width={15} />
+                  <SVGIcon
+                    icon="diamond_verified"
+                    height={15}
+                    width={15}
+                    marginRight={5}
+                  />
                 )}
               </TouchableOpacity>
               {nugget.type === 2 && (

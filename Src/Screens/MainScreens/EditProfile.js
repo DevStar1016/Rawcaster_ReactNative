@@ -53,7 +53,6 @@ const EditProfile = ({route}) => {
   const [isOpenVerificationOptions, setisOpenVerificationOptions] =
     useState(false);
   const {requiredField} = route.params || {};
-
   const [isLoading, setisLoading] = useState(false);
 
   const isValidateEmail = useRef(false);
@@ -84,7 +83,21 @@ const EditProfile = ({route}) => {
     mobileNumber: yup
       .string()
       .matches(PHONE_REGEX, 'Invalid phone number')
-      .test('Required', 'Required', function (value) {
+      .test('Required', 'Phone number is required', function (value) {
+        return profile?.mobile
+          ? value
+            ? true
+            : false
+          : requiredField === 'sms'
+          ? value
+            ? true
+            : false
+          : true;
+      }),
+    country: yup
+      .object()
+      .nullable()
+      .test('Required', 'Country code is required', function (value) {
         return profile?.mobile
           ? value
             ? true
@@ -135,6 +148,13 @@ const EditProfile = ({route}) => {
       location: profile?.geo_location ?? '',
       workAt: profile?.work_at ?? '',
       studyAt: profile?.studied_at ?? '',
+      country:
+        profile?.country_id && profile?.country_code
+          ? {
+              id: profile?.country_id,
+              phone_code: profile?.country_code,
+            }
+          : null,
     },
     validationSchema: validationSchema,
     onSubmit: values => {
@@ -169,8 +189,16 @@ const EditProfile = ({route}) => {
     formData.append('first_name', values.firstName.trim());
     formData.append('last_name', values.lastName.trim());
     formData.append('name', values.displayName.trim());
-    formData.append('mobile_no', values.mobileNumber.toString().trim());
-    formData.append('email_id', values.email.trim());
+    if (values.mobileNumber.trim()) {
+      formData.append('mobile_no', values.mobileNumber.toString().trim());
+    }
+    if (values.mobileNumber.trim() && country) {
+      formData.append('country_id', values.country.id);
+      formData.append('country_code', values.country.phone_code);
+    }
+    if (values.email.trim()) {
+      formData.append('email_id', values.email.trim());
+    }
     formData.append('gender', values.sex.id);
     formData.append('other_gender', values.gender);
     formData.append('dob', values.dob);
@@ -388,7 +416,6 @@ const EditProfile = ({route}) => {
           errorText={touched.sex && errors.sex}
           value={values.sex}
           isDisabled={profile?.account_verify_type !== 0}
-          isEditable={profile?.account_verify_type === 0}
           fieldName="name"
           onSelectItem={item => {
             setFieldValue('sex', item);
@@ -462,9 +489,18 @@ const EditProfile = ({route}) => {
         />
         <TextBox
           title="Phone Number"
+          isEnableCountryCode
+          inputContainerMarginLeft={10}
           value={values.mobileNumber}
           onChangeText={handleChange('mobileNumber')}
-          errorText={touched.mobileNumber && errors.mobileNumber}
+          // errorText={touched.mobileNumber && errors.mobileNumber}
+          errorText={
+            touched.country && errors.country
+              ? errors.country
+              : errors.mobileNumber && touched.mobileNumber
+              ? errors.mobileNumber
+              : ''
+          }
           titlePaddingVertical={3}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your phone number'}
@@ -477,6 +513,24 @@ const EditProfile = ({route}) => {
           }
           alternateIconProps={{
             icon: 'verified_sign',
+          }}
+          countryCodePickerProps={{
+            listType: 'large',
+            fieldName: 'phone_code',
+            listFieldName: 'name',
+            isDisabled: profile?.is_mobile_no_verified !== 0,
+            value: values.country,
+            listTitle: 'Select Country Code',
+            isHideErrorText: true,
+            errorText: touched.country && errors.country,
+            bigListProps: {
+              apiName: 'country',
+              isAPICall: true,
+              secondaryFieldName: 'phone_code',
+            },
+            onSelectItem: selectedItem => {
+              setFieldValue('country', selectedItem);
+            },
           }}
         />
         <TextBox

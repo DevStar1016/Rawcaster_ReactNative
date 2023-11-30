@@ -19,6 +19,7 @@ import {removeToken} from '../../../Utilities/Methods';
 import Toast from '../../../Components/Toast';
 import Loader from '../../../Components/Loader';
 import {useDispatch} from 'react-redux';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../../../Utilities/Constants';
 
 var isMount = true;
 const SettingsHome = () => {
@@ -46,6 +47,7 @@ const SettingsHome = () => {
     {
       id: 5,
       name: 'Event Settings',
+      isHide: !IS_ENABLE_CHIME_FUNCTIONALITY,
     },
     {
       id: 6,
@@ -162,7 +164,7 @@ const SettingsHome = () => {
       <HeaderWithBack title="Settings" isEnableSafeArea />
       <View style={styles.contentContainer}>
         <FlatList
-          data={settinsOptionsList}
+          data={settinsOptionsList.filter(item => !item.isHide)}
           bounces={false}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}

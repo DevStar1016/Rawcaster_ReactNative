@@ -1,6 +1,7 @@
-import { Linking, Modal } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import {Linking, Modal} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import * as mime from 'react-native-mime-types';
 import Loader from '../Components/Loader';
 import {
   useGlobalLoaderData,
@@ -12,13 +13,14 @@ import {
   useinActiveAlert,
 } from '../Utilities/StoreData';
 import InfluencersList from '../Screens/Influencer/InfluencersList';
-import { getAuthCode } from '../Utilities/Methods';
+import {getAuthCode, getUrlWithFilePrefix} from '../Utilities/Methods';
 import {
   complementaryMembershipService,
   getInfluencerCategoryService,
   listAllFriendRequestsService,
 } from '../Services/ApiService';
-import { useDispatch } from 'react-redux';
+import ReceiveSharingIntent from 'react-native-receive-sharing-intent';
+import {useDispatch} from 'react-redux';
 import PostEditNugget from '../Screens/MainScreens/NuggetPost/PostEditNugget';
 import EditProfile from '../Screens/MainScreens/EditProfile';
 import {
@@ -33,9 +35,9 @@ import CreateEditGroup from '../Screens/MainScreens/User/CreateEditGroup';
 import AddUserToGroup from '../Screens/MainScreens/User/AddUserToGroup';
 import AddNewConnection from '../Screens/MainScreens/User/AddNewConnection';
 import StackAnimation from '../Utilities/StackAnimation';
-import { initiateAllNuggetsLoadingTotalPages } from '../Store/Slices/NuggetsListSlice';
+import {initiateAllNuggetsLoadingTotalPages} from '../Store/Slices/NuggetsListSlice';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
-import { COLORS } from '../Utilities/Colors';
+import {COLORS} from '../Utilities/Colors';
 import UserChat from '../Screens/MainScreens/ChatScreens/UserChat';
 import GroupChat from '../Screens/MainScreens/ChatScreens/GroupChat';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
@@ -55,14 +57,18 @@ import {
   getAllFriendsGroupsList,
   getAllFriendsList,
 } from '../Store/ThunkAPIServices';
-import { decode } from 'base-64';
+import {decode} from 'base-64';
 import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
 import ViewNugget from '../Screens/MainScreens/HomeScreen/ViewNugget';
 import EventDetailScreen from '../Screens/MainScreens/EventsAndTalkshowsCommon/EventDetailScreen';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
-import { setMyProfile } from '../Store/Slices/AuthSlice';
-import { setMeetInviteRefId, setTalkShowInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
+import {setMyProfile} from '../Store/Slices/AuthSlice';
+import {
+  setMeetInviteRefId,
+  setTalkShowInviteRefId,
+} from '../Store/Slices/MeetInviteRefIdSlice';
 import InActiveModal from '../Modals/InActiveModal';
+import {IS_ENABLE_CHIME_FUNCTIONALITY, IS_IOS} from '../Utilities/Constants';
 const Stack = createStackNavigator();
 
 const MainStack = () => {
@@ -95,10 +101,12 @@ const MainStack = () => {
         event.url?.includes('https://dev.rawcaster.com/join/event') ||
         event.url?.includes('https://dev.rawcaster.com/join/talkshow')
       ) {
-        setTimeout(() => {
-          console.log('from here 123');
-          handleOpenUrl(event.url);
-        }, 3000);
+        if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+          setTimeout(() => {
+            console.log('from here 123');
+            handleOpenUrl(event.url);
+          }, 3000);
+        }
       } else {
         ////////// Change from indian team
         //////////////////////
@@ -113,10 +121,12 @@ const MainStack = () => {
           url?.includes('https://dev.rawcaster.com/join/event') ||
           url?.includes('https://dev.rawcaster.com/join/talkshow')
         ) {
-          setTimeout(() => {
-            console.log('from here');
-            handleOpenUrl(url);
-          }, 3000);
+          if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+            setTimeout(() => {
+              console.log('from here');
+              handleOpenUrl(url);
+            }, 3000);
+          }
         } else {
           ////////// Change from indian team
           //////////////////////
@@ -135,6 +145,105 @@ const MainStack = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    ReceiveSharingIntent.getReceivedFiles(
+      files => {
+        const sharedMediasList = files.map(item => {
+          let filePath = item.filePath
+            ? item.filePath?.replace('file://', '')
+            : null;
+          return {
+            webLink: item.weblink ? encodeURIComponent(item.weblink) : null,
+            uri: filePath ? encodeURIComponent(filePath) : null,
+            name: item.fileName ? item.fileName.replace(/%20/g, '') : null,
+            type: filePath
+              ? encodeURIComponent(
+                  IS_IOS ? mime.lookup(filePath) : item.mimeType,
+                )
+              : null,
+          };
+        });
+        const tempFiles = JSON.stringify(sharedMediasList);
+
+        Linking.openURL('rawcaster://posteditnugget/' + tempFiles)
+          .then(res => {
+            console.log(res, 'Post Nugget Linking Success');
+          })
+          .catch(e => {
+            console.log(e, 'Post Nugget Linking Error');
+          });
+        // ReceiveSharingIntent.clearReceivedFiles();
+      },
+      e => {
+        console.log(e, 'Receive Files Error');
+      },
+      'rawcaster',
+    );
+  }, []);
+
+  // useEffect(() => {
+  //   ReceiveSharingIntent.getReceivedFiles(
+  //     (files) => {
+  //       console.log("files", files);
+  //       let sharedfiles = files;
+  //       let WEBLINK;
+  //       let TEXT;
+  //       if (isIos) {
+  //         sharedfiles = files.map((file) => {
+  //           let FILEPATH = file.filePath?.replace("file://", "");
+  //           let MIMETYPE = mime.lookup(FILEPATH);
+  //           WEBLINK = file.weblink;
+  //           TEXT = file.text;
+  //           return {
+  //             ...file,
+  //             filename: file.fileName
+  //               ? file.fileName.replace(/%20/g, "")
+  //               : null,
+  //             //path: encodeURIComponent(file.filePath),
+  //             path: FILEPATH ? encodeURIComponent(FILEPATH) : null,
+  //             // mime: file.mimeType,
+  //             mime: MIMETYPE ? encodeURIComponent(MIMETYPE) : null,
+  //             filePath: "",
+  //             contentUri: "",
+  //             weblink: WEBLINK ? encodeURIComponent(WEBLINK) : null,
+  //             text: TEXT ? encodeURIComponent(file.text) : null,
+  //           };
+  //         });
+  //       } else {
+  //         sharedfiles = files.map((file) => {
+  //           WEBLINK = file.weblink;
+  //           TEXT = file.text;
+  //           return {
+  //             ...file,
+  //             filename: file.fileName?.replace(/%20/g, ""),
+  //             path: encodeURIComponent("file://" + file.filePath),
+  //             mime: encodeURIComponent(file.mimeType),
+  //             weblink: WEBLINK ? encodeURIComponent(WEBLINK) : null,
+  //             filePath: "",
+  //             contentUri: "",
+  //             mimeType: "",
+  //             text: TEXT ? encodeURIComponent(file.text) : null,
+  //           };
+  //         });
+  //       }
+  //       galleryItems = JSON.stringify(sharedfiles);
+
+  //       setTimeout(() => {
+  //         Linking.openURL("rawcaster://Composer/" + galleryItems)
+  //           .then((res) => {
+  //             console.log("Composer Linked From APP.js", res);
+  //           })
+  //           .catch((err) =>
+  //             console.log("Linking Error in Sharing Intent", err)
+  //           );
+  //       }, 1000);
+  //     },
+  //     (error) => {
+  //       console.log(error, "Error Sharing Intent]");
+  //     }
+  //   );
+  // }, []);
 
   function getCommonFormData() {
     const formData = new FormData();
@@ -188,7 +297,7 @@ const MainStack = () => {
         }
         return res;
       })
-      .catch(e => { })
+      .catch(e => {})
       .finally(() => {
         setisLoading(false);
         dispatch(getAllFriendsGroupsList());
@@ -385,7 +494,7 @@ const MainStack = () => {
       )}
       {premiumALert?.status && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={premiumALert.status}>
@@ -435,7 +544,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>
@@ -455,7 +564,7 @@ const MainStack = () => {
       )}
       {isComplimentoryAlert?.status && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={isComplimentoryAlert.status}>
@@ -475,7 +584,7 @@ const MainStack = () => {
       )}
       {isInActiveAlert && (
         <Modal
-          onRequestClose={() => { }}
+          onRequestClose={() => {}}
           // style={{zIndex: 10000}}
           transparent
           visible={isInActiveAlert}>

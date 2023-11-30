@@ -19,6 +19,7 @@ import {IconType} from '../Utilities/Icons';
 import {FONTS} from '../Utilities/Fonts';
 import StyledText from './StyledText';
 import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
+import DropDownPicker, {DropDownPickerProps} from './DropDownPicker';
 
 type AppendedListProps = {
   list?: [];
@@ -33,6 +34,7 @@ export type TextBoxProps = {
   returnKeyType?: ReturnKeyTypeOptions;
   innerRef?: LegacyRef<TextInput> | undefined;
   isSecure?: boolean;
+  isEnableCountryCode?: boolean;
   errorText?: string;
   borderWidth?: number;
   icon?: IconType;
@@ -52,6 +54,7 @@ export type TextBoxProps = {
   borderColor?: string;
   titleStyle?: TextStyle;
   textColor?: string;
+  inputContainerMarginLeft?: number;
   isEnableAlternateIconOfSecureIcon?: boolean;
   isEnableOuterRightIcon?: boolean;
   outerRightIconProps?: SVGIconProps;
@@ -62,6 +65,7 @@ export type TextBoxProps = {
   inputContainerHeight?: number;
   isEnableListAppend?: boolean;
   appendedListProps?: AppendedListProps;
+  countryCodePickerProps?: DropDownPickerProps;
   additionalTextInputProps?: Omit<
     TextInputProps,
     | 'ref'
@@ -102,6 +106,7 @@ const TextBox = ({
   returnKeyType,
   iconHeight = 25,
   iconWidth = 25,
+  isEnableCountryCode = false,
   isSecure = false,
   isEnablePasswordConditionText = false,
   value = '',
@@ -110,6 +115,7 @@ const TextBox = ({
   isEditable = true,
   keyboardType,
   maxLength,
+  inputContainerMarginLeft,
   onChangeText,
   mainContainerWidth,
   passwordConditionTextStyle = {},
@@ -122,6 +128,7 @@ const TextBox = ({
   textColor = COLORS.black,
   isEnableOuterRightIcon = false,
   outerRightIconProps = {},
+  countryCodePickerProps,
   multiline = false,
   inputContainerHeight = TEXT_INPUT_HEIGHT,
   textAlignVertical,
@@ -193,6 +200,14 @@ const TextBox = ({
         </ScrollView>
       )}
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        {isEnableCountryCode && (
+          <DropDownPicker
+            mainContainerWidth={'25%'}
+            dropDownTextPaddingHorizontal={10}
+            placeHolderText="Code"
+            {...countryCodePickerProps}
+          />
+        )}
         <View
           style={[
             styles.inputContainer,
@@ -202,6 +217,7 @@ const TextBox = ({
               backgroundColor,
               height: inputContainerHeight,
               borderWidth,
+              marginLeft: inputContainerMarginLeft,
             },
           ]}>
           <TextInput

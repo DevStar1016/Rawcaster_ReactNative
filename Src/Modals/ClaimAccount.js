@@ -60,6 +60,8 @@ const ClaimAccount = ({route}) => {
   const [isLoading, setisLoading] = useState(false);
   const [isOpenGooglePlacesListModal, setisOpenGooglePlacesListModal] =
     useState(false);
+  const [isOpenIdenfyConfirmation, setisOpenIdenfyConfirmation] =
+    useState(false);
   const [AccountVerifyConfirmationData, setAccountVerifyConfirmationData] =
     useState({
       isOpen: false,
@@ -87,12 +89,13 @@ const ClaimAccount = ({route}) => {
       .required('Last name is required'),
     dob: yup.string().required('Date of birth is required'),
     sex: isVerifyAccount
-      ? yup.object().nullable().required('Required')
+      ? yup.object().nullable().required('Sex is required')
       : yup.object().nullable(),
     mobileNumber: yup
       .string()
       .matches(PHONE_REGEX, 'Invalid phone number')
       .required('Phone number is required'),
+    country: yup.object().nullable().required('Country code is required'),
     email: yup
       .string()
       .email('Enter valid email')
@@ -113,13 +116,23 @@ const ClaimAccount = ({route}) => {
         email: profile?.email_id ?? '',
         location: profile?.geo_location ?? '',
         sex: GENDER_LIST.find(item => item.id === profile?.gender) ?? null,
+        country:
+          profile?.country_id && profile?.country_code
+            ? {
+                id: profile?.country_id,
+                phone_code: profile?.country_code,
+              }
+            : null,
       },
       validationSchema: validationSchema,
       onSubmit: values => {
         if (isMount) {
-          setisLoading(true);
+          setisOpenIdenfyConfirmation(true);
         }
-        HandleSubmitforVeification();
+        // if (isMount) {
+        //   setisLoading(true);
+        // }
+        // HandleSubmitforVeification();
       },
     });
 
@@ -166,6 +179,10 @@ const ClaimAccount = ({route}) => {
     formData.append('first_name', values.firstName.trim());
     formData.append('last_name', values.lastName.trim());
     formData.append('telephone', values.mobileNumber.toString().trim());
+    if (values.country) {
+      formData.append('country_id', values.country.id);
+      formData.append('country_code', values.country.phone_code);
+    }
     formData.append('email_id', values.email.trim());
     formData.append('dob', values.dob);
     formData.append('location', values.location);
@@ -313,6 +330,10 @@ const ClaimAccount = ({route}) => {
     formData.append('first_name', values.firstName.trim());
     formData.append('last_name', values.lastName.trim());
     formData.append('telephone', values.mobileNumber.toString().trim());
+    if (values.country) {
+      formData.append('country_id', values.country.id);
+      formData.append('country_code', values.country.phone_code);
+    }
     formData.append('email_id', values.email.trim());
     formData.append('dob', values.dob);
     formData.append('gender', values.sex.id);
@@ -458,8 +479,12 @@ const ClaimAccount = ({route}) => {
             title="Phone Number"
             placeHolder="Enter your Phone Number"
             value={values.mobileNumber}
+            isEnableCountryCode
+            inputContainerMarginLeft={10}
             errorText={
-              errors.mobileNumber && touched.mobileNumber
+              touched.country && errors.country
+                ? errors.country
+                : errors.mobileNumber && touched.mobileNumber
                 ? errors.mobileNumber
                 : ''
             }
@@ -473,6 +498,24 @@ const ClaimAccount = ({route}) => {
             }
             alternateIconProps={{
               icon: 'verified_sign',
+            }}
+            countryCodePickerProps={{
+              listType: 'large',
+              fieldName: 'phone_code',
+              listFieldName: 'name',
+              isDisabled: profile?.is_mobile_no_verified !== 0,
+              value: values.country,
+              listTitle: 'Select Country Code',
+              isHideErrorText: true,
+              errorText: touched.country && errors.country,
+              bigListProps: {
+                apiName: 'country',
+                isAPICall: true,
+                secondaryFieldName: 'phone_code',
+              },
+              onSelectItem: selectedItem => {
+                setFieldValue('country', selectedItem);
+              },
             }}
           />
           <TextBox
@@ -603,6 +646,33 @@ const ClaimAccount = ({route}) => {
           isEnableNegativeButton={false}
           positiveButtonText="OK"
           content={messageBoxData.message}
+        />
+      </Modal>
+
+      <Modal visible={isOpenIdenfyConfirmation} transparent>
+        <ConfirmationPopup
+          onClose={() => {
+            if (isMount) {
+              setisOpenIdenfyConfirmation(false);
+            }
+          }}
+          onPressPositiveButton={() => {
+            if (isMount) {
+              setisOpenIdenfyConfirmation(false);
+              setisLoading(true);
+            }
+            HandleSubmitforVeification();
+          }}
+          onPressNegativeButton={() => {
+            if (isMount) {
+              setisOpenIdenfyConfirmation(false);
+            }
+          }}
+          positiveButtonText="Continue"
+          negativeButtonText="Cancel"
+          content={
+            'You are being redirected to our partner website for your ID verification.'
+          }
         />
       </Modal>
 

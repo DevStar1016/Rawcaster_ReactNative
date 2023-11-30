@@ -16,7 +16,11 @@ import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
 import InputPopup from '../../../Modals/InputPopup';
 import {getAuthCode, htmlDecodeText} from '../../../Utilities/Methods';
-import {EMAIL_REGEX, PHONE_REGEX} from '../../../Utilities/Constants';
+import {
+  EMAIL_REGEX,
+  IS_ENABLE_CHIME_FUNCTIONALITY,
+  PHONE_REGEX,
+} from '../../../Utilities/Constants';
 
 const SWITCHES_LIST = [
   {
@@ -322,15 +326,17 @@ const NotificationsSettings = () => {
               changeSwitchStatus(id, 'nuggets');
             }}
           />
-          <SwtchesContainer
-            title="Events"
-            description="Choose how you want to be notified when you receive a new event"
-            switchesList={[...SWITCHES_LIST]}
-            onStatusSwitchesIdsList={getOnStatusIdsList(switchStatus.events)}
-            onChangeButtonStatus={id => {
-              changeSwitchStatus(id, 'events');
-            }}
-          />
+          {IS_ENABLE_CHIME_FUNCTIONALITY && (
+            <SwtchesContainer
+              title="Events"
+              description="Choose how you want to be notified when you receive a new event"
+              switchesList={[...SWITCHES_LIST]}
+              onStatusSwitchesIdsList={getOnStatusIdsList(switchStatus.events)}
+              onChangeButtonStatus={id => {
+                changeSwitchStatus(id, 'events');
+              }}
+            />
+          )}
         </ScrollView>
       </View>
       <Modal visible={confirmationBoxData.isOpen} transparent>

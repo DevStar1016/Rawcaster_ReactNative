@@ -8,9 +8,17 @@ import {
   Image,
 } from 'react-native';
 import {COLORS} from '../../../Utilities/Colors';
-import {DIMENSIONS} from '../../../Utilities/Constants';
+import {
+  DIMENSIONS,
+  IS_ENABLE_CHIME_FUNCTIONALITY,
+} from '../../../Utilities/Constants';
 import {FONTS} from '../../../Utilities/Fonts';
-import {useInsets, useProfile, useToken} from '../../../Utilities/StoreData';
+import {
+  useInfluencerCategoryList,
+  useInsets,
+  useProfile,
+  useToken,
+} from '../../../Utilities/StoreData';
 import {useEffect, useRef} from 'react';
 import {useDashboardTopTabCategories} from '../../../Utilities/Contexts';
 import SVGIcon from '../../../Components/SVGIcon';
@@ -26,6 +34,7 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
   const dispatch = useDispatch();
   const insets = useInsets();
   const profile = useProfile();
+  const categoryList = useInfluencerCategoryList() ?? [];
   const mainNavigation = useNavigation();
   const token = useToken();
   const scrollViewRef = useRef(null);
@@ -56,19 +65,7 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
         styles.mainContainer,
         {top: insets.top ? insets.top : StatusBar.currentHeight},
       ]}>
-      <TouchableOpacity
-        // onPress={() => {
-        //   // Toast.success('Someone wants to join.', {
-        //   //   position: 'top',
-        //   // });
-        //   Toast.normal('Senthalan', {
-        //     position: 'bottom',
-        //     visibilityTime: 6000,
-        //     description: 'Hii I am ready to Join',
-        //   });
-        // }}
-        disabled
-        style={{marginRight: 10}}>
+      <TouchableOpacity disabled style={{marginRight: 10}}>
         <SVGIcon icon="app_logo_white" height={30} width={30} />
       </TouchableOpacity>
       <ScrollView
@@ -78,11 +75,12 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
           paddingVertical: 10,
         }}
         onContentSizeChange={() => {
-          scrollViewRef?.current?.scrollTo({
-            x: state.routes.length * 50,
-            y: 0,
-            animated: true,
-          });
+          console.log('TESTTTT');
+          // scrollViewRef?.current?.scrollTo({
+          //   x: state.routes.length * 50,
+          //   y: 0,
+          //   animated: true,
+          // });
         }}
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -97,7 +95,6 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
               : route.name;
 
           const isFocused = state.index === index;
-
           const onPress = () => {
             const event = navigation.emit({
               type: 'tabPress',
@@ -164,15 +161,17 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
             }
           }}
         />
-        <TouchableOpacity
-          onPress={() => {
-            if (isLogin()) {
-            }
-          }}
-          activeOpacity={0.7}
-          style={styles.gifContainer}>
-          <Image source={LiveGif} style={styles.gif} />
-        </TouchableOpacity>
+        {IS_ENABLE_CHIME_FUNCTIONALITY && (
+          <TouchableOpacity
+            onPress={() => {
+              if (isLogin()) {
+              }
+            }}
+            activeOpacity={0.7}
+            style={styles.gifContainer}>
+            <Image source={LiveGif} style={styles.gif} />
+          </TouchableOpacity>
+        )}
         <ProfileWithBadge
           profileImage={profile?.profile_image}
           profileSize={28}

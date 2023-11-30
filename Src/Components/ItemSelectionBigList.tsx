@@ -17,6 +17,7 @@ import {getCountylistService} from '../Services/ApiService';
 export type ItemSelectionBigListProps = {
   title?: string;
   fieldName?: string;
+  secondaryFieldName?: string;
   onCloseList?: (status: boolean) => void;
   headerProps?: Omit<BackHeaderProps, 'setModal' | 'isModal' | 'title'>;
   listData?: any[];
@@ -40,6 +41,7 @@ const ItemSelectionBigList = ({
   apiName,
   isEnableSearchBar = true,
   itemContainerStyle,
+  secondaryFieldName,
 }: ItemSelectionBigListProps) => {
   const [searchText, setsearchText] = useState('');
   const [dataList, setdataList] = useState([...listData]);
@@ -87,10 +89,15 @@ const ItemSelectionBigList = ({
   }
 
   function getItemText(item: any) {
+    let displayValue = item;
     if (fieldName) {
-      return item[fieldName];
+      displayValue = item[fieldName];
+      if (secondaryFieldName) {
+        displayValue =
+          item[fieldName] + ' ( ' + item[secondaryFieldName] + ' ) ';
+      }
     }
-    return item;
+    return displayValue;
   }
 
   function keyExtractor(item: any, index: number) {
@@ -116,6 +123,17 @@ const ItemSelectionBigList = ({
   function getList() {
     if (searchText && searchText.trim()) {
       if (fieldName) {
+        if (secondaryFieldName) {
+          return [...dataList].filter(
+            item =>
+              item[fieldName]
+                .toLowerCase()
+                .includes(searchText.toLowerCase().trim()) ||
+              item[secondaryFieldName]
+                .toLowerCase()
+                .includes(searchText.toLowerCase().trim()),
+          );
+        }
         return [...dataList].filter(item =>
           item[fieldName]
             .toLowerCase()
@@ -157,6 +175,7 @@ const ItemSelectionBigList = ({
               paddingBottom: 10,
               paddingTop: isEnableSearchBar ? 0 : 10,
             }}
+            keyboardShouldPersistTaps="handled"
             keyExtractor={keyExtractor}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => {

@@ -26,6 +26,7 @@ import {useMyConnections} from '../../../Utilities/Contexts';
 import {listAllFriendGroupsService} from '../../../Services/ApiService';
 import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../../../Utilities/Constants';
 
 var isMount = true;
 const GroupsList = () => {
@@ -142,11 +143,7 @@ const GroupsList = () => {
         style={styles.itemContainer}
         activeOpacity={0.8}
         onPress={() => {
-          // navigation.navigate('CreateEditGroup', {
-          //   groupId: item.group_id,
-          //   isLocked: parseInt(item.locked) === 1,
-          // });
-          if (item.locked === 1) {
+          if (item.locked === 1 || !IS_ENABLE_CHIME_FUNCTIONALITY) {
             navigation.navigate('CreateEditGroup', {
               groupId: item.group_id,
               isLocked: parseInt(item.locked) === 1,
@@ -168,21 +165,29 @@ const GroupsList = () => {
             <StyledText style={styles.nameText}>
               {getSlicedText(item.group_name, 20)}
             </StyledText>
-            <StyledText style={styles.messageText}>
-              {/* {getSlicedText(item.last_msg, 30)} */}Lorem ipsum dolor sit
-              ame ...
-            </StyledText>
+            {IS_ENABLE_CHIME_FUNCTIONALITY && (
+              <StyledText style={styles.messageText}>
+                {getSlicedText(item.last_msg, 30)}
+              </StyledText>
+            )}
           </View>
         </View>
-        <View style={styles.actionIconsContainer}>
-          <SVGIcon
-            icon="audio_call_white"
-            height={20}
-            width={20}
-            marginLeft={10}
-          />
-          <SVGIcon icon="event_white" height={21} width={21} marginLeft={20} />
-        </View>
+        {IS_ENABLE_CHIME_FUNCTIONALITY && (
+          <View style={styles.actionIconsContainer}>
+            <SVGIcon
+              icon="audio_call_white"
+              height={20}
+              width={20}
+              marginLeft={10}
+            />
+            <SVGIcon
+              icon="event_white"
+              height={21}
+              width={21}
+              marginLeft={20}
+            />
+          </View>
+        )}
       </TouchableOpacity>
     );
   }

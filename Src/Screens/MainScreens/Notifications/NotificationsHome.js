@@ -21,11 +21,9 @@ const NotificationsHome = () => {
   const dispatch = useDispatch();
   const token = useToken();
   const unreadNotificationCount = useUnreadNotificationCount();
-  const [focusedTab, setfocusedTab] = useState(5);
   const [isActionLoading, setisActionLoading] = useState(false);
 
   const noticationContextValue = {
-    setFocusedTab: setfocusedTab,
     setisActionLoading: setisActionLoading,
   };
 

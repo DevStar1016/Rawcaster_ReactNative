@@ -6,11 +6,14 @@ import EventImage from '../Assets/Png/IntroImages/event.png';
 import NuggetImage from '../Assets/Png/IntroImages/nugget.png';
 import LiveImage from '../Assets/Png/IntroImages/live.png';
 import {getyears} from './Methods';
+import {constant} from 'lodash';
 
 export const DIMENSIONS = {
   window: Dimensions.get('window'),
   screen: Dimensions.get('screen'),
 };
+
+export const IS_ENABLE_CHIME_FUNCTIONALITY = false;
 
 export const REFERAL_MESSAGE =
   'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my friends and special people to join this platform to make it easier to reach everyone with content, personalized messages, Nuggets, and invitations to participate in my special events. I expect to see you there soon.';
@@ -51,9 +54,9 @@ export const INTRO_DATA = [
 ];
 
 export const DEFAULT_PAGES_LIST = [
-  {id: 1, type: 'Nugget'},
-  {id: 2, type: 'Event'},
-  {id: 3, type: 'Chat'},
+  {id: 1, type: 'Nugget', isShow: true},
+  {id: 2, type: 'Event', isShow: IS_ENABLE_CHIME_FUNCTIONALITY},
+  {id: 3, type: 'Chat', isShow: IS_ENABLE_CHIME_FUNCTIONALITY},
 ];
 
 export const DEFAULT_DATE_FORMAT_LIST = [

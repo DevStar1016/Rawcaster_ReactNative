@@ -19,10 +19,12 @@ import CustomHomeHeader from '../../../Components/CustomHomeHeader';
 import DefaultBackground from '../../../Components/DefaultBackground';
 import {getSlicedText} from '../../../Utilities/Methods';
 import DashboardCustomTopTabBar from './DashboardCustomTopTabBar';
+import {useNavigation} from '@react-navigation/native';
 
 const Tab = createMaterialTopTabNavigator();
 
 function DashboardTopTabNavigation() {
+  const navigation = useNavigation();
   const viewableRef = useRef();
   // const insets = useInsets();
   // const profile = useProfile();
@@ -95,7 +97,6 @@ function DashboardTopTabNavigation() {
         screenListeners={{
           focus: e => {
             setisViewableItemSet(false);
-
             categoryNameRef.current = e.target.split('-')[0];
             // setcategoryName(preName => {
             //   setpreCategoryName(preName);

@@ -18,7 +18,7 @@ import CustomHomeTabButton from '../Components/CustomHomeTabButton';
 import {useDispatch} from 'react-redux';
 import {setIsOpenLoginAlert, setNuggetType} from '../Store/Slices/UtilitySlice';
 import StyledText from '../Components/StyledText';
-import {IS_IOS} from '../Utilities/Constants';
+import {IS_ENABLE_CHIME_FUNCTIONALITY, IS_IOS} from '../Utilities/Constants';
 
 const CustomBottomTabBar = ({state, descriptors, navigation}) => {
   const [visible, setVisible] = useState(true);
@@ -57,13 +57,16 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
         }>
         {state.routes.map((route, index) => {
           let Icon;
-          if (route.name === 'EventsStack') {
+          if (route.name === 'EventsStack' && IS_ENABLE_CHIME_FUNCTIONALITY) {
             Icon = EventsIcon;
           } else if (route.name === 'NotificationsStack') {
             Icon = NotificationsIcon;
           } else if (route.name === 'HomeStack') {
             Icon = EventsIcon;
-          } else if (route.name === 'TalkshowStack') {
+          } else if (
+            route.name === 'TalkshowStack' &&
+            IS_ENABLE_CHIME_FUNCTIONALITY
+          ) {
             Icon = TalkShowIcon;
           } else if (route.name === 'UsersStack') {
             Icon = UserIcon;
@@ -84,11 +87,11 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
           };
 
           const onPress = () => {
-            if (!token && index !== 2) {
+            if (!token && index !== (IS_ENABLE_CHIME_FUNCTIONALITY ? 2 : 1)) {
               dispatch(setIsOpenLoginAlert(true));
               return;
             }
-            if (index === 2) {
+            if (index === (IS_ENABLE_CHIME_FUNCTIONALITY ? 2 : 1)) {
               handleChangeNuggetType();
             }
 
@@ -104,7 +107,7 @@ const CustomBottomTabBar = ({state, descriptors, navigation}) => {
 
           return (
             <View key={index} style={styles.mainItemContainer}>
-              {index === 2 ? (
+              {index === (IS_ENABLE_CHIME_FUNCTIONALITY ? 2 : 1) ? (
                 <CustomHomeTabButton
                   onPress={onPress}
                   isLoading={isAllNuggetsLoading}

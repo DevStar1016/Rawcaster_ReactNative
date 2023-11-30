@@ -26,6 +26,7 @@ import EventsStack from '../Stacks/EventsStack';
 import UsersStack from '../Stacks/UsersStack';
 import NotificationsStack from '../Stacks/NotificationsStack';
 import {useDashboardProfile} from '../Utilities/Contexts';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../Utilities/Constants';
 
 const Tab = createBottomTabNavigator();
 export default function BottomTabNavigation() {
@@ -81,7 +82,9 @@ export default function BottomTabNavigation() {
   };
 
   const getInitialRouteName = () => {
-    // return 'HomeStack';
+    if (!IS_ENABLE_CHIME_FUNCTIONALITY) {
+      return 'HomeStack';
+    }
     if (token && settings) {
       switch (
         settings.mobile_default_page // 1-nuggets ( Home ), 2-events,  3-chats
@@ -131,10 +134,14 @@ export default function BottomTabNavigation() {
           tabBarHideOnKeyboard: true,
           tabBarShowLabel: false,
         })}>
-        <Tab.Screen name="EventsStack" component={EventsStack} />
+        {IS_ENABLE_CHIME_FUNCTIONALITY && (
+          <Tab.Screen name="EventsStack" component={EventsStack} />
+        )}
         <Tab.Screen name="NotificationsStack" component={NotificationsStack} />
         <Tab.Screen name="HomeStack" component={HomeStack} />
-        <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
+        {IS_ENABLE_CHIME_FUNCTIONALITY && (
+          <Tab.Screen name="TalkshowStack" component={TalkshowStack} />
+        )}
         <Tab.Screen
           name="UsersStack"
           component={UsersStack}

@@ -198,7 +198,9 @@ const NotificationsList = ({
       .then(res => {
         if (res.data.status === 1) {
           dispatch(
-            setUnreadNotificationCount(parseInt(unreadNotificationCount) - 1),
+            setUnreadNotificationCount(
+              parseInt(unreadNotificationCount ?? '0') - 1,
+            ),
           );
           setnotificationsList(preList => {
             let tempNotificationList = [...preList];

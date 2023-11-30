@@ -364,7 +364,7 @@ export const addNugget = createAsyncThunk(
     );
     Toast.success('Nugget being uploaded...');
     try {
-      data.navigation.goBack();
+      data.navigateGoBack();
       // data.navigation.reset({
       //   routes: [{name: 'DashboardProfileTopTabNavigation'}],
       // });

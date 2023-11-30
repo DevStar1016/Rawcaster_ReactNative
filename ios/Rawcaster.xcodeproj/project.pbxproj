@@ -31,6 +31,9 @@
 		88C502C54654408F7387EE4D /* Pods_Rawcaster_RawcasterTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61C1E2812B29A1EECEC97F8D /* Pods_Rawcaster_RawcasterTests.framework */; };
 		95DBB1742C01473BBBF52B28 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0E2E1D3090304ABA9C8427B2 /* Inter-SemiBold.ttf */; };
 		972948014DCD43778F8D39D9 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 84F593CB9DF740A0B3DAA752 /* Roboto-Bold.ttf */; };
+		9C4839A52B15AD2500E4E8A5 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C4839A42B15AD2500E4E8A5 /* ShareViewController.swift */; };
+		9C4839A82B15AD2500E4E8A5 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9C4839A62B15AD2500E4E8A5 /* MainInterface.storyboard */; };
+		9C4839B22B15D78300E4E8A5 /* GalleryShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 9C4839A22B15AD2400E4E8A5 /* GalleryShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9C616AD0299A3296009CE5E6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9C616ACF299A3296009CE5E6 /* GoogleService-Info.plist */; };
 		9CE0CDFA2A616C5300C3EB47 /* NativeMobileSDKBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CE0CDF52A616C5300C3EB47 /* NativeMobileSDKBridge.m */; };
 		9CE0CDFB2A616C5300C3EB47 /* MeetingObservers.m in Sources */ = {isa = PBXBuildFile; fileRef = 9CE0CDF82A616C5300C3EB47 /* MeetingObservers.m */; };
@@ -56,7 +59,28 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = Rawcaster;
 		};
+		9C4839AA2B15AD2500E4E8A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9C4839A12B15AD2400E4E8A5;
+			remoteInfo = GalleryShare;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9C01EBD32B14B39C0034EB5B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9C4839B22B15D78300E4E8A5 /* GalleryShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		00E356EE1AD99517003FC87E /* RawcasterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RawcasterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -96,6 +120,11 @@
 		929EA32DA48145D3B4E57F00 /* Roboto-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-LightItalic.ttf"; path = "../assets/fonts/Roboto/Roboto-LightItalic.ttf"; sourceTree = "<group>"; };
 		9AB9B1356B994EFFABAD0D07 /* Roboto-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Black.ttf"; path = "../assets/fonts/Roboto/Roboto-Black.ttf"; sourceTree = "<group>"; };
 		9C0CF2BD2AF1082F00BFC96B /* idenfy_react_native.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = idenfy_react_native.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C4839A22B15AD2400E4E8A5 /* GalleryShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GalleryShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C4839A42B15AD2500E4E8A5 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		9C4839A72B15AD2500E4E8A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		9C4839A92B15AD2500E4E8A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9C4839B02B15B13A00E4E8A5 /* GalleryShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GalleryShare.entitlements; sourceTree = "<group>"; };
 		9C515AB3299A399400C8CF1A /* Rawcaster.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Rawcaster.entitlements; path = Rawcaster/Rawcaster.entitlements; sourceTree = "<group>"; };
 		9C616ACF299A3296009CE5E6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9CE0CDF42A616C5300C3EB47 /* NativeMobileSDKBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NativeMobileSDKBridge.h; path = Rawcaster/NativeMobileSDKBridge.h; sourceTree = "<group>"; };
@@ -129,6 +158,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5D098F42620B71C18CF2BD3 /* Pods_Rawcaster.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C48399F2B15AD2400E4E8A5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +263,7 @@
 				13B07FAE1A68108700A75B9A /* Rawcaster */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* RawcasterTests */,
+				9C4839A32B15AD2500E4E8A5 /* GalleryShare */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -242,8 +279,20 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* Rawcaster.app */,
 				00E356EE1AD99517003FC87E /* RawcasterTests.xctest */,
+				9C4839A22B15AD2400E4E8A5 /* GalleryShare.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9C4839A32B15AD2500E4E8A5 /* GalleryShare */ = {
+			isa = PBXGroup;
+			children = (
+				9C4839B02B15B13A00E4E8A5 /* GalleryShare.entitlements */,
+				9C4839A42B15AD2500E4E8A5 /* ShareViewController.swift */,
+				9C4839A62B15AD2500E4E8A5 /* MainInterface.storyboard */,
+				9C4839A92B15AD2500E4E8A5 /* Info.plist */,
+			);
+			path = GalleryShare;
 			sourceTree = "<group>";
 		};
 		9CE0CDF32A616C3B00C3EB47 /* ChimeMeeting */ = {
@@ -300,6 +349,7 @@
 			buildPhases = (
 				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
+				9C01EBD32B14B39C0034EB5B /* Embed Foundation Extensions */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
@@ -311,11 +361,29 @@
 			buildRules = (
 			);
 			dependencies = (
+				9C4839AB2B15AD2500E4E8A5 /* PBXTargetDependency */,
 			);
 			name = Rawcaster;
 			productName = Rawcaster;
 			productReference = 13B07F961A680F5B00A75B9A /* Rawcaster.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9C4839A12B15AD2400E4E8A5 /* GalleryShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9C4839AD2B15AD2500E4E8A5 /* Build configuration list for PBXNativeTarget "GalleryShare" */;
+			buildPhases = (
+				9C48399E2B15AD2400E4E8A5 /* Sources */,
+				9C48399F2B15AD2400E4E8A5 /* Frameworks */,
+				9C4839A02B15AD2400E4E8A5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GalleryShare;
+			productName = GalleryShare;
+			productReference = 9C4839A22B15AD2400E4E8A5 /* GalleryShare.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -323,6 +391,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					00E356ED1AD99517003FC87E = {
@@ -331,6 +400,9 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
+					};
+					9C4839A12B15AD2400E4E8A5 = {
+						CreatedOnToolsVersion = 15.0.1;
 					};
 				};
 			};
@@ -349,6 +421,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Rawcaster */,
 				00E356ED1AD99517003FC87E /* RawcasterTests */,
+				9C4839A12B15AD2400E4E8A5 /* GalleryShare */,
 			);
 		};
 /* End PBXProject section */
@@ -396,6 +469,14 @@
 				22F9C5126C74408A939F047C /* Inter-Regular.ttf in Resources */,
 				95DBB1742C01473BBBF52B28 /* Inter-SemiBold.ttf in Resources */,
 				7BA108BFF4B34D4F888A91F3 /* Inter-Thin.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C4839A02B15AD2400E4E8A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9C4839A82B15AD2500E4E8A5 /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -585,6 +666,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9C48399E2B15AD2400E4E8A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9C4839A52B15AD2500E4E8A5 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -593,7 +682,23 @@
 			target = 13B07F861A680F5B00A75B9A /* Rawcaster */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
+		9C4839AB2B15AD2500E4E8A5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9C4839A12B15AD2400E4E8A5 /* GalleryShare */;
+			targetProxy = 9C4839AA2B15AD2500E4E8A5 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		9C4839A62B15AD2500E4E8A5 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9C4839A72B15AD2500E4E8A5 /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
@@ -651,14 +756,125 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-Rawcaster.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Rawcaster/Rawcaster.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_TEAM = CR8PDZDGNZ;
 				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/BVLinearGradient/BVLinearGradient.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/DoubleConversion/DoubleConversion.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCore/FirebaseCore.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreExtension/FirebaseCoreExtension.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseCoreInternal/FirebaseCoreInternal.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseInstallations/FirebaseInstallations.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/FirebaseMessaging/FirebaseMessaging.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GTMAppAuth/GTMAppAuth.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleDataTransport/GoogleDataTransport.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleSignIn/GoogleSignIn.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/GoogleUtilities/GoogleUtilities.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/NextLevelSessionExporter/NextLevelSessionExporter.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/folly.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RCTTypeSafety/RCTTypeSafety.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNAppleAuthentication/RNAppleAuthentication.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNAudioRecorderPlayer/RNAudioRecorderPlayer.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNCClipboard/RNCClipboard.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNDateTimePicker/RNDateTimePicker.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNDeviceInfo/RNDeviceInfo.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBApp/RNFBApp.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNFBMessaging/RNFBMessaging.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNGestureHandler/RNGestureHandler.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNGoogleSignin/RNGoogleSignin.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNImageCropPicker/RNImageCropPicker.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNReanimated/RNReanimated.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVG.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNScreens/RNScreens.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNShare/RNShare.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/RNSound/RNSound.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-Codegen/React_Codegen.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-CoreModules/CoreModules.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTAnimation/RCTAnimation.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTAppDelegate/React_RCTAppDelegate.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTBlob/RCTBlob.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTImage/RCTImage.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTLinking/RCTLinking.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTNetwork/RCTNetwork.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTSettings/RCTSettings.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTText/RCTText.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-RCTVibration/RCTVibration.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/cxxreact.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-hermes/reacthermes.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsi/jsi.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsiexecutor/jsireact.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-jsinspector/jsinspector.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-logger/logger.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/React-perflogger/reactperflogger.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/ReactNativeAvoidSoftinput/ReactNativeAvoidSoftinput.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImageWebPCoder/SDWebImageWebPCoder.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/SwiftAudioEx/SwiftAudioEx.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/TOCropViewController/TOCropViewController.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/VisionCamera/VisionCamera.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/Yoga/yoga.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/fmt/fmt.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/idenfy-react-native/idenfy_react_native.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/libevent/libevent.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/libwebp/libwebp.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/lottie-ios/Lottie.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/nanopb/nanopb.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-background-timer/react_native_background_timer.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-blur/react_native_blur.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-cameraroll/react_native_cameraroll.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-compressor/react_native_compressor.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-contacts/react_native_contacts.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-create-thumbnail/react_native_create_thumbnail.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-document-picker/react_native_document_picker.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-encrypted-storage/react_native_encrypted_storage.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-geolocation-service/react_native_geolocation_service.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-google-contact-api/react_native_google_contact_api.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-image-crop-tools/react_native_image_crop_tools.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-netinfo/react_native_netinfo.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-pager-view/react_native_pager_view.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-photo-editor/react_native_photo_editor.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-safe-area-context/react_native_safe_area_context.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-splash-screen/react_native_splash_screen.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-track-player/react_native_track_player.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-video/react_native_video.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-webview/react_native_webview.framework/Headers\"",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/rn-fetch-blob/rn_fetch_blob.framework/Headers\"",
+					"\"${PODS_ROOT}/Headers/Public\"",
+					"\"${PODS_ROOT}/Headers/Public/FBLazyVector\"",
+					"\"${PODS_ROOT}/Headers/Public/Firebase\"",
+					"\"${PODS_ROOT}/Headers/Public/RCTRequired\"",
+					"\"${PODS_ROOT}/Headers/Public/React-callinvoker\"",
+					"\"${PODS_ROOT}/Headers/Public/React-runtimeexecutor\"",
+					"\"${PODS_ROOT}/Headers/Public/hermes-engine\"",
+					"\"$(PODS_ROOT)/DoubleConversion\"",
+					"$(inherited)",
+					"${PODS_ROOT}/Firebase/CoreOnly/Sources",
+					"\"$(PODS_ROOT)/boost\"",
+					"\"$(PODS_ROOT)/boost\"",
+					"\"$(PODS_ROOT)/boost-for-react-native\"",
+					"\"$(PODS_ROOT)/glog\"",
+					"\"$(PODS_ROOT)/RCT-Folly\"",
+					"\"$(PODS_ROOT)/RCT-Folly\"",
+					"\"${PODS_ROOT}/Headers/Public/React-hermes\"",
+					"\"${PODS_ROOT}/Headers/Public/hermes-engine\"",
+					"\"$(PODS_ROOT)/../../node_modules/react-native/ReactCommon\"",
+					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
+					"\"$(PODS_TARGET_SRCROOT)/include/\"",
+				);
 				INFOPLIST_FILE = Rawcaster/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rawcaster;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -689,13 +905,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-Rawcaster.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Rawcaster/Rawcaster.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_TEAM = CR8PDZDGNZ;
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Rawcaster/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Rawcaster;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -858,6 +1076,93 @@
 			};
 			name = Release;
 		};
+		9C4839AE2B15AD2500E4E8A5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = GalleryShare/GalleryShare.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = CR8PDZDGNZ;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GalleryShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GalleryShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rawcaster.app.GalleryShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9C4839AF2B15AD2500E4E8A5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = GalleryShare/GalleryShare.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = CR8PDZDGNZ;
+				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GalleryShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GalleryShare;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rawcaster.app.GalleryShare;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -884,6 +1189,15 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9C4839AD2B15AD2500E4E8A5 /* Build configuration list for PBXNativeTarget "GalleryShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C4839AE2B15AD2500E4E8A5 /* Debug */,
+				9C4839AF2B15AD2500E4E8A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

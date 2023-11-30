@@ -1,10 +1,10 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import BottomTabNavigation from '../../BottomTabNavigation';
 import ProfileStack from '../../../Stacks/ProfileStack';
 import DefaultBackground from '../../../Components/DefaultBackground';
-import { DashboardProfileContext } from '../../../Utilities/Contexts';
-import { useState } from 'react';
-import { useProfile, useToken } from '../../../Utilities/StoreData';
+import {DashboardProfileContext} from '../../../Utilities/Contexts';
+import {useState} from 'react';
+import {useProfile, useToken} from '../../../Utilities/StoreData';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -32,7 +32,7 @@ function DashboardProfileTopTabNavigation() {
           lazy: true,
           lazyPlaceholder: () => <DefaultBackground />,
         }}>
-        {token ?
+        {token ? (
           <>
             <Tab.Screen
               name="BottomTabNavigationAfterLogin"
@@ -47,7 +47,9 @@ function DashboardProfileTopTabNavigation() {
               options={{
                 title: '',
               }}
-            /></> :
+            />
+          </>
+        ) : (
           <Tab.Screen
             name="BottomTabNavigationBeforeLogin"
             component={BottomTabNavigation}
@@ -55,7 +57,7 @@ function DashboardProfileTopTabNavigation() {
               title: '',
             }}
           />
-        }
+        )}
       </Tab.Navigator>
     </DashboardProfileContext.Provider>
   );

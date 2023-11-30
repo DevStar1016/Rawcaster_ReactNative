@@ -77,7 +77,7 @@ var metaDataFetchingTimer = undefined;
 const EMOJI_CONTAINER_HEIGHT = DIMENSIONS.window.height / 2;
 const PostEditNugget = ({route}) => {
   const [isKeyBoardEnabledStatus, setisKeyBoardEnabledStatus] = useState(false);
-  const {nugget, preContent} = route.params ?? {};
+  const {nugget, preContent, files} = route.params ?? {};
   const focus = useIsFocused();
   const dispatch = useDispatch();
   const connectionsList = useConnectionsList();
@@ -130,6 +130,32 @@ const PostEditNugget = ({route}) => {
     text: '',
   });
   const [typedText, settypedText] = useState(nugget?.content ?? '');
+
+  useEffect(() => {
+    if (files && isMount) {
+      const decodedFiles = JSON.parse(
+        IS_IOS ? decodeURIComponent(files) : files,
+      );
+      if (decodedFiles && decodedFiles.length > 0) {
+        let receivedFiles = [...decodedFiles].filter(item => item.webLink);
+        if ([...decodedFiles].filter(item => item.uri).length > 0) {
+          setselectedMediaList(
+            [...decodedFiles].map(item => ({
+              ...item,
+              uri: getUrlWithFilePrefix(decodeURIComponent(item.uri)),
+              type: decodeURIComponent(item.type),
+            })),
+          );
+        } else if (receivedFiles.length > 0) {
+          settypedText(
+            [...receivedFiles]
+              .map(item => decodeURIComponent(item.webLink))
+              .toString(),
+          );
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!typedText && focus) {
@@ -187,7 +213,7 @@ const PostEditNugget = ({route}) => {
           setisOpenEmojiContainer(false);
         }
       } else {
-        navigation.goBack();
+        navigateGoBack();
       }
       return true;
     };
@@ -264,6 +290,12 @@ const PostEditNugget = ({route}) => {
       }
     }
   }, []);
+
+  const resetStack = () => {
+    navigation.reset({
+      routes: [{name: 'DashboardProfileTopTabNavigation'}],
+    });
+  };
 
   function getMetaDataArrayJSON() {
     let metaData = JSON.parse(nugget?.metadata);
@@ -421,7 +453,8 @@ const PostEditNugget = ({route}) => {
       }
     }
 
-    dispatch(addNugget({navigation, formData}));
+    dispatch(addNugget({navigateGoBack, formData}));
+
     // stopLoader();
     // addNuggetsService(formData)
     //   .then(res => {
@@ -515,7 +548,7 @@ const PostEditNugget = ({route}) => {
           if (res.data.nugget_detail) {
             dispatch(addEditedNugget(res.data.nugget_detail));
           }
-          navigation.goBack();
+          navigateGoBack();
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
         }
@@ -825,6 +858,14 @@ const PostEditNugget = ({route}) => {
     );
   }
 
+  const navigateGoBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      resetStack();
+    }
+  };
+
   /**
    * Calculates the maximum height for a container based on various conditions.
    * @returns {number} The maximum height for the container.
@@ -1016,7 +1057,7 @@ const PostEditNugget = ({route}) => {
         isEnableRightIcon: true,
         rightIcon: 'close_white',
         onPressRightIcon: () => {
-          navigation.goBack();
+          navigateGoBack();
         },
       }}
       isEnableDefaultBackground>
@@ -1308,16 +1349,16 @@ const PostEditNugget = ({route}) => {
                     />
                   )}
                   <View style={{flex: 1, paddingLeft: 15}}>
-                    {urlMetaData[urlMetaData.length - 1].title && (
-                      <StyledText
-                        style={{
-                          color: COLORS.white,
-                          fontFamily: FONTS.DMSans.bold,
-                        }}
-                        normalTextModeTextProps={{numberOfLines: 1}}>
-                        {urlMetaData[urlMetaData.length - 1].title}
-                      </StyledText>
-                    )}
+                    <StyledText
+                      style={{
+                        color: COLORS.white,
+                        fontFamily: FONTS.DMSans.bold,
+                      }}
+                      normalTextModeTextProps={{numberOfLines: 1}}>
+                      {urlMetaData[urlMetaData.length - 1].title ??
+                        urlMetaData[urlMetaData.length - 1].url}
+                    </StyledText>
+
                     {urlMetaData[urlMetaData.length - 1].description && (
                       <StyledText
                         style={{
@@ -1444,9 +1485,9 @@ const PostEditNugget = ({route}) => {
         statusBarTranslucent
         transparent
         onRequestClose={() => {
-          if (isMount) {
-            setisOpenCamera(false);
-          }
+          // if (isMount) {
+          //   setisOpenCamera(false);
+          // }
         }}>
         <CustomCameraView
           setModal={setisOpenCamera}

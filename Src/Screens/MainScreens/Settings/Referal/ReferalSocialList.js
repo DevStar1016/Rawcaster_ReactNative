@@ -231,6 +231,9 @@ const ReferalSocialList = () => {
         }
         break;
       case SHARE_OPTION.facebook:
+        // Linking.openURL('fb://post?text=rerr');
+        // fb://post/%@
+
         handleSocialShare({socialMedia: Share.Social.FACEBOOK});
         break;
       case SHARE_OPTION.instagram:

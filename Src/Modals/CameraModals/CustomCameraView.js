@@ -1,4 +1,5 @@
 import {
+  Alert,
   Animated,
   Modal,
   StatusBar,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Camera,
   useCameraDevice,
@@ -41,6 +42,12 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
   });
   const animatedButtonScale = new Animated.Value(1);
   const insets = useInsets();
+
+  useEffect(() => {
+    return () => {
+      handleStopVideoRecording();
+    };
+  }, []);
 
   /**
    * Retrieves the camera type based on the camera setting.
@@ -246,9 +253,11 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         ref={camera}
         style={[StyleSheet.absoluteFill]}
         device={
-          cameraSetting.cameraType === 2
-            ? useCameraDevice('front')
-            : useCameraDevice('back')
+          getCameraType()
+          // getCameraType()
+          // cameraSetting.cameraType === 2
+          //   ? useCameraDevice('front')
+          //   : useCameraDevice('back')
         }
         isActive={true}
         audio={true}
@@ -270,37 +279,57 @@ const CustomCameraView = ({setModal, onSendMedia}) => {
         <View
           style={[
             styles.topBottomActionButtonsContainer,
-            {justifyContent: isVideoRecording ? 'center' : 'space-between'},
+            {justifyContent: 'space-between'},
           ]}>
-          {!isVideoRecording ? (
-            <>
-              <TopActionButton
-                icon={'close_white'}
-                iconSize={18}
-                onPress={() => {
-                  setModal(false);
-                }}
-              />
-              <TopActionButton
-                icon={getFlashIcon()}
-                onPress={() => {
-                  setcameraSetting(preSetting => {
-                    let tempFlashMode = preSetting.flashMode;
-                    if (tempFlashMode === 2) {
-                      tempFlashMode = 0;
-                    } else {
-                      tempFlashMode = tempFlashMode + 1;
-                    }
-                    return {...preSetting, flashMode: tempFlashMode};
-                  });
-                }}
-              />
-            </>
-          ) : (
+          <TopActionButton
+            icon={'close_white'}
+            iconSize={18}
+            onPress={() => {
+              if (isVideoRecording) {
+                Alert.alert(
+                  '',
+                  `Do you want to stop the recording?`,
+                  [
+                    {
+                      text: 'Yes',
+                      onPress: () => {
+                        handleStopVideoRecording();
+                      },
+                    },
+                    {text: 'No', onPress: () => {}},
+                  ],
+                  {
+                    cancelable: true,
+                  },
+                );
+              } else {
+                setModal(false);
+              }
+            }}
+          />
+          {isVideoRecording && (
             <VideoRecordTimer
               maxSeconds={MAX_VIDEO_SECONDS}
               onReachMaxTime={() => {
                 handleStopVideoRecording();
+              }}
+            />
+          )}
+          {isVideoRecording ? (
+            <View style={{height: 28, width: 28}} />
+          ) : (
+            <TopActionButton
+              icon={getFlashIcon()}
+              onPress={() => {
+                setcameraSetting(preSetting => {
+                  let tempFlashMode = preSetting.flashMode;
+                  if (tempFlashMode === 2) {
+                    tempFlashMode = 0;
+                  } else {
+                    tempFlashMode = tempFlashMode + 1;
+                  }
+                  return {...preSetting, flashMode: tempFlashMode};
+                });
               }}
             />
           )}

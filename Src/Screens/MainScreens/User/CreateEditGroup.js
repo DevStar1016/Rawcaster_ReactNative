@@ -35,7 +35,10 @@ import {useDispatch} from 'react-redux';
 import {setGroupsList} from '../../../Store/Slices/HomeSlice';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import MenuContainer from '../../../Modals/MenuContainer';
-import {GROUP_CATEGORY} from '../../../Utilities/Constants';
+import {
+  GROUP_CATEGORY,
+  IS_ENABLE_CHIME_FUNCTIONALITY,
+} from '../../../Utilities/Constants';
 import {deleteFriendGroupService} from '../../../Services/ApiService';
 import InputPopup from '../../../Modals/InputPopup';
 import {
@@ -575,12 +578,14 @@ const CreateEditGroup = ({route}) => {
           buttonName: `Share Link`,
         });
       }
-      groupMenuList.push({
-        id: GROUP_OPERATIONS.enableDisableMemberChat,
-        buttonName: `${
-          isEnabledMemberChat() ? 'Disable' : 'Enable'
-        } Member Chat`,
-      });
+      if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+        groupMenuList.push({
+          id: GROUP_OPERATIONS.enableDisableMemberChat,
+          buttonName: `${
+            isEnabledMemberChat() ? 'Disable' : 'Enable'
+          } Member Chat`,
+        });
+      }
 
       if (isOtherGroup()) {
         groupMenuList.push({
@@ -754,7 +759,8 @@ const CreateEditGroup = ({route}) => {
         title: `${groupId ? 'Edit' : 'Create'} Group`,
         isTitleCenter: true,
         rightIcon: 'menu_vertical_white',
-        isEnableRightIcon: groupId ? true : false,
+        isEnableRightIcon:
+          groupId && getMenuOptions().length > 0 ? true : false,
         rightIconSize: 18,
         onPressRightIcon: () => {
           if (isMount) {

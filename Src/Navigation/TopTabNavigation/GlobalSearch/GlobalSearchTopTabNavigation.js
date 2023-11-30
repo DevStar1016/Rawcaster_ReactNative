@@ -8,6 +8,7 @@ import EventsSearchStack from '../../../Stacks/EventsSearchStack';
 import TagsSearch from '../../../Screens/MainScreens/GlobalSearch/TagsSearch';
 import ProfileSearch from '../../../Screens/MainScreens/GlobalSearch/ProfileSearch';
 import {useGlobalSearch} from '../../../Utilities/Contexts';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../../../Utilities/Constants';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -24,7 +25,10 @@ function GlobalSearchTopTabNavigation() {
             setFocusedTab('Profile');
           } else if (e.target.includes('NuggetsSearch')) {
             setFocusedTab('Nuggets');
-          } else if (e.target.includes('EventsSearch')) {
+          } else if (
+            e.target.includes('EventsSearch') &&
+            IS_ENABLE_CHIME_FUNCTIONALITY
+          ) {
             setFocusedTab('Events');
           } else if (e.target.includes('TagsSearch')) {
             setFocusedTab('#Tags');
@@ -41,11 +45,13 @@ function GlobalSearchTopTabNavigation() {
         component={NuggetsSearch}
         options={{title: 'Nuggets'}}
       />
-      <Tab.Screen
-        name="EventsSearchStack"
-        component={EventsSearchStack}
-        options={{title: 'Events'}}
-      />
+      {IS_ENABLE_CHIME_FUNCTIONALITY && (
+        <Tab.Screen
+          name="EventsSearchStack"
+          component={EventsSearchStack}
+          options={{title: 'Events'}}
+        />
+      )}
       <Tab.Screen
         name="TagsSearch"
         component={TagsSearch}

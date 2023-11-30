@@ -97,6 +97,17 @@ const SignupWithPhone = ({route}) => {
       }
       return true;
     }),
+    country: Yup.object()
+      .nullable()
+      .test('country', 'required', (value, ctx) => {
+        const {isEnablePhoneNumber} = ctx.parent;
+        if (isEnablePhoneNumber && !value) {
+          return ctx.createError({
+            message: 'Country code is required',
+          });
+        }
+        return true;
+      }),
     //  isEnablePhoneNumber
     //   ? Yup.string().required('Phone number is required')
     //   : Yup.string().email('Enter valid email').required('Email is required'),
@@ -121,6 +132,7 @@ const SignupWithPhone = ({route}) => {
       password: '',
       dob: '',
       sex: null,
+      country: null,
     },
     validationSchema: validationSchema,
     onSubmit: values => {
@@ -190,6 +202,15 @@ const SignupWithPhone = ({route}) => {
       formData.append('other_gender', values.gender);
     }
     formData.append('email_id', values.login_id?.trim());
+    if (
+      values.isEnablePhoneNumber &&
+      values.country &&
+      values.login_id?.trim()
+    ) {
+      formData.append('country_id', values.country.id);
+      formData.append('country_code', values.country.phone_code);
+    }
+
     formData.append('password', values.password);
     formData.append('confirm_password', values.password);
     if (locationDetails || tempLocationDetails) {
@@ -304,10 +325,33 @@ const SignupWithPhone = ({route}) => {
               title="Phone Number"
               keyboardType="number-pad"
               maxLength={13}
+              isEnableCountryCode
+              inputContainerMarginLeft={10}
               onChangeText={handleChange('login_id')}
               errorText={
-                errors.login_id && touched.login_id ? errors.login_id : ''
+                touched.country && errors.country
+                  ? errors.country
+                  : errors.login_id && touched.login_id
+                  ? errors.login_id
+                  : ''
               }
+              countryCodePickerProps={{
+                listType: 'large',
+                fieldName: 'phone_code',
+                listFieldName: 'name',
+                value: values.country,
+                listTitle: 'Select Country Code',
+                isHideErrorText: true,
+                errorText: touched.country && errors.country,
+                bigListProps: {
+                  apiName: 'country',
+                  isAPICall: true,
+                  secondaryFieldName: 'phone_code',
+                },
+                onSelectItem: selectedItem => {
+                  setFieldValue('country', selectedItem);
+                },
+              }}
               value={values.login_id}
             />
           ) : (
@@ -351,6 +395,7 @@ const SignupWithPhone = ({route}) => {
                   setValues(preValues => ({
                     ...preValues,
                     login_id: '',
+                    country: null,
                     isEnablePhoneNumber: !preValues.isEnablePhoneNumber,
                   }));
                   // setisEnablePhoneNumber(pre => !pre);

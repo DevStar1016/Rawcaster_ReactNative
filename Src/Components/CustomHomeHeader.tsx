@@ -17,6 +17,7 @@ import ProfileWithBadge from './ProfileWithBadge';
 import {FONTS} from '../Utilities/Fonts';
 import LiveGif from '../Assets/Gif/live.gif';
 import Badges from '../Utilities/Badges';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../Utilities/Constants';
 
 export type CustomHomeHeaderProps = {
   bgColor?: string;
@@ -196,7 +197,7 @@ const CustomHomeHeader = ({
           />
         )}
 
-        {isEnableLive && (
+        {isEnableLive && IS_ENABLE_CHIME_FUNCTIONALITY && (
           <TouchableOpacity
             onPress={() => {
               if (isLogin()) {

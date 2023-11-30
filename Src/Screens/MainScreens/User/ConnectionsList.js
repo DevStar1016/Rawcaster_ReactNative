@@ -40,6 +40,7 @@ import Loader from '../../../Components/Loader';
 import RoundedPlusButton from '../../../Components/RoundedPlusButton';
 import {useNavigation} from '@react-navigation/native';
 import DefaultBackground from '../../../Components/DefaultBackground';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../../../Utilities/Constants';
 
 var isMount = true;
 const ConnectionsList = () => {
@@ -205,11 +206,16 @@ const ConnectionsList = () => {
       <TouchableOpacity
         style={styles.itemContainer}
         activeOpacity={0.8}
-        disabled={typeof item.online === typeof undefined}
+        disabled={
+          !IS_ENABLE_CHIME_FUNCTIONALITY ||
+          typeof item.online === typeof undefined
+        }
         onPress={() => {
-          navigation.navigate('UserChat', {
-            userData: item,
-          });
+          if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+            navigation.navigate('UserChat', {
+              userData: item,
+            });
+          }
         }}>
         <View style={styles.subContainer}>
           <ProfileWithBadge
@@ -230,10 +236,12 @@ const ConnectionsList = () => {
             <StyledText style={styles.nameText}>
               {getSlicedText(item.display_name, 20)}
             </StyledText>
-            <StyledText style={styles.messageText}>
-              {/* {getSlicedText(item.last_msg, 30)} */}Lorem ipsum dolor sit
-              ame ...
-            </StyledText>
+
+            {IS_ENABLE_CHIME_FUNCTIONALITY && (
+              <StyledText style={styles.messageText}>
+                {getSlicedText(item.last_msg, 30)}
+              </StyledText>
+            )}
           </View>
         </View>
 
@@ -261,16 +269,18 @@ const ConnectionsList = () => {
               />
             </>
           ) : (
-            <>
-              <SVGIcon
-                icon="audio_call_white"
-                height={22}
-                width={22}
-                isButton
-                marginLeft={10}
-              />
-              <SVGIcon isButton icon="video_call_white" marginLeft={20} />
-            </>
+            IS_ENABLE_CHIME_FUNCTIONALITY && (
+              <>
+                <SVGIcon
+                  icon="audio_call_white"
+                  height={22}
+                  width={22}
+                  isButton
+                  marginLeft={10}
+                />
+                <SVGIcon isButton icon="video_call_white" marginLeft={20} />
+              </>
+            )
           )}
         </View>
       </TouchableOpacity>

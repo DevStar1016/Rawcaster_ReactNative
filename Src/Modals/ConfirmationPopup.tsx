@@ -19,6 +19,7 @@ type MetaDataProp = {
   open_graph_image: string;
   title: string;
   description: string;
+  url: string;
 };
 
 type Props = {
@@ -75,18 +76,17 @@ const ConfirmationPopup = ({
           />
         )}
         <View style={{flex: 1, paddingLeft: 10}}>
-          {metaData.title && (
-            <StyledText
-              style={styles.metaDataTitle}
-              normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData.title}
-            </StyledText>
-          )}
-          {metaData.title && (
+          <StyledText
+            style={styles.metaDataTitle}
+            normalTextModeTextProps={{numberOfLines: 2}}>
+            {metaData.title ?? metaData.url}
+          </StyledText>
+
+          {metaData.description && (
             <StyledText
               style={styles.metaDataDescription}
               normalTextModeTextProps={{numberOfLines: 2}}>
-              {metaData.title}
+              {metaData.description}
             </StyledText>
           )}
         </View>

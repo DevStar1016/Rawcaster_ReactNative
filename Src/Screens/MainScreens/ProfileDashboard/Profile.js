@@ -54,6 +54,7 @@ import Nugget from '../HomeScreen/Nugget';
 import SVGIcon from '../../../Components/SVGIcon';
 import {
   DIMENSIONS,
+  IS_ENABLE_CHIME_FUNCTIONALITY,
   RAWCASTER_DEFAULT_MESSAGE,
 } from '../../../Utilities/Constants';
 import BlurOverlay from '../../../Components/BlurOverlay';
@@ -85,7 +86,8 @@ const Profile = ({route}) => {
   const isMount = useRef(true);
   const dispatch = useDispatch();
   const profile = useProfile();
-  const isFocused = useRef(useIsFocused());
+  const isFocused = useIsFocused();
+
   const [isunclaimeduserAlert, setisunclaimeduserAlert] = useState({
     status: false,
     text: '',
@@ -106,6 +108,7 @@ const Profile = ({route}) => {
   const [userId, setuserId] = useState(
     route.params ? route.params?.userId : focusedNuggetUserId ?? null,
   );
+
   const [isLoadMore, setisLoadMore] = useState(false);
   const [isRefreshing, setisRefreshing] = useState(false);
   const [isListLoading, setisListLoading] = useState(false);
@@ -148,13 +151,13 @@ const Profile = ({route}) => {
     return <View style={styles.divider} />;
   };
   useEffect(() => {
-    if (!isFocused.current) {
+    if (!isFocused) {
       if (nuggetContentController.current) {
         nuggetContentController.current.abort();
       }
       handleStopAudio();
     }
-  }, [isFocused.current]);
+  }, [isFocused]);
 
   useEffect(() => {
     currentPage = 1;
@@ -183,13 +186,13 @@ const Profile = ({route}) => {
   }, [focusedNuggetUserId]);
 
   useEffect(() => {
-    if (userId) {
+    if (userId && isFocused) {
       if (isMount.current) {
         setisLoading(true);
       }
       getOthersProfileAPI();
     }
-  }, [userId]);
+  }, [userId, isFocused]);
 
   useEffect(() => {
     if (
@@ -292,7 +295,7 @@ const Profile = ({route}) => {
               });
             }, 5000);
           }
-
+          console.log(isMount.current, 'ISMOUNT');
           if (isMount.current) {
             setothersProfile({...tempProfile});
           }
@@ -317,6 +320,7 @@ const Profile = ({route}) => {
         }
       })
       .catch(e => {
+        console.log(e, 'ERROR PROFILE');
         if (isMount.current) {
           if (e.message.includes('canceled')) {
             setothersProfile(null);
@@ -719,8 +723,8 @@ const Profile = ({route}) => {
     setisMuted: setisMuted,
     isAutoPlay: false,
     isFrom: 'profile',
-    isFocused: isFocused.current,
-    profileFocused: isFocused.current,
+    isFocused: isFocused,
+    profileFocused: isFocused,
     categoryName: 'forYou',
     scrollNuggetsListToTop: scrollNuggetsListToTop,
     // viewableNuggetItem: viewableItem.nugget_id,
@@ -771,8 +775,8 @@ const Profile = ({route}) => {
     ) : null;
   };
 
-  const renderHeader = useMemo(
-    () => (
+  const renderHeader = useMemo(() => {
+    return (
       <View style={{flex: 1, backgroundColor: COLORS.white, paddingBottom: 10}}>
         <ProfileTopSection
           userId={userId}
@@ -877,8 +881,8 @@ const Profile = ({route}) => {
           listType="fans"
           title={'Fans'}
           paddingHorizontal={PADDING_HORIZONTAL}
-          isDisplayChat
-          isDisplayEvent
+          isDisplayChat={IS_ENABLE_CHIME_FUNCTIONALITY}
+          isDisplayEvent={IS_ENABLE_CHIME_FUNCTIONALITY}
           onPressChat={() => {
             navigation.navigate('MyFansChat');
           }}
@@ -976,22 +980,21 @@ const Profile = ({route}) => {
           false
         )}
       </View>
-    ),
-    [
-      userId,
-      focusedNuggetUserId,
-      // getProfileData(),
-      // getClaimAccountStatus(),
-      unclaimedAccountsList,
-      othersProfile,
-      profile,
-      connections,
-      isFocused.current,
-      selectedTab,
-      nuggetsCount,
-      savedNuggetsList,
-    ],
-  );
+    );
+  }, [
+    userId,
+    focusedNuggetUserId,
+    // getProfileData(),
+    // getClaimAccountStatus(),
+    unclaimedAccountsList,
+    othersProfile,
+    profile,
+    connections,
+    isFocused,
+    selectedTab,
+    nuggetsCount,
+    savedNuggetsList,
+  ]);
 
   return (
     <NuggetParentActionsContext.Provider value={nuggetActions}>
@@ -1033,8 +1036,7 @@ const Profile = ({route}) => {
             }}
           />
         </View>
-        {((focusedNuggetUserId && isFocused.current) ||
-          !focusedNuggetUserId) && (
+        {((focusedNuggetUserId && isFocused) || !focusedNuggetUserId) && (
           <>
             {isLoading ? (
               <Loader
@@ -1122,7 +1124,7 @@ const Profile = ({route}) => {
           </Modal>
         )}
 
-        {!isFocused.current && <DefaultBackground />}
+        {!isFocused && <DefaultBackground />}
       </View>
     </NuggetParentActionsContext.Provider>
   );

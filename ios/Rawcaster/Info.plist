@@ -34,7 +34,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>rawcaster</string>
+			<string>com.rawcaster.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>rawcaster</string>
@@ -46,8 +46,11 @@
 			<key>CFBundleURLName</key>
 			<string></string>
 			<key>CFBundleURLSchemes</key>
-			<array/>
+			<array>
+				<string>rawcaster</string>
+			</array>
 		</dict>
+		<dict/>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
@@ -57,6 +60,7 @@
 	<array>
 		<string>instagram</string>
 		<string>tg</string>
+		<string>fb</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

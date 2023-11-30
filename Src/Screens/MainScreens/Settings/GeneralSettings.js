@@ -25,6 +25,7 @@ import {
   DEFAULT_PAGES_LIST,
   DISPLAY_CHOICES_LIST,
   EMAIL_REGEX,
+  IS_ENABLE_CHIME_FUNCTIONALITY,
   OPT_IN_STATUS_LIST,
   PHONE_REGEX,
   VISIBLE_CHOICES_LIST,
@@ -97,6 +98,7 @@ const CHOICE_CONTAINERS_LIST = [
     listFieldName: 'event_display_list',
     title: 'Event Display Option',
     listType: 2,
+    isHide: !IS_ENABLE_CHIME_FUNCTIONALITY,
   },
 ];
 
@@ -385,7 +387,7 @@ const GeneralSettings = () => {
 
   function getDefaultPage() {
     return [...DEFAULT_PAGES_LIST].find(
-      item => item.id === settingsData.mobile_default_page,
+      item => item.id === settingsData.mobile_default_page && item.isShow,
     );
   }
 
@@ -572,13 +574,14 @@ const GeneralSettings = () => {
           />
           <RowContainer leftText="User Type" rightText={profile?.user_type} />
           <DropDownPicker
-            title="Default Rawcaster page"
+            title="Default Rawcaster Page"
             isDisabled={isInActive}
             value={getDefaultPage()}
             listTitle=""
+            placeHolderText="Select Default Rawcaster Page"
             titleStyle={styles.titleText}
             borderColor={COLORS.borderColor}
-            dataList={DEFAULT_PAGES_LIST}
+            dataList={DEFAULT_PAGES_LIST.filter(item => item.isShow)}
             fieldName="type"
             onSelectItem={selectedItem => {
               handleChangeSettingsData({
@@ -613,7 +616,7 @@ const GeneralSettings = () => {
               }
             }}
           />
-          {CHOICE_CONTAINERS_LIST.map(item => {
+          {CHOICE_CONTAINERS_LIST.filter(item => !item.isHide).map(item => {
             const list =
               item.listType === 2
                 ? [...DISPLAY_CHOICES_LIST]

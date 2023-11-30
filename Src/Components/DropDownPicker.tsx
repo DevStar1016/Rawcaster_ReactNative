@@ -22,7 +22,7 @@ import ItemSelectionBigList, {
   ItemSelectionBigListProps,
 } from './ItemSelectionBigList';
 
-type Props = {
+export type DropDownPickerProps = {
   title?: string;
   value?: any;
   dateValue?: string;
@@ -38,8 +38,10 @@ type Props = {
   titlePaddingVertical?: number;
   inputContainerMarginVertical?: number;
   fieldName?: string;
+  listFieldName?: string;
   listTitle?: string;
   isDateTime?: boolean;
+  dropDownTextPaddingHorizontal?: number;
   errorText?: string;
   datePickerProps?: ReactNativeModalDateTimePickerProps;
   dropDownIcon?: IconType;
@@ -49,6 +51,7 @@ type Props = {
   isLoadingIcon?: boolean;
   listType?: 'mini' | 'large';
   fontSize?: number;
+  isHideErrorText?: boolean;
   backgroundColor?: string;
   borderColor?: string;
   valueTextColor?: string;
@@ -64,6 +67,7 @@ const DropDownPicker = ({
   value,
   dateValue,
   errorText = '',
+  isHideErrorText = false,
   dropDownIconSize = 13,
   mainContainerWidth = '100%',
   placeHolderText = 'Select Data',
@@ -74,6 +78,8 @@ const DropDownPicker = ({
   isDisabled = false,
   onSelectItem,
   fieldName,
+  listFieldName,
+  dropDownTextPaddingHorizontal = 15,
   isDateTime = false,
   mainContainerMarginVertical = 5,
   titlePaddingVertical = 5,
@@ -91,7 +97,7 @@ const DropDownPicker = ({
   additionalDisplayText = '',
   datePickerProps,
   bigListProps,
-}: Props) => {
+}: DropDownPickerProps) => {
   const [isOpenDataListModal, setisOpenDataListModal] = useState(false);
   const [isOpenDatePicker, setisOpenDatePicker] = useState(false);
 
@@ -153,7 +159,11 @@ const DropDownPicker = ({
             }
           }
         }}>
-        <View style={[styles.dropDownTextContainer]}>
+        <View
+          style={[
+            styles.dropDownTextContainer,
+            {paddingHorizontal: dropDownTextPaddingHorizontal},
+          ]}>
           <StyledText
             style={[
               {
@@ -182,7 +192,7 @@ const DropDownPicker = ({
           )}
         </TouchableOpacity>
       </TouchableOpacity>
-      {errorText ? (
+      {errorText && !isHideErrorText ? (
         <StyledText style={styles.errorText}>{errorText}</StyledText>
       ) : null}
       {listType === 'mini' && (
@@ -199,7 +209,7 @@ const DropDownPicker = ({
               onClose={() => {
                 setisOpenDataListModal(false);
               }}
-              fieldName={fieldName}
+              fieldName={listFieldName ?? fieldName}
               title={listTitle}
               listData={dataList}
               onSelectItem={(item: any) => {
@@ -222,7 +232,7 @@ const DropDownPicker = ({
           }}>
           <SafeAreaView style={{flex: 1, backgroundColor: COLORS.primary}}>
             <ItemSelectionBigList
-              fieldName={fieldName}
+              fieldName={listFieldName ?? fieldName}
               onSelectItem={(item: any) => {
                 setisOpenDataListModal(false);
                 if (onSelectItem) {
