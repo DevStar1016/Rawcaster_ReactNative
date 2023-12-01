@@ -554,7 +554,10 @@ const ReferalSocialList = () => {
             style={styles.profileNameText}
             numberOfLines={1}
             normalTextModeTextProps={{ellipsizeMode: 'tail'}}>
-            {getSlicedText(item.name, 22)}
+            {getSlicedText(
+              !item.name || item.name === 'null' ? item.email : item.name,
+              22,
+            )}
           </StyledText>
 
           <StyledText

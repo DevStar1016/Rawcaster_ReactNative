@@ -154,7 +154,11 @@ const MainStack = () => {
             ? item.filePath?.replace('file://', '')
             : null;
           return {
-            webLink: item.weblink ? encodeURIComponent(item.weblink) : null,
+            webLink: item.text
+              ? encodeURIComponent(item.text)
+              : item.weblink
+              ? encodeURIComponent(item.weblink)
+              : null,
             uri: filePath ? encodeURIComponent(filePath) : null,
             name: item.fileName ? item.fileName.replace(/%20/g, '') : null,
             type: filePath
@@ -181,69 +185,6 @@ const MainStack = () => {
       'rawcaster',
     );
   }, []);
-
-  // useEffect(() => {
-  //   ReceiveSharingIntent.getReceivedFiles(
-  //     (files) => {
-  //       console.log("files", files);
-  //       let sharedfiles = files;
-  //       let WEBLINK;
-  //       let TEXT;
-  //       if (isIos) {
-  //         sharedfiles = files.map((file) => {
-  //           let FILEPATH = file.filePath?.replace("file://", "");
-  //           let MIMETYPE = mime.lookup(FILEPATH);
-  //           WEBLINK = file.weblink;
-  //           TEXT = file.text;
-  //           return {
-  //             ...file,
-  //             filename: file.fileName
-  //               ? file.fileName.replace(/%20/g, "")
-  //               : null,
-  //             //path: encodeURIComponent(file.filePath),
-  //             path: FILEPATH ? encodeURIComponent(FILEPATH) : null,
-  //             // mime: file.mimeType,
-  //             mime: MIMETYPE ? encodeURIComponent(MIMETYPE) : null,
-  //             filePath: "",
-  //             contentUri: "",
-  //             weblink: WEBLINK ? encodeURIComponent(WEBLINK) : null,
-  //             text: TEXT ? encodeURIComponent(file.text) : null,
-  //           };
-  //         });
-  //       } else {
-  //         sharedfiles = files.map((file) => {
-  //           WEBLINK = file.weblink;
-  //           TEXT = file.text;
-  //           return {
-  //             ...file,
-  //             filename: file.fileName?.replace(/%20/g, ""),
-  //             path: encodeURIComponent("file://" + file.filePath),
-  //             mime: encodeURIComponent(file.mimeType),
-  //             weblink: WEBLINK ? encodeURIComponent(WEBLINK) : null,
-  //             filePath: "",
-  //             contentUri: "",
-  //             mimeType: "",
-  //             text: TEXT ? encodeURIComponent(file.text) : null,
-  //           };
-  //         });
-  //       }
-  //       galleryItems = JSON.stringify(sharedfiles);
-
-  //       setTimeout(() => {
-  //         Linking.openURL("rawcaster://Composer/" + galleryItems)
-  //           .then((res) => {
-  //             console.log("Composer Linked From APP.js", res);
-  //           })
-  //           .catch((err) =>
-  //             console.log("Linking Error in Sharing Intent", err)
-  //           );
-  //       }, 1000);
-  //     },
-  //     (error) => {
-  //       console.log(error, "Error Sharing Intent]");
-  //     }
-  //   );
-  // }, []);
 
   function getCommonFormData() {
     const formData = new FormData();

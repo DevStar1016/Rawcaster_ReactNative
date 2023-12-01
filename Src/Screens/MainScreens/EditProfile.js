@@ -192,7 +192,7 @@ const EditProfile = ({route}) => {
     if (values.mobileNumber.trim()) {
       formData.append('mobile_no', values.mobileNumber.toString().trim());
     }
-    if (values.mobileNumber.trim() && country) {
+    if (values.mobileNumber.trim() && values.country) {
       formData.append('country_id', values.country.id);
       formData.append('country_code', values.country.phone_code);
     }
@@ -215,6 +215,7 @@ const EditProfile = ({route}) => {
     }
     updateMyProfileService(formData)
       .then(res => {
+        console.log(res.data, 'DATATATATA RESSS');
         if (res.data.status === 1) {
           let tempProfile = {...res.data.profile};
           tempProfile = {
@@ -257,6 +258,7 @@ const EditProfile = ({route}) => {
         }
       })
       .catch(e => {
+        console.log(e, 'ERROORR');
         Toast.fail(e.message);
       })
       .finally(() => {
@@ -302,7 +304,9 @@ const EditProfile = ({route}) => {
         }
       })
       .catch(err => {
-        Toast.fail(err.message ?? 'Something went wrong');
+        if (!err.message?.includes('cancel')) {
+          Toast.fail(err.message);
+        }
       });
   };
 

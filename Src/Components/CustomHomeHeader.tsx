@@ -52,6 +52,7 @@ const CustomHomeHeader = ({
   isEnableReward = false,
   paddingTop = 0,
   title = '',
+  onPressBack,
   onLeftContainerLayout,
   onRightContainerLayout,
   isEnableLive = true,
@@ -113,7 +114,11 @@ const CustomHomeHeader = ({
             isButton
             width={18}
             onPress={() => {
-              navigation.goBack();
+              if (onPressBack) {
+                onPressBack();
+              } else {
+                navigation.goBack();
+              }
             }}
           />
         ) : (

@@ -1,7 +1,7 @@
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 import React from 'react';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import {TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
+import {IS_IOS, TEXT_INPUT_HEIGHT} from '../Utilities/Constants';
 import {COLORS} from '../Utilities/Colors';
 import {FONTS} from '../Utilities/Fonts';
 import HeaderWithBack from './HeaderWithBack';
@@ -9,7 +9,7 @@ import {GOOGLE_SERACH_ANDROID, GOOGLE_SERACH_IOS} from '../Services/APIKeysIds';
 
 const GooglePlacesList = ({setOpenModal, onSelect}) => {
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <View style={{flex: 1}}>
       <View
         style={{
           flex: 1,
@@ -19,6 +19,7 @@ const GooglePlacesList = ({setOpenModal, onSelect}) => {
           title="Location Search"
           isTitleCenter={true}
           isModal
+          isEnableSafeArea={IS_IOS}
           setModal={setOpenModal}
         />
 
@@ -47,7 +48,7 @@ const GooglePlacesList = ({setOpenModal, onSelect}) => {
           }}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -63,6 +64,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderWidth: 1,
+    borderTopWidth: 3,
     borderColor: COLORS.borderColor,
     alignItems: 'center',
   },

@@ -8,6 +8,13 @@ import SVGIcon from '../Components/SVGIcon';
 import TextBox, {TextBoxProps} from '../Components/TextBox';
 import SubmitButton, {SubmitButtonProps} from '../Components/SubmitButton';
 
+type CountryProp = {
+  id: number;
+  image: string;
+  name: string;
+  phone_code: string;
+};
+
 type Props = {
   closePopup: () => void;
   title?: string;
@@ -15,9 +22,10 @@ type Props = {
   requiredErrorText?: string;
   textInputProps?: Omit<TextBoxProps, 'value' | 'onChangeText'>;
   submitButtonProps?: Omit<SubmitButtonProps, 'onPress'>;
-  onSubmit: (value: string) => void;
+  onSubmit: (value: string, country?: CountryProp) => void;
   regexValue?: RegExp;
   regexErrorText?: string;
+  isEnableCountryCode?: boolean;
 };
 
 const InputPopup = ({
@@ -29,9 +37,11 @@ const InputPopup = ({
   isRequired = true,
   submitButtonProps,
   onSubmit,
+  isEnableCountryCode = false,
   regexValue,
 }: Props) => {
   const [value, setvalue] = useState('');
+  const [country, setcountry] = useState<CountryProp | undefined>(undefined);
   const [errorText, seterrorText] = useState('');
   return (
     <View style={styles.mainContainer}>
@@ -66,12 +76,37 @@ const InputPopup = ({
               }
               setvalue(text);
             }}
+            countryCodePickerProps={{
+              listType: 'large',
+              fieldName: 'phone_code',
+              listFieldName: 'name',
+              value: country,
+              listTitle: 'Select Country Code',
+              isHideErrorText: true,
+              errorText:
+                errorText && !country ? 'Country code is required' : '',
+              bigListProps: {
+                apiName: 'country',
+                isAPICall: true,
+                secondaryFieldName: 'phone_code',
+              },
+              onSelectItem: selectedItem => {
+                console.log(selectedItem);
+
+                setcountry(selectedItem);
+                seterrorText('');
+              },
+            }}
             {...textInputProps}
           />
           <SubmitButton
             buttonText="SUBMIT"
             marginTop={5}
             onPress={() => {
+              if (isEnableCountryCode && !country) {
+                seterrorText('Country code is required');
+                return;
+              }
               if (!value.trim() && isRequired) {
                 seterrorText(requiredErrorText);
                 return;
@@ -80,7 +115,7 @@ const InputPopup = ({
                 seterrorText(regexErrorText);
                 return;
               }
-              onSubmit(value);
+              onSubmit(value, country);
             }}
             {...submitButtonProps}
           />

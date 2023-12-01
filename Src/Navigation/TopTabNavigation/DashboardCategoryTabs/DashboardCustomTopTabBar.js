@@ -75,12 +75,11 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
           paddingVertical: 10,
         }}
         onContentSizeChange={() => {
-          console.log('TESTTTT');
-          // scrollViewRef?.current?.scrollTo({
-          //   x: state.routes.length * 50,
-          //   y: 0,
-          //   animated: true,
-          // });
+          scrollViewRef?.current?.scrollTo({
+            x: state.routes.length * 50,
+            y: 0,
+            animated: true,
+          });
         }}
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -108,11 +107,11 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
             }
           };
 
-          const inputRange = state.routes.map((_, i) => i);
-          const alteropacity = position.interpolate({
-            inputRange,
-            outputRange: inputRange.map(i => (i === index ? 0 : 1)),
-          });
+          // const inputRange = state.routes.map((_, i) => i);
+          // const alteropacity = position.interpolate({
+          //   inputRange,
+          //   outputRange: inputRange.map(i => (i === index ? 0 : 1)),
+          // });
 
           return (
             <TouchableOpacity
@@ -126,7 +125,11 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
               style={styles.tabButton}>
               <Animated.View>
                 <Animated.Text
-                  style={[styles.label, {color: COLORS.secondary}]}>
+                  style={[
+                    styles.label,
+                    {color: isFocused ? COLORS.secondary : COLORS.white},
+                  ]}>
+                  {/* style={[styles.label, {color: COLORS.secondary}]}> */}
                   {label}
                 </Animated.Text>
               </Animated.View>
@@ -138,13 +141,13 @@ function DashboardCustomTopTabBar({state, descriptors, navigation, position}) {
                   bottom: 0,
                   top: 0,
                 }}>
-                <Animated.Text
+                {/* <Animated.Text
                   style={[
                     styles.label,
                     {opacity: alteropacity, color: COLORS.white},
                   ]}>
                   {label}
-                </Animated.Text>
+                </Animated.Text> */}
               </Animated.View>
             </TouchableOpacity>
           );

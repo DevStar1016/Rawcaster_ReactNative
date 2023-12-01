@@ -252,7 +252,7 @@ const GeneralSettings = () => {
       });
   }
 
-  const handleUpdateProfile = (value = '', fieldType = '') => {
+  const handleUpdateProfile = (value = '', fieldType = '', country) => {
     if (isMount) {
       setisLoading(true);
     }
@@ -262,6 +262,10 @@ const GeneralSettings = () => {
     formData.append('name', profile?.name.trim());
     formData.append('first_name', profile?.first_name.trim());
     if (fieldType.includes('sms')) {
+      if (country) {
+        formData.append('country_id', country.id);
+        formData.append('country_code', country.phone_code);
+      }
       formData.append('mobile_no', value.trim());
     } else if (fieldType.includes('email')) {
       formData.append('email_id', value.trim());
@@ -898,7 +902,7 @@ const GeneralSettings = () => {
                   otpType === 'email'
                     ? 'Enter valid email'
                     : otpType === 'sms'
-                    ? 'Eneter valid phone number'
+                    ? 'Enter valid phone number'
                     : '',
               });
             }
@@ -922,6 +926,9 @@ const GeneralSettings = () => {
           closePopup={() => {
             closeVerificationInputModal();
           }}
+          isEnableCountryCode={
+            verificationInputModalData.verificationField === 'sms'
+          }
           regexErrorText={verificationInputModalData.regexErrorText}
           regexValue={verificationInputModalData.regexValue}
           title={`Enter your ${
@@ -932,7 +939,16 @@ const GeneralSettings = () => {
           submitButtonProps={{
             buttonText: 'Update and Verify',
           }}
+          requiredErrorText={`${
+            verificationInputModalData.verificationField === 'sms'
+              ? 'Phone Number'
+              : 'Email'
+          } is required`}
           textInputProps={{
+            isEnableCountryCode:
+              verificationInputModalData.verificationField === 'sms',
+            inputContainerMarginLeft:
+              verificationInputModalData.verificationField === 'sms' ? 10 : 0,
             placeHolder:
               verificationInputModalData.verificationField === 'sms'
                 ? 'Phone Number'
@@ -942,11 +958,11 @@ const GeneralSettings = () => {
             //     ? 'number-pad'
             //     : 'email-address',
           }}
-          onSubmit={value => {
+          onSubmit={(value, country) => {
             const otpType = verificationInputModalData.verificationField;
             closeVerificationInputModal();
 
-            handleUpdateProfile(value, otpType);
+            handleUpdateProfile(value, otpType, country);
           }}
         />
       </Modal>

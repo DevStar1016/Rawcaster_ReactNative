@@ -147,11 +147,25 @@ const PostEditNugget = ({route}) => {
             })),
           );
         } else if (receivedFiles.length > 0) {
-          settypedText(
-            [...receivedFiles]
-              .map(item => decodeURIComponent(item.webLink))
-              .toString(),
-          );
+          const urlText = [...receivedFiles]
+            .map(item => decodeURIComponent(item.webLink))
+            .toString();
+          if (isMount) {
+            settypedText(
+              getSlicedText(urlText, profile?.nugget_content_length, false),
+            );
+          }
+          if (
+            urlText.length > profile?.nugget_content_length &&
+            profile?.user_status_id !== 4
+          ) {
+            dispatch(
+              setPremiumAlert({
+                status: true,
+                text: 'You have reached your character limit, to increase the limit upgrade your membership',
+              }),
+            );
+          }
         }
       }
     }
@@ -1207,7 +1221,7 @@ const PostEditNugget = ({route}) => {
                 }
               }}
             />
-          ) : profile?.nugget_content_length > 0 ? (
+          ) : profile?.nugget_content_length >= 0 ? (
             <View
               style={[
                 styles.inputContainer,

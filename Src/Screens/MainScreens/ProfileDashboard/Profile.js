@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   Alert,
+  BackHandler,
   FlatList,
   Modal,
   RefreshControl,
@@ -106,7 +107,9 @@ const Profile = ({route}) => {
   const followingUsersList = useFollowingUsersList();
 
   const [userId, setuserId] = useState(
-    route.params ? route.params?.userId : focusedNuggetUserId ?? null,
+    route.params && parseInt(route.params.userId) !== profile.user_id
+      ? route.params?.userId
+      : focusedNuggetUserId ?? null,
   );
 
   const [isLoadMore, setisLoadMore] = useState(false);
@@ -208,6 +211,32 @@ const Profile = ({route}) => {
     }
   }, [userId, othersProfile]);
 
+  useEffect(() => {
+    const backAction = () => {
+      navigateGoBack();
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  }, []);
+
+  const resetStack = () => {
+    navigation.reset({
+      routes: [{name: 'DashboardProfileTopTabNavigation'}],
+    });
+  };
+
+  const navigateGoBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      resetStack();
+    }
+  };
+
   const getMyProfileAPI = () => {
     const formData = new FormData();
     formData.append('token', token);
@@ -295,7 +324,6 @@ const Profile = ({route}) => {
               });
             }, 5000);
           }
-          console.log(isMount.current, 'ISMOUNT');
           if (isMount.current) {
             setothersProfile({...tempProfile});
           }
@@ -320,7 +348,6 @@ const Profile = ({route}) => {
         }
       })
       .catch(e => {
-        console.log(e, 'ERROR PROFILE');
         if (isMount.current) {
           if (e.message.includes('canceled')) {
             setothersProfile(null);
@@ -395,7 +422,6 @@ const Profile = ({route}) => {
     if (tab === 2) {
       formData.append('saved', 1);
     }
-    console.log(formData, 'FORMDATAA');
     listNuggetsService(formData, nuggetsController.signal)
       .then(res => {
         if (isMount.current) {
@@ -1020,6 +1046,9 @@ const Profile = ({route}) => {
               navigation.navigate('ReferalSocialList');
             }}
             isEnableBack
+            onPressBack={() => {
+              navigateGoBack();
+            }}
             isEnableSafeArea
             bgColor={COLORS.primary}
             isEnableAddUserButton={

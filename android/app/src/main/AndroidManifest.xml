@@ -106,6 +106,9 @@
                   android:pathPrefix="/index.php" />
               <data android:scheme="https"
                   android:host="*.rawcaster.com"
+                  android:pathPrefix="/viewprofile" />
+              <data android:scheme="https"
+                  android:host="*.rawcaster.com"
                   android:pathPrefix="/signup" />
               />
               <data android:scheme="https"
@@ -126,6 +129,9 @@
               <data android:scheme="https"
                   android:host="rawcaster.com"
                   android:pathPrefix="/share/index.php" />
+              <data android:scheme="https"
+                  android:host="rawcaster.com"
+                  android:pathPrefix="/viewprofile" />
               <data android:scheme="https"
                   android:host="rawcaster.com"
                   android:pathPrefix="/share" />

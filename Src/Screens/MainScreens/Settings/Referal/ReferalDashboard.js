@@ -182,6 +182,7 @@ export default ReferalDashboard;
 const styles = StyleSheet.create({
   emptyDataContainer: {
     alignItems: 'center',
+    paddingVertical: 15,
   },
   itemContainer: {
     backgroundColor: COLORS.white,

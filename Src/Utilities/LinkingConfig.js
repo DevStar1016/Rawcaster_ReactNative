@@ -20,6 +20,11 @@ const mainDeepLinking = {
     screens: {
       PostEditNugget: 'posteditnugget/:files',
       ViewNugget: 'viewnugget/:id',
+      ProfileStack: {
+        screens: {
+          Profile: 'profile/:userId',
+        },
+      },
     },
   },
 };

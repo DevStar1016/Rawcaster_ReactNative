@@ -1,5 +1,5 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import React, { useEffect } from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import React, {useEffect} from 'react';
 import BottomTabNavigation from '../Navigation/BottomTabNavigation';
 import EmailPhoneVerification from '../Screens/AuthScreens/EmailPhoneVerification';
 import ForgotPassword from '../Screens/AuthScreens/ForgotPassword';
@@ -8,57 +8,65 @@ import ResetPasswordOTP from '../Screens/AuthScreens/ResetPasswordOTP';
 import Signup from '../Screens/AuthScreens/SignupScreens/Signup';
 import SignupWithPhone from '../Screens/AuthScreens/SignupScreens/SignupWithPhone';
 import StackAnimation from '../Utilities/StackAnimation';
-import { Linking } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {Linking} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import ChimeSocketConnectionListener from '../Services/ChimeSocket/ListenerComponent/ChimeSocketConnectionListener';
-import { useDispatch } from 'react-redux';
-import { setMeetInviteRefId, setTalkShowInviteRefId } from '../Store/Slices/MeetInviteRefIdSlice';
+import {useDispatch} from 'react-redux';
+import {
+  setMeetInviteRefId,
+  setTalkShowInviteRefId,
+} from '../Store/Slices/MeetInviteRefIdSlice';
 import OpenLinkingUrl from '../Utilities/OpenLinkingUrl';
 import DashboardProfileTopTabNavigation from '../Navigation/TopTabNavigation/DashboardProfileTopTabs/DashboardProfileTopTabNavigation';
 import EventHostScreen from '../Screens/MainScreens/Events/EventHost/EventHostScreen';
 import TalkShowHostScreen from '../Screens/MainScreens/Talkshow/TalkshowHost/TalkshowHostScreen';
+import {IS_ENABLE_CHIME_FUNCTIONALITY} from '../Utilities/Constants';
 
 const Stack = createStackNavigator();
 
 const RootStack = () => {
-
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const currentRout = useRoute();
 
   useEffect(() => {
     const subscription = Linking.addEventListener('url', event => {
-
-      if (event.url?.includes('https://dev.rawcaster.com/join/event') || event.url?.includes('https://dev.rawcaster.com/join/talkshow')) {
-        setTimeout(() => {
-          console.log('from here 123')
-          handleOpenUrl(event.url)
-        }, 3000);
-      }
-      else {
+      if (
+        event.url?.includes('https://dev.rawcaster.com/join/event') ||
+        event.url?.includes('https://dev.rawcaster.com/join/talkshow')
+      ) {
+        if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+          setTimeout(() => {
+            console.log('from here 123');
+            handleOpenUrl(event.url);
+          }, 3000);
+        }
+      } else {
         ////////// Change from indian team
         //////////////////////
-        OpenLinkingUrl(event.url)
+        OpenLinkingUrl(event.url);
         ///////
         //////////
       }
-
-    }
-    );
+    });
     Linking?.getInitialURL()
-      .then((url) => {
-        if (url?.includes('https://dev.rawcaster.com/join/event') || url?.includes('https://dev.rawcaster.com/join/talkshow')) {
-          setTimeout(() => {
-            console.log('from here')
-            handleOpenUrl(url);
-          }, 3000);
+      .then(url => {
+        if (
+          url?.includes('https://dev.rawcaster.com/join/event') ||
+          url?.includes('https://dev.rawcaster.com/join/talkshow')
+        ) {
+          if (IS_ENABLE_CHIME_FUNCTIONALITY) {
+            setTimeout(() => {
+              console.log('from here');
+              handleOpenUrl(url);
+            }, 3000);
+          }
         } else {
           ////////// Change from indian team
           //////////////////////
           OpenLinkingUrl(url);
           ////////////
         }
-
       })
       .catch(e => {
         console.log(e, 'ERROR LINK');
@@ -72,8 +80,6 @@ const RootStack = () => {
   }, []);
   const handleOpenUrl = url => {
     console.log('url_received', url);
-
-
 
     if (url && !url.includes('rawcaster://')) {
       if (url?.includes('share')) {
@@ -89,13 +95,14 @@ const RootStack = () => {
       } else {
         if (url?.includes('https://dev.rawcaster.com/join/event')) {
           console.log('incluededddddd');
-          const ref_id = url.replace('https://dev.rawcaster.com/join/event/', '').trim();
+          const ref_id = url
+            .replace('https://dev.rawcaster.com/join/event/', '')
+            .trim();
           console.log('ref_id', ref_id);
           console.log('route_name', currentRout.name);
 
           if (currentRout.name == 'RootStack') {
             dispatch(setMeetInviteRefId(ref_id));
-
           } else {
             setTimeout(() => {
               dispatch(setMeetInviteRefId(ref_id));
@@ -108,18 +115,19 @@ const RootStack = () => {
               params: {
                 screen: 'EventsPublic',
                 params: {
-                  ref_id: ref_id
+                  ref_id: ref_id,
                 },
               },
             },
           });
         } else {
           if (url?.includes('https://dev.rawcaster.com/join/talkshow')) {
-            const ref_id = url.replace('https://dev.rawcaster.com/join/talkshow/', '').trim();
+            const ref_id = url
+              .replace('https://dev.rawcaster.com/join/talkshow/', '')
+              .trim();
             console.log('ref_id', ref_id);
             if (currentRout.name == 'RootStack') {
               dispatch(setTalkShowInviteRefId(ref_id));
-
             } else {
               setTimeout(() => {
                 dispatch(setTalkShowInviteRefId(ref_id));
@@ -132,12 +140,11 @@ const RootStack = () => {
                 params: {
                   screen: 'TalkshowPublic',
                   params: {
-                    ref_id: ref_id
+                    ref_id: ref_id,
                   },
                 },
               },
             });
-
           }
         }
       }
@@ -147,7 +154,7 @@ const RootStack = () => {
   return (
     <>
       <ChimeSocketConnectionListener />
-      <Stack.Navigator screenOptions={{ headerShown: false, ...StackAnimation }}>
+      <Stack.Navigator screenOptions={{headerShown: false, ...StackAnimation}}>
         <Stack.Screen
           name="BottomTabNavigationBeforeLogin"
           component={BottomTabNavigation}
