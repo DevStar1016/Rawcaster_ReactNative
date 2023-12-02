@@ -46,6 +46,7 @@ import {useDispatch} from 'react-redux';
 import {setUnclaimedAccountsList} from '../Store/Slices/HomeSlice';
 import {setMyProfile} from '../Store/Slices/AuthSlice';
 import {StartIdenfyVerification} from '../Hooks/IdenfyHooks';
+import {setPremiumAlert} from '../Store/Slices/UtilitySlice';
 
 var isMount = true;
 
@@ -126,13 +127,12 @@ const ClaimAccount = ({route}) => {
       },
       validationSchema: validationSchema,
       onSubmit: values => {
-        if (isMount) {
-          if (isVerifyAccount) {
-            setisOpenIdenfyConfirmation(true);
-          } else {
-            HandleSubmitforVeification();
-          }
+        if (isVerifyAccount) {
+          setisOpenIdenfyConfirmation(true);
+        } else {
+          HandleSubmitforVeification();
         }
+
         // if (isMount) {
         //   setisLoading(true);
         // }
@@ -621,10 +621,20 @@ const ClaimAccount = ({route}) => {
                   text: '',
                   isPositive: false,
                 });
+
                 navigation.goBack();
-                navigation.navigate('ClaimAccount', {
-                  isVerifyAccount: true,
-                });
+                if (parseInt(profile?.user_status_id) >= 3) {
+                  navigation.navigate('ClaimAccount', {
+                    isVerifyAccount: true,
+                  });
+                } else {
+                  dispatch(
+                    setPremiumAlert({
+                      status: true,
+                      text: RAWCASTER_DEFAULT_MESSAGE.VERIFY_UPGRADE_MESSAGE,
+                    }),
+                  );
+                }
               } else {
                 closeMessageBox();
                 setAccountVerifyConfirmationData({
