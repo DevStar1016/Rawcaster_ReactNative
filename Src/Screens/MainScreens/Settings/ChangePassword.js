@@ -22,6 +22,7 @@ const resetPasswordSchema = Yup.object({
   newPassword: Yup.string()
     .min(8, 'Password to be at least 8 characters long')
     .trim('Password cannot include leading and trailing spaces')
+    .required('New password is required')
     .strict(true),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')

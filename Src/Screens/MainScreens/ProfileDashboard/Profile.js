@@ -66,6 +66,7 @@ import {
   removeFollowingUser,
   setConnectionsList,
   setFollowingUsersList,
+  setUnclaimedAccountsList,
   setUnreadNotificationCount,
 } from '../../../Store/Slices/HomeSlice';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -312,6 +313,22 @@ const Profile = ({route}) => {
             name: htmlDecodeText(res.data.profile?.name),
             last_name: htmlDecodeText(res.data.profile?.last_name),
           };
+
+          if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
+            let tempUnclaimedList = [...unclaimedAccountsList];
+            const tempIndex = tempUnclaimedList.findIndex(
+              item => item.user_id === res.data.profile.user_id,
+            );
+
+            if (tempIndex !== -1) {
+              tempUnclaimedList[tempIndex] = {
+                ...tempUnclaimedList[tempIndex],
+                unclaimed_status: res.data.profile.unclaimed_status,
+              };
+            }
+            dispatch(setUnclaimedAccountsList(tempUnclaimedList));
+          }
+
           if (res.data.profile.unclaimed_status === 1) {
             setisunclaimeduserAlert({
               status: true,

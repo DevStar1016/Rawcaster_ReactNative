@@ -59,7 +59,7 @@ const TagsSearch = () => {
   const tagsSearchAPICall = (pageNumber = 1) => {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('search_tag', searchText || '');
+    formData.append('search_tag', searchText?.trim() || '');
     formData.append('auth_code', getAuthCode(token));
     formData.append('page_number', pageNumber);
     tagListService(formData)

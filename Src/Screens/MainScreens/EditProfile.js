@@ -329,7 +329,11 @@ const EditProfile = ({route}) => {
           setFieldValue('location', res.geoLocation);
         }
       })
-      .catch(e => {})
+      .catch(e => {
+        Toast.fail(
+          typeof e == 'string' ? e : e.message ?? 'Something went wrong',
+        );
+      })
       .finally(() => {
         if (isMount) {
           setisFetchingLocation(false);

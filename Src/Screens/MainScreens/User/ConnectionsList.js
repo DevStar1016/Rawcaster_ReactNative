@@ -229,6 +229,12 @@ const ConnectionsList = () => {
               top: 2,
               right: 0,
             }}
+            isButton
+            onPressProfile={() => {
+              navigation.navigate('ProfileStack', {
+                userId: item.user_id,
+              });
+            }}
             profileSize={50}
             extraMargin={0}
           />

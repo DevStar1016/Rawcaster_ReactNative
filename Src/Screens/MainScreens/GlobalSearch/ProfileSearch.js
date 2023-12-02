@@ -71,7 +71,7 @@ const ProfileSearch = () => {
     const formData = new FormData();
     formData.append('token', token);
     if (searchText) {
-      formData.append('search_key', searchText);
+      formData.append('search_key', searchText.trim());
     }
     formData.append('auth_code', getAuthCode(token));
     formData.append('page_number', pageNumber);

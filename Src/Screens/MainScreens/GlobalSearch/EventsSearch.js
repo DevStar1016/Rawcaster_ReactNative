@@ -65,7 +65,7 @@ const EventsSearch = () => {
     const formData = new FormData();
     formData.append('token', token);
     if (searchText) {
-      formData.append('search_key', searchText);
+      formData.append('search_key', searchText.trim());
     }
     formData.append('page_number', pageNumber);
     globalSearchEventsService(formData)

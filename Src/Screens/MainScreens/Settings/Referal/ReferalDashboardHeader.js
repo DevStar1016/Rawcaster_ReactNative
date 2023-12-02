@@ -275,7 +275,7 @@ const ReferalDashboardHeader = ({
             </StyledText>
           </TouchableOpacity>
         </LinearGradient>
-        {profile.user_status_id === 1 && (
+        {profile?.user_status_id === 1 && (
           <View
             style={[
               styles.countsContainer,

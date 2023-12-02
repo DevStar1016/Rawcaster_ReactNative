@@ -263,15 +263,18 @@ const Nugget = ({nugget, nuggetIndex}) => {
     shareNuggetService(formData)
       .then(res => {
         if (res.data.status === 1) {
-          dispatch(
-            setNuggetsList(
-              getNuggetsReduxStoreDataFormate(categoryName, [
-                res.data.nugget_detail,
-                ...nuggetsList,
-              ]),
-            ),
-          );
+          // dispatch(
+          //   setNuggetsList(
+          //     getNuggetsReduxStoreDataFormate(categoryName, [
+          //       res.data.nugget_detail,
+          //       ...nuggetsList,
+          //     ]),
+          //   ),
+          // );
           scrollNuggetsListToTop && scrollNuggetsListToTop();
+          navigation.reset({
+            routes: [{name: 'DashboardProfileTopTabNavigation'}],
+          });
         }
       })
       .catch(e => {})

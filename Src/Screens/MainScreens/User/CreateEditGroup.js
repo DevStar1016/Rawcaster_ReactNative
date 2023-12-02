@@ -157,6 +157,7 @@ const CreateEditGroup = ({route}) => {
         }
       })
       .catch(e => {
+        console.log(e);
         Toast.fail(e.message);
       })
       .finally(() => {
@@ -779,7 +780,7 @@ const CreateEditGroup = ({route}) => {
         <View style={styles.topContainer}>
           <ProfileWithBadge
             isEnableOnPressImagePicker
-            isButton={isGroupOwner()}
+            isButton={isGroupOwner() || !groupId}
             profileSize={45}
             profileImage={groupProfileImage?.uri}
             extraMargin={0}

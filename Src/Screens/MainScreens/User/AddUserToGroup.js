@@ -20,6 +20,7 @@ import {GROUP_PROCESS_SOCKET_TYPE} from '../../../Services/Socket/SocketConstant
 import {groupFunctionalitySocket} from '../../../Services/Socket/SocketRequests';
 import SearchInput from '../../../Components/SearchInput';
 import UserItem from './UserItem';
+import {IS_IOS} from '../../../Utilities/Constants';
 
 var isMount = true;
 const AddUserToGroup = ({route}) => {
@@ -169,6 +170,8 @@ const AddUserToGroup = ({route}) => {
         rightIcon: 'tick',
         isEnableRightIcon: selectedConnectionsIds.length > 0,
         rightIconSize: 20,
+        paddingTop: 12,
+        isEnableSafeArea: IS_IOS && getUsersList().length <= 0,
         onPressRightIcon: handleAddusersToGroup,
       }}
       isLoading={isLoading}

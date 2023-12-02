@@ -91,7 +91,6 @@ const NuggetsSearch = () => {
 
   useEffect(() => {
     if (getNuggetsList() && getNuggetsList().length > 0 && !isListLoading) {
-      console.log(getNuggetsList()[0].nugget_id, 'JKJKKJ');
       setviewableItem(getNuggetsList()[0].nugget_id || 0);
     }
   }, [searchedNuggetsList, isListLoading]);
@@ -114,7 +113,7 @@ const NuggetsSearch = () => {
     const formData = new FormData();
     formData.append('token', token);
     if (searchText) {
-      formData.append('search_key', searchText);
+      formData.append('search_key', searchText.trim());
       formData.append('global_search', 1);
     }
     formData.append('page_number', pageNumber);

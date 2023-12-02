@@ -5,7 +5,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import ImagePicker from 'react-native-image-crop-picker';
 import SVGIcon from './SVGIcon';
 import {BadgesType} from '../Utilities/Badges';
@@ -83,6 +83,7 @@ const ProfileWithBadge = ({
   alternateProfileImageComponent,
   onPressTopRightIcon,
 }: ProfileWithBadgeProps) => {
+  const [isError, setisError] = useState(false);
   const onSelectProfilePhoto = () => {
     ImagePicker.openPicker({
       width: 512,
@@ -118,8 +119,10 @@ const ProfileWithBadge = ({
           });
         }
       })
-      .catch(err => {
-        Toast.fail(err.message ?? 'Something went wrong');
+      .catch(e => {
+        if (!e.message.includes('cancel')) {
+          Toast.fail(e.message);
+        }
       });
   };
 
@@ -168,11 +171,15 @@ const ProfileWithBadge = ({
                 justifyContent: 'center',
               },
             ]}>
-            {profileImage ? (
+            {profileImage && !isError ? (
               <Image
                 source={{uri: profileImage}}
                 style={styles.profileImage}
                 borderRadius={borderRadius}
+                onError={e => {
+                  setisError(true);
+                  // console.log('LJKJKJK', e.currentTarget.src);
+                }}
               />
             ) : alternateProfileImageComponent ? (
               alternateProfileImageComponent(undefined)

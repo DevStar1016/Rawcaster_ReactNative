@@ -51,6 +51,12 @@ const UsersGroupsListHome = () => {
         <ProfileWithBadge
           profileImage={item.profile_img}
           padding={0}
+          isButton
+          onPressProfile={() => {
+            navigation.navigate('ProfileStack', {
+              userId: item.user_id,
+            });
+          }}
           isEnableOnlineOfflineStatus
           isOnline
         />
@@ -87,7 +93,7 @@ const UsersGroupsListHome = () => {
                 onSearch={setsearchText}
                 searchButtonColor={COLORS.secondary}
               />
-              <SVGIcon
+              {/* <SVGIcon
                 icon="qr_scanner"
                 marginLeft={10}
                 height={28}
@@ -96,7 +102,7 @@ const UsersGroupsListHome = () => {
                 onPress={() => {
                   // setisOpenScanner(true);
                 }}
-              />
+              /> */}
             </View>
             <View style={{paddingBottom: 10}}>
               <FlatList

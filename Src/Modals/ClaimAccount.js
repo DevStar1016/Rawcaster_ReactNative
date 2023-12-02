@@ -127,7 +127,11 @@ const ClaimAccount = ({route}) => {
       validationSchema: validationSchema,
       onSubmit: values => {
         if (isMount) {
-          setisOpenIdenfyConfirmation(true);
+          if (isVerifyAccount) {
+            setisOpenIdenfyConfirmation(true);
+          } else {
+            HandleSubmitforVeification();
+          }
         }
         // if (isMount) {
         //   setisLoading(true);
@@ -248,12 +252,21 @@ const ClaimAccount = ({route}) => {
           };
 
           dispatch(setMyProfile(profile));
-
-          if (profile.verification_reason) {
+          if (
+            profile.last_verify_status &&
+            profile.last_verify_status === IDENFY_STATUS.APPROVED
+          ) {
+            HandleDisplayMessage(IDENFY_STATUS_MESSAGE.APPROVED);
+          } else if (profile.verification_reason) {
             HandleDisplayMessage(profile.verification_reason, 0);
           } else {
-            HandleAutomatedVerify(idenfyResponse);
+            HandleDisplayMessage(IDENFY_STATUS_MESSAGE.FAILED, 0);
           }
+          // if (profile.verification_reason) {
+          //   HandleDisplayMessage(profile.verification_reason, 0);
+          // } else {
+          //   HandleAutomatedVerify(idenfyResponse);
+          // }
         } else if (res.data.status === 0) {
           Toast.fail(res.data.msg);
           navigation.goBack();

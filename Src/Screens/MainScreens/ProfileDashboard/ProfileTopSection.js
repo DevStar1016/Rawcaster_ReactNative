@@ -143,7 +143,9 @@ const ProfileTopSection = ({
                   profileUpdateAPICall(2, {...res});
                 })
                 .catch(e => {
-                  Toast.fail(e.message ?? 'Something went wrong');
+                  if (!e.message.includes('cancel')) {
+                    Toast.fail(e.message);
+                  }
                 });
             }}
             buttonStyle={styles.cameraIconContainer}

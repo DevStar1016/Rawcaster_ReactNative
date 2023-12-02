@@ -56,6 +56,7 @@ export type BackHeaderProps = {
   rightButtonTextStyle?: TextStyle;
   isEnableBackButton?: boolean;
   bgColor?: string;
+  paddingTop?: number;
   profileContainer?: ViewStyle;
   titlePaddingHorizontal?: number;
   isEnableProfileImage?: boolean;
@@ -105,6 +106,7 @@ const HeaderWithBack = ({
   rightButtonTextStyle,
   profileImageProps,
   profileContainer,
+  paddingTop = 12,
   titlePaddingHorizontal = 15,
   backIconMarginLeft = 0,
   rightIconAdditionalProps,
@@ -146,7 +148,7 @@ const HeaderWithBack = ({
               : StatusBar.currentHeight
               ? StatusBar.currentHeight + 12
               : 12
-            : 12,
+            : paddingTop,
         },
       ]}>
       <View style={[{flexDirection: 'row'}, !isTitleCenter && {flex: 1}]}>
