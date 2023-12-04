@@ -22,6 +22,7 @@ import StyledText from '../../Components/StyledText';
 import PoliciesFooter from '../../Components/PoliciesFooter';
 import {FONTS} from '../../Utilities/Fonts';
 import SubmitButton from '../../Components/SubmitButton';
+import {MAX_CHARACTERS} from '../../Utilities/Constants';
 
 const resetPasswordSchema = Yup.object({
   otp: Yup.string()
@@ -175,6 +176,7 @@ const ResetPasswordOTP = ({route}) => {
             iconColor={COLORS.placeHolderColor}
             placeHolder="Enter your password"
             title="Password"
+            maxLength={MAX_CHARACTERS.password}
             onChangeText={handleChange('password')}
             errorText={
               touched.password && errors.password ? errors.password : ''
@@ -186,6 +188,7 @@ const ResetPasswordOTP = ({route}) => {
             iconColor={COLORS.placeHolderColor}
             placeHolder="Enter your password"
             title="Re-Enter your password"
+            maxLength={MAX_CHARACTERS.password}
             onChangeText={handleChange('confirm_password')}
             errorText={
               touched.confirm_password && errors.confirm_password

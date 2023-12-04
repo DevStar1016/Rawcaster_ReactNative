@@ -16,6 +16,7 @@ import SVGIcon from '../../../Components/SVGIcon';
 import StyledText from '../../../Components/StyledText';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {useProfile} from '../../../Utilities/StoreData';
+import {MAX_CHARACTERS} from '../../../Utilities/Constants';
 
 const PollContainer = ({
   onPressRemovePoll,
@@ -81,7 +82,7 @@ const PollContainer = ({
         titleStyle={{color: COLORS.white}}
         backgroundColor={COLORS.transparent}
         borderColor={COLORS.white}
-        maxLength={25}
+        maxLength={MAX_CHARACTERS.pollChoice}
       />
     );
   }

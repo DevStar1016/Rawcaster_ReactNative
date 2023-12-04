@@ -16,6 +16,7 @@ import {changePasswordService} from '../../../Services/ApiService';
 import Toast from '../../../Components/Toast';
 import {useNavigation} from '@react-navigation/native';
 import TitleDescriptionContainer from '../../../Components/TitleDescriptionContainer';
+import {MAX_CHARACTERS} from '../../../Utilities/Constants';
 
 const resetPasswordSchema = Yup.object({
   currentPassword: Yup.string().required('Current password is required'),
@@ -121,6 +122,7 @@ const ChangePassword = () => {
             mainContainerMarginVertical={5}
             inputContainerMarginVertical={2}
             titlePaddingVertical={3}
+            maxLength={MAX_CHARACTERS.password}
             onChangeText={handleChange('newPassword')}
             errorText={
               touched.newPassword && errors.newPassword
@@ -134,6 +136,7 @@ const ChangePassword = () => {
           <TextBox
             value={values.confirmPassword}
             title="Confirm Password"
+            maxLength={MAX_CHARACTERS.password}
             mainContainerMarginVertical={5}
             inputContainerMarginVertical={2}
             titlePaddingVertical={3}

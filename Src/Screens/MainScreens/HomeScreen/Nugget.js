@@ -10,7 +10,11 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import lodash from 'lodash';
 import NuggetItem from './NuggetItem';
 import TextOnlyNugget from './NuggetItemTypes/TextOnlyNugget';
-import {DIMENSIONS, NUGGET_SHARE_TYPE} from '../../../Utilities/Constants';
+import {
+  DIMENSIONS,
+  MAX_CHARACTERS,
+  NUGGET_SHARE_TYPE,
+} from '../../../Utilities/Constants';
 import {
   useConnectionsList,
   useGroupsList,
@@ -651,7 +655,7 @@ const Nugget = ({nugget, nuggetIndex}) => {
               multiline: true,
               inputContainerHeight: 100,
               textAlignVertical: 'top',
-              maxLength: 500,
+              maxLength: MAX_CHARACTERS.reportMsg,
             }}
             onSubmit={message => {
               setisOpenReportModal(false);

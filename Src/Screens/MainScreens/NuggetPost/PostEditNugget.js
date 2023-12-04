@@ -65,6 +65,7 @@ import {addNugget} from '../../../Store/ThunkAPIServices';
 import StyledText from '../../../Components/StyledText';
 import RoundedIconButton from '../../../Components/RoundedIconButton';
 import {EmojiKeyboard} from 'rn-emoji-keyboard';
+import ConfirmationPopup from '../../../Modals/ConfirmationPopup';
 
 if (!IS_IOS && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -85,6 +86,10 @@ const PostEditNugget = ({route}) => {
   const navigation = useNavigation();
   const profile = useProfile();
   const token = useToken();
+  const [alertBox, setalertBox] = useState({
+    status: false,
+    text: '',
+  });
   const videoPlayerRef = useRef(null);
   const controller = useRef(null);
   const [mainContainerHeight, setmainContainerHeight] = useState(0);
@@ -1273,16 +1278,10 @@ const PostEditNugget = ({route}) => {
                     text.length > profile?.nugget_content_length &&
                     profile?.user_status_id === 4
                   ) {
-                    dispatch(
-                      setPremiumAlert({
-                        status: true,
-                        text: 'You have reached your character limit',
-                        isModifyButton: true,
-                        isSuccessbuttonAvailable: true,
-                        isFailureButtonAvailable: false,
-                        SuccessButtonText: 'Ok',
-                      }),
-                    );
+                    setalertBox({
+                      status: true,
+                      text: 'You have reached your character limit',
+                    });
                   } else {
                     settypedText(text);
                   }
@@ -1585,6 +1584,23 @@ const PostEditNugget = ({route}) => {
           isEnableEdit={false}
         />
       </Modal>
+
+      {alertBox?.status && (
+        <Modal onRequestClose={() => {}} transparent visible={alertBox.status}>
+          <ConfirmationPopup
+            isEnableClose={false}
+            isEnableNegativeButton={false}
+            positiveButtonText={'OK'}
+            onPressPositiveButton={() => {
+              setalertBox({
+                status: false,
+                text: '',
+              });
+            }}
+            content={alertBox.text}
+          />
+        </Modal>
+      )}
     </HOCView>
   );
 };

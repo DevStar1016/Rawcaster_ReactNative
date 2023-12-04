@@ -6,7 +6,6 @@ import EventImage from '../Assets/Png/IntroImages/event.png';
 import NuggetImage from '../Assets/Png/IntroImages/nugget.png';
 import LiveImage from '../Assets/Png/IntroImages/live.png';
 import {getyears} from './Methods';
-import {constant} from 'lodash';
 
 export const DIMENSIONS = {
   window: Dimensions.get('window'),
@@ -14,6 +13,17 @@ export const DIMENSIONS = {
 };
 
 export const IS_ENABLE_CHIME_FUNCTIONALITY = false;
+
+export const MAX_CHARACTERS = {
+  firstName: 50,
+  lastName: 50,
+  displayName: 30,
+  password: 50,
+  mobileNumber: 15,
+  gender: 20,
+  reportMsg: 500,
+  pollChoice: 25,
+};
 
 export const REFERAL_MESSAGE =
   'Hi, I have joined Rawcaster. A one-stop platform for all social media needs. I am asking all my friends and special people to join this platform to make it easier to reach everyone with content, personalized messages, Nuggets, and invitations to participate in my special events. I expect to see you there soon.';

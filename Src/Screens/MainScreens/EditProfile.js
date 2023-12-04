@@ -17,7 +17,12 @@ import {useProfile, useToken} from '../../Utilities/StoreData';
 import ImagePicker from 'react-native-image-crop-picker';
 import TextBox from '../../Components/TextBox';
 import DropDownPicker from '../../Components/DropDownPicker';
-import {GENDER_LIST, NAME_REGEX, PHONE_REGEX} from '../../Utilities/Constants';
+import {
+  GENDER_LIST,
+  MAX_CHARACTERS,
+  NAME_REGEX,
+  PHONE_REGEX,
+} from '../../Utilities/Constants';
 import CustomDateMonthYearPicker from '../../Components/CustomDateMonthYearPicker';
 import SubmitButton from '../../Components/SubmitButton';
 import PoliciesFooter from '../../Components/PoliciesFooter';
@@ -62,20 +67,29 @@ const EditProfile = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
-      .min(2, 'Enter valid first name')
-      .max(20, 'First name is too long')
+      .max(
+        MAX_CHARACTERS.firstName,
+        `First name cannot be longer than ${MAX_CHARACTERS.firstName} characters`,
+      )
+      .trim('First name cannot include leading and trailing spaces')
+      .strict(true)
       .matches(NAME_REGEX, 'Enter valid first name')
       .required('Required'),
     lastName: yup
       .string()
-      .min(1, 'Enter Valid last name')
-      .max(20, 'Last name is too long')
+      .max(
+        MAX_CHARACTERS.lastName,
+        `Last name cannot be longer than ${MAX_CHARACTERS.lastName} characters`,
+      )
+      .trim('Last name cannot include leading and trailing spaces')
+      .strict(true)
       .matches(NAME_REGEX, 'Enter valid last name')
       .required('Required'),
     displayName: yup
       .string()
-      .min(2, 'Enter Valid Display name')
-      .max(30, 'Display name is too long')
+      .trim('Display name cannot include leading and trailing spaces')
+      .strict(true)
+      .max(MAX_CHARACTERS.displayName, 'Display name is too long')
       .required('Required'),
     sex: yup.object().nullable().required('Required'),
     gender: yup.string().max(20, 'Maximum 20 characters allowed'),
@@ -215,7 +229,6 @@ const EditProfile = ({route}) => {
     }
     updateMyProfileService(formData)
       .then(res => {
-        console.log(res.data, 'DATATATATA RESSS');
         if (res.data.status === 1) {
           let tempProfile = {...res.data.profile};
           tempProfile = {
@@ -386,7 +399,7 @@ const EditProfile = ({route}) => {
           value={values.firstName}
           onChangeText={handleChange('firstName')}
           titlePaddingVertical={3}
-          maxLength={20}
+          maxLength={MAX_CHARACTERS.firstName}
           isEditable={profile?.account_verify_type === 0}
           textColor={
             profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
@@ -400,7 +413,7 @@ const EditProfile = ({route}) => {
           value={values.lastName}
           onChangeText={handleChange('lastName')}
           titlePaddingVertical={3}
-          maxLength={20}
+          maxLength={MAX_CHARACTERS.lastName}
           isEditable={profile?.account_verify_type === 0}
           textColor={
             profile?.account_verify_type === 0 ? COLORS.black : COLORS.grey
@@ -414,7 +427,7 @@ const EditProfile = ({route}) => {
           value={values.displayName}
           onChangeText={handleChange('displayName')}
           titlePaddingVertical={3}
-          maxLength={30}
+          maxLength={MAX_CHARACTERS.displayName}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your display name'}
         />
@@ -439,7 +452,7 @@ const EditProfile = ({route}) => {
           value={values.gender}
           onChangeText={handleChange('gender')}
           titlePaddingVertical={3}
-          maxLength={20}
+          maxLength={MAX_CHARACTERS.gender}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your gender'}
         />
@@ -509,6 +522,7 @@ const EditProfile = ({route}) => {
               ? errors.mobileNumber
               : ''
           }
+          maxLength={MAX_CHARACTERS.mobileNumber}
           titlePaddingVertical={3}
           inputContainerMarginVertical={0}
           placeHolder={'Enter your phone number'}

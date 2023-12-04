@@ -1,5 +1,5 @@
 import {Keyboard, Modal, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useFormik} from 'formik';
 import * as yup from 'yup';
@@ -17,6 +17,7 @@ import {
   GENDER_LIST,
   IDENFY_STATUS,
   IDENFY_STATUS_MESSAGE,
+  MAX_CHARACTERS,
   NAME_REGEX,
   PHONE_REGEX,
   RAWCASTER_DEFAULT_MESSAGE,
@@ -48,12 +49,11 @@ import {setMyProfile} from '../Store/Slices/AuthSlice';
 import {StartIdenfyVerification} from '../Hooks/IdenfyHooks';
 import {setPremiumAlert} from '../Store/Slices/UtilitySlice';
 
-var isMount = true;
-
 const ClaimAccount = ({route}) => {
   const dispatch = useDispatch();
   const unclaimedAccountsList = useUnclaimedAccountsList();
   const token = useToken();
+  const isMount = useRef(true);
   const profile = useProfile();
   const navigation = useNavigation();
   const {influencerId, isVerifyAccount} = route.params ?? {};
@@ -78,14 +78,22 @@ const ClaimAccount = ({route}) => {
   const validationSchema = yup.object().shape({
     firstName: yup
       .string()
-      .min(2, 'Enter valid first name')
-      .max(20, 'First name is too long')
+      .max(
+        MAX_CHARACTERS.firstName,
+        `First name cannot be longer than ${MAX_CHARACTERS.firstName} characters`,
+      )
+      .trim('First name cannot include leading and trailing spaces')
+      .strict(true)
       .matches(NAME_REGEX, 'Enter valid first name')
       .required('First name is required'),
     lastName: yup
       .string()
-      .min(1, 'Enter valid last name')
-      .max(20, 'Last name is too long')
+      .trim('Last name cannot include leading and trailing spaces')
+      .strict(true)
+      .max(
+        MAX_CHARACTERS.lastName,
+        `Last name cannot be longer than ${MAX_CHARACTERS.lastName} characters`,
+      )
       .matches(NAME_REGEX, 'Enter valid last name')
       .required('Last name is required'),
     dob: yup.string().required('Date of birth is required'),
@@ -163,12 +171,12 @@ const ClaimAccount = ({route}) => {
   };
 
   useEffect(() => {
-    isMount = true;
+    isMount.current = true;
     AvoidSoftInput.setAdjustResize();
     return () => {
       AvoidSoftInput.setAdjustPan();
       Keyboard.dismiss();
-      isMount = false;
+      isMount.current = false;
     };
   }, []);
 
@@ -220,7 +228,7 @@ const ClaimAccount = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(false);
         }
       });
@@ -363,7 +371,7 @@ const ClaimAccount = ({route}) => {
         Toast.fail(e.message);
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisLoading(false);
         }
       });
@@ -379,12 +387,12 @@ const ClaimAccount = ({route}) => {
    * @returns None
    */
   const handleGetCurrentLocationAddress = () => {
-    if (isMount) {
+    if (isMount.current) {
       setisFetchingLocation(true);
     }
     getLocationAddress()
       .then(res => {
-        if (isMount) {
+        if (isMount.current) {
           setFieldValue('location', res.geoLocation);
         }
       })
@@ -396,7 +404,7 @@ const ClaimAccount = ({route}) => {
         }
       })
       .finally(() => {
-        if (isMount) {
+        if (isMount.current) {
           setisFetchingLocation(false);
         }
       });
@@ -408,7 +416,7 @@ const ClaimAccount = ({route}) => {
    * @returns None
    */
   function closeMessageBox() {
-    if (isMount) {
+    if (isMount.current) {
       setmessageBoxData({
         isOpen: false,
         message: '',
@@ -456,6 +464,7 @@ const ClaimAccount = ({route}) => {
             errorText={
               errors.firstName && touched.firstName ? errors.firstName : ''
             }
+            maxLength={MAX_CHARACTERS.firstName}
             onChangeText={handleChange('firstName')}
           />
           <TextBox
@@ -469,6 +478,7 @@ const ClaimAccount = ({route}) => {
             errorText={
               errors.lastName && touched.lastName ? errors.lastName : ''
             }
+            maxLength={MAX_CHARACTERS.lastName}
             onChangeText={handleChange('lastName')}
           />
           {isVerifyAccount && (
@@ -493,6 +503,7 @@ const ClaimAccount = ({route}) => {
             placeHolder="Enter your Phone Number"
             value={values.mobileNumber}
             isEnableCountryCode
+            maxLength={MAX_CHARACTERS.mobileNumber}
             inputContainerMarginLeft={10}
             errorText={
               touched.country && errors.country
@@ -554,7 +565,7 @@ const ClaimAccount = ({route}) => {
             onSelect={handleChange('dob')}
             isDisabled={profile?.account_verify_type !== 0}
             onSelectDateMonthYearError={() => {
-              if (isMount) {
+              if (isMount.current) {
                 setFieldValue('dob', '');
               }
             }}
@@ -569,7 +580,7 @@ const ClaimAccount = ({route}) => {
             dropDownIconSize={20}
             isLoadingIcon={isFetchingLocation}
             onPress={() => {
-              if (isMount) {
+              if (isMount.current) {
                 setisOpenGooglePlacesListModal(true);
               }
             }}
@@ -585,7 +596,7 @@ const ClaimAccount = ({route}) => {
       </KeyboardAwareScrollView>
       <Modal
         onRequestClose={() => {
-          if (isMount) {
+          if (isMount.current) {
             setisOpenGooglePlacesListModal(false);
           }
         }}
@@ -593,7 +604,7 @@ const ClaimAccount = ({route}) => {
         <GooglePlacesList
           setOpenModal={setisOpenGooglePlacesListModal}
           onSelect={location => {
-            if (isMount) {
+            if (isMount.current) {
               setFieldValue('location', location);
             }
           }}
@@ -614,7 +625,7 @@ const ClaimAccount = ({route}) => {
               : 'Back to Profile'
           }
           onPressPositiveButton={() => {
-            if (isMount) {
+            if (isMount.current) {
               if (AccountVerifyConfirmationData.isPositive) {
                 setAccountVerifyConfirmationData({
                   isOpen: false,
@@ -675,19 +686,19 @@ const ClaimAccount = ({route}) => {
       <Modal visible={isOpenIdenfyConfirmation} transparent>
         <ConfirmationPopup
           onClose={() => {
-            if (isMount) {
+            if (isMount.current) {
               setisOpenIdenfyConfirmation(false);
             }
           }}
           onPressPositiveButton={() => {
-            if (isMount) {
+            if (isMount.current) {
               setisOpenIdenfyConfirmation(false);
               setisLoading(true);
             }
             HandleSubmitforVeification();
           }}
           onPressNegativeButton={() => {
-            if (isMount) {
+            if (isMount.current) {
               setisOpenIdenfyConfirmation(false);
             }
           }}

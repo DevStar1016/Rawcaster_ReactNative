@@ -12,6 +12,7 @@ import {
   EMAIL_REGEX,
   GENDER_LIST,
   IS_IOS,
+  MAX_CHARACTERS,
   PHONE_REGEX,
 } from '../../../Utilities/Constants';
 import {signupService} from '../../../Services/ApiService';
@@ -65,7 +66,14 @@ const SignupWithPhone = ({route}) => {
     useState(false);
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Name is required'),
+    name: Yup.string()
+      .required('Name is required')
+      .trim('Name cannot include leading and trailing spaces')
+      .strict(true)
+      .max(
+        MAX_CHARACTERS.firstName,
+        `Name cannot be longer than ${MAX_CHARACTERS.firstName} characters`,
+      ),
     password: Yup.string()
       .min(8, 'Password to be at least 8 characters long')
       .trim('Password cannot include leading and trailing spaces')
@@ -194,8 +202,8 @@ const SignupWithPhone = ({route}) => {
     const formData = new FormData();
     formData.append('auth_code', getAuthCode(values.login_id));
     formData.append('signup_type', values.isEnablePhoneNumber ? 2 : 1); // 1 - Email, 2 - Phone
-    formData.append('first_name', values.name);
-    formData.append('display_name', values.name);
+    formData.append('first_name', values.name.trim());
+    formData.append('display_name', values.name.trim());
     formData.append('dob', values.dob);
     formData.append('gender', values.sex?.id);
     if (values.gender) {
@@ -313,7 +321,7 @@ const SignupWithPhone = ({route}) => {
             iconColor={COLORS.placeHolderColor}
             placeHolder="Enter your name"
             title="Name"
-            maxLength={50}
+            maxLength={MAX_CHARACTERS.firstName}
             onChangeText={handleChange('name')}
             errorText={errors.name && touched.name ? errors.name : ''}
             value={values.name}
@@ -324,7 +332,7 @@ const SignupWithPhone = ({route}) => {
               placeHolder="Enter your phone number"
               title="Phone Number"
               keyboardType="number-pad"
-              maxLength={13}
+              maxLength={MAX_CHARACTERS.mobileNumber}
               isEnableCountryCode
               inputContainerMarginLeft={10}
               onChangeText={handleChange('login_id')}
@@ -387,7 +395,12 @@ const SignupWithPhone = ({route}) => {
                 }}
               />
             )}
-
+          </View>
+          <View
+            style={{
+              alignItems: 'flex-end',
+              paddingTop: values.isEnablePhoneNumber ? 5 : 0,
+            }}>
             <StyledText
               style={styles.emailFieldToggleButtonText}
               onPress={() => {
@@ -411,6 +424,7 @@ const SignupWithPhone = ({route}) => {
             placeHolder="Enter your password"
             title="Password"
             isEditable
+            maxLength={MAX_CHARACTERS.password}
             onChangeText={handleChange('password')}
             errorText={
               errors.password && touched.password ? errors.password : ''
@@ -443,7 +457,7 @@ const SignupWithPhone = ({route}) => {
             iconColor={COLORS.placeHolderColor}
             placeHolder="Enter your gender"
             title="Gender"
-            maxLength={20}
+            maxLength={MAX_CHARACTERS.gender}
             onChangeText={handleChange('gender')}
             errorText={errors.gender && touched.gender ? errors.gender : ''}
             value={values.gender}

@@ -342,15 +342,17 @@ const MainStack = () => {
               ...profile,
               user_status: res.data.user_status ?? profile.user_status,
               user_status_id: res.data.user_status_id ?? profile.user_status_id,
+              complementary_status: res.data.complementary_status ?? 0,
             }),
           );
           setisComplimentoryAlert({
             status: true,
             text: res.data.msg,
           });
-        } else {
-          navigation.navigate('PlansAndPrice');
         }
+        // else {
+        //   navigation.navigate('PlansAndPrice');
+        // }
       })
       .catch(e => {
         console.log(e);
@@ -450,27 +452,17 @@ const MainStack = () => {
               );
             }}
             positiveButtonText={
-              premiumALert.isModifyButton && premiumALert.SuccessButtonText
-                ? premiumALert.SuccessButtonText
-                : 'Upgrade Now'
+              profile.complementary_status === 0 ? 'OK' : 'Upgrade Now'
             }
-            isEnableNegativeButton={
-              premiumALert.isModifyButton &&
-              premiumALert.isFailureButtonAvailable
-            }
-            negativeButtonText={
-              premiumALert.isModifyButton && premiumALert.FailureButtonText
-                ? premiumALert.FailureButtonText
-                : 'Cancel'
-            }
+            isEnableNegativeButton={profile.complementary_status !== 0}
+            negativeButtonText={'Cancel'}
             onPressPositiveButton={() => {
-              if (!premiumALert.isModifyButton) {
-                if (profile.complementary_status === 1) {
-                  HandleUpgradeComplimentory();
-                } else {
-                  navigation.navigate('PlansAndPrice');
-                }
+              if (profile.complementary_status === 1) {
+                HandleUpgradeComplimentory();
               }
+              // else {
+              //   navigation.navigate('PlansAndPrice');
+              // }
 
               dispatch(
                 setPremiumAlert({

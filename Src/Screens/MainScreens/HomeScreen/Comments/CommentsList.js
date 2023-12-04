@@ -372,15 +372,20 @@ const CommentsList = ({
 
   /**
    * Handles the editing of a comment by sending a request to the server to update the comment.
-   * @param {string} commentId - The ID of the comment to be edited.
+   * @param {string} editedItem - The Full json of a comment to be edited.
    * @param {string} comment - The updated content of the comment.
    * @param {Array} preCommentsList - The previous list of comments before the edit.
    * @returns None
    */
-  const handleEditComment = (commentId, comment, preCommentsList) => {
+  const handleEditComment = (
+    editedItem,
+    comment,
+    preCommentsList,
+    // updatedCommentsList,
+  ) => {
     const formData = new FormData();
     formData.append('token', token);
-    formData.append('comment_id', commentId);
+    formData.append('comment_id', editedItem.comment_id);
     formData.append('comment', comment);
     editNuggetCommentService(formData)
       .then(res => {
@@ -388,7 +393,7 @@ const CommentsList = ({
           if (isMount) {
             setreadoutCommentData(preData => {
               let tempData = {...preData};
-              if (commentId === tempData.id) {
+              if (editedItem.comment_id === tempData.id) {
                 tempData = {
                   id: null,
                   isLoading: false,
@@ -400,6 +405,43 @@ const CommentsList = ({
                 ...tempData,
               };
             });
+          }
+
+          const preCommentsList = [...commentsList]; // for API Catch Error
+          let updatedCommentsList = [...preCommentsList];
+
+          const commentIndex = updatedCommentsList.findIndex(
+            item => item.comment_id === editedItem.parentCommentId,
+          );
+
+          if (commentIndex !== -1) {
+            if (editedItem.isReply) {
+              let updatedReplyList = [
+                ...updatedCommentsList[commentIndex].reply,
+              ];
+              const replyIndex = [...updatedReplyList].findIndex(
+                item => item.comment_id === editedItem.comment_id,
+              );
+
+              if (replyIndex !== -1) {
+                updatedReplyList[replyIndex] = {
+                  ...updatedReplyList[replyIndex],
+                  comment: res.data.edited_comment.comment,
+                };
+                updatedCommentsList[commentIndex] = {
+                  ...updatedCommentsList[commentIndex],
+                  reply: updatedReplyList,
+                };
+              }
+            } else {
+              updatedCommentsList[commentIndex] = {
+                ...updatedCommentsList[commentIndex],
+                comment: res.data.edited_comment.comment,
+              };
+            }
+          }
+          if (isMount) {
+            setcommentsList([...updatedCommentsList]);
           }
         }
         if (res.data.status === 0) {
@@ -472,43 +514,44 @@ const CommentsList = ({
       if (isMount) {
         seteditData(null);
       }
-      const preCommentsList = [...commentsList]; // for API Catch Error
-      let updatedCommentsList = [...preCommentsList];
-      const commentIndex = updatedCommentsList.findIndex(
-        item => item.comment_id === editedItem.parentCommentId,
-      );
+      // const preCommentsList = [...commentsList]; // for API Catch Error
+      // let updatedCommentsList = [...preCommentsList];
+      // const commentIndex = updatedCommentsList.findIndex(
+      //   item => item.comment_id === editedItem.parentCommentId,
+      // );
 
-      if (commentIndex !== -1) {
-        if (editedItem.isReply) {
-          let updatedReplyList = [...updatedCommentsList[commentIndex].reply];
-          const replyIndex = [...updatedReplyList].findIndex(
-            item => item.comment_id === editedItem.comment_id,
-          );
+      // if (commentIndex !== -1) {
+      //   if (editedItem.isReply) {
+      //     let updatedReplyList = [...updatedCommentsList[commentIndex].reply];
+      //     const replyIndex = [...updatedReplyList].findIndex(
+      //       item => item.comment_id === editedItem.comment_id,
+      //     );
 
-          if (replyIndex !== -1) {
-            updatedReplyList[replyIndex] = {
-              ...updatedReplyList[replyIndex],
-              comment: preTypedText.trim(),
-            };
-            updatedCommentsList[commentIndex] = {
-              ...updatedCommentsList[commentIndex],
-              reply: updatedReplyList,
-            };
-          }
-        } else {
-          updatedCommentsList[commentIndex] = {
-            ...updatedCommentsList[commentIndex],
-            comment: preTypedText.trim(),
-          };
-        }
-      }
-      if (isMount) {
-        setcommentsList([...updatedCommentsList]);
-      }
+      //     if (replyIndex !== -1) {
+      //       updatedReplyList[replyIndex] = {
+      //         ...updatedReplyList[replyIndex],
+      //         comment: preTypedText.trim(),
+      //       };
+      //       updatedCommentsList[commentIndex] = {
+      //         ...updatedCommentsList[commentIndex],
+      //         reply: updatedReplyList,
+      //       };
+      //     }
+      //   } else {
+      //     updatedCommentsList[commentIndex] = {
+      //       ...updatedCommentsList[commentIndex],
+      //       comment: preTypedText.trim(),
+      //     };
+      //   }
+      // }
+      // if (isMount) {
+      //   setcommentsList([...updatedCommentsList]);
+      // }
       handleEditComment(
-        editedItem.comment_id,
+        editedItem,
         preTypedText.trim(),
-        preCommentsList,
+        // preCommentsList,
+        [...commentsList],
       );
       return '';
     });
