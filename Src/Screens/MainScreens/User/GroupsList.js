@@ -33,6 +33,7 @@ const GroupsList = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token = useToken();
+  const [containerHeight, setcontainerHeight] = useState(0);
   const isGroupListLoading = useGroupListLoading();
   const groupsList = useGroupsList();
   const {searchText} = useMyConnections();
@@ -193,8 +194,12 @@ const GroupsList = () => {
   }
 
   return (
-    <View style={styles.mainContainer}>
-      {getList().length > 0 ? (
+    <View
+      style={styles.mainContainer}
+      onLayout={e => {
+        setcontainerHeight(e.nativeEvent.layout.height);
+      }}>
+      {!isGroupListLoading ? (
         <FlatList
           data={getList()}
           renderItem={renderItem}
@@ -202,6 +207,24 @@ const GroupsList = () => {
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
           onScroll={onScrollEvent}
+          ListEmptyComponent={() => {
+            return (
+              !refreshing &&
+              getList().length <= 0 && (
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: containerHeight,
+                  }}>
+                  <StyledText style={styles.emptyListText}>
+                    No data found
+                  </StyledText>
+                </View>
+              )
+            );
+          }}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}
@@ -212,11 +235,12 @@ const GroupsList = () => {
         />
       ) : (
         <View style={styles.emptyListContainer}>
-          {isGroupListLoading ? (
+          <ActivityIndicator size={'large'} color={COLORS.white} />
+          {/* {isGroupListLoading ? (
             <ActivityIndicator size={'large'} color={COLORS.white} />
           ) : (
             <StyledText style={styles.emptyListText}>No data found</StyledText>
-          )}
+          )} */}
         </View>
       )}
       {isShowAddButton && (

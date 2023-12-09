@@ -5,11 +5,18 @@ import {COLORS} from '../Utilities/Colors';
 import StyledText from './StyledText';
 import AppLogo from '../Assets/Svg/app_logo.svg';
 import WebUrlLoaderModal from '../Modals/WebUrlLoaderModal';
-import {TERMS_CONDTION_URL} from '../Services/ServiceConstants';
+import {
+  COOKIES_POLICY,
+  PRIVACY_POLICY_URL,
+  TERMS_CONDTION_URL,
+} from '../Services/ServiceConstants';
 
 const PoliciesFooter = () => {
-  const [isOpenTermsAndConditionsModal, setisOpenTermsAndConditionsModal] =
-    useState(false);
+  const [policiesData, setpoliciesData] = useState({
+    status: false,
+    url: '',
+    title: '',
+  });
 
   return (
     <View style={styles.mainContainer}>
@@ -17,24 +24,63 @@ const PoliciesFooter = () => {
       <StyledText style={[styles.footerText, {paddingVertical: 5}]}>
         © Copyright Rawcaster 2021
       </StyledText>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <StyledText
+          style={styles.footerText}
+          onPress={() => {
+            setpoliciesData({
+              status: true,
+              url: TERMS_CONDTION_URL,
+              title: 'Terms and Conditions',
+            });
+          }}>
+          Terms and Conditions
+        </StyledText>
+        <StyledText style={styles.footerText}> | </StyledText>
+        <StyledText
+          onPress={() => {
+            setpoliciesData({
+              status: true,
+              url: PRIVACY_POLICY_URL,
+              title: 'Privacy Policy',
+            });
+          }}
+          style={styles.footerText}>
+          Privacy Policy
+        </StyledText>
+      </View>
+
       <StyledText
-        style={styles.footerText}
         onPress={() => {
-          setisOpenTermsAndConditionsModal(true);
-        }}>
-        Terms and Conditions | Privacy Policy
+          setpoliciesData({
+            status: true,
+            url: COOKIES_POLICY,
+            title: 'Cookies Policy',
+          });
+        }}
+        style={styles.footerText}>
+        Cookies Policy
       </StyledText>
-      <StyledText style={styles.footerText}>Cookies Policy</StyledText>
       <Modal
-        visible={isOpenTermsAndConditionsModal}
+        visible={policiesData.status}
         transparent
         onRequestClose={() => {
-          setisOpenTermsAndConditionsModal(false);
+          setpoliciesData({
+            status: false,
+            url: '',
+            title: '',
+          });
         }}>
         <SafeAreaView style={{flex: 1}}>
           <WebUrlLoaderModal
-            url={TERMS_CONDTION_URL}
-            setModal={setisOpenTermsAndConditionsModal}
+            title={policiesData.title}
+            url={policiesData.url}
+            setModal={() => {
+              setpoliciesData({
+                status: false,
+                url: '',
+              });
+            }}
           />
         </SafeAreaView>
       </Modal>

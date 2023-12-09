@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import lodash from 'lodash';
 import ProfileWithBadge from '../../../../Components/ProfileWithBadge';
@@ -81,7 +81,6 @@ const CommentItem = ({
     formData.append('translation_type', 2);
     nuggetContentAudioService(formData)
       .then(res => {
-        console.log(res.data, 'DATATATAA');
         if (res.data.status === 1) {
           settranslatedText(res.data.translation);
         } else if (res.data.status === 0) {
@@ -170,7 +169,24 @@ const CommentItem = ({
                   if (selectedId === 1) {
                     onPressEdit();
                   } else {
-                    onDeleteComment();
+                    Alert.alert(
+                      'Delete!',
+                      'Are you sure to delete this comment?',
+                      [
+                        {
+                          text: 'No',
+                          onPress: () => {},
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'Yes',
+                          onPress: () => {
+                            onDeleteComment();
+                          },
+                        },
+                      ],
+                      {cancelable: false},
+                    );
                   }
                 }}
               />

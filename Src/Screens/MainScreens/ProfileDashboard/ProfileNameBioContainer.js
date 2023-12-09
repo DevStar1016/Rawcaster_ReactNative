@@ -13,6 +13,7 @@ import {
 import {
   calcualteAge,
   getAuthCode,
+  getBioData,
   getDefaultRawcasterPage,
   getSlicedText,
   htmlDecodeText,
@@ -56,63 +57,63 @@ const ProfileNameBioContainer = ({
       : false;
   };
 
-  const getBioData = () => {
-    if (profile?.bio_data && profile?.bio_data.trim()) {
-      return htmlDecodeText(profile?.bio_data.trim());
-    }
-    let bioDataText = '';
-    if (profile?.dob) {
-      bioDataText +=
-        '<first_name> <last_name> is  <age> years old, was born in <dob>. ';
-    }
-    if (profile?.geo_location) {
-      bioDataText +=
-        '<first_name> <last_name> presently resides in <location>. ';
-    }
-    bioDataText +=
-      '<first_name>’s preferred communication language is <language> . <first_name> has been a Rawcaster <user_status>  since <date_of_join> and prefers to be contacted in Rawcaster through <rawcaster_default_page>.';
+  // const getBioData = () => {
+  //   if (profile?.bio_data && profile?.bio_data.trim()) {
+  //     return htmlDecodeText(profile?.bio_data.trim());
+  //   }
+  //   let bioDataText = '';
+  //   if (profile?.dob) {
+  //     bioDataText +=
+  //       '<first_name> <last_name> is  <age> years old, was born in <dob>. ';
+  //   }
+  //   if (profile?.geo_location) {
+  //     bioDataText +=
+  //       '<first_name> <last_name> presently resides in <location>. ';
+  //   }
+  //   bioDataText +=
+  //     '<first_name>’s preferred communication language is <language> . <first_name> has been a Rawcaster <user_status>  since <date_of_join> and prefers to be contacted in Rawcaster through <rawcaster_default_page>.';
 
-    bioDataText = bioDataText.replace(
-      /<first_name>/g,
-      htmlDecodeText(profile?.first_name),
-    );
-    bioDataText = bioDataText.replace(
-      /<last_name>/g,
-      htmlDecodeText(profile?.last_name),
-    );
-    bioDataText = bioDataText.replace(
-      /<age>/g,
-      calcualteAge(moment(profile?.dob)),
-    );
-    bioDataText = bioDataText.replace(
-      /<dob>/g,
-      moment(profile?.dob).format(' MMM YYYY '),
-    );
-    bioDataText = bioDataText.replace(
-      /<location>/g,
-      htmlDecodeText(profile?.geo_location),
-    );
-    bioDataText = bioDataText.replace(
-      /<language>/g,
-      htmlDecodeText(profile?.language),
-    );
-    bioDataText = bioDataText.replace(/<user_status>/g, profile?.user_status);
+  //   bioDataText = bioDataText.replace(
+  //     /<first_name>/g,
+  //     htmlDecodeText(profile?.first_name),
+  //   );
+  //   bioDataText = bioDataText.replace(
+  //     /<last_name>/g,
+  //     htmlDecodeText(profile?.last_name),
+  //   );
+  //   bioDataText = bioDataText.replace(
+  //     /<age>/g,
+  //     calcualteAge(moment(profile?.dob)),
+  //   );
+  //   bioDataText = bioDataText.replace(
+  //     /<dob>/g,
+  //     moment(profile?.dob).format(' MMM YYYY '),
+  //   );
+  //   bioDataText = bioDataText.replace(
+  //     /<location>/g,
+  //     htmlDecodeText(profile?.geo_location),
+  //   );
+  //   bioDataText = bioDataText.replace(
+  //     /<language>/g,
+  //     htmlDecodeText(profile?.language),
+  //   );
+  //   bioDataText = bioDataText.replace(/<user_status>/g, profile?.user_status);
 
-    if (profile?.date_of_join) {
-      bioDataText = bioDataText.replace(
-        /<date_of_join>/g,
-        utcToUserTimezone(profile?.date_of_join, settings?.time_zone).format(
-          ' DD MMM YYYY ',
-        ),
-      );
-    }
-    bioDataText = bioDataText.replace(
-      /<rawcaster_default_page>/g,
-      getDefaultRawcasterPage(settings?.mobile_default_page || 1),
-    );
+  //   if (profile?.date_of_join) {
+  //     bioDataText = bioDataText.replace(
+  //       /<date_of_join>/g,
+  //       utcToUserTimezone(profile?.date_of_join, settings?.time_zone).format(
+  //         ' DD MMM YYYY ',
+  //       ),
+  //     );
+  //   }
+  //   bioDataText = bioDataText.replace(
+  //     /<rawcaster_default_page>/g,
+  //     getDefaultRawcasterPage(settings?.mobile_default_page || 1),
+  //   );
 
-    return bioDataText;
-  };
+  //   return bioDataText;
+  // };
 
   function handleUpdateBioAndCategory(updatedData) {
     setisOpenBioCategoryEditor(false);
@@ -251,7 +252,7 @@ const ProfileNameBioContainer = ({
         )}
       </View>
       <View style={styles.bioContainer}>
-        <StyledText>{getBioData()}</StyledText>
+        <StyledText>{getBioData(profile, settings)}</StyledText>
       </View>
       {userId && !isFan() && (
         <GradientButton
@@ -300,7 +301,7 @@ const ProfileNameBioContainer = ({
         }}>
         <CategoryBioEditor
           setModal={setisOpenBioCategoryEditor}
-          preBioText={getBioData()}
+          preBioText={getBioData(profile, settings)}
           preSelectedCategoriesIds={getInfluencerCategoryIdsList()}
           onSubmit={handleUpdateBioAndCategory}
         />

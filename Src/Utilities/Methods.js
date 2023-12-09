@@ -598,6 +598,13 @@ export const getNotificationMessage = type => {
   }
 };
 
+export const getCharactersLimitMsg = (userStatusId, maxCharacters) => {
+  if (userStatusId >= 4) {
+    return `Sorry, this  Nugget has more than your character limit of ${maxCharacters}`;
+  }
+  return `You have reached your character limit of ${maxCharacters}, to increase the limit upgrade your membership`;
+};
+
 /**
  * Generates a unique ID by combining the provided user ID (if any), the current UTC timestamp,
  * and a random number.
@@ -756,4 +763,66 @@ export const sorAttendeesList = (attendiFirst, attendiSecond) => {
 
   // For other roles, maintain the order
   return 0;
+};
+
+export const getBioData = (profile, settings, isAddDefaultPage = true) => {
+  if (profile?.bio_data && profile?.bio_data.trim()) {
+    return htmlDecodeText(profile?.bio_data.trim());
+  }
+  let bioDataText = '';
+  if (profile?.dob) {
+    bioDataText +=
+      '<first_name> <last_name> is  <age> years old, was born in <dob>. ';
+  }
+  if (profile?.geo_location) {
+    bioDataText += '<first_name> <last_name> presently resides in <location>. ';
+  }
+  bioDataText += `<first_name>’s preferred communication language is <language> . <first_name> has been a Rawcaster <user_status>  since <date_of_join> ${
+    isAddDefaultPage
+      ? 'and prefers to be contacted in Rawcaster through <rawcaster_default_page>'
+      : ''
+  }.`;
+
+  bioDataText = bioDataText.replace(
+    /<first_name>/g,
+    htmlDecodeText(profile?.first_name),
+  );
+  bioDataText = bioDataText.replace(
+    /<last_name>/g,
+    htmlDecodeText(profile?.last_name),
+  );
+  bioDataText = bioDataText.replace(
+    /<age>/g,
+    calcualteAge(moment(profile?.dob)),
+  );
+  bioDataText = bioDataText.replace(
+    /<dob>/g,
+    moment(profile?.dob).format(' MMM YYYY '),
+  );
+  bioDataText = bioDataText.replace(
+    /<location>/g,
+    htmlDecodeText(profile?.geo_location),
+  );
+  bioDataText = bioDataText.replace(
+    /<language>/g,
+    htmlDecodeText(profile?.language),
+  );
+  bioDataText = bioDataText.replace(/<user_status>/g, profile?.user_status);
+
+  if (profile?.date_of_join) {
+    bioDataText = bioDataText.replace(
+      /<date_of_join>/g,
+      utcToUserTimezone(profile?.date_of_join, settings?.time_zone).format(
+        ' DD MMM YYYY ',
+      ),
+    );
+  }
+  if (settings) {
+    bioDataText = bioDataText.replace(
+      /<rawcaster_default_page>/g,
+      getDefaultRawcasterPage(settings?.mobile_default_page || 1),
+    );
+  }
+
+  return bioDataText;
 };

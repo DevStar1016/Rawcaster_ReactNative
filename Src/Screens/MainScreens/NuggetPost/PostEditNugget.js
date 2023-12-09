@@ -42,11 +42,13 @@ import {
 } from '../../../Services/ApiService';
 import {
   compressMedia,
+  getCharactersLimitMsg,
   getFileName,
   getLinkInfo,
   getMediaMimeType,
   getMillisToMinutesNumber,
   getSlicedText,
+  getUniqueId,
   getUrlWithFilePrefix,
 } from '../../../Utilities/Methods';
 import ImageCropPicker from 'react-native-image-crop-picker';
@@ -149,6 +151,7 @@ const PostEditNugget = ({route}) => {
               ...item,
               uri: getUrlWithFilePrefix(decodeURIComponent(item.uri)),
               type: decodeURIComponent(item.type),
+              id: getUniqueId(),
             })),
           );
         } else if (receivedFiles.length > 0) {
@@ -161,13 +164,16 @@ const PostEditNugget = ({route}) => {
             );
           }
           if (
-            urlText.length > profile?.nugget_content_length &&
-            profile?.user_status_id !== 4
+            urlText.length > profile?.nugget_content_length
+            // &&profile?.user_status_id !== 4
           ) {
             dispatch(
               setPremiumAlert({
                 status: true,
-                text: 'You have reached your character limit, to increase the limit upgrade your membership',
+                text: getCharactersLimitMsg(
+                  profile?.user_status_id,
+                  profile?.nugget_content_length,
+                ),
               }),
             );
           }
@@ -183,13 +189,16 @@ const PostEditNugget = ({route}) => {
           getSlicedText(preContent, profile?.nugget_content_length, false),
         );
         if (
-          preContent.length > profile?.nugget_content_length &&
-          profile?.user_status_id !== 4
+          preContent.length > profile?.nugget_content_length
+          // &&profile?.user_status_id !== 4
         ) {
           dispatch(
             setPremiumAlert({
               status: true,
-              text: 'You have reached your character limit, to increase the limit upgrade your membership',
+              text: getCharactersLimitMsg(
+                profile?.user_status_id,
+                profile?.nugget_content_length,
+              ),
             }),
           );
         }
@@ -198,13 +207,16 @@ const PostEditNugget = ({route}) => {
           getSlicedText(nugget.content, profile?.nugget_content_length, false),
         );
         if (
-          nugget.length > profile?.nugget_content_length &&
-          profile?.user_status_id !== 4
+          nugget.length > profile?.nugget_content_length
+          // && profile?.user_status_id !== 4
         ) {
           dispatch(
             setPremiumAlert({
               status: true,
-              text: 'You have reached your character limit, to increase the limit upgrade your membership',
+              text: getCharactersLimitMsg(
+                profile?.user_status_id,
+                profile?.nugget_content_length,
+              ),
             }),
           );
         }
@@ -298,6 +310,7 @@ const PostEditNugget = ({route}) => {
             uri: getUrlWithFilePrefix(item.path),
             name: getFileName(item.path),
             type: getMediaMimeType(item.path, item.media_type),
+            id: getUniqueId(),
           };
         });
         setselectedMediaList(tempMediaList);
@@ -645,6 +658,7 @@ const PostEditNugget = ({route}) => {
               name: getFileName(item.path),
               type: item.mime,
               duration: item.duration,
+              id: getUniqueId(),
             };
           }),
         )
@@ -698,9 +712,9 @@ const PostEditNugget = ({route}) => {
    * @param {number} selectedIndex - The index of the selected media item to remove.
    * @returns None
    */
-  function handleRemoveSelectedMediaItem(selectedIndex) {
+  function handleRemoveSelectedMediaItem(id) {
     const filteredSelectedMediaList = [...selectedMediaList].filter(
-      (_, index) => index !== selectedIndex,
+      (item, index) => item.id !== id,
     );
     if (isMount) {
       setselectedMediaList(filteredSelectedMediaList);
@@ -786,6 +800,7 @@ const PostEditNugget = ({route}) => {
           type: mediaItem.type,
           // uri: mediaPath,
           uri: mediaItem.uri,
+          id: getUniqueId(),
         },
       ]);
     } else {
@@ -797,6 +812,7 @@ const PostEditNugget = ({route}) => {
           type: mediaItem.type,
           // uri: mediaPath,
           uri: mediaItem.uri,
+          id: getUniqueId(),
         },
       ]);
     }
@@ -818,6 +834,7 @@ const PostEditNugget = ({route}) => {
       setselectedMediaList([
         {
           ...audioFile,
+          id: getUniqueId(),
         },
       ]);
     } else {
@@ -825,6 +842,7 @@ const PostEditNugget = ({route}) => {
         ...pre,
         {
           ...audioFile,
+          id: getUniqueId(),
         },
       ]);
     }
@@ -920,7 +938,7 @@ const PostEditNugget = ({route}) => {
       return (
         <Video
           ref={videoPlayerRef}
-          resizeMode="contain"
+          resizeMode="cover"
           paused={true}
           muted={false}
           source={{uri: item.uri}}
@@ -1006,6 +1024,43 @@ const PostEditNugget = ({route}) => {
     };
   }, [isKeyBoardEnabledStatus]);
 
+  const onChangeText = text => {
+    if (
+      text.length > profile?.nugget_content_length
+      // && profile?.user_status_id !== 4
+    ) {
+      settypedText(preText =>
+        getSlicedText(preText, profile?.nugget_content_length, false),
+      );
+
+      Keyboard.dismiss();
+      if (isOpenEmojiContainer) {
+        setisOpenEmojiContainer(false);
+      }
+      dispatch(
+        setPremiumAlert({
+          status: true,
+          text: getCharactersLimitMsg(
+            profile?.user_status_id,
+            profile?.nugget_content_length,
+          ),
+        }),
+      );
+    }
+    // else if (
+    //   text.length > profile?.nugget_content_length &&
+    //   profile?.user_status_id === 4
+    // ) {
+    //   setalertBox({
+    //     status: true,
+    //     text: 'You have reached your character limit',
+    //   });
+    // }
+    else {
+      settypedText(text);
+    }
+  };
+
   /**
    * Renders a selected nugget item with the given item and index.
    * @param {Object} item - The selected nugget item to render.
@@ -1042,7 +1097,7 @@ const PostEditNugget = ({route}) => {
             style={styles.itemRemoveIconContainer}
             activeOpacity={0.7}
             onPress={() => {
-              handleRemoveSelectedMediaItem(index);
+              handleRemoveSelectedMediaItem(item.id);
             }}>
             <SVGIcon icon="close_white" height={10} width={10} marginLeft={0} />
           </TouchableOpacity>
@@ -1059,9 +1114,9 @@ const PostEditNugget = ({route}) => {
       }}
       keyboardAwareContentContainerStyle={{
         flexGrow: 1,
-        height: WINDOW_HEIGHT / 2,
+        height: isPollClicked ? undefined : WINDOW_HEIGHT / 2,
       }}
-      isEnableKeyboardAware={false}
+      isEnableKeyboardAware={isPollClicked}
       // keyBoardAwareScrollViewProps={{
       //   nestedScrollEnabled: true,
       //   keyboardShouldPersistTaps: 'handled',
@@ -1254,38 +1309,7 @@ const PostEditNugget = ({route}) => {
                   profile?.nugget_content_length,
                   false,
                 )}
-                onChangeText={text => {
-                  if (
-                    text.length > profile?.nugget_content_length &&
-                    profile?.user_status_id !== 4
-                  ) {
-                    settypedText(
-                      getSlicedText(
-                        typedText,
-                        profile?.nugget_content_length,
-                        false,
-                      ),
-                    );
-
-                    Keyboard.dismiss();
-                    dispatch(
-                      setPremiumAlert({
-                        status: true,
-                        text: 'You have reached your character limit, to increase the limit upgrade your membership',
-                      }),
-                    );
-                  } else if (
-                    text.length > profile?.nugget_content_length &&
-                    profile?.user_status_id === 4
-                  ) {
-                    setalertBox({
-                      status: true,
-                      text: 'You have reached your character limit',
-                    });
-                  } else {
-                    settypedText(text);
-                  }
-                }}
+                onChangeText={onChangeText}
                 numberOfLines={5}
                 textAlignVertical={'top'}
                 placeholderTextColor={COLORS.placeHolderColor}
@@ -1318,7 +1342,7 @@ const PostEditNugget = ({route}) => {
                   renderItem={renderSelectedNuggetItem}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  keyExtractor={(_, index) => index.toString()}
+                  keyExtractor={(item, index) => item.id.toString()}
                 />
               </View>
             ) : (
@@ -1412,7 +1436,8 @@ const PostEditNugget = ({route}) => {
           />
         </View>
 
-        <View
+        <TouchableOpacity
+          activeOpacity={1}
           style={{
             display: isOpenEmojiContainer ? 'flex' : 'none',
             height: EMOJI_CONTAINER_HEIGHT,
@@ -1426,14 +1451,19 @@ const PostEditNugget = ({route}) => {
           }}>
           <EmojiKeyboard
             onEmojiSelected={res => {
-              if (isMount) {
-                settypedText(pre => {
-                  if (pre.length < 500) {
-                    return pre + res.emoji;
-                  }
-                  return pre;
-                });
-              }
+              settypedText(preText => {
+                onChangeText(preText + res.emoji);
+                return preText + res.emoji;
+              });
+              // if (isMount) {
+
+              //   settypedText(pre => {
+              //     if (pre.length < 500) {
+              //       return pre + res.emoji;
+              //     }
+              //     return pre;
+              //   });
+              // }
             }}
             // enableSearchBar
             // disabledCategories={['people_body', 'flags']}
@@ -1447,7 +1477,7 @@ const PostEditNugget = ({route}) => {
               // container: {width: },
             }}
           />
-        </View>
+        </TouchableOpacity>
       </Pressable>
 
       <Modal

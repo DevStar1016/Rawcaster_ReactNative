@@ -33,11 +33,20 @@ import {
 import {useDispatch} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 
+var timer = undefined;
 const SocialSignin = ({pushId, isLogin = false, refId}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const locationDetails = useLocationDetails();
   const [isLoading, setisLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     getLocationAddress()
@@ -56,7 +65,6 @@ const SocialSignin = ({pushId, isLogin = false, refId}) => {
    * @returns None
    */
   const handleSocialSignupAPICall = (values, signin_type) => {
-    setisLoading(true);
     const formData = new FormData();
     formData.append('auth_code', getAuthCode(values.login_id));
     formData.append('signin_type', signin_type); // 1 - Email, 2 - Phone
@@ -136,7 +144,11 @@ const SocialSignin = ({pushId, isLogin = false, refId}) => {
         name: userInfo.user.name,
         uniqueId: userInfo.user.id,
       };
-      handleSocialSignupAPICall(values, SIGNUP_TYPE.google);
+      setisLoading(true);
+      timer = setTimeout(() => {
+        handleSocialSignupAPICall(values, SIGNUP_TYPE.google);
+        clearTimeout(timer);
+      }, 500);
     } catch (error) {
       const typedError = error;
 
@@ -178,7 +190,7 @@ const SocialSignin = ({pushId, isLogin = false, refId}) => {
         const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
         values = {...values, login_id: tempToken.email ?? '', name: ''};
       }
-
+      setisLoading(true);
       handleSocialSignupAPICall(values, SIGNUP_TYPE.apple);
       // const tempToken = jwt_decode(appleAuthRequestResponse.identityToken);
     } catch (err) {

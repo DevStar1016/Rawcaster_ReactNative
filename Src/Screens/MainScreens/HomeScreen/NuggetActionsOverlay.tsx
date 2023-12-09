@@ -74,7 +74,7 @@ import RoundedIconButton from '../../../Components/RoundedIconButton';
 import AIChat from './OpenAI/AIChat';
 import LoadingDots from '../../../Components/LoadingDots';
 import {nuggetContentAudioService} from '../../../Services/ApiService';
-import {SOCIAL_SHARE_LINK} from '../../../Services/ServiceConstants';
+import {NUGGET_SHARE_LINK} from '../../../Services/ServiceConstants';
 import RNFetchBlob, {RNFetchBlobConfig} from 'rn-fetch-blob';
 import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
@@ -151,7 +151,8 @@ function NuggetActionsOverlay({
     isFromGlobalSearch,
     isEnableHeaderContainerHeightforTopButtons,
     isEnableTopInsetsPadding,
-
+    isFrom,
+    profileId,
     handleStopAudio,
     isReadMuted,
     isReadMore,
@@ -391,7 +392,7 @@ function NuggetActionsOverlay({
    * @returns None
    */
   const onShareLink = async () => {
-    const shareMessage = `${SOCIAL_SHARE_LINK}` + `${encode(nugget.nugget_id)}`;
+    const shareMessage = `${NUGGET_SHARE_LINK}` + `${encode(nugget.nugget_id)}`;
     try {
       const result = await Share.share({
         message: shareMessage,
@@ -415,6 +416,70 @@ function NuggetActionsOverlay({
     }
   };
 
+  const downloadFileIOS = (
+    url: string,
+    fileName: string,
+    type: 'image' | 'video' | 'audio',
+  ) => {
+    const getFileExtention = (fileUrl: string) => {
+      // To get the file extension
+      return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
+    };
+    let date = new Date();
+    // File URL which we want to download
+    let FILE_URL = url;
+    // Function to get extention of the file url
+    //@ts-ignore
+    let file_ext: string = getFileExtention(FILE_URL);
+
+    file_ext = '.' + file_ext[0];
+    const {config, fs} = RNFetchBlob;
+    let RootDir = fs.dirs.DocumentDir;
+    let options: RNFetchBlobConfig = {
+      fileCache: true,
+      path:
+        RootDir +
+        '/file_' +
+        Math.floor(date.getTime() + date.getSeconds() / 2) +
+        file_ext,
+      //@ts-ignore
+      notification: true,
+      title: fileName,
+      IOSBackgroundTask: true,
+      addAndroidDownloads: {
+        //Related to the Android only
+        useDownloadManager: true,
+        notification: true,
+        path:
+          RootDir +
+          '/file_' +
+          Math.floor(date.getTime() + date.getSeconds() / 2) +
+          file_ext,
+        description: 'Nugget Download',
+      },
+    };
+    console.log(options);
+    config(options)
+      .fetch('GET', url)
+      .then(res => {
+        if (IS_IOS) {
+          RNFetchBlob.ios.openDocument(
+            RootDir +
+              '/file_' +
+              Math.floor(date.getTime() + date.getSeconds() / 2) +
+              file_ext,
+          );
+        }
+
+        Toast.success('Media Downloaded');
+      })
+      .catch(e => {
+        console.log(e.message);
+
+        // Toast.success(e.message);
+      });
+  };
+
   const downloadMedia = async (
     url: string,
     fileName: string,
@@ -429,70 +494,18 @@ function NuggetActionsOverlay({
           album: 'Rawcaster',
           type: 'photo',
         })
-          .then(res => {
+          .then(() => {
             Toast.success('Media Downloaded');
           })
           .catch(e => {
-            Toast.fail(e.message);
+            if (e.message?.includes('PHPhotos')) {
+              downloadFileIOS(url, fileName, type);
+            } else {
+              Toast.fail(e.message);
+            }
           });
       } else {
-        const getFileExtention = (fileUrl: string) => {
-          // To get the file extension
-          return /[.]/.exec(fileUrl) ? /[^.]+$/.exec(fileUrl) : undefined;
-        };
-        let date = new Date();
-        // File URL which we want to download
-        let FILE_URL = url;
-        // Function to get extention of the file url
-        //@ts-ignore
-        let file_ext: string = getFileExtention(FILE_URL);
-
-        file_ext = '.' + file_ext[0];
-        const {config, fs} = RNFetchBlob;
-        let RootDir = fs.dirs.DocumentDir;
-        let options: RNFetchBlobConfig = {
-          fileCache: true,
-          path:
-            RootDir +
-            '/file_' +
-            Math.floor(date.getTime() + date.getSeconds() / 2) +
-            file_ext,
-          //@ts-ignore
-          notification: true,
-          title: fileName,
-          IOSBackgroundTask: true,
-          addAndroidDownloads: {
-            //Related to the Android only
-            useDownloadManager: true,
-            notification: true,
-            path:
-              RootDir +
-              '/file_' +
-              Math.floor(date.getTime() + date.getSeconds() / 2) +
-              file_ext,
-            description: 'Nugget Download',
-          },
-        };
-        console.log(options);
-        config(options)
-          .fetch('GET', url)
-          .then(res => {
-            if (IS_IOS) {
-              RNFetchBlob.ios.openDocument(
-                RootDir +
-                  '/file_' +
-                  Math.floor(date.getTime() + date.getSeconds() / 2) +
-                  file_ext,
-              );
-            }
-
-            Toast.success('Media Downloaded');
-          })
-          .catch(e => {
-            console.log(e.message);
-
-            // Toast.success(e.message);
-          });
+        downloadFileIOS(url, fileName, type);
       }
     } else {
       const {config, fs} = RNFetchBlob;
@@ -1203,13 +1216,18 @@ function NuggetActionsOverlay({
                 isButton
                 onPressProfile={() => {
                   if (isLogin()) {
-                    const pushAction = StackActions.push('ProfileStack', {
-                      userId:
-                        nugget.user_id === profile?.user_id
-                          ? null
-                          : nugget.user_id,
-                    });
-                    navigation.dispatch(pushAction);
+                    if (
+                      isFrom !== 'profile' ||
+                      (isFrom === 'profile' && profileId !== nugget.user_id)
+                    ) {
+                      const pushAction = StackActions.push('ProfileStack', {
+                        userId:
+                          nugget.user_id === profile?.user_id
+                            ? null
+                            : nugget.user_id,
+                      });
+                      navigation.dispatch(pushAction);
+                    }
                   }
                 }}
                 badgeSize={18}
@@ -1240,13 +1258,18 @@ function NuggetActionsOverlay({
                 }}
                 onPress={() => {
                   if (isLogin()) {
-                    const pushAction = StackActions.push('ProfileStack', {
-                      userId:
-                        nugget.user_id === profile?.user_id
-                          ? null
-                          : nugget.user_id,
-                    });
-                    navigation.dispatch(pushAction);
+                    if (
+                      isFrom !== 'profile' ||
+                      (isFrom === 'profile' && profileId !== nugget.user_id)
+                    ) {
+                      const pushAction = StackActions.push('ProfileStack', {
+                        userId:
+                          nugget.user_id === profile?.user_id
+                            ? null
+                            : nugget.user_id,
+                      });
+                      navigation.dispatch(pushAction);
+                    }
                   }
                 }}>
                 <StyledText
@@ -1276,13 +1299,19 @@ function NuggetActionsOverlay({
                     activeOpacity={0.8}
                     onPress={() => {
                       if (isLogin()) {
-                        const pushAction = StackActions.push('ProfileStack', {
-                          userId:
-                            nugget.original_user_id === profile?.user_id
-                              ? null
-                              : nugget.original_user_id,
-                        });
-                        navigation.dispatch(pushAction);
+                        if (
+                          isFrom !== 'profile' ||
+                          (isFrom === 'profile' &&
+                            profileId !== nugget.original_user_id)
+                        ) {
+                          const pushAction = StackActions.push('ProfileStack', {
+                            userId:
+                              nugget.original_user_id === profile?.user_id
+                                ? null
+                                : nugget.original_user_id,
+                          });
+                          navigation.dispatch(pushAction);
+                        }
                       }
                     }}>
                     <StyledText style={styles.nameText}>

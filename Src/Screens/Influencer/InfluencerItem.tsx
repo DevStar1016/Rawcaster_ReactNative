@@ -14,7 +14,11 @@ import StyledText from '../../Components/StyledText';
 import {FONTS} from '../../Utilities/Fonts';
 import GradientButton from '../../Components/GradientButton';
 import SubmitButton from '../../Components/SubmitButton';
-import {getSlicedText, htmlDecodeText} from '../../Utilities/Methods';
+import {
+  getBioData,
+  getSlicedText,
+  htmlDecodeText,
+} from '../../Utilities/Methods';
 import ItemSelectionMiniList from '../../Components/ItemSelectionMiniList';
 import Badges from '../../Utilities/Badges';
 
@@ -73,17 +77,6 @@ const InfluencerItem = ({
     return 20;
   }
 
-  /**
-   * Retrieves the bio data from the given item.
-   * @returns {string} The bio data if it exists, otherwise an empty string.
-   */
-  function getBioData() {
-    if (item.bio_data) {
-      return item.bio_data;
-    }
-    return '';
-  }
-
   return (
     <View style={styles.mainConatiner}>
       <ProfileWithBadge
@@ -132,7 +125,7 @@ const InfluencerItem = ({
           )}
         </View>
 
-        {item.bio_data &&
+        {getBioData(item, null, false) &&
           (isExtendText ? (
             <StyledText
               style={{paddingVertical: 5}}
@@ -141,7 +134,7 @@ const InfluencerItem = ({
               onReadMore={() => {
                 setisExtendText(false);
               }}>
-              {item.bio_data}
+              {getBioData(item, null, false)}
             </StyledText>
           ) : (
             <StyledText
@@ -152,15 +145,15 @@ const InfluencerItem = ({
                 setisExtendText(true);
               }}
               numberOfLines={2}>
-              {item.bio_data}
+              {getBioData(item, null, false)}
             </StyledText>
           ))}
-        {/* {getBioData() ? (
+        {/* {getBioData(item,null,false) ? (
           <StyledText
             style={{paddingVertical: 5}}
             textMode="read_more"
             numberOfLines={2}>
-            {getBioData()}
+            {getBioData(item,null,false)}
           </StyledText>
         ) : (
           false

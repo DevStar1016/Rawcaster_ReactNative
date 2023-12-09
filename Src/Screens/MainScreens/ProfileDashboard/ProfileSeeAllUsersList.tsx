@@ -343,7 +343,7 @@ const ProfileSeeAllUsersList = ({route}: any) => {
             if (tempIndex !== -1) {
               tempConnectionList[tempIndex] = {
                 ...tempConnectionList[tempIndex],
-                friend_status: 1,
+                friend_status: 0,
               };
             }
             return tempConnectionList;

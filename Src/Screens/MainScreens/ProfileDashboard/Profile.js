@@ -108,7 +108,7 @@ const Profile = ({route}) => {
   const followingUsersList = useFollowingUsersList();
 
   const [userId, setuserId] = useState(
-    route.params && parseInt(route.params.userId) !== profile.user_id
+    route.params && parseInt(route.params.userId) !== profile?.user_id
       ? route.params?.userId
       : focusedNuggetUserId ?? null,
   );
@@ -398,7 +398,7 @@ const Profile = ({route}) => {
           Toast.success(res.data.msg);
           if (isMount.current) {
             setothersProfile(pre => {
-              return {...pre, friend_status: 1};
+              return {...pre, friend_status: 0};
             });
           }
         } else if (res.data.status === 0) {
@@ -556,7 +556,7 @@ const Profile = ({route}) => {
           Toast.success(res.data.msg);
           dispatch(
             removeFollowingUser({
-              user_id: othersProfile.user_id,
+              user_id: othersProfile?.user_id,
             }),
           );
           dispatch(getInfluencersCategoriesList());
@@ -679,7 +679,7 @@ const Profile = ({route}) => {
     if (unclaimedAccountsList && unclaimedAccountsList.length > 0) {
       let tempUnclaimedList = [...unclaimedAccountsList];
       const tempUnclaimedUser = tempUnclaimedList.find(
-        item => item.user_id === getProfileData().user_id,
+        item => item.user_id === getProfileData()?.user_id,
       );
       if (tempUnclaimedUser) {
         return tempUnclaimedUser.unclaimed_status;
@@ -766,6 +766,7 @@ const Profile = ({route}) => {
     setisMuted: setisMuted,
     isAutoPlay: false,
     isFrom: 'profile',
+    profileId: getProfileData()?.user_id,
     isFocused: isFocused,
     profileFocused: isFocused,
     categoryName: 'forYou',

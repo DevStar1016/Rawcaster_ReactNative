@@ -111,22 +111,24 @@ const NotificationItem = ({
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.messageActionButtonsContainer}>
-            <View style={{flex: 1}}>
-              <StyledText
-                style={[
-                  styles.subText,
-                  {
-                    opacity:
-                      !unreadNotificationCount ||
-                      item.is_read ||
-                      (item.poll_option && item.poll_option.length > 0)
-                        ? 0.7
-                        : 1,
-                  },
-                ]}>
-                {getNotificationMessage(item.type)}
-              </StyledText>
-            </View>
+            {getNotificationMessage(item.type) ? (
+              <View style={{flex: 1}}>
+                <StyledText
+                  style={[
+                    styles.subText,
+                    {
+                      opacity:
+                        !unreadNotificationCount ||
+                        item.is_read ||
+                        (item.poll_option && item.poll_option.length > 0)
+                          ? 0.7
+                          : 1,
+                    },
+                  ]}>
+                  {getNotificationMessage(item.type)}
+                </StyledText>
+              </View>
+            ) : null}
             {item.type &&
               parseInt(item.type) === 11 &&
               parseInt(item.friend_request_status) === 0 && (

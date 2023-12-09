@@ -179,7 +179,6 @@ const ReferalSocialList = () => {
           title: 'Rawcaster Invite',
           url: profile?.referral_link ?? '',
           message: referalMessage ?? REFERAL_MESSAGE,
-
           social: socialMedia,
           type: 'text/*',
           subject: 'Rawcaster - Invite from ' + profile?.name,

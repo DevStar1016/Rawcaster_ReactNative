@@ -595,10 +595,12 @@ const CreateEditGroup = ({route}) => {
         });
       }
     } else {
-      groupMenuList.push({
-        id: GROUP_OPERATIONS.exitGroup,
-        buttonName: 'Exit Group',
-      });
+      if (isOtherGroup()) {
+        groupMenuList.push({
+          id: GROUP_OPERATIONS.exitGroup,
+          buttonName: 'Exit Group',
+        });
+      }
       groupMenuList.push({
         id: GROUP_OPERATIONS.reportGroup,
         buttonName: 'Report and Exit Group',
@@ -661,9 +663,8 @@ const CreateEditGroup = ({route}) => {
     }
     listViewOffset.current = currentOffset;
   }
-
   function isOtherGroup() {
-    return groupDetails.group_category === GROUP_CATEGORY.other;
+    return groupDetails?.group_category === GROUP_CATEGORY.other;
   }
 
   function isGroupOwner(id) {
@@ -683,7 +684,7 @@ const CreateEditGroup = ({route}) => {
 
   function onPressItemDelete(userId) {
     Alert.alert(
-      'Delete!',
+      'Remove!',
       'Do you want to remove this member from group?',
       [
         {
@@ -801,7 +802,10 @@ const CreateEditGroup = ({route}) => {
               onChangeText={setgroupName}
             />
           </View>
-          {(!groupId || (groupId && isGroupOwner())) && (
+          {(!groupId ||
+            (groupId &&
+              isGroupOwner() &&
+              (isOtherGroup() || groupProfileImage?.type))) && (
             <SubmitButton
               buttonText={groupId ? 'Edit' : 'Create'}
               marginTop={0}

@@ -53,6 +53,7 @@ const InputPopup = ({
           paddingVertical: 20,
           flex: 1,
         }}
+        extraScrollHeight={-100}
         showsVerticalScrollIndicator={false}>
         <SafeAreaView style={styles.subContainer}>
           <View style={styles.titleContainer}>

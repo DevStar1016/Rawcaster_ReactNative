@@ -19,6 +19,7 @@ import {ImageVideoPicker} from '../../../Utilities/ImageVideoPicker';
 import SVGIcon from '../../../Components/SVGIcon';
 import MenuContainer from '../../../Modals/MenuContainer';
 import Clipboard from '@react-native-community/clipboard';
+import Badges from '../../../Utilities/Badges';
 
 const MENU_LIST = [
   {id: 1, buttonName: 'Remove Friend'},
@@ -175,6 +176,7 @@ const ProfileTopSection = ({
             profile &&
             parseInt(profile?.account_verify_type) === 2 &&
             'verified_sign'
+            // : Badges(profile.user_status_id))
           }
           topRightIconAsButton={false}
         />

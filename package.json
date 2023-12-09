@@ -15,7 +15,7 @@
     "@idenfy/react-native-sdk": "github:Maestrotechnology/rawcaster_idenfy_react_native_sdk",
     "@invertase/react-native-apple-authentication": "^2.2.2",
     "@miblanchard/react-native-slider": "^2.3.1",
-    "@react-native-camera-roll/camera-roll": "^5.9.0",
+    "@react-native-camera-roll/camera-roll": "^7.2.0",
     "@react-native-community/blur": "^4.3.0",
     "@react-native-community/clipboard": "^1.5.1",
     "@react-native-community/datetimepicker": "^7.0.0",

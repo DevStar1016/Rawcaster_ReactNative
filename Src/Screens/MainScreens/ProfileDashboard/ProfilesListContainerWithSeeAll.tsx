@@ -264,7 +264,7 @@ const ProfilesListContainerWithSeeAll = ({
             if (tempIndex !== -1) {
               tempConnectionList[tempIndex] = {
                 ...tempConnectionList[tempIndex],
-                friend_status: 1,
+                friend_status: 0,
               };
             }
             return tempConnectionList;
@@ -470,7 +470,7 @@ const ProfilesListContainerWithSeeAll = ({
                       />
                       <View style={{flex: 1, paddingTop: 10}}>
                         <StyledText style={{textAlign: 'center'}}>
-                          {getSlicedText(item.display_name.trim(), 15)}
+                          {getSlicedText(item.display_name?.trim(), 15)}
                         </StyledText>
                       </View>
                     </TouchableOpacity>

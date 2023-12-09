@@ -63,7 +63,6 @@ const NuggetsSearch = () => {
   const audioPlayerRef = useRef(new AudioRecorderPlayer());
   const nuggetContentController = useRef(null);
   const onViewRef = useRef(viewableItems => {
-    console.log('TESTTTT');
     if (viewableItems?.viewableItems?.length > 0) {
       setviewableItem(viewableItems.viewableItems[0].item.nugget_id || 0);
     }

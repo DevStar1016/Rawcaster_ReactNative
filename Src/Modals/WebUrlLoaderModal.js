@@ -5,16 +5,12 @@ import Loader from '../Components/Loader';
 import {COLORS} from '../Utilities/Colors';
 import HeaderWithBack from '../Components/HeaderWithBack';
 
-const WebUrlLoaderModal = ({url, setModal}) => {
+const WebUrlLoaderModal = ({url, title, setModal}) => {
   const [isLoading, setisLoading] = useState(false);
 
   return (
     <View style={{flex: 1}}>
-      <HeaderWithBack
-        title="Terms and Conditions"
-        isModal
-        setModal={setModal}
-      />
+      <HeaderWithBack title={title} isModal setModal={setModal} />
       <WebView
         style={{flex: 1}}
         originWhitelist={['*']}

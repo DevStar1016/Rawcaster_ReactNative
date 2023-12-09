@@ -1,4 +1,5 @@
 import {
+  Keyboard,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,9 @@ import StyledText from '../../../Components/StyledText';
 import {AvoidSoftInput} from 'react-native-avoid-softinput';
 import {useProfile} from '../../../Utilities/StoreData';
 import {MAX_CHARACTERS} from '../../../Utilities/Constants';
+import {getCharactersLimitMsg, getSlicedText} from '../../../Utilities/Methods';
+import {useDispatch} from 'react-redux';
+import {setPremiumAlert} from '../../../Store/Slices/UtilitySlice';
 
 const PollContainer = ({
   onPressRemovePoll,
@@ -26,6 +30,7 @@ const PollContainer = ({
   setchoiceList,
   setpollLength,
 }) => {
+  const dispatch = useDispatch();
   const profile = useProfile();
 
   useEffect(() => {
@@ -47,6 +52,41 @@ const PollContainer = ({
       }
       return [...preList];
     });
+  };
+
+  const onChangeText = text => {
+    if (
+      text.length > profile?.nugget_content_length
+      // && profile?.user_status_id !== 4
+    ) {
+      setquestion(preText =>
+        getSlicedText(preText, profile?.nugget_content_length, false),
+      );
+
+      Keyboard.dismiss();
+
+      dispatch(
+        setPremiumAlert({
+          status: true,
+          text: getCharactersLimitMsg(
+            profile?.user_status_id,
+            profile?.nugget_content_length,
+          ),
+        }),
+      );
+    }
+    // else if (
+    //   text.length > profile?.nugget_content_length &&
+    //   profile?.user_status_id === 4
+    // ) {
+    //   setalertBox({
+    //     status: true,
+    //     text: 'You have reached your character limit',
+    //   });
+    // }
+    else {
+      setquestion(text);
+    }
   };
 
   function renderChoice(item, index) {
@@ -95,11 +135,15 @@ const PollContainer = ({
           style={styles.textInput}
           multiline
           value={question}
-          onChangeText={setquestion}
+          onChangeText={text => {
+            if (setquestion) {
+              onChangeText(text);
+            }
+          }}
           numberOfLines={2}
           textAlignVertical={'top'}
           placeholderTextColor={COLORS.white}
-          maxLength={profile?.nugget_content_length}
+          // maxLength={profile?.nugget_content_length}
         />
         {choiceList.length < 4 && (
           <View style={styles.addPollOptionsButton}>

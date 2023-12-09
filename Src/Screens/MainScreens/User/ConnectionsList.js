@@ -52,6 +52,7 @@ const ConnectionsList = () => {
   const connectionsList = useConnectionsList();
   const isLoadingConnectionsList = useConnectionsListLoading();
   const {searchText} = useMyConnections();
+  const [containerHeight, setcontainerHeight] = useState(0);
   const [refreshing, setrefreshing] = useState(false);
   const [actionLoaderText, setactionLoaderText] = useState('');
   const [isActionLoading, setisActionLoading] = useState(false);
@@ -294,30 +295,53 @@ const ConnectionsList = () => {
   }
 
   return (
-    <View style={styles.mainContainer}>
-      {isLoadingConnectionsList || getList().length <= 0 ? (
+    <View
+      style={styles.mainContainer}
+      onLayout={e => {
+        setcontainerHeight(e.nativeEvent.layout.height);
+      }}>
+      {/* {isLoadingConnectionsList || getList().length <= 0 ? ( */}
+      {isLoadingConnectionsList ? (
         <View style={styles.emptyListContainer}>
-          {isLoadingConnectionsList ? (
-            <>
-              <ActivityIndicator size={'large'} color={COLORS.white} />
-              <StyledText style={{color: COLORS.white}}>
-                Fetching Connections
-              </StyledText>
-            </>
-          ) : (
+          {/* {isLoadingConnectionsList ? ( */}
+          <>
+            <ActivityIndicator size={'large'} color={COLORS.white} />
+            <StyledText style={{color: COLORS.white}}>
+              Fetching Connections
+            </StyledText>
+          </>
+          {/* ) : (
             <StyledText style={styles.emptyListText}>
               No connections found
             </StyledText>
-          )}
+          )} */}
         </View>
       ) : (
         <FlatList
-          data={getList()}
+          data={getList() ?? []}
           renderItem={renderItem}
           contentContainerStyle={{paddingBottom: 20}}
           showsVerticalScrollIndicator={false}
           keyExtractor={keyExtractor}
           onScroll={onScrollEvent}
+          ListEmptyComponent={() => {
+            return (
+              !refreshing &&
+              getList().length <= 0 && (
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: containerHeight,
+                  }}>
+                  <StyledText style={styles.emptyListText}>
+                    No connections found
+                  </StyledText>
+                </View>
+              )
+            );
+          }}
           refreshControl={
             <RefreshControl
               tintColor={COLORS.secondary}

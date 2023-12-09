@@ -18,7 +18,7 @@ const OpenLinkingUrl = (url?: string | null) => {
   if (url && !url.includes('rawcaster://')) {
     const parsedUrl: any = queryString.parseUrl(url);
 
-    if (url?.includes('share')) {
+    if (url?.includes('share') || url?.includes('nugget')) {
       handleOpenUrl(`rawcaster://viewnugget/${decode(parsedUrl.query.id)}`);
     } else if (url?.includes('signup')) {
       handleOpenUrl(`rawcaster://signup/${parsedUrl.query.ref}`);
